@@ -1,0 +1,95 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/coupon.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Coupon Management</h1>
+
+        <div class="toolbar">
+            <button id="add-coupon-button"><i class="fas fa-plus"></i> Add Coupon</button>
+            <div class="search-filter">
+                <input type="text" id="search-box" placeholder="Search coupons...">
+                <select id="status-filter">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+
+
+        <table id="coupon-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Discount</th>
+                    <th>Valid From</th>
+                    <th>Valid To</th>
+                    <th>Usage</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+
+        <div id="pagination">
+            </div>
+
+        <div id="coupon-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2>Add/Edit Coupon</h2>
+                <form id="coupon-form">
+                    <input type="hidden" id="coupon-id">  <label for="code">Code:</label>
+                    <input type="text" id="code" name="code" required><br>
+
+                    <label for="name">Name/Description:</label>
+                    <input type="text" id="name" name="name" required><br>
+
+                    <label for="type">Type:</label>
+                    <select id="type" name="type">
+                        <option value="percentage">Percentage Off</option>
+                        <option value="fixed">Fixed Amount Off</option>
+                        <option value="free_shipping">Free Shipping</option>
+                    </select><br>
+
+                    <label for="discount">Discount:</label>
+                    <input type="number" id="discount" name="discount" required><br>
+
+                    <label for="min_purchase">Min. Purchase (Optional):</label>
+                    <input type="number" id="min_purchase" name="min_purchase"><br>
+
+                    <label for="usage_limit">Usage Limit (Optional):</label>
+                    <input type="number" id="usage_limit" name="usage_limit"><br>
+
+                    <label for="valid_from">Valid From:</label>
+                    <input type="date" id="valid_from" name="valid_from" required><br>
+
+                    <label for="valid_to">Valid To:</label>
+                    <input type="date" id="valid_to" name="valid_to" required><br>
+
+                    <label for="applicable_products">Applicable Products (Optional - Comma-separated IDs):</label>
+                    <input type="text" id="applicable_products" name="applicable_products"><br>
+
+                    <label for="status">Status:</label>
+                    <select id="status" name="status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select><br>
+
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>

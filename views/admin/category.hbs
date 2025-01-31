@@ -1,0 +1,57 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management</title>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>Category Management</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Parent</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="category-table-body">
+                </tbody>
+        </table>
+
+        <button id="add-category-button">Add Category</button>
+
+        <div id="category-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2>Add/Edit Category</h2>
+                <form id="category-form">
+                    <input type="hidden" id="category-id" name="id">
+                    <label for="category-name">Name:</label>
+                    <input type="text" id="category-name" name="name" required><br><br>
+
+                    <label for="parent-category">Parent:</label>
+                    <select id="parent-category" name="parent">
+                        <option value="">None</option>
+                    </select><br><br>
+
+                    <label for="category-description">Description:</label>
+                    <textarea id="category-description" name="description"></textarea><br><br>
+
+                    <label for="category-status">Status:</label>
+                    <select id="category-status" name="status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select><br><br>
+
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,45 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>User Management</h1>
+
+    {{!-- <div class="search-container">
+        <input type="text" id="search" placeholder="Search users...">
+        <button id="search-button">Search</button>
+    </div> --}}
+
+    <table>
+        <thead>
+            <tr>
+                {{!-- <th>User ID</th> --}}
+                <th>Name</th>
+                <th>Email</th>
+                <th>phone</th>
+                <th>statusVerified</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each user}}
+            <tr>
+                <td>{{this.name}}</td>
+                <td>{{this.email}}</td>
+                <td>{{this.phone}}</td>
+                <td>{{this.isVerified}}</td>
+                {{!-- <td class="actions">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                </td> --}}
+            </tr>
+            {{/each}}
+            </tbody>
+    </table>
+</div>
+
+</body>

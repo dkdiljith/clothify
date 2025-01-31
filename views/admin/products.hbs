@@ -1,0 +1,153 @@
+<link rel="stylesheet" type="text/css" href="/stylesheets/admin/products.css">
+<div class="col-md-10 p-4 admin-products-container">
+  <div class="header-bar mb-5">
+    <h2 class="brand-gradient-text">Product Management</h2>
+
+    <!-- Search and Add Product -->
+    <div class="d-flex justify-content-between align-items-center action-bar">
+      <div class="search-container">
+        {{!-- <form action="/admin/products" method="GET">
+          <div class="input-group holographic-input">
+            <input type="text" name="searchQuery" class="form-control" placeholder="Search products..."
+              value="{{searchQuery}}">
+            <button class="btn brand-gradient-bg" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form> --}}
+      </div>
+      <a class="btn brand-gradient-bg hover-lift" href="/admin/addproducts"> <i class="fas fa-plus me-2"></i>Add Product
+      </a>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-responsive-lg custom-scroll">
+    <table class="table table-hover align-middle holographic-table">
+      <thead class="table-header-group">
+        <tr>
+          {{!-- <th class="table-header ps-4">Product Image</th> --}}
+          <th class="table-header">Product Name</th>
+          <th class="table-header">Category</th>
+          <th class="table-header">Price</th>
+          <th class="table-header text-end pe-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if products.length}}
+        {{#each products}}
+        <tr class="product-row hover-elevate">
+          {{!-- <td class="ps-4">
+            <div class="product-image-container">
+              {{#if this.images}}
+              {{#each this.images}}
+              {{#if @first}}
+              <img src="{{this}}" class="product-image" alt="{{../this.name}}">
+              <div class="image-count">{{../this.images.length}} photos</div>
+              {{/if}}
+              {{/each}}
+              {{else}}
+              <div class="no-image">
+                <i class="fas fa-image fa-2x"></i>
+              </div>
+              {{/if}}
+            </div>
+          </td> --}}
+          <td>
+            <div class="product-info">
+              <h5 class="product-title mb-1">{{this.name}}</h5>
+              <div class="text-muted small">Product_Id: {{this._id}}</div>
+            </div>
+          </td>
+          <td>
+            <span class="category-badge">{{this.category}}</span>
+          </td>
+          <td>
+            <div class="price-display">
+              <div class="current-price">₹{{this.price}}</div>
+              {{#if this.originalPrice}}
+              <div class="original-price">₹{{this.originalPrice}}</div>
+              {{/if}}
+            </div>
+          </td>
+          <td class="pe-4">
+            <div class="d-flex justify-content-end gap-2">
+              {{!-- <a href="/admin/edit-product/{{this._id}}" class="btn action-btn edit-btn hover-lift"
+                aria-label="Edit product">
+                <i class="fas fa-edit"></i>
+              </a> --}}
+              <form action="/admin/delete-product/{{this._id}}" method="POST">
+                <input type="hidden" name="_csrf" value="{{csrfToken}}"> <button type="submit"
+                  class="btn action-btn delete-btn hover-lift" aria-label="Delete product">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr class="no-products-row">
+          <td colspan="6">
+            <div class="no-products-content text-center py-5">
+              <i class="fas fa-box-open fa-3x mb-3"></i>
+              <h4>No Products Found</h4>
+              <p class="text-muted">Try adjusting your search or add a new product</p>
+              <button class="btn brand-gradient-bg mt-3" onclick="window.location.href='/admin/add-product'">
+                Add Your First Product
+              </button>
+            </div>
+          </td>
+        </tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {{#if products.length}}
+  <div class="pagination-wrapper mt-4">
+    <nav aria-label="Product pagination">
+      <ul class="pagination justify-content-center">
+        {{#if prevPage}}
+        <li class="page-item">
+          <a class="page-link brand-gradient-bg hover-lift"
+            href="/admin/products?page={{prevPage}}&searchQuery={{searchQuery}}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+        {{else}}
+        <li class="page-item disabled">
+          <span class="page-link brand-gradient-bg">
+            <i class="fas fa-chevron-left"></i>
+          </span>
+        </li>
+        {{/if}}
+
+        {{#each pages}}
+        <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+          <a class="page-link page-number" href="/admin/products?page={{this}}">
+            {{this}}
+          </a>
+        </li>
+        {{/each}}
+
+        {{#if nextPage}}
+        <li class="page-item">
+          <a class="page-link brand-gradient-bg hover-lift"
+            href="/admin/products?page={{nextPage}}&searchQuery={{searchQuery}}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+        {{else}}
+        <li class="page-item disabled">
+          <span class="page-link brand-gradient-bg">
+            <i class="fas fa-chevron-right"></i>
+          </span>
+        </li>
+        {{/if}}
+      </ul>
+    </nav>
+  </div>
+  {{/if}}
+</div>
