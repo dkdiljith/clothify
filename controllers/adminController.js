@@ -1,4 +1,4 @@
-const Admin = require("../models/Admin/adminSchema")
+const Admin = require("../models/adminSchema")
 const bcrypt = require("bcrypt");
 let adminData 
 
@@ -126,3 +126,23 @@ exports.register = async (req, res) => {
     }
   };
   
+
+
+
+  ////////////////////CATEGORY//////////////////////////////
+  exports.getAllcategories = async ()=>{
+    return await Category.find({}).lean()
+  }
+  
+  exports.checkCategoryExists = async (name)=>{
+    return await Category.findOne({name});
+  }
+  
+  exports.addCategory = async (data)=>{
+    const category = new Category(data)
+     await category.save() 
+  }
+  
+  exports.deleteCategory = async (id)=>{
+     await Category.findByIdAndDelete(id);
+  }

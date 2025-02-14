@@ -1,0 +1,257 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  /* Breadcrumbs */
+  .breadcrumb-nav {
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    margin-bottom: 20px;
+  }
+  
+  .breadcrumb-nav a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-nav a:hover {
+    text-decoration: underline;
+  }
+  
+  .breadcrumb-nav span {
+    color: #6c757d;
+  }
+  
+  /* Product Container */
+  .product-container {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  
+  .product-images {
+    flex: 1;
+  }
+  
+  .main-image img {
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: zoom-in;
+  }
+  
+  .thumbnail-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .thumbnail-images img {
+    width: 80px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .product-details {
+    flex: 1;
+  }
+  
+  .product-title {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .ratings {
+    margin-bottom: 20px;
+  }
+  
+  .rating-stars {
+    color: #ffc107;
+  }
+  
+  .rating-count {
+    color: #6c757d;
+  }
+  
+  /* Price Section */
+  .price-section {
+    margin-bottom: 20px;
+  }
+  
+  .original-price {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 10px;
+  }
+  
+  .discounted-price {
+    font-size: 1.5rem;
+    color: #d9534f;
+    font-weight: bold;
+  }
+  
+  .discount-percentage {
+    color: #5cb85c;
+    font-weight: bold;
+  }
+  
+  /* Stock Status */
+  .stock-status {
+    margin-bottom: 20px;
+  }
+  
+  .out-of-stock, .sold-out {
+    color: #d9534f;
+  }
+  
+  .in-stock {
+    color: #5cb85c;
+  }
+  
+  /* Highlights */
+  .highlights {
+    margin-bottom: 20px;
+  }
+  
+  .highlights ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .highlights li {
+    margin-bottom: 10px;
+  }
+  
+  .highlights i {
+    color: #5cb85c;
+    margin-right: 10px;
+  }
+  
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .btn-add-to-cart, .btn-buy-now {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .btn-add-to-cart {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .btn-buy-now {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  .btn-add-to-cart:disabled, .btn-buy-now:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  /* Coupons */
+  .coupons ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .coupons li {
+    margin-bottom: 10px;
+  }
+  
+  .coupons i {
+    color: #ffc107;
+    margin-right: 10px;
+  }
+  
+  /* Reviews Section */
+  .reviews-section {
+    margin-bottom: 40px;
+  }
+  
+  .review {
+    border-bottom: 1px solid #ddd;
+    padding: 20px 0;
+  }
+  
+  .review-author {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .review-rating {
+    color: #ffc107;
+    margin-bottom: 10px;
+  }
+  
+  .review-text {
+    color: #555;
+  }
+  
+  .no-reviews {
+    color: #6c757d;
+  }
+  
+  /* Related Products */
+  .related-products {
+    margin-bottom: 40px;
+  }
+  
+  .related-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  .related-product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .related-product-card img {
+    width: 100%;
+    max-width: 150px;
+    margin-bottom: 10px;
+  }
+  
+  .related-product-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .related-product-card .price {
+    font-size: 1.1rem;
+    color: #d9534f;
+    margin-bottom: 10px;
+  }
+  
+  .btn-view-product {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+  }

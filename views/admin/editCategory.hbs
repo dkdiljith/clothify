@@ -1,0 +1,112 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/category.css" />
+
+</head>
+
+<body>
+    <div class="container">
+        <h2>Manage Categories</h2>
+
+        <form id="addCategoryForm" action="/admin/addCategory" method="POST" novalidate>
+            <div class="mb-3">
+                <label for="categoryName" class="form-label">Category Name</label>
+                <input type="text" class="form-control" id="categoryName" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="parentCategory" class="form-label">Parent Category (Optional)</label>
+                <select class="form-control" id="parentCategory" name="parentCategory">
+                    <option value="{{parentCategory._id}}">{{parentCategory.name}}</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Add Category</button>
+        </form>
+
+
+
+
+
+
+
+   <h2>Subcategories of {{parentCategory.name}}</h2>
+
+
+
+{{#if subcategories.length}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Subcategory</th>
+                    {{!-- <th>Subcategories</th> --}}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="categoriesTable">
+                {{#each subcategories}}
+                <tr>
+                    <td></td>
+                    <td>{{this.name}}</td>
+                    {{!-- <td>{{#each this.subcategories}}
+                        <li>{{this.name}}</li>
+                        {{else}}
+                        <li>No subcategories</li>
+                        {{/each}}
+                    </td> --}}
+                    <td class="action-buttons">
+                        {{!-- <button class="btn btn-sm btn-primary edit-button" data-id="{{this._id}}"
+                            data-name="{{this.name}}"
+                            data-parent="{{this.parentCategory._id}}"
+                            data-bs-toggle="modal" data-bs-target="#editModal">Edit</button> --}}
+
+                        <button onclick="location.href='/admin//deleteCategory/{{this._id}}'"
+                            class="btn btn-sm btn-danger delete-button">Delete</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No categories found. Add a new category below:</p>
+        {{/if}}
+
+
+ <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="editModalLabel">Edit Category</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editCategoryForm" action="/admin/updateCategory/{{this._id}}" method="POST">
+                            <input type="hidden" id="editCategoryId" name="id">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="mb-3">
+                                <label for="editCategoryName" class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editParentCategory" class="form-label"> Category You Selected</label>
+                                <select class="form-control" id="editParentCategory" name="parentCategory">
+                                    <option value="">None</option>
+                                    {{!-- {{#each subcategories}}
+                                    <option value="{{this._id}}">{{this.name}}</option>
+                                    {{/each}} --}}
+                                    {{#each subcategories}}
+                                    <option value="{{this._id}}">{{this.name}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <button onclick="location.href='/admin/updateCategory/{{this._id}}'"
+                                class="btn btn-primary">Update Category</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+         <script src="/javascripts/admin/category.js" defer></script>
+         </body>

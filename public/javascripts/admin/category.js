@@ -1,112 +1,105 @@
-const categories = [
-    { id: 1, name: "Electronics", parent: null, description: "Tech gadgets", status: "active" },
-    { id: 2, name: "Clothing", parent: null, description: "Apparel", status: "active" },
-    { id: 3, name: "Televisions", parent: 1, description: "TV sets", status: "active" }, // Subcategory
-    // ... more categories
-];
 
-const tableBody = document.getElementById("category-table-body");
-const addCategoryButton = document.getElementById("add-category-button");
-const categoryModal = document.getElementById("category-modal");
-const closeButton = document.querySelector(".close-button");
-const categoryForm = document.getElementById("category-form");
-const categoryIdInput = document.getElementById("category-id");
-const categoryNameInput = document.getElementById("category-name");
-const parentCategorySelect = document.getElementById("parent-category");
-const categoryDescriptionInput = document.getElementById("category-description");
-const categoryStatusSelect = document.getElementById("category-status");
 
-function renderCategories() {
-    tableBody.innerHTML = ""; // Clear table
-    parentCategorySelect.innerHTML = "<option value=''>None</option>"; // Reset parent options
+const editButtons = document.querySelectorAll('.edit-button');
+const modalBody = document.getElementById('modalBody');
+const saveChangesButton = document.getElementById('saveChanges');
 
-    categories.forEach(category => {
-        const row = tableBody.insertRow();
-        row.innerHTML = `
-            <td>${category.id}</td>
-            <td>${category.name}</td>
-            <td>${category.parent ? categories.find(c => c.id === category.parent)?.name : 'None'}</td>
-            <td>${category.description}</td>
-            <td>${category.status}</td>
-            <td>
-                <button class="edit-button" data-id="${category.id}">Edit</button>
-                <button class="delete-button" data-id="${category.id}">Delete</button>
-            </td>
-        `;
 
-        // Add parent category options (excluding the current category)
-        if (!category.parent) {  //Only adds top level categories to the parent select
-            const option = document.createElement("option");
-            option.value = category.id;
-            option.text = category.name;
-            parentCategorySelect.add(option);
+editButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const categoryId = button.dataset.id;
+    const categoryName = button.dataset.name;
+    const parentCategoryId = button.dataset.parent;
+
+    // Fetch subcategories (replace with your actual API endpoint)
+    fetch(`/admin/category/getSubcategories/${categoryId}`) // Example API endpoint
+      .then(response => response.json())
+      .then(subcategories => {
+        let modalContent = `<h3>${categoryName}</h3>`;
+
+        if (subcategories.length === 0) {
+          modalContent += "<p>No subcategories found.</p>";
+        } else {
+           modalContent += "<ul>";
+          subcategories.forEach(subcategory => {
+            modalContent += `<li>
+              <input type="text" value="${subcategory.name}" data-id="${subcategory._id}">
+              <button class="btn btn-sm btn-danger delete-subcategory" data-id="${subcategory._id}">Delete</button>
+            </li>`;
+          });
+          modalContent += "</ul>";
         }
-
-        // Add event listeners to the buttons
-        row.querySelector(".edit-button").addEventListener("click", () => openModal(category));
-        row.querySelector(".delete-button").addEventListener("click", () => deleteCategory(category.id));
-
-    });
-}
+        modalContent += "<input type='text' id='newSubcategory' placeholder='Add new subcategory'>";
+        modalContent += "<button id='addSubcategory' class='btn btn-sm btn-success'>Add</button>";
 
 
-function openModal(category = null) {
-    categoryModal.style.display = "block";
+        modalBody.innerHTML = modalContent;
 
-    if (category) { // Editing existing category
-        categoryIdInput.value = category.id;
-        categoryNameInput.value = category.name;
-        parentCategorySelect.value = category.parent || "";
-        categoryDescriptionInput.value = category.description;
-        categoryStatusSelect.value = category.status;
-    } else {  // Adding new category
-        categoryIdInput.value = "";
-        categoryNameInput.value = "";
-        parentCategorySelect.value = "";
-        categoryDescriptionInput.value = "";
-        categoryStatusSelect.value = "active";
-    }
-}
+        // Add event listeners for delete buttons
+        const deleteSubcategoryButtons = document.querySelectorAll('.delete-subcategory');
+        deleteSubcategoryButtons.forEach(deleteButton => {
+          deleteButton.addEventListener('click', () => {
+            const subcategoryId = deleteButton.dataset.id;
+            // Implement your delete logic here (e.g., using fetch API)
+            console.log("Deleting subcategory:", subcategoryId);
+          });
+        });
 
-function closeModal() {
-    categoryModal.style.display = "none";
-}
-
-addCategoryButton.addEventListener("click", () => openModal());
-closeButton.addEventListener("click", closeModal);
-
-categoryForm.addEventListener("submit", (event) => {
-    event.preventDefault();  // Prevent form from actually submitting
-
-    const id = categoryIdInput.value;
-    const name = categoryNameInput.value;
-    const parent = parentCategorySelect.value || null;
-    const description = categoryDescriptionInput.value;
-    const status = categoryStatusSelect.value;
-
-    if (id) { // Update existing category
-      const index = categories.findIndex(c => c.id == id);
-      if (index !== -1) {
-        categories[index] = { id: parseInt(id), name, parent: parent ? parseInt(parent) : null, description, status };
-      }
-    } else { // Add new category
-        const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
-        categories.push({ id: newId, name, parent: parent ? parseInt(parent) : null, description, status });
-    }
-
-    renderCategories();
-    closeModal();
-
+        // Event listener for adding a subcategory
+        const addSubcategoryButton = document.getElementById('addSubcategory');
+        addSubcategoryButton.addEventListener('click', () => {
+          const newSubcategoryName = document.getElementById('newSubcategory').value;
+           // Implement your add logic here (e.g., using fetch API)
+          console.log("Adding subcategory:", newSubcategoryName, "to category:", categoryId);
+        });
+      })
+      .catch(error => {
+        console.error("Error fetching subcategories:", error);
+        modalBody.innerHTML = "<p>Error loading subcategories.</p>";
+      });
+  });
 });
 
-function deleteCategory(id) {
-    if (confirm("Are you sure you want to delete this category?")) {
-        const index = categories.findIndex(c => c.id === id);
-        if (index !== -1) {
-            categories.splice(index, 1);
-            renderCategories();
-        }
-    }
-}
+saveChangesButton.addEventListener('click', () => {
+  // Implement your save changes logic here (e.g., using fetch API)
+  console.log("Saving changes...");
+  const subcategoryInputs = document.querySelectorAll('#modalBody input[type="text"]');
+  subcategoryInputs.forEach(input => {
+    const subcategoryId = input.dataset.id;
+    const newSubcategoryName = input.value;
+    console.log("Subcategory:", subcategoryId, "New name:", newSubcategoryName);
+  });
+});
 
-renderCategories(); // Initial rendering
+
+
+  const categoriesContainer = document.getElementById("categories-container");
+  const modal = document.getElementById("myModal");
+  const modalContentInner = document.getElementById("modal-content-inner");
+  const closeButton = document.querySelector(".close");
+
+
+  categoriesContainer.addEventListener("click", (event) => {
+    if (event.target.classList.contains("edit-button2")) {
+      const categoryId = event.target.dataset.categoryId;
+      const category = subcategories.find(cat => cat.id === parseInt(categoryId));
+
+      if (category) {
+        modalContentInner.innerHTML = `<h2>Edit ${category.name}</h2>
+                                       <input type="text" value="${category.name}">
+                                       <button>Save</button>`;
+
+        modal.style.display = "block";
+      }
+    }
+  });
+
+  closeButton.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  });

@@ -1,8 +1,11 @@
-const User = require("../models/User/userSchema");
+const User = require("../models/userSchema");
+const VerificationEmail = require(`../middlewares/VerificationEmail`)
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto")
 let userData 
+
+const Product = require(`../models/productSchema`)
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 
@@ -80,7 +83,24 @@ exports.indexRender = async (req, res) => {
 };
 
 exports.homeRender = async (req,res)=>{
-  res.render(`user/home` )
+  const product = await Product.find().lean()
+  res.render(`user/home` ,{
+    product:product
+  })
+}
+
+exports.mensRender = async(req,res)=>{
+  const product =  await Product.find({ gender: 'Men' }).lean();
+  res.render('user/mens',{
+    product:product
+  })
+}
+
+exports.womensRender = async(req,res)=>{
+  const product =  await Product.find({ gender: 'Women' }).lean();
+  res.render('user/womens',{
+    product:product
+  })
 }
 
 exports.registerRender = async (req, res) => {
@@ -98,6 +118,46 @@ exports.forgetPasswordRender = async (req, res) => {
 exports.userLogout = async (req,res)=>{
   req.session.destroy()
   res.redirect(`/user`)
+}
+
+
+
+// GET Products with search & filter
+exports.searchProducts =  async (req, res) => {
+  try {
+      let { search, categoryId, gender, parentCategoryId } = req.query;
+
+      let filter = {}; // Initialize filter object
+
+      // 🔎 Search by product name (case insensitive)
+      if (search) {
+          filter.name = { $regex: search, $options: 'i' };
+      }
+
+      // 🎭 Filter by gender
+      if (gender) {
+          filter.gender = gender;
+      }
+
+      // 🔥 Filter by category (either subcategory or parent category)
+      if (categoryId) {
+          filter.categoryId = categoryId;
+      } else if (parentCategoryId) {
+          // Find all subcategories of the selected parent category
+          const subcategories = await Category.find({ parentCategory: parentCategoryId }).select('_id');
+          const subcategoryIds = subcategories.map(cat => cat._id);
+
+          // Filter products that belong to these subcategories
+          filter.categoryId = { $in: subcategoryIds };
+      }
+
+      // Fetch products with applied filters
+      const products = await Product.find(filter);
+
+      res.json(products);
+  } catch (error) {
+      res.status(500).json({ error: 'Server Error' });
+  }
 }
 //========================================================================================================
 //POST METHODS
@@ -152,8 +212,16 @@ exports.login = async (req, res) => {
       userDataa.password
     );
     if (checkPassword) {
-      req.session.userIsLoggedIn = true
-      res.render("user/home" ,{user:userData});
+      req.session.userIsLoggedIn = ({
+        _id:userDataa._id,
+        name:userDataa.name,
+        email:userDataa.email,
+        phone:userDataa.phone,
+        dateOfBirth:userDataa.dateOfBirth,
+        gender:userDataa.gender,
+        blocked:userDataa.blocked
+      })
+      res.render("user/home");
       userData = userDataa
     } else {
       res.render("user/login" , {message:"Invalid Email or Password" , isAdminLogin:true});
@@ -189,11 +257,17 @@ exports.emailVerification = async (req, res) => {
     await user.save();
 
     }
-    req.session.userIsLoggedIn = true
+    req.session.userIsLoggedIn = ({
+      _id:user._id,
+      name:user.name,
+      email:user.email,
+      phone:user.phone,
+      dateOfBirth:user.dateOfBirth,
+      gender:user.gender,
+      blocked:user.blocked
+    })
     // Render the home page after successful verification
-    res.render("user/home", {
-      user:userData
-    });
+    res.render("user/home");
   } catch (error) {
     console.error("Error during email verification:", error);
 
@@ -204,6 +278,7 @@ exports.emailVerification = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -224,7 +299,29 @@ exports.showUsers =  async (req, res) => {  // Route to display products
           user: [], // Important: Pass an empty array in case of error
           errorMessage: "Error fetching products. Please try again later." // Optional error message
       });
-      // Or, for API routes, you might want:
-      // res.status(500).json({ error: "Error fetching products" });
   }
 }
+
+
+exports.blockUser = async (req, res) => {
+  try {
+    // Log the received ID from the URL
+    console.log("Received ID from URL:", req.params.id); 
+
+    const userId = req.params.id; // Should get the ID here
+
+    const user = await User.findById(userId); // Use the received userId
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle blocked status
+    user.blocked = !user.blocked;
+    await user.save();
+    res.redirect('/admin/userslist'); // Redirect after update
+  } catch (error) {
+    console.error("Error in blocking user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

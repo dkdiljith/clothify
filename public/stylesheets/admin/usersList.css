@@ -1,121 +1,98 @@
-body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+
+
+/* Status styles matching your pattern */
+.status-active {
+    background: #D1FAE5;
+    color: #065F46;
 }
 
-.container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+.status-inactive {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
+.sidebar {
+    background: var(--surface);
+    padding: 1rem;
+    border-right: 1px solid var(--border);
+}
+
+.main-content {
+    padding: 2rem;
+}
+
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #007bff;
+    font-size: 1.8rem;
+    color: var(--text);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.users-table {
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
 }
 
 th, td {
-    padding: 10px;
+    padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border);
 }
 
 th {
-    background-color: #f0f0f0;
+    background: var(--background);
+    color: var(--text);
+    font-weight: 500;
 }
 
-.actions {
-    display: flex;
-    gap: 5px; /* Space between buttons */
+.status {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
-.edit-btn, .delete-btn {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: small; /* Smaller Font */
-    transition: background-color 0.3s;
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.edit-btn {
-    background-color: #007bff;
-    color: white;
-}
-
-.edit-btn:hover {
-    background-color: #0056b3;
-}
-
-.delete-btn {
-    background-color: #dc3545;
-    color: white;
-}
-
-.delete-btn:hover {
-    background-color: #c12a36;
-}
-
-/* Style for the "Add User" button */
-.add-user-btn {
-    background-color: #28a745; /* Green */
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s;
-}
-
-.add-user-btn:hover {
-    background-color: #1e7e34;
-}
- /* Style for the search bar */
-.search-container {
-    margin-bottom: 10px; /* Add some space below the search bar */
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Vertically align items */
-}
-
-#search {
-    flex-grow: 1; /* Allow search input to expand */
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Include padding in width */
-}
-
-#search-button {
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 5px; /* Space between input and button */
-}
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    table {
-        display: block;
-        overflow-x: auto; /* Enable horizontal scrolling */
+    body {
+        grid-template-columns: 1fr;
     }
-    .actions{
-        flex-direction: column; /* stack buttons vertically */
+    .sidebar {
+        display: none;
+    }
+    .users-table {
+        overflow-x: auto;
     }
 }

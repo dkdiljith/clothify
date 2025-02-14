@@ -3,13 +3,12 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var hbs = require('express-handlebars')
+var exphbs = require('express-handlebars');
 const passport = require('passport');
 var session = require("express-session")
 require('dotenv').config();
 const crypto = require('crypto');
 const fs = require('fs');
-
 
 var adminRouter = require(`./routes/adminRoute`)
 var userRouter = require('./routes/userRoute');
@@ -17,28 +16,40 @@ var db = require("./config/connection")
 
 var app = express();
 
-//nocache setup
-const nocache = require(`nocache`)
-app.use(nocache())
-
-/////////////////////////////////////////Express-Session-Setup///////////////////////////////////////////////////
-// Generate a random secret key
-const randomSecret = crypto.randomBytes(64).toString('hex');
-
-// Path to the .env file
-const envPath = path.resolve(__dirname, '.env');
-
-// Check if .env exists, and append or create it
-fs.appendFile(envPath, `SESSION_SECRET=${randomSecret}\n`, (err) => {
-  if (err) {
-    console.error('Failed to write to .env file:', err);
-  } else {
-    console.log('SESSION_SECRET successfully written to .env file');
+// Handlebar setup with custom helpers
+const hbs = exphbs.create({
+  extname: 'hbs', // Use .hbs as the extension
+  defaultLayout: 'layout', // Define default layout
+  layoutsDir: path.join(__dirname, 'views', 'layout'), // Set layouts directory
+  partialsDir: path.join(__dirname, 'views', 'partials'), // Set partials directory
+  helpers: {
+    ifEquals: function (arg1, arg2, options) {
+      return arg1 == arg2 ? options.fn(this) : options.inverse(this);
+    }
   }
 });
 
+//REGISTERING HBS HELPERS
+var hbsHelpers = require('./middlewares/hbsHelpers')
+for (const helperName in hbsHelpers) {  // Iterate over all the exported helpers
+  hbs.handlebars.registerHelper(helperName, hbsHelpers[helperName]);
+}
+
+
+// Set Handlebars as the view engine
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serve static files (if needed)
+app.use(express.static('public'));
+
+// Express-Session Setup
+const randomSecret = crypto.randomBytes(64).toString('hex');
+const envPath = path.resolve(__dirname, '.env');
+
 app.use(session({
-  secret: process.env.SESSION_SECRET, // Access the secret key from environment variables
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -49,48 +60,28 @@ app.use(session({
   },
 }));
 
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
+// Logger and Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.engine('hbs',hbs.engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))
-db.connect((err)=>{
-if(err){
-  console.log("Connection Failed")
-  process.exit(1)
-}
-console.log("Sucessfully Running")
+
+// Database connection
+db.connect((err) => {
+  if (err) {
+    console.log("Connection Failed")
+    process.exit(1)
+  }
+  console.log("Successfully Running")
 })
 
-app.use(`/admin` , adminRouter);
+// Routes
+app.use(`/admin`, adminRouter);
 app.use('/user', userRouter);
 
-// // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
-
-// // error handler
-// app.use(function(err, req, res, next) {
-//   // set locals, only providing error in development
-//   res.locals.message = err.message;
-//   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-//   // render the error page
-//   res.status(err.status || 500);
-//   res.render('error');
-// });
-
-//wildcard route
-app.use('*', (req, res) => {
-  res.status(404).send('Not Found');
-});
-
+// Handling Unhandled Requests
+const ErrorMessage = require(`./middlewares/ErrorMessage`)
+app.use('*', ErrorMessage.ErrorContent)
 
 module.exports = app;

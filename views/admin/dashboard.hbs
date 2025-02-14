@@ -1,150 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #007bff; /* Example color */
-        }
-
-        .overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: #555; /* Example color */
-        }
-
-        .card p {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .recent-activity {
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f0f0f0;
-        }
-
-        .add-admin-btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px; /* Added margin */
-            transition: background-color 0.3s; /* Smooth transition */
-        }
-
-        .add-admin-btn:hover {
-            background-color: #0056b3; /* Darker shade on hover */
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .overview {
-                grid-template-columns: 1fr; /* Stack cards vertically */
-            }
-        }
-
-    </style>
+ <!-- Header -->
+ <head>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/admin/dashboard.css">
 </head>
-<body>
 
-<div class="container">
-    <h1>Admin Dashboard</h1>
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value">$24,500</div>
+                    <span class="text-success">↑ 12% from last month</span>
+                </div>
+                <div class="metric-card">
+                    <h3>Active Users</h3>
+                    <div class="metric-value">1,234</div>
+                    <span class="text-warning">↓ 3% from last week</span>
+                </div>
+                <div class="metric-card">
+                    <h3>Conversion Rate</h3>
+                    <div class="metric-value">3.8%</div>
+                    <span class="text-success">↑ 2.1% from yesterday</span>
+                </div>
+            </div>
 
-    <div class="overview">
-        <div class="card">
-            <h2>Total Users</h2>
-            <p>1250</p>
-        </div>
-        <div class="card">
-            <h2>Active Users</h2>
-            <p>980</p>
-        </div>
-        <div class="card">
-            <h2>Revenue</h2>
-            <p>$15,500</p>
-        </div>
-        <div class="card">
-            <h2>New Signups</h2>
-            <p>55</p>
-        </div>
-    </div>
+            <!-- Charts Section -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Sales Overview</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Traffic Sources</h3>
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
 
-    <div class="recent-activity">
-        <h2>Recent Activity</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Action</th>
-                    <th>User</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>2024-07-26</td>
-                    <td>User Login</td>
-                    <td>JohnDoe</td>
-                </tr>
-                <tr>
-                    <td>2024-07-25</td>
-                    <td>Content Updated</td>
-                    <td>JaneSmith</td>
-                </tr>
-                </tbody>
-        </table>
-    </div>
-    <a class="add-admin-btn" href="/admin/register">Add Admin</a>
-</div>
-</body>
-</html>
+          

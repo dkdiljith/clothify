@@ -1,77 +1,116 @@
-/* ... (Basic styles from previous examples) ... */
 
-/* Enhanced styles */
-.toolbar {
-    display: flex;
-    justify-content: space-between; /* Align items on opposite ends */
-    align-items: center; /* Vertically align items */
-    margin-bottom: 20px;
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-.toolbar button {
-    /* ... styles for add button */
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+body {
+    background: var(--background);
+    color: var(--text);
+    padding: 2rem;
 }
 
-.search-filter {
-    display: flex; /* Arrange search and filter horizontally */
-    gap: 10px; /* Spacing between elements */
-}
-.search-filter input, .search-filter select{
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.container {
+    max-width: 100% !important; 
+    margin: 0 auto;
 }
 
-table {
+h1 {
+    color: var(--text);
+    margin-bottom: 1.5rem;
+}
+
+/* Form Styles */
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.form-control {
     width: 100%;
-    border-collapse: collapse;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    margin-bottom: 1rem;
 }
 
-th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Modal Styles (from previous examples) */
-
-/* Pagination Styles */
-#pagination {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-}
-
-#pagination a {
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: 1px solid #ddd;
-    text-decoration: none;
-    color: #333;
-    border-radius: 3px;
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 500;
 }
 
-#pagination a.active {
-    background-color: #007bff;
+.btn-primary {
+    background: var(--primary);
     color: white;
-    border-color: #007bff;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .toolbar {
-        flex-direction: column; /* Stack toolbar elements */
-        align-items: flex-start; /* Align items to the left */
-    }
-    .search-filter {
-        flex-direction: column;
-        margin-top: 10px;
-    }
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.table th {
+    background: var(--background);
+    color: var(--text);
+    font-weight: 500;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
 }

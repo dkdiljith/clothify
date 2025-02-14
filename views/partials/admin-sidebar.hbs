@@ -1,116 +1,43 @@
-<link rel="stylesheet" type="text/css" href="/stylesheets/admin/admin-sidebar.css">
-<div class="admin-layout container-fluid">
-    <div class="d-flex" style="min-height: 100vh;">
+<head>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="/stylesheets/admin/admin-sidebar.css"
+  />
+</head>
 
-        <aside class="custom-sidebar col-md-2 text-light p-4">  
-            <div class="logo-container mb-4 p-3 rounded-3">
-                <img src="https://i.postimg.cc/NjTJQfB3/Clothify-logo-white-1.png" alt="Clothify Logo" class="img-fluid" style="max-height: 50px;">
-            </div>
-             <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link dashboard-link" href="/admin/dashboard">
-                                <i class="fas fa-chart-line nav-icon"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link products-link" href="/admin/products">
-                                <i class="fas fa-boxes-stacked nav-icon"></i>
-                                Products
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link users-link" href="/admin/userslist">
-                                <i class="fas fa-user nav-icon"></i>
-                                Users
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link orders-link" href="/admin/orders">
-                                <i class="fas fa-cart-shopping nav-icon"></i>
-                                Orders
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link category-link" href="/admin/category">
-                                <i class="fas fa-folder-plus nav-icon"></i>
-                                Category
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link coupon-link" href="/admin/coupon">
-                                <i class="fas fa-tags nav-icon"></i>
-                                Coupons
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link logout-link" href="/admin/logout">
-                                <i class="fas fa-right-from-bracket nav-icon"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-        </aside>
-        <main class="main-content col-md-10">{{{body}}}</main>
-    </div>
-</div>
+<body>
+  <div class="sidebar-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Admin Console</h2>
+      <nav>
+        <div onclick="location.href='/admin/dashboard'" class="nav-item">📊Dashboard</div>
+        <div onclick="location.href='/admin/products'" class="nav-item">📦Products</div>
+        <div onclick="location.href='/admin/orders'" class="nav-item">💵 Orders</div>
+        <div onclick="location.href='/admin/userslist'" class="nav-item">👥Users</div>
+        <div onclick="location.href='/admin/category'" class="nav-item">📂Category</div>
+        <div onclick="location.href='/admin/coupon'" class="nav-item">🏷️ Coupons</div>
+        <div onclick="location.href='/admin/logout'" class="nav-item">🚪 Logout</div>
+      </nav>
+    </aside>
 
-<style>
-.custom-sidebar {
-    background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-}
+    <!-- Main Content -->
+    <main class="main-content">
 
-.logo-container {
-    background: rgba(255,255,255,0.1);
-    border: 2px solid rgba(255,255,255,0.2);
-    transition: all 0.3s ease;
-}
+      <!-- Header -->
+      <div class="dashboard-header">
+        <h1>Dashboard Overview</h1>
+        <div class="header-controls">
+          <button id="theme-toggle" class="theme-btn">🌓 Toggle Theme</button>
+          <button onclick="location.href='/admin/register'" class="theme-btn">👥
+            Add New Admin</button>
+        </div>
+      </div>
 
-.logo-container:hover {
-    background: rgba(255,255,255,0.15);
-    transform: scale(1.02);
-}
+      {{{body}}}
 
-.custom-link {
-    color: #fff !important;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.custom-link:hover {
-    background: linear-gradient(90deg, rgba(46,204,113,0.3) 0%, rgba(52,152,219,0.2) 100%);
-    transform: translateX(8px);
-}
-
-.custom-link i {
-    color: #2ECC71;
-    transition: all 0.3s ease;
-}
-
-.custom-link:hover i {
-    color: #FFFFFF;
-}
-
-.main-content {
-    background: #f8f9fa;
-    padding: 30px;
-}
-
-/* Animated underline effect */
-.custom-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #2ECC71;
-    transition: width 0.3s ease;
-}
-
-.custom-link:hover::after {
-    width: 100%;
-}
-</style>
+    </main>
+  </div>
+  <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+</body>

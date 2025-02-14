@@ -1,4 +1,3 @@
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6,40 +5,68 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
 </head>
 <body>
+    <main class="main-content">
+        <div class="users-header">
+            <h1>User Management</h1>
+            <button class="btn-primary">+ Add New User</button>
+        </div>
 
-<div class="container">
-    <h1>User Management</h1>
-
-    {{!-- <div class="search-container">
-        <input type="text" id="search" placeholder="Search users...">
-        <button id="search-button">Search</button>
-    </div> --}}
-
-    <table>
-        <thead>
-            <tr>
-                {{!-- <th>User ID</th> --}}
-                <th>Name</th>
-                <th>Email</th>
-                <th>phone</th>
-                <th>statusVerified</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each user}}
-            <tr>
-                <td>{{this.name}}</td>
-                <td>{{this.email}}</td>
-                <td>{{this.phone}}</td>
-                <td>{{this.isVerified}}</td>
-                {{!-- <td class="actions">
-                    <button class="edit-btn">Edit</button>
-                    <button class="delete-btn">Delete</button>
-                </td> --}}
-            </tr>
-            {{/each}}
-            </tbody>
-    </table>
-</div>
-
+        <div class="users-table">
+            <table>
+                <thead>
+                    <tr>
+                        
+                        <th >User</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Verified</th>
+                        {{!-- <th>Status</th> --}}
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each user}}
+                    <tr>
+                        <td style="display: flex; align-items: center; gap: 0.75rem;">
+                            {{!-- <img src="https://via.placeholder.com/36" class="user-avatar" alt="Avatar"> --}}
+                            <span>{{this.name}}</span>
+                        </td>
+                        <td>{{this.email}}</td>
+                        <td> {{#if this.phone }}
+                                {{this.phone}}
+                            {{else}}
+                                <span> 🚫Not Available</span>
+                            {{/if}}
+                        </td>
+                        <td> {{#if this.isVerified }}
+                                <span class="">✅</span>
+                            {{else}}
+                                <span class="">❌</span>
+                            {{/if}}</td>
+                        {{!-- <td>
+                            {{#if this.blocked }}
+                                <span class="status status-inactive">Blocked</span>
+                            {{else}}
+                                <span class="status status-active">Active</span>
+                            {{/if}}
+                        </td> --}}
+                        <td>{{#if this.createdAt }}
+                                <span id="createdAt-{{@index}}">{{this.createdAt}}</span>
+                            {{else}}
+                                <span>🚫Not Available</span>
+                            {{/if}}
+                        <td>
+                            {{#if this.blocked}}
+                            <button onclick="location.href='/admin/blockUser/{{this._id}}'" class="btn btn-primary">UnBlock</button>
+                            {{else}}
+                        <button onclick="location.href='/admin/blockUser/{{this._id}}'" class="btn btn-warning">Block</button>
+                        {{/if}}
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </main>
+     <script src="/javascripts/admin/usersList.js" defer></script>
 </body>

@@ -1,4 +1,5 @@
-
+src="https://apis.google.com/js/platform.js"
+      
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("loginForm");
         const email = document.getElementById("email");
@@ -82,4 +83,43 @@
           togglePassword.classList.toggle("fa-eye");
           togglePassword.classList.toggle("fa-eye-slash");
         });
+
+
+        function onSignIn(googleUser) {
+          // Get the Google ID token
+          var id_token = googleUser.getAuthResponse().id_token;
+    
+          // Send the token to your server to verify and create the session
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/google-sign-in');
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              // Handle successful login response here
+              console.log('Logged in successfully');
+              window.location.href = "/dashboard"; // Redirect to user dashboard or homepage
+            }
+          };
+          xhr.send(JSON.stringify({ token: id_token }));
+        }
+    
+        // Load the Google Sign-In API
+        function renderGoogleButton() {
+          gapi.signin2.render('googleSignInBtn', {
+            'scope': 'profile email',
+            'width': 240,
+            'height': 50,
+            'longtitle': true,
+            'theme': 'light',
+            'onsuccess': onSignIn,
+            'onfailure': function(error) {
+              console.log(error);
+            }
+          });
+        }
+    
+        // Call render function after Google API is loaded
+        gapi.load('auth2', renderGoogleButton);
+
+
       });
