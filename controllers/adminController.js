@@ -1,6 +1,5 @@
 const Admin = require("../models/adminSchema")
 const bcrypt = require("bcrypt");
-let adminData 
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 
@@ -90,8 +89,7 @@ exports.register = async (req, res) => {
     }else{
       let result = await admin.save();
       if (result) {
-        res.render("admin/dashboard" , { isAdminLogin: true });
-        adminData = result
+        res.render("admin/dashboard" , {admin:true});
       }
   
     }
@@ -113,9 +111,13 @@ exports.register = async (req, res) => {
         : false;
   
       if (checkPassword) {
-        req.session.adminIsLoggedIn = true;
-        adminData = adminDataa; // Assign before rendering
-        return res.render("admin/dashboard", { admin: adminData });
+        req.session.adminIsLoggedIn = ({
+          name:adminDataa.name,
+          phone:adminDataa.phone,
+          email:adminDataa.email,
+        })
+        res.locals.admin = req.session.adminIsLoggedIn
+        return res.render("admin/dashboard" , {admin:true});
       } else {
         return res.render("admin/login", { message: "Invalid Email or Password", isAdminLogin: true });
       }

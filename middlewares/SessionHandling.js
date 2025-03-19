@@ -7,15 +7,15 @@ const User = require("../models/userSchema");
 
 exports.userIsLoggedIn = async (req, res, next) => {
   try {
+    res.locals.user = req.session.userIsLoggedIn;
     if (req.session.userIsLoggedIn) {
-
-      const user = await User.findOne({_id:req.session.userIsLoggedIn._id}).lean()
+      const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
         return res.redirect("/user/login"); // Redirect if user not found
       }
       if (user.blocked) {
-        // ✅ Check user.blocked correctly
+        //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
       }
 
@@ -31,15 +31,15 @@ exports.userIsLoggedIn = async (req, res, next) => {
 
 exports.userIsLoggedOut = async (req, res, next) => {
   try {
+    res.locals.user = req.session.userIsLoggedIn;
     if (req.session.userIsLoggedIn) {
-
-      const user = await User.findOne({_id:req.session.userIsLoggedIn._id}).lean()
+      const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
         return res.redirect("/user/login"); // Redirect if user not found
       }
       if (user.blocked) {
-        // ✅ Check user.blocked correctly
+        //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
       }
 
@@ -65,7 +65,7 @@ exports.adminIsLoggedIn = async (req, res, next) => {
 
     next();
     } else {
-      res.render('admin/login' ,{ isAdminLogin: true }); // Redirect to login if session is missing
+      res.render('admin/login' ,{ isAdminLogin: true }); 
     }
   } catch (error) {
     console.error(error);
@@ -79,7 +79,7 @@ exports.adminIsLoggedOut = async (req, res, next) => {
       res.render('admin/dashboard' , { admin: true });
 
       } else {
-    next(); // User is not logged in, proceed to the next middleware
+    next(); 
     }
   } catch (error) {
     console.error(error);

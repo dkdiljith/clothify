@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothify Profile</title>
+    <style>
+    
+
+        .profile-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .profile-sidebar {
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .profile-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .profile-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .profile-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-details .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .profile-details .detail-value {
+            color: #333;
+        }
+
+        .profile-edit-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .profile-edit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+    
+<div class="container">
+<div class="profile-container">
+    <div class="profile-sidebar">
+        <ul>
+            <li onclick="location.href='/user/profile'" class="active">Profile</li>
+            <li onclick="location.href='/user/orders'" >Orders</li>
+            <li onclick="location.href='/user/address'">Addresses</li>
+            <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+        </ul>
+    </div>
+    <div class="profile-content">
+        <h2>Profile Details</h2>
+       <div class="profile-details">
+    <label class="detail-label">Full Name:</label>
+    <span class="detail-value" id="full-name">{{userData.name}}</span>
+
+    <label class="detail-label">Mobile Number:</label>
+    <span class="detail-value" id="mobile-number">
+        {{#if userData.phone}}  {{!-- Check if phone number exists --}}
+            {{userData.phone}}
+        {{else}}
+            Not added
+        {{/if}}
+    </span>
+
+    <label class="detail-label">Email ID:</label>
+    <span class="detail-value" id="email">{{userData.email}}</span>
+
+    <label class="detail-label">Gender:</label>
+    <span class="detail-value" id="gender">
+        {{#if userData.gender}}  {{!-- Check if gender exists --}}
+            {{userData.gender}}
+        {{else}}
+            Not added
+        {{/if}}
+    </span>
+
+    <label class="detail-label">Date of Birth:</label>
+    <span class="detail-value" id="dob">
+        {{#if userData.dateOfBirth}}  {{!-- Check if dateOfBirth exists --}}
+            {{formatDate userData.dateOfBirth "YYYY-MM-DD"}}  {{!-- Format the date --}}
+        {{else}}
+            Not added
+        {{/if}}
+    </span>
+
+    <label class="detail-label">Address:</label>
+    <span class="detail-value" id="location">
+        {{#if address}}  {{!-- Check if location exists --}}
+            Address Name : {{address.name}}
+            <br>
+            Street Address : {{address.streetAddress}}
+            <br>
+            City : {{address.city}}
+            <br>
+            State : {{address.state}}
+            <br>
+            Zip : {{address.zip}}
+        {{else}}
+            Not added
+        {{/if}}
+    </span>
+</div>
+
+        <button onclick="location.href='/user/profileedit'" class="profile-edit-button">EDIT</button>
+    </div>
+</div>
+</div>
+</body>
+<br><br>
+</html>

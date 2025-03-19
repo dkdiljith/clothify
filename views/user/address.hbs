@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothify - My Addresses</title>
+    <style>
+      
+
+        .addresses-container { /* Main container */
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .addresses-sidebar { /* Sidebar */
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .addresses-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .addresses-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .addresses-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .addresses-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .addresses-content { /* Main content area */
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .addresses-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .add-address-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .add-address-button:hover {
+            background-color: #0056b3;
+        }
+
+        .address-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .address-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .address-card h3 {
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .address-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+        }
+
+        .address-details label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .address-details span {
+            color: #333;
+        }
+
+        .address-actions {
+            margin-top: 10px;
+            display: flex; /* Make buttons align horizontally */
+        }
+
+        .edit-button, .delete-button, .set-default-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 5px; /* Space between buttons */
+        }
+
+        .edit-button:hover, .delete-button:hover, .set-default-button:hover {
+            background-color: #0056b3;
+        }
+
+        .default-indicator {
+            color: #007bff;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<br><br>
+<br><br>
+<br><br>
+<body>
+
+<div class="container">
+    <div class="addresses-container">
+        <div class="addresses-sidebar">
+            <ul>
+                <li onclick="location.href='/user/profile'">Profile</li>
+                <li onclick="location.href='/user/orders'" >Orders</li>
+                <li onclick="location.href='/user/address'" class="active">Addresses</li>
+                <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+            </ul>
+        </div>
+        <div class="addresses-content">
+            <h2>My Addresses</h2>
+            <button onclick="location.href='/user/addaddress'" class="add-address-button">Add New Address</button>
+
+            <div class="address-list">
+                {{#if addresses.length}}  {{#each addresses}} <div class="address-card">
+                            <h3>{{this.name}}</h3>
+                            <div class="address-details">
+                                <label>Street Address:</label>
+                                <span>{{this.streetAddress}}</span>
+                                <label>Landmark:</label> <span>{{#if landmark}}{{this.landmark}}{{else}} Null {{/if}}</span>
+                                <label>City:</label>
+                                <span>{{this.city}}</span>
+                                <label>State:</label>
+                                <span>{{this.state}}</span>
+                                <label>Zip:</label>
+                                <span>{{this.zip}}</span>
+                                <label>Country:</label>
+                                <span>{{this.country}}</span>
+                                <label>Phone:</label>
+                                <span>{{this.phone}}</span>
+                            </div>
+                            <div class="address-actions">
+                                <button class="edit-button" onclick="location.href='/user/editaddress/{{this._id}}'">Edit</button>
+                                <button class="delete-button" onclick="location.href='/user/deleteaddress/{{this._id}}'">Delete</button>
+                                {{#unless this.isDefault}} <button class="set-default-button" onclick="location.href='/user/setdefaultaddress/{{this._id}}'">Set as Default</button> {{/unless}}
+                            </div>
+                        </div>
+                    {{/each}}
+                {{else}}
+                    <p>No addresses found. Please add an address.</p>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<br><br>
+
+</html>

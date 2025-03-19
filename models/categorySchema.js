@@ -12,11 +12,7 @@ const categorySchema = new mongoose.Schema({
       ref: "Category",
       default: null
   },
-  createdAt: {
-      type: Date,
-      default: Date.now
-  }
-});
+} , { timestamps: true });
 
 const Category = mongoose.model("Category", categorySchema);
 module.exports = Category;

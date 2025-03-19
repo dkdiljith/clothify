@@ -1,18 +1,17 @@
 // middlewares/passport.js
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userSchema'); // Adjust the path to your User model
+const User = require('../models/userSchema'); 
 require('dotenv').config();
 
 passport.use(new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID.trim(),
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/user/auth/google/callback', // Ensure this matches the URI in your Google Developer Console
+    callbackURL: 'http://localhost:3000/user/auth/google/callback', 
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      // Check if user already exists
       let user = await User.findOne({ googleId: profile.id });
       if (user) {
         return done(null, user);
@@ -50,7 +49,7 @@ passport.deserializeUser(async (req,id, done) => {
     const user = await User.findById(id);
 
     req.session.userIsLoggedIn = ({
-      _id:user._id,
+      id:user._id,
       name:user.name,
       email:user.email,
       phone:user.phone,
@@ -58,6 +57,7 @@ passport.deserializeUser(async (req,id, done) => {
       gender:user.gender,
       blocked:user.blocked
     })
+    console.log()
 
     done(null, user);
   } catch (error) {

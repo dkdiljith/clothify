@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    categoryId: {  // Changed to ObjectId and added ref
+    categoryId: {  
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",  // This is the key: it tells Mongoose to relate to Category
-        required: true // Category is now a required field
+        ref: "Category",  
+        required: true 
     },
     details: [{
         size: { type: String, required: true },

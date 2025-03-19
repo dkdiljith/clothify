@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Delivery Address</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* General Styles (from cart page) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        .cart-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            display: flex;
+        }
+
+        /* Cart Items Section (adapted) */
+        .cart-items-section {
+            flex: 2;
+            padding-right: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .cart-items {
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .item-image img {
+            width: 100px;
+            border-radius: 5px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-details h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .item-details .price {
+            font-size: 16px;
+            color: #e74c3c;
+        }
+
+        /* Price Summary Section (from cart page) */
+        .cart-summary-section {
+            flex: 1;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        .price-summary {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .price-summary h2 {
+            margin: 0 0 15px;
+            font-size: 24px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2ecc71;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-checkout:hover {
+            background-color: #27ae60;
+        }
+
+        /* Address Specific Styles */
+        .address-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .address-actions button {
+            margin-left: 5px;
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #f04040;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-content input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        #saveBtn {
+            background-color: #f04040;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+    <div class="cart-container">
+        <div class="cart-items-section">
+
+            <div class="default-address">
+                <h3>SELECT ADDRESS</h3>
+                {{#each address}}
+                <div class="address-card">
+                    <div class="address-details">
+                        <span class="name">{{name}} <span class="home-label">HOME</span></span>
+                        <p>{{streetAddress}}</p>
+                        <p>{{landmark}}</p>
+                        <p>{{city}}, {{state}} - {{zip}}</p>
+                        <p>Mobile: {{phone}}</p>
+                        <p>• Pay on Delivery available</p>
+                         <input type="radio" id="address1" name="selectedAddress" value="{{_id}}">
+                    </div>
+                    <div class="address-actions">
+                        <button class="remove-btn">REMOVE</button>
+                        <button class="edit-btn">EDIT</button>
+
+                        <!-- Checkbox for setting default address -->
+                        {{!-- <form action="/user/address/set-default/{{_id}}" method="POST">
+                            <input type="checkbox" name="isDefault" onchange="this.form.submit()" {{#if
+                                isDefault}}checked{{/if}}>
+                            <label>Set as Default</label>
+                        </form> --}}
+                        
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="cart-summary-section">
+            <div class="price-summary cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span>₹{{cart.subtotal}}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span>₹{{cart.shippingFee}}</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total</span>
+                    <span>₹{{cart.totalAmount}}</span>
+                </div>
+            </div>
+            <a href="/user/payment" class="continue-btn">CONTINUE</a>
+        </div>
+    </div>
+</body>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Address selection and storage
+  const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
+  addressRadios.forEach(radio => {
+    radio.addEventListener('change', function(event) {
+      const selectedAddressId = this.value;
+      localStorage.setItem('selectedAddressId', selectedAddressId);
+      console.log(`Address ID ${selectedAddressId} saved to local storage.`);
+    });
+  });
+
+  // Continue button link modification
+  const continueBtn = document.querySelector('.continue-btn');
+  const retrievedAddressId = localStorage.getItem('selectedAddressId');
+
+  if (retrievedAddressId) {
+    continueBtn.href = `/user/payment?selectedAddressId=${retrievedAddressId}`;
+  } else {
+    console.warn("Address ID not found in local storage.");
+    
+     continueBtn.style.pointerEvents = 'none';
+     continueBtn.style.opacity = '0.5';
+  }
+});
+</script>
+
+
+
+<br><br>
+<br><br>
+
+</html>

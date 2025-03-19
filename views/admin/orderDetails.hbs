@@ -1,0 +1,111 @@
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4" style="color: #007bff;">Order Details</h2>
+
+        <table class="table table-bordered">
+            <tr>
+                <th>Order ID</th>
+                <td>#{{order._id}}</td>
+            </tr>
+            <tr>
+                <th>Customer Name</th>
+                <td>{{order.deliveryAddress.name}}</td>
+            </tr>
+
+            <tr>
+                <th>Shipping Fee</th>
+                <td>₹{{order.shippingFee}}</td>
+            </tr>
+            <tr>
+                <th>Total Price</th>
+                <td>₹{{order.totalAmount}}</td>
+            </tr>
+            <tr>
+                <th>Payment Method</th>
+                <td class="payment-method">
+                    {{order.paymentMethod}}<br>
+
+                    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
+                        {{order.paymentStatus}}
+                    </span>
+
+                </td>
+            </tr>
+
+            <tr>
+                <th>Order Date</th>
+                <td>{{formatDate order.createdAt}}</td>
+            </tr>
+            <tr>
+                <th>Delivery Address</th>
+                <td>
+                    <strong>{{order.deliveryAddress.name}}</strong><br>
+                    {{order.deliveryAddress.streetAddress}}, {{order.deliveryAddress.city}},<br>
+                    {{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}
+                </td>
+            </tr>
+            <tr>
+                <th colspan="2" class="text-center">Ordered Items</th>
+            </tr>
+            <tr>
+                <th>Product</th>
+                <th>Details</th>
+            </tr>
+            {{#each order.items}}
+            <tr>
+                <td>
+                    <img src="{{this.productImg}}" alt="{{this.productName}}"
+                        style="width: 100px; height: 100px; object-fit: cover;">
+                </td>
+                <td>
+                    <strong>{{this.productName}}</strong><br>
+                    Quantity: {{this.quantity}}<br>
+                    Price: ₹{{this.productPrice}}<br>
+                    Size: {{this.productSize}}<br>
+                    <div>Status:
+                        <select onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (eq this.status "Completed")}}disabled{{/if}}>
+                            <option value="Pending" {{#ifEquals this.status "Pending" }}selected{{/ifEquals}}>Pending
+                            </option>
+                            <option value="Shipped" {{#ifEquals this.status "Shipped" }}selected{{/ifEquals}}>Shipped
+                            </option>
+                            <option value="Completed" {{#ifEquals this.status "Completed" }}selected{{/ifEquals}}>
+                                Completed</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            {{/each}}
+        </table>
+
+        <div class="mt-4 text-center">
+            <a href="/admin/orders" class="btn" style="background-color: #007bff; color:white;">Back to Orders</a>
+        </div>
+    </div>
+</div>
+<script>
+    function updateItemStatus(itemId, newStatus) {
+    const orderId = "{{order._id}}"; 
+    fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Status updated:', data);
+        
+         window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error updating status:', error);
+       
+    });
+}
+</script>

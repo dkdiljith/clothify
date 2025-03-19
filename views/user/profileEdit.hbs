@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+
+        
+        .profile-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .profile-sidebar {
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .profile-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .profile-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .profile-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-details .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .profile-details .detail-value {
+            color: #333;
+        }
+
+        .profile-edit-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .profile-edit-button:hover {
+            background-color: #0056b3;
+        }
+        /* ... (same styles as your profile details page) ... */
+        .profile-edit-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .profile-edit-form input,
+        .profile-edit-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .profile-edit-form .error { /* Style for error messages */
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .profile-edit-form button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .profile-edit-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <ul>
+                    <li onclick="location.href='/user/profile'">Profile</li>
+                    <li onclick="location.href='/user/orders'" >Orders</li>
+                    <li onclick="location.href='/user/address'">Addresses</li>
+                    <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+                </ul>
+            </div>
+            <div class="profile-content">
+                <h2>Edit Profile</h2>
+                <form class="profile-edit-form" action="/user/profileedit" method="POST" id="profileEditForm">
+                    <label for="full-name">Full Name:</label>
+                    <input type="text" id="full-name" name="name" value="{{userData.name}}" required>
+                    <div class="error" id="nameError"></div>
+
+                    <label for="mobile-number">Mobile Number:</label>
+                    <input type="tel" id="mobile-number" name="phone" value="{{userData.phone}}">
+                    <div class="error" id="phoneError"></div>
+
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender">
+                        <option value="" disabled>Select Gender</option>
+                        <option value="MALE" {{#ifCond userData.gender '===' 'MALE'}}selected{{/ifCond}}>Male</option>
+                        <option value="FEMALE" {{#ifCond userData.gender '===' 'FEMALE'}}selected{{/ifCond}}>Female</option>
+                        <option value="OTHER" {{#ifCond userData.gender '===' 'OTHER'}}selected{{/ifCond}}>Other</option>
+                    </select>
+                    <div class="error" id="genderError"></div>
+
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" id="dob" name="dateOfBirth" value="{{formatDate userData.dateOfBirth 'YYYY-MM-DD'}}">
+                    <div class="error" id="dobError"></div>
+
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br><br>
+
+    <script>
+        document.getElementById('profileEditForm').addEventListener('submit', function(event) {
+            let isValid = true;
+
+            // Reset error messages
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+            // Validation checks
+            if (document.getElementById('full-name').value.trim() === '') {
+                document.getElementById('nameError').textContent = 'Full Name is required.';
+                isValid = false;
+            }
+
+            const email = document.getElementById('email').value;
+            if (email.trim() === '' || !isValidEmail(email)) {
+                document.getElementById('emailError').textContent = 'Valid Email is required.';
+                isValid = false;
+            }
+
+            // ... (Add similar checks for phone, gender, dob if needed) ...
+
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+
+        function isValidEmail(email) {
+            // Basic email validation regex (improve as needed)
+            const re = /^[^@]+@[^@]+\.[^@]+$/;
+            return re.test(email);
+        }
+    </script>
+</body>
+</html>

@@ -1,11 +1,12 @@
 const User = require("../models/userSchema");
-const VerificationEmail = require(`../middlewares/VerificationEmail`)
+const Address = require(`../models/addressSchema`)
+const Product = require(`../models/productSchema`)
+const Order = require(`../models/orderSchema`)
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto")
-let userData 
 
-const Product = require(`../models/productSchema`)
+
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 
@@ -32,7 +33,7 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
       if (phone.startsWith("91")) {
         phone = `+${phone}`;
       } else if (phone.startsWith("0")) {
-        phone = `+91${phone.slice(1)}`; 
+        phone = `+91${phone.slice(1)}`;
       } else {
         phone = `+91${phone}`;
       }
@@ -41,7 +42,7 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
     return phone;
   } catch (err) {
     console.error("Error while validating the phone number:", err);
-    throw err; 
+    throw err;
   }
 };
 
@@ -79,29 +80,251 @@ const verificationEmailSend = async (email, verificationToken) => {
 //GET METHODS / RENDERING PAGES
 
 exports.indexRender = async (req, res) => {
-  res.render("user/index");
+  res.render("user/index", { isAdminLogin: true });
 };
 
-exports.homeRender = async (req,res)=>{
+exports.homeRender = async (req, res) => {
   const product = await Product.find().lean()
-  res.render(`user/home` ,{
-    product:product
+  res.render(`user/home`, {
+    product: product
   })
 }
 
-exports.mensRender = async(req,res)=>{
-  const product =  await Product.find({ gender: 'Men' }).lean();
-  res.render('user/mens',{
-    product:product
+exports.mensRender = async (req, res) => {
+  const product = await Product.find({ gender: 'Men' }).lean();
+  res.render('user/mens', {
+    product: product
   })
 }
 
-exports.womensRender = async(req,res)=>{
-  const product =  await Product.find({ gender: 'Women' }).lean();
-  res.render('user/womens',{
-    product:product
+exports.womensRender = async (req, res) => {
+  const product = await Product.find({ gender: 'Women' }).lean();
+  res.render('user/womens', {
+    product: product
   })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//profile page
+exports.profileRender = async (req, res) => {
+  const userId = res.locals.user.id
+  const userData = await User.findById(userId).lean()
+  const address = await Address.findOne({ userId: userId, isDefault: true }).lean();
+  res.render(`user/profileView`, { userData: userData, address: address })
+}
+
+exports.profileEditRender = async (req, res) => {
+  const userId = res.locals.user.id
+  const userData = await User.findById(userId).lean()
+  res.render(`user/profileEdit`, { userData: userData })
+}
+
+exports.addressRender = async (req, res) => {
+  try {
+    const userId = res.locals.user.id;
+    const addresses = await Address.find({ userId }).lean(); 
+    res.render('user/address', { addresses: addresses }); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
+exports.editAddressRender = async (req, res) => {
+  const addressId = req.params.id
+  const address = await Address.findById(addressId).lean()
+  res.render(`user/editAddress`, { address: address })
+}
+
+exports.setDefaultAddress = async (req, res) => {
+  const addressId = req.params.id;
+  const userId = req.session.userIsLoggedIn.id
+
+  try {
+
+    await Address.updateMany(
+      { userId: userId },
+      { $set: { isDefault: false } }
+    );
+
+
+    await Address.findByIdAndUpdate(
+      addressId,
+      { $set: { isDefault: true } },
+      { new: true } 
+    );
+
+    res.redirect('/user/address'); 
+  } catch (error) {
+    console.error("Error setting default address:", error);
+    res.status(500).send('Server error');
+  }
+};
+exports.deleteAddress = async (req, res) => {
+  const addressId = req.params.id
+  await Address.findByIdAndDelete(addressId).lean()
+  res.redirect(`/user/address`)
+}
+
+exports.editAddress = async (req, res) => {
+  const addressId = req.params.id;
+  const { name, streetAddress, landmark, city, state, zip, country, phone } = req.body;
+
+  try {
+    await Address.findByIdAndUpdate(addressId, {
+      name,
+      streetAddress,
+      landmark,
+      city,
+      state,
+      zip,
+      country,
+      phone
+    });
+    res.redirect('/user/address');
+  } catch (error) {
+    console.error("Error updating address:", error);
+    res.status(500).send('Server Error');
+
+  }
+}
+
+
+exports.addAddressRender = async (req, res) => {
+  res.render(`user/addAddress`)
+}
+
+exports.deleteUserRender = async (req, res) => {
+  res.render(`user/deleteAccount`)
+}
+
+exports.deleteUser = async (req, res) => {
+  req.session.destroy()
+  let userId = res.locals.user.id
+  await User.findByIdAndDelete(userId)
+  res.redirect(`/user`)
+}
+
+exports.userOrders = async(req,res)=>{
+  const userId = req.session.userIsLoggedIn.id;
+  const orders = await Order.find({userId:userId}).lean()
+  res.render('user/userOrders' , {orders:orders})
+}
+
+exports.userOrderDetails = async(req,res)=>{
+
+  const orderId = req.params.orderId;
+  const itemId = req.params.itemId;
+
+  const order = await Order.findById(orderId).lean();
+
+  const item = await order.items.find((item)=>
+    item._id.toString() === itemId
+  )
+  // console.log("item", item);
+  
+
+  res.render(`user/orderDetails` ,{order:order, item:item})
+}
+
+
+
+
+
+
+
+
+exports.profileEdit = async (req, res) => {
+
+  try {
+    const { name, phone, gender, dateOfBirth } = req.body;
+    const userId = res.locals.user.id
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        name,
+        phone,
+        gender,
+        dateOfBirth,
+      },
+      { new: true } 
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const user = await User.findById(userId).lean()
+
+    res.render('user/profileView', { userData: user }); 
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+exports.addAddress = async (req, res) => {
+  try {
+    const { streetAddress, landmark, city, state, zip, country, phone, name } = req.body;
+    const userId = req.session.userIsLoggedIn.id
+    const addresses = await Address.find({ userId: userId }).lean()
+
+    const isFirstAddress = addresses.length === 0;
+    const newAddress = new Address({
+      userId, 
+      name,
+      streetAddress,
+      landmark,
+      city,
+      state,
+      zip,
+      country,
+      phone,
+      isDefault: isFirstAddress || isFirstAddress
+    });
+
+    await newAddress.save();
+    const address = await Address.find({ userId: userId }).lean()
+
+    res.render('user/address', { addresses: address });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
+
+
+
 
 exports.registerRender = async (req, res) => {
   res.render("user/register", { isAdminLogin: true });
@@ -115,50 +338,11 @@ exports.forgetPasswordRender = async (req, res) => {
   res.render("user/forgetPassword", { isAdminLogin: true });
 };
 
-exports.userLogout = async (req,res)=>{
+exports.userLogout = async (req, res) => {
   req.session.destroy()
-  res.redirect(`/user`)
+  res.redirect(`/user/login`)
 }
 
-
-
-// GET Products with search & filter
-exports.searchProducts =  async (req, res) => {
-  try {
-      let { search, categoryId, gender, parentCategoryId } = req.query;
-
-      let filter = {}; // Initialize filter object
-
-      // 🔎 Search by product name (case insensitive)
-      if (search) {
-          filter.name = { $regex: search, $options: 'i' };
-      }
-
-      // 🎭 Filter by gender
-      if (gender) {
-          filter.gender = gender;
-      }
-
-      // 🔥 Filter by category (either subcategory or parent category)
-      if (categoryId) {
-          filter.categoryId = categoryId;
-      } else if (parentCategoryId) {
-          // Find all subcategories of the selected parent category
-          const subcategories = await Category.find({ parentCategory: parentCategoryId }).select('_id');
-          const subcategoryIds = subcategories.map(cat => cat._id);
-
-          // Filter products that belong to these subcategories
-          filter.categoryId = { $in: subcategoryIds };
-      }
-
-      // Fetch products with applied filters
-      const products = await Product.find(filter);
-
-      res.json(products);
-  } catch (error) {
-      res.status(500).json({ error: 'Server Error' });
-  }
-}
 //========================================================================================================
 //POST METHODS
 
@@ -168,10 +352,9 @@ exports.register = async (req, res) => {
   const passwordHash = await securePassword(req.body.password);
   const validatePhone = await validatePhoneStartsWithPlus91(req.body.phone);
 
-  // Generate a verification token
+
   const verificationToken = crypto.randomBytes(3).toString("hex");
 
-  // Set token expiration (1 hour from now)
   const tokenExpiration = Date.now() + 3600000;
 
   const user = new User({
@@ -184,47 +367,47 @@ exports.register = async (req, res) => {
     isVerified: false,
   });
 
-  const existingUser = await User.findOne({ email:req.body.email})
-  if( existingUser){
+  const existingUser = await User.findOne({ email: req.body.email })
+  if (existingUser) {
 
     res.render(`user/register`, { message: "Email is already registered", isAdminLogin: true });
 
-  }else{
+  } else {
     let result = await user.save();
     if (result) {
       await verificationEmailSend(req.body.email, verificationToken);
-      res.render("user/emailVerification" , { isAdminLogin: true });
+      res.render("user/emailVerification", { isAdminLogin: true });
       userData = result
     }
 
   }
- 
+
 };
 
 
 
 
 exports.login = async (req, res) => {
-  const userDataa = await User.findOne({ email: req.body.email });
-  if (userDataa) {
+  const user = await User.findOne({ email: req.body.email });
+  if (user) {
     const checkPassword = await bcrypt.compare(
       req.body.password,
-      userDataa.password
+      user.password
     );
     if (checkPassword) {
       req.session.userIsLoggedIn = ({
-        _id:userDataa._id,
-        name:userDataa.name,
-        email:userDataa.email,
-        phone:userDataa.phone,
-        dateOfBirth:userDataa.dateOfBirth,
-        gender:userDataa.gender,
-        blocked:userDataa.blocked
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        blocked: user.blocked
       })
+
       res.render("user/home");
-      userData = userDataa
     } else {
-      res.render("user/login" , {message:"Invalid Email or Password" , isAdminLogin:true});
+      res.render("user/login", { message: "Invalid Email or Password", isAdminLogin: true });
     }
   }
 };
@@ -235,43 +418,43 @@ exports.emailVerification = async (req, res) => {
   try {
     const { email } = userData;
 
-    // Find the user by email and verification token
     const user = await User.findOne({
       email: email,
-      verificationToken:req.body.verificationCode ,
-      verificationTokenExpires: { $gt: Date.now() }, // Token should not be expired
+      verificationToken: req.body.verificationCode,
+      verificationTokenExpires: { $gt: Date.now() }, 
     });
 
     if (!user) {
-        res.status(400).render("user/emailVerification", {
+      res.status(400).render("user/emailVerification", {
         message: "Invalid or expired verification token. Please try again.",
-        isAdminLogin: false, // Adjust based on your use case
+        isAdminLogin: false,
       });
-    }else if(user){
+    } else if (user) {
 
-      // Update user to set isVerified as true and clear token fields
-    user.isVerified = true;
-    user.verificationToken = null;
-    user.verificationTokenExpires = null;
-    
-    await user.save();
+  
+      user.isVerified = true;
+      user.verificationToken = null;
+      user.verificationTokenExpires = null;
+
+      await user.save();
 
     }
     req.session.userIsLoggedIn = ({
-      _id:user._id,
-      name:user.name,
-      email:user.email,
-      phone:user.phone,
-      dateOfBirth:user.dateOfBirth,
-      gender:user.gender,
-      blocked:user.blocked
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      blocked: user.blocked
     })
-    // Render the home page after successful verification
+
+
     res.render("user/home");
   } catch (error) {
     console.error("Error during email verification:", error);
 
-    // Render an error page or send an error response
+    
     res.status(500).render("error", {
       message: "An error occurred during email verification. Please try again.",
       error: error.message,
@@ -282,31 +465,30 @@ exports.emailVerification = async (req, res) => {
 
 
 
-exports.showUsers =  async (req, res) => {  // Route to display products
+exports.showUsers = async (req, res) => {  
   try {
-      const user = await User.find().lean(); // Fetch ALL products from the database
+    const user = await User.find().lean(); 
 
 
-      res.render('admin/usersList', { 
-          admin: true, // Assuming this is always true for admin pages
-          user: user // Pass the products data to the template
-      });
+    res.render('admin/usersList', {
+      admin: true, 
+      user: user
+    });
 
   } catch (error) {
-      console.error("Error fetching products:", error);
-      res.render('admin/usersList', { 
-          admin: true, 
-          user: [], // Important: Pass an empty array in case of error
-          errorMessage: "Error fetching products. Please try again later." // Optional error message
-      });
+    console.error("Error fetching products:", error);
+    res.render('admin/usersList', {
+      admin: true,
+      user: [], 
+      errorMessage: "Error fetching products. Please try again later." 
+    });
   }
 }
 
 
 exports.blockUser = async (req, res) => {
   try {
-    // Log the received ID from the URL
-    console.log("Received ID from URL:", req.params.id); 
+    console.log("Received ID from URL:", req.params.id);
 
     const userId = req.params.id; // Should get the ID here
 
@@ -319,7 +501,7 @@ exports.blockUser = async (req, res) => {
     // Toggle blocked status
     user.blocked = !user.blocked;
     await user.save();
-    res.redirect('/admin/userslist'); // Redirect after update
+    res.redirect('/admin/userslist');
   } catch (error) {
     console.error("Error in blocking user:", error);
     res.status(500).json({ message: "Internal Server Error" });

@@ -10,7 +10,7 @@
    <main class="main-content">
         <div class="orders-header">
             <h1>Order Management</h1>
-            <button class="btn-primary">+ Add New Order</button>
+            {{!-- <button class="btn-primary">+ Add New Order</button> --}}
         </div>
 
         <div class="orders-table">
@@ -20,36 +20,22 @@
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Date</th>
-                        <th>Status</th>
+                        <th>No:Of Items</th>
                         <th>Amount</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {{#each order}}
                     <tr>
-                        <td>#3258</td>
-                        <td>John Smith</td>
-                        <td>2023-08-15</td>
-                        <td><span class="status status-success">Completed</span></td>
-                        <td>$149.99</td>
-                        <td><button class="btn-primary">View</button></td>
+                        <td>#{{this._id}}</td>
+                        <td>{{this.deliveryAddress.name}}</td>
+                        <td>{{formatDate this.createdAt}}</td>
+                        <td><span class="status status-success">{{this.items.length}}</span></td>
+                        <td>₹{{this.totalAmount}}</td>
+                        <td><button onclick="location.href='/admin/orderDetails/{{this._id}}'" class="btn-primary">View</button></td>
                     </tr>
-                    <tr>
-                        <td>#3257</td>
-                        <td>Jane Doe</td>
-                        <td>2023-08-14</td>
-                        <td><span class="status status-warning">Processing</span></td>
-                        <td>$89.99</td>
-                        <td><button class="btn-primary">View</button></td>
-                    </tr>
-                    <tr>
-                        <td>#3256</td>
-                        <td>Mike Johnson</td>
-                        <td>2023-08-13</td>
-                        <td><span class="status status-danger">Pending</span></td>
-                        <td>$199.99</td>
-                        <td><button class="btn-primary">View</button></td>
-                    </tr>
+                    {{/each}}
                 </tbody>
             </table>
         </div>

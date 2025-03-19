@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothify Profile</title>
+    <style>
+        .profile-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .profile-sidebar {
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .profile-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .profile-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .profile-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-details .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .profile-details .detail-value {
+            color: #333;
+        }
+
+        .profile-edit-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .profile-edit-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        .myntra-insider {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .enroll-button {
+            background-color: #ff4081;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .enroll-button:hover {
+            background-color: #f02061;
+        }
+
+        .orders-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .orders-search {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .orders-search input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filter-button {
+            background-color: #ddd;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .order-item {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 100px 1fr 100px 40px;
+            /* Image, Details, Status, Arrow */
+            align-items: center;
+        }
+
+        .order-item.cancelled {
+            border-color: #fdd;
+        }
+
+        .order-item.delivered {
+            border-color: #dfd;
+        }
+
+        .order-item-status {
+            text-align: right;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .order-item-product {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-item-image img {
+            max-height: 60px;
+            width: auto;
+        }
+
+        .order-item-info {
+            flex: 1;
+            font-family: Verdana, Geneva, Tahoma, sans-serif font-size: 12px;
+            color: #4e4e4e;
+        }
+
+        .product-name {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .order-item-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: right;
+        }
+
+        .order-item-status {
+            font-weight: bold;
+        }
+
+        .order-item-date {
+            color: #666;
+        }
+
+        .arrow-icon {
+            color: #888;
+        }
+
+        .arrow-icon a {
+            text-decoration: none;
+            color: inherit;
+            font-size: 18px;
+            display: block;
+            padding: 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination-button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .pagination-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination-button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <ul>
+                    <li onclick="location.href='/user/profile'">Profile</li>
+                    <li onclick="location.href='/user/orders'" class="active">Orders</li>
+                    <li onclick="location.href='/user/address'">Addresses</li>
+                    <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+                </ul>
+            </div>
+            <div class="profile-content">
+                <h2>My Orders</h2>
+                <div class="content">
+                    <div class="orders">
+                        <div class="orders-header">
+                            {{!-- <span
+                                style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:18px">All
+                                orders</span> --}}
+                        </div>
+                        <div class="orders-search">
+                            {{!-- <button class="filter-button"
+                                style="background- color: #007bff; color:white">FILTER</button> --}}
+                        </div>
+
+                        {{#if orders.length}}
+                        {{#each orders}}
+                        {{#each this.items}}
+                        <div class="order-item {{this.status}}">
+                            <div class="order-item-product">
+                                <div class="order-item-image">
+                                    <img src="{{this.productImg}}" alt="{{this.productName}}">
+                                </div>
+                                <div class="order-item-info">
+                                    <span class="product-name">{{this.productName}}</span>
+                                    <br>
+                                    <span style="font-size: 12px;">Size: {{this.productSize}}</span>
+                                    <br>
+                                    <span style="font-size: 12px;">Quantity: {{this.quantity}}</span>
+                                    <br>
+                                    <span style="font-size: 12px;">Price: ₹{{this.productPrice}}</span>
+                                </div>
+                            </div>
+                            <div class="order-item-meta">
+                                <div class="order-item-status">
+                                    <span
+                                        style="font-size: 16px; 
+               color: {{#if (eq this.status 'Completed')}}green{{else if (eq this.status 'Cancelled')}}red{{else if (eq this.status 'Returned')}}red{{else}} #007bff;{{/if}};">
+                                        Status: {{this.status}}
+                                    </span>
+                                </div>
+                                <div class="order-item-date">
+                                    <span style="font-size: 14px;">Ordered Date: {{formatDate ../this.createdAt}}</span>
+                                </div>
+                            </div>
+                            <div class="arrow-icon">
+                                <a href="/user/orderDetails/{{../this._id}}/{{this._id}}" style=" color: #007bff;">&gt;</a>
+                            </div>
+                        </div>
+                        {{/each}}
+                        {{/each}}
+                        {{else}}
+                        <p>No orders found.</p>
+                        {{/if}}
+
+                        <!-- Pagination Controls -->
+                        <div class="pagination">
+                            {{#if (gt currentPage 1)}}
+                            <a href="/orders?page={{subtract currentPage 1}}&limit={{limit}}"
+                                class="pagination-button">Previous</a>
+                            {{/if}}
+
+                            {{#each (range 1 totalPages)}}
+                            <a href="/orders?page={{this}}&limit={{limit}}"
+                                class="pagination-button {{#if (eq this currentPage)}}active{{/if}}">{{this}}</a>
+                            {{/each}}
+
+                            {{#if (lt currentPage totalPages)}}
+                            <a href="/orders?page={{add currentPage 1}}&limit={{limit}}"
+                                class="pagination-button">Next</a>
+                            {{/if}}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<br><br>
+
+</html>

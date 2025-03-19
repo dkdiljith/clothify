@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothify - Edit Address</title>
+    <style>
+         .add-address-container {
+            /* Main container */
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .add-address-sidebar {
+            /* Sidebar */
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .add-address-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .add-address-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .add-address-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .add-address-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .add-address-content {
+            /* Main content area */
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .add-address-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .add-address-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .add-address-form label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .add-address-form input,
+        .add-address-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .add-address-form .form-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .add-address-form button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+
+        .add-address-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            font-size: smaller;
+        }
+
+        /* Style for invalid input fields */
+        .invalid-input {
+            border-color: red;
+            /* Or any other visual cue */
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+    <div class="container">
+        <div class="add-address-container">
+            <div class="add-address-sidebar">
+                <ul>
+                    <li onclick="location.href='/user/profile'">Profile</li>
+                    <li onclick="location.href='/user/orders'" >Orders</li>
+                    <li onclick="location.href='/user/address'" class="active">Addresses</li>
+                    <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+                </ul>
+            </div>
+            <div class="add-address-content">
+                <h2>Edit Address</h2>
+
+                <form id="addressForm" method="POST" action="/user/editaddress/{{address._id}}" class="add-address-form" novalidate>
+                    <label for="name">Name: (eg:Home)</label>
+                    <input type="text" id="name" name="name" value="{{address.name}}" required>
+                    <div id="fullNameError" class="error-message"></div>
+
+                    <label for="streetAddress">Street Address Line:</label>
+                    <input type="text" id="streetAddress" name="streetAddress" value="{{address.streetAddress}}" required>
+                    <div id="streetAddressError" class="error-message"></div>
+
+                    <label for="landmark">Landmark (Optional):</label>
+                    <input type="text" id="landmark" name="landmark" value="{{#if landmark}}{{address.landmark}} {{else}}No landmark Selected {{/if}}">
+                    <div id="landmarkError" class="error-message"></div>
+
+                    <label for="city">City:</label>
+                    <select id="city" name="city" required>
+ <option value="{{address.city}}" {{#if (eq address.city)}}selected{{/if}}>{{address.city}}</option>
+                        <option value="" disabled>Select City</option>
+                        <option value="Kasaragod" >Kasaragod</option>
+                        <option value="Kannur">Kannur</option>
+                        <option value="Wayanad">Wayanad</option>
+                        <option value="Kozhikode">Kozhikode</option>
+                        <option value="Malappuram">Malappuram</option>
+                        <option value="Palakkad">Palakkad</option>
+                        <option value="Thrissur">Thrissur</option>
+                        <option value="Ernakulam">Ernakulam</option>
+                        <option value="Idukki">Idukki</option>
+                        <option value="Kottayam">Kottayam</option>
+                        <option value="Alappuzha">Alappuzha</option>
+                        <option value="Pathanamthitta">Pathanamthitta</option>
+                        <option value="Kollam">Kollam</option>
+                        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                    </select>
+                    <div id="cityError" class="error-message"></div>
+
+                    <label for="state">State/Province:</label>
+                    <select id="state" name="state" required>
+                        <option value="{{address.state}}"  {{#if (eq address.state)}}selected{{/if}}>{{address.state}}</option>
+                        <option value="" disabled>Select State</option>
+                        <option value="Kerala">Kerala</option>
+                    </select>
+                    <div id="stateError" class="error-message"></div>
+
+                    <label for="zip">Postal/Zip Code:</label>
+                    <input type="text" id="zip" name="zip" value="{{address.zip}}" required>
+                    <div id="zipError" class="error-message"></div>
+
+                    <label for="country">Country:</label>
+                    <select id="country" name="country" required>
+                        <option value="{{address.country}}"  {{#if (eq address.country)}}selected{{/if}}>{{address.country}}</option>
+                        <option value="" disabled>Select Country</option>
+                        <option value="India">India</option>
+                    </select>
+                    <div id="countryError" class="error-message"></div>
+
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone" value="{{address.phone}}" required>
+                    <div id="phoneError" class="error-message"></div>
+
+                    <div class="form-actions">
+                        <button type="submit">Update Address</button>
+                        <button type="button" onclick="window.location.href='/user/address'">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+<br><br>
+</html>

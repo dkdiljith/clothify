@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothify - Delete Account</title>
+    <style>
+      
+        .delete-container { /* Main container */
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .delete-sidebar { /* Sidebar */
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .delete-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .delete-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .delete-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .delete-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .delete-content-area { /* Main content area */
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .delete-content-area h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .delete-content-area img {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .delete-content-area p {
+            margin-bottom: 15px;
+        }
+
+        .delete-content-area ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .delete-content-area li {
+            margin-bottom: 10px;
+        }
+
+        .delete-content-area a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .delete-content-area a:hover {
+            text-decoration: underline;
+        }
+
+        .delete-checkbox-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .delete-checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .delete-actions {
+            display: flex;
+        }
+
+        .delete-anyway-button { /* More descriptive button class */
+            background-color: #d9534f;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .delete-anyway-button:hover {
+            background-color: #c9302c;
+        }
+
+        .delete-anyway-button:disabled {
+            background-color: #aaa;
+            cursor: default;
+        }
+
+        .keep-account-button { /* More descriptive button class */
+            background-color: #ccc;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+
+        .keep-account-button:hover {
+            background-color: #bbb;
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+
+<div class="container">
+<div class="delete-container">
+    <div class="delete-sidebar">
+        <ul>
+            <li onclick="location.href='/user/profile'">Profile</li>
+            <li onclick="location.href='/user/orders'" >Orders</li>
+            <li onclick="location.href='/user/address'">Addresses</li>
+            <li onclick="location.href='/user/deleteuser'" class="active">Delete Account</li>
+        </ul>
+    </div>
+    <div class="delete-content-area">
+        <h2>Delete Account</h2>
+        <div class="delete-content">
+            <img src="https://i.postimg.cc/wBJnRSMF/image.png" alt="Delete Account Illustration">
+            <p>Is this goodbye? We're sad to see you go, but we understand. Before you delete your account, please take a moment to review the following:</p>
+            <ul>
+                <li>You'll lose your order history, saved details, Clothify Credit, Clothify Cash, Clothify Coins, and all other coupons and benefits.</li>
+                <li>Any account-related benefits will be forfeited once the account is deleted and will no longer be available to you. You cannot recover them. However, you can always create a new account. By deleting your account, you acknowledge you have read our <a href="#">Privacy Policy</a>.</li>
+                <li>Any pending orders, exchanges, returns, or refunds will no longer be accessible via your account.</li>
+                <li>Clothify will try to complete the open transactions within the next 30 days on a best-effort basis. However, we cannot ensure tracking and traceability of transactions once the account is deleted.</li>
+                <li>Clothify may not extend a New User coupon if an account is created with the same mobile number or email ID.</li>
+                <li>Clothify may refuse or delay deletion in case there are any pending grievances related to orders, shipments, cancellations, or any other services offered by Clothify.</li>
+                <li>Clothify may retain certain data for legitimate reasons, such as security, fraud prevention, future abuse, regulatory compliance, including the exercise of legal rights or compliance with legal orders under applicable laws.</li>
+            </ul>
+            <div class="delete-checkbox-container">
+                <input type="checkbox" id="agreeTerms" onchange="toggleDeleteButton()">
+                <label for="agreeTerms">I agree to all the terms and conditions</label>
+            </div>
+            <div class="delete-actions">
+                <button onclick="location.href='/user/deleteuseraccount'" class="delete-anyway-button" disabled>DELETE ANYWAY</button>
+                <button class="keep-account-button">KEEP ACCOUNT</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    function toggleDeleteButton() {
+        const agreeTerms = document.getElementById('agreeTerms');
+        const deleteButton = document.querySelector('.delete-anyway-button');
+
+        deleteButton.disabled = !agreeTerms.checked;
+    }
+</script>
+
+</body>
+<br><br>
+</html>

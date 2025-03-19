@@ -24,6 +24,8 @@ router.post(`/login` , adminController.login)
 router.get(`/dashboard`,SessionHandling.adminIsLoggedIn, adminController.dashboardRender)
 router.get(`/products`, SessionHandling.adminIsLoggedIn,productController.showProducts)
 router.get(`/orders`,SessionHandling.adminIsLoggedIn,productController.ordersRender )
+router.get(`/orderDetails/:orderId` ,SessionHandling.adminIsLoggedIn , productController.orderDetails)
+router.post('/orderDetails/:orderId/item/:itemId/status' , productController.orderStatusChange)
 router.get(`/userslist`,SessionHandling.adminIsLoggedIn, userController.showUsers)
 router.get('/blockUser/:id' , SessionHandling.adminIsLoggedIn , userController.blockUser) ///BLOCK USER///
 router.get(`/category`,SessionHandling.adminIsLoggedIn, categoryController.showCategories)

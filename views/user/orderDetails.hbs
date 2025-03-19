@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+
+        
+        .profile-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            margin-left: 150px;
+        }
+
+        .profile-sidebar {
+            width: 200px;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .profile-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .profile-sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-sidebar li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-sidebar li.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .profile-content h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .profile-details .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .profile-details .detail-value {
+            color: #333;
+        }
+
+        .profile-edit-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .profile-edit-button:hover {
+            background-color: #0056b3;
+        }
+        /* ... (same styles as your profile details page) ... */
+        .profile-edit-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .profile-edit-form input,
+        .profile-edit-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .profile-edit-form .error { /* Style for error messages */
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .profile-edit-form button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .profile-edit-form button:hover {
+            background-color: #0056b3;
+        }
+  
+
+.order-item {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-item-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-item-image img {
+    max-height: 60px;
+    width: auto;
+}
+
+.order-item-info {
+    flex: 1;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12px;
+    color: #4e4e4e;
+}
+
+.product-name {
+    font-family: 'Georgia', serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+}
+
+.order-item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: right;
+}
+
+.order-item-status {
+    font-weight: bold;
+}
+
+.order-item-date {
+    color: #666;
+}
+
+/* Delivery Address Section */
+.delivery-address {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.delivery-address h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.address-details p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #4e4e4e;
+}
+
+/* Savings and Total Price Section */
+.price-details {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.savings {
+    font-size: 14px;
+    color: #4e4e4e;
+    margin-bottom: 10px;
+}
+
+.savings-amount {
+    font-weight: bold;
+    color: green;
+}
+
+.total-price {
+    font-size: 14px;
+    color: #4e4e4e;
+    margin-bottom: 10px;
+}
+
+.price-amount {
+    font-weight: bold;
+}
+
+.payment-method {
+    font-size: 14px;
+    color: #4e4e4e;
+    margin-bottom: 10px;
+}
+
+.seller-info {
+    font-size: 14px;
+    color: #4e4e4e;
+    margin-bottom: 10px;
+}
+
+.get-invoice-button {
+  
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.arrow-icon a {
+    text-decoration: none;
+    color: inherit; 
+    font-size: 18px; 
+    display: block; 
+    padding: 10px;
+}
+/* Other Items in This Order Section */
+.other-items {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.other-items h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.order-id {
+    font-size: 14px;
+    color: #4e4e4e;
+    margin-bottom: 10px;
+}
+
+.order-id-number {
+    font-weight: bold;
+}
+
+.other-item {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.other-item-image img {
+    max-height: 80px;
+    width: auto;
+    margin-right: 15px;
+}
+
+.other-product-name {
+    font-size: 14px;
+    color: #4e4e4e;
+}
+</style>
+
+</head>
+
+<br><br>
+<br><br>
+<br><br>
+
+<body>
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <ul>
+                    <li onclick="location.href='/user/profile'">Profile</li>
+                    <li onclick="location.href='/user/orders'" class="active">Orders</li>
+                    <li onclick="location.href='/user/address'">Addresses</li>
+                    <li onclick="location.href='/user/deleteuser'">Delete Account</li>
+                </ul>
+            </div>
+            <div class="profile-content">
+                <h2>My Orders</h2>
+                 <div class="content">
+        <div class="orders">
+            <div class="orders-header">
+                <span style="font-family: 'Times New Roman', Times, serif font-size:18px;"></span>
+            </div>
+
+            <!-- Order Item -->
+            <div class="order-item">
+                <div class="order-item-product">
+                    <div class="order-item-image">
+                        <img src="{{item.productImg}}" alt="{{item.productName}}">
+                    </div>
+                    
+                    <div class="order-item-info">
+                        <span class="product-name" style="font-size: 16px; color: #007bff">{{item.productName}}</span>
+                        <br>
+                        <span style="color: #4e4e4e; font-size:14px">Size: {{item.productSize}}</span>
+                        <br>
+                        <span style="color: #4e4e4e; font-size:14px">Quantity: {{item.quantity}}</span>
+                        <br>
+                        <span style="color: #4e4e4e; font-size:14px">QuantityPrice: ₹{{item.productPrice}}</span>
+                    </div>
+
+                </div>
+                <div class="order-item-meta">
+                   <div class="order-item-status">
+  <span style="font-size: 16px; 
+               color: {{#if (eq order.status 'Completed')}}green{{else if (eq item.status 'Cancelled')}}red{{else if (eq item.status 'Returned')}}red{{else}}#007bff{{/if}};">
+    Status: {{item.status}}
+  </span>
+</div>
+                    <div class="order-item-date" style="margin-left: 50px;">
+                        <span style="color: #4e4e4e; font-size:14px">Ordered Date: {{formatDate order.createdAt}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Address Section -->
+            <div class="delivery-address">
+                <h3>Delivery Address</h3>
+                <div class="address-details">
+                    <p style="font-size: 12px; color:#4e4e4e">{{order.deliveryAddress.name}}</p>
+                    <p style="font-size: 12px; color:#4e4e4e">{{order.deliveryAddress.streetAddress}}</p>
+                    
+                    <p style="font-size: 12px; color:#4e4e4e">{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}}, {{order.deliveryAddress.state}} -{{order.deliveryAddress.zip}}</p>
+                    <p style="font-size: 12px; color:#4e4e4e">{{order.deliveryAddress.phone}}</p>
+                </div>
+            </div>
+
+            <!-- Savings and Total Price Section -->
+<div class="price-details">
+    <div class="total-price">
+        <h6>Total Amount:</h6>
+        <span class="price-amount" style="color: #4e4e4e; font-size:14px">₹{{order.totalAmount}}</span>
+    </div>
+
+    {{#if (or (eq order.payment "Online Payment") (eq order.payment "Wallet"))}}
+        <div>
+            <p style="font-size: 12px; color:#a7a3a3">Wallet amount used: ₹{{order.walletAmountUsed}}</p>
+        </div>
+        <div>
+            <p style="font-size: 14px; color:#a7a3a3">Amount paid: ₹{{order.newTotal}}</p>
+        </div>
+    {{else}}
+        <div>
+            <p style="font-size: 14px; color:#a7a3a3">Amount to be paid: ₹{{order.totalAmount}}</p>
+        </div>
+    {{/if}}
+
+    <div class="payment-method">
+        <span style="color: #5aca2e; font-size:14px">Payment method: {{order.paymentMethod}}.</span>
+    </div>
+
+    {{!-- <button 
+        id="return-order-button" 
+        class="get-invoice-button" 
+        style="background-color: #007bff color: white;"
+        data-order-status="{{order.status}}"
+        data-completion-date="{{order.completionDate}}">
+        Return Order
+    </button>
+
+    <button 
+        id="cancel-order-button" 
+        class="get-invoice-button" 
+        style="background-color: #007bff color: white;"
+        data-order-status="{{order.status}}">
+        Cancel Order
+    </button> --}}
+</div>
+<!-- Modal for Cancellation Reason -->
+<div id="cancel-order-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
+  <h3>Cancel Order</h3>
+  <textarea id="cancellation-reason" placeholder="Enter reason for cancellation..." style="width: 100%; height: 100px; margin-bottom: 10px;"></textarea>
+  <button id="submit-cancellation" style="background-color: #007bff color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+  <button id="close-modal" style="background-color: #ccc; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Close</button>
+</div>
+<div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<!-- Modal for Return Reason -->
+<div id="return-order-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
+  <h3>Return Order</h3>
+  <textarea id="return-reason" placeholder="Enter reason for return..." style="width: 100%; height: 100px; margin-bottom: 10px;"></textarea>
+  <div id="return-reason-error" style="color: red; font-size: 14px; margin-bottom: 10px; display: none;">Please provide a reason for return.</div>
+  <button id="submit-return" style="background-color: #007bff color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+  <button id="close-return-modal" style="background-color: #ccc; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Close</button>
+</div>
+<div id="overlay-return" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+            <div class="other-items">
+                <h3>Other items in this order</h3>
+                <div class="order-id">
+                    Order ID: <span class="order-id-number" style="font-size: 14px; color:#4e4e4e">{{order._id}}</span>
+                </div>
+                {{#each order.items}}
+    {{#if (neq this._id ../item._id)}} 
+        <div class="other-item">
+            <div class="other-item-image">
+                <img src="{{this.productImg}}" alt="{{this.productName}}">
+            </div>
+            <div class="other-item-info">
+                <div class="other-product-name"><span style="color: #4e4e4e; font-size:12px">{{this.productName}}</span></div>
+                <div class="other-product-details">
+                    <span style="color: #4e4e4e; font-size:12px">Size: {{this.productSize}} | Quantity: {{this.quantity}} | Price: ₹{{this.productPrice}}</span>
+                </div>
+                <div class="arrow-icon" style="margin-left: 300px;">
+         <a href="/user/orderDetails/{{../order._id}}/{{this._id}}" style=" color: #007bff;">&gt;</a>
+    </div>
+            </div>
+        </div>
+    {{/if}}
+{{/each}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="success-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); z-index: 1000; text-align: center;">
+  <p style="font-size: 16px; color: green;">Order item returned successfully!</p>
+  <button id="close-popup" style="background-color: #007bff color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+</div>
+<div id="overlay-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+
+            </div>
+        </div>
+    </div>
+    <br><br>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const cancelButton = document.getElementById("cancel-order-button");
+  const returnButton = document.getElementById("return-order-button");
+  const orderStatus = cancelButton.dataset.orderStatus;
+  const completionDate = new Date(returnButton.dataset.completionDate);
+
+  // Cancel Button Logic
+  if (orderStatus !== "Pending") {
+    cancelButton.disabled = true;
+    cancelButton.style.backgroundColor = "#ccc";
+    cancelButton.style.pointerEvents = "none";
+  } else {
+    // Add click event to show the modal
+    cancelButton.addEventListener("click", function () {
+      document.getElementById("cancel-order-modal").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+    });
+  }
+
+  // Close Cancel Modal
+  document.getElementById("close-modal").addEventListener("click", function () {
+    document.getElementById("cancel-order-modal").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  });
+
+  // Submit Cancellation Reason
+  document.getElementById("submit-cancellation").addEventListener("click", async function () {
+    const reason = document.getElementById("cancellation-reason").value.trim();
+
+    if (!reason) {
+      alert("Please provide a reason for cancellation.");
+      return;
+    }
+
+    const data = {
+      orderId: "{{order._id}}",
+      itemId: "{{item._id}}",
+      reason: reason,
+    };
+
+    try {
+      // Send data to the server
+      const response = await fetch("/cancel-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        window.location.reload(); // Refresh the page to reflect changes
+      } else {
+        alert("Failed to cancel order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  });
+
+  // Return Button Logic
+  if (orderStatus === "Completed") {
+    const currentDate = new Date();
+    const returnEndDate = new Date(completionDate);
+    returnEndDate.setDate(returnEndDate.getDate() + 7); // Add 7 days to the completion date
+
+    if (currentDate <= returnEndDate) {
+      // Enable the return button
+      returnButton.disabled = false;
+      returnButton.style.backgroundColor = " #007bff";
+      returnButton.style.pointerEvents = "auto";
+
+      // Add click event to show the return modal
+      returnButton.addEventListener("click", function () {
+        document.getElementById("return-order-modal").style.display = "block";
+        document.getElementById("overlay-return").style.display = "block";
+      });
+    } else {
+      // Disable the return button after 7 days
+      returnButton.disabled = true;
+      returnButton.style.backgroundColor = "#ccc";
+      returnButton.style.pointerEvents = "none";
+    }
+  } else {
+    // Disable the return button if the order is not completed
+    returnButton.disabled = true;
+    returnButton.style.backgroundColor = "#ccc";
+    returnButton.style.pointerEvents = "none";
+  }
+
+  // Close Return Modal
+  document.getElementById("close-return-modal").addEventListener("click", function () {
+    document.getElementById("return-order-modal").style.display = "none";
+    document.getElementById("overlay-return").style.display = "none";
+  });
+
+  // Submit Return Reason
+  document.getElementById("submit-return").addEventListener("click", async function () {
+    const reason = document.getElementById("return-reason").value.trim();
+    const errorMessage = document.getElementById("return-reason-error");
+
+    // Clear any previous error message
+    errorMessage.style.display = "none";
+
+    if (!reason) {
+      errorMessage.style.display = "block";
+      return;
+    }
+
+    const data = {
+      orderId: "{{order._id}}",
+      itemId: "{{item._id}}",
+      reason: reason,
+    };
+
+    try {
+      // Send data to the server
+      console.log("Data",data)
+      const response = await fetch("/return-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        // Show the custom success popup
+        const successPopup = document.getElementById("success-popup");
+        const overlayPopup = document.getElementById("overlay-popup");
+        successPopup.style.display = "block";
+        overlayPopup.style.display = "block";
+
+        // Automatically hide the popup after 3 seconds
+        setTimeout(() => {
+          successPopup.style.display = "none";
+          overlayPopup.style.display = "none";
+          window.location.reload(); // Refresh the page to reflect changes
+        }, 3000);
+
+        // Close the popup manually if the user clicks the "Close" button
+        document.getElementById("close-popup").addEventListener("click", function () {
+          successPopup.style.display = "none";
+          overlayPopup.style.display = "none";
+          window.location.reload(); // Refresh the page to reflect changes
+        });
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to return order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  });
+});
+</script>
+
+</body>
+</html>

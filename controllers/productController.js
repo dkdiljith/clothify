@@ -4,7 +4,7 @@ const Category = require("../models/categorySchema")
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs');
-const { adminIsLoggedIn } = require("../middlewares/SessionHandling");
+const Order = require("../models/orderSchema");
 
 
 
@@ -15,80 +15,113 @@ const { adminIsLoggedIn } = require("../middlewares/SessionHandling");
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const storage = multer.diskStorage({
-  destination:(req,file,cb)=>{
-    const uploadPath = path.join(__dirname,'..','public','uploads')
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null,uploadPath)
-  },
-  filename:(req,file,cb)=>{
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '..', 'public', 'uploads')
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath)
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
 
-  }
+    }
 })
 
 const upload = multer({ storage: storage }).array('images', 5);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-exports.addProductsRender = async(req,res)=>{
-    // Fetch all categories from MongoDB
+exports.addProductsRender = async (req, res) => {
+    
     const categories = await Category.find().lean();
 
-    // Group categories: Find parent categories & map their subcategories
     const groupedCategories = categories
-        .filter(cat => !cat.parentCategory) // Get only parent categories
+        .filter(cat => !cat.parentCategory) 
         .map(parent => ({
             ...parent,
-            subcategories: categories.filter(sub => 
+            subcategories: categories.filter(sub =>
                 sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-            ) // Find matching subcategories
+            ) 
         }));
-        res.render('admin/addProducts', { 
-            admin: true, // Assuming this is always true for admin pages
-            categories: groupedCategories // Pass the products data to the template
-        });
+    res.render('admin/addProducts', {
+        admin: true, 
+        categories: groupedCategories 
+    });
 }
 
-exports.editProductsRender = async(req,res)=>{
+exports.editProductsRender = async (req, res) => {
 
     const productId = req.params.id;
-  
     const product = await Product.findById(productId).lean()
-    const categoryId = product.categoryId
-    const categories = await Category.findById(categoryId).lean();
 
+    const categories = await Category.find().lean();
 
+    
+    const groupedCategories = categories
+        .filter(cat => !cat.parentCategory) 
+        .map(parent => ({
+            ...parent,
+            subcategories: categories.filter(sub =>
+                sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
+            ) 
+        }));
 
-     // Fetch all categories from MongoDB
-     const category = await Category.find().lean();
+    res.render('admin/editProduct', {
+        admin: true,
+        product: product,
+        categories: groupedCategories,
+    });
 
-     // Group categories: Find parent categories & map their subcategories
-     const groupedCategories = category
-         .filter(cat => !cat.parentCategory) // Get only parent categories
-         .map(parent => ({
-             ...parent,
-             subcategories: category.filter(sub => 
-                 sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-             ) // Find matching subcategories
-         }));
-
-
-
-        res.render('admin/editProduct', { 
-            admin: true, // Assuming this is always true for admin pages
-            product:product,
-            category: categories,
-            categories: groupedCategories
-        });
 }
 
 
-exports.ordersRender = async(req,res)=>{
-    res.render(`admin/orders` ,{admin:true})
+exports.ordersRender = async (req, res) => {
+    const order = await Order.find().lean()
+    res.render(`admin/orders`, {order:order, admin: true })
 }
 
+exports.orderDetails = async(req,res)=>{
+    const orderId = req.params.orderId
+    console.log(orderId)
+    const order = await Order.findById(orderId).lean()
+    console.log(order)
+    res.render(`admin/orderDetails` , {order:order, admin:true})
+}
+
+exports.orderStatusChange =  async (req, res) => {
+    const orderId = req.params.orderId;
+    const itemId = req.params.itemId;
+    const newStatus = req.body.status;
+
+    console.log(orderId , "this is order Id")
+    console.log(itemId , "this is itmeId")
+    console.log(newStatus, "this is new Status")
+
+    try {
+        const order = await Order.findById(orderId);
+        // console.log(order , "This is Order")
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        const item = order.items.id(itemId);
+
+        if (!item) {
+            throw new Error('Item not found in order');
+        }
+
+        item.status = newStatus;
+        await order.save();
+        
+        // console.log(item.status)
+
+        // console.log('Order item status updated successfully.');
+    } catch (error) {
+        console.error('Error updating order item status:', error);
+        throw error;
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,16 +138,14 @@ exports.addProducts = async (req, res) => {
             let sizeQuantities = req.body.sizeQuantity || [];
             let sizePrices = req.body.sizePrice || [];
 
-            // 🔹 Convert single values to arrays if needed
             if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
             if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
             if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
 
-            // ✅ Ensure details array is formatted correctly
             const details = sizeNames.map((size, index) => ({
                 size,
-                quantity: parseInt(sizeQuantities[index]) || 0, // Convert to number
-                price: parseInt(sizePrices[index]) || 299  // Convert to number
+                quantity: parseInt(sizeQuantities[index]) || 0, 
+                price: parseInt(sizePrices[index]) || 299  
             }));
 
             const latestCollection = req.body.latestCollection === 'on';
@@ -131,8 +162,8 @@ exports.addProducts = async (req, res) => {
 
             const newProduct = new Product({
                 name,
-                categoryId,  // ✅ Fixed: Now correctly uses categoryId
-                details,     // ✅ Fixed: Now correctly stores sizes, quantities, and prices
+                categoryId, 
+                details,    
                 gender,
                 description,
                 images,
@@ -141,7 +172,25 @@ exports.addProducts = async (req, res) => {
             });
 
             await newProduct.save();
-            res.render(`admin/addProducts`, { admin: true });
+            
+
+    const categories = await Category.find().lean();
+
+
+    const groupedCategories = categories
+        .filter(cat => !cat.parentCategory) 
+        .map(parent => ({
+            ...parent,
+            subcategories: categories.filter(sub =>
+                sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
+            )
+        }));
+    res.render('admin/addProducts', {
+        admin: true, 
+        categories: groupedCategories 
+    });
+
+
         });
     } catch (err) {
         console.error('Error adding product:', err);
@@ -167,16 +216,14 @@ exports.updateProduct = async (req, res) => {
             let sizeQuantities = req.body.sizeQuantity || [];
             let sizePrices = req.body.sizePrice || [];
 
-            // 🔹 Convert single values to arrays if needed
             if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
             if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
             if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
 
-            // ✅ Ensure details array is formatted correctly
             const details = sizeNames.map((size, index) => ({
                 size,
-                quantity: parseInt(sizeQuantities[index]) || 0, // Convert to number
-                price: parseInt(sizePrices[index]) || 299  // Convert to number
+                quantity: parseInt(sizeQuantities[index]) || 0, 
+                price: parseInt(sizePrices[index]) || 299  
             }));
 
             const latestCollection = req.body.latestCollection === 'on';
@@ -190,7 +237,6 @@ exports.updateProduct = async (req, res) => {
                 }));
             }
 
-            // 🔥 **Find & Update the Existing Product**
             const updatedProduct = await Product.findByIdAndUpdate(
                 productId,
                 {
@@ -201,16 +247,16 @@ exports.updateProduct = async (req, res) => {
                     description,
                     latestCollection,
                     bestSeller,
-                    ...(images.length > 0 && { images }) // Update images only if new ones are uploaded
+                    ...(images.length > 0 && { images })
                 },
-                { new: true } // ✅ Returns the updated product
+                { new: true } 
             );
 
             if (!updatedProduct) {
                 return res.status(404).json({ success: false, message: "Product not found" });
             }
 
-            res.redirect(`/admin/addProducts`); // ✅ Redirect back to edit page
+            res.redirect(`/admin/products`); 
         });
     } catch (err) {
         console.error('Error updating product:', err);
@@ -223,64 +269,62 @@ exports.updateProduct = async (req, res) => {
 
 
 
-exports.showProducts =  async (req, res) => {  // Route to display products
+exports.showProducts = async (req, res) => { 
     try {
-        const products = await Product.find().lean(); // Fetch ALL products from the database
+        const products = await Product.find().lean(); 
         const category = await Category.find().lean()
 
-        res.render('admin/products', { 
-            admin: true, // Assuming this is always true for admin pages
+        res.render('admin/products', {
+            admin: true, 
             products: products,
-            categories:category
+            categories: category
         });
 
     } catch (error) {
         console.error("Error fetching products:", error);
-        res.render('admin/products', { 
-            admin: true, 
-            products: [], // Important: Pass an empty array in case of error
-            errorMessage: "Error fetching products. Please try again later." // Optional error message
+        res.render('admin/products', {
+            admin: true,
+            products: [], 
+            errorMessage: "Error fetching products. Please try again later."
         });
     }
 }
 
 
-exports.singleProductPage =  async (req, res) => {
+exports.singleProductPage = async (req, res) => {
     try {
-      const product = await Product.findById(req.params.id).lean()
-      const categoryId = product.categoryId
-      const categories = await Category.findById(categoryId).lean();
-  
-      if (!product) {
-        return res.status(404).render('error', { message: 'Product not found' });
-      }
-  
-      // Fetch related products
-      const relatedProducts = await Product.find({
-        categoryId: product.categoryId,
-        _id: { $ne: product._id }, // Exclude current product
-      }).limit(4).lean()
-  
-      res.render('user/singleProductPage', {
-        product:product,
-        relatedProducts:relatedProducts,
-        categories:categories,
-        isAdminLogin: true
-      });
+        const product = await Product.findById(req.params.id).lean()
+        const categoryId = product.categoryId
+        const categories = await Category.findById(categoryId).lean();
+
+        if (!product) {
+            return res.status(404).render('error', { message: 'Product not found' });
+        }
+
+        const relatedProducts = await Product.find({
+            categoryId: product.categoryId,
+            _id: { $ne: product._id }, 
+        }).limit(4).lean()
+
+        res.render('user/singleProductPage', {
+            product: product,
+            relatedProducts: relatedProducts,
+            categories: categories,
+        });
     } catch (err) {
-      console.error('Error fetching product:', err);
-      res.status(500).render('error', { message: 'Server error' });
+        console.error('Error fetching product:', err);
+        res.status(500).render('error', { message: 'Server error' });
     }
-  }
+}
 
 
-exports.deleteProducts =  async (req, res) => { // Use csrfProtection here too
+exports.deleteProducts = async (req, res) => { 
     try {
         const productId = req.params.id;
         await Product.findByIdAndDelete(productId);
-        res.redirect('/admin/products'); // Redirect after successful deletion
+        res.redirect('/admin/products'); 
     } catch (error) {
         console.error("Error deleting product:", error);
-        res.status(500).send("Error deleting product."); // Or better error handling
+        res.status(500).send("Error deleting product."); 
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zoom.js/0.0.1/zoom.css">
 </head>
+
+<br><br>
+<br><br>
+<br><br>
+
 <body>
   <!-- Breadcrumbs -->
   <nav class="breadcrumb-nav">
@@ -18,25 +24,24 @@
     </div>
   </nav>
 
+  {{#if messages.success}}
+  <div class="alert alert-success">{{messages.success}}</div>
+  {{/if}}
+
+  {{#if messages.error}}
+  <div class="alert alert-danger">{{messages.error}}</div>
+  {{/if}}
+
   <!-- Product Details Section -->
   <div class="product-container container">
-    <!-- Product Images with Zoom -->
+    <!-- Product Images with Magnifier -->
     <div class="product-images">
-      <div class="main-image">
-        <img
-          src="{{product.images.[0].path}}"
-          alt="{{product.images.[0].altText}}"
-          data-action="zoom"
-        />
+      <div class="img-zoom-container">
+        <img id="main-image" src="{{product.images.[0].path}}" alt="{{product.images.[0].altText}}" />
       </div>
       <div class="thumbnail-images">
         {{#each product.images}}
-          <img
-            src="{{this.path}}"
-            alt="{{this.altText}}"
-            class="thumbnail"
-            onclick="changeMainImage('{{this.path}}')"
-          />
+        <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail" onclick="changeMainImage('{{this.path}}')" />
         {{/each}}
       </div>
     </div>
@@ -49,21 +54,30 @@
         <span class="rating-count">({{product.reviews.length}} reviews)</span>
       </div>
 
-      <!-- Price and Discount -->
-      <div class="price-section">
-        <span class="discounted-price">₹{{product.details.[0].price}}</span>
-        {{!-- <span class="discounted-price">₹{{product.discountedPrice}}</span>
-        <span class="discount-percentage">{{product.discount}}% off</span> --}}
+      <!-- Display Price and Stock -->
+      <div class="price-stock-display mt-4">
+        <p id="selected-price">Price: ₹{{product.details.[0].price}}</p>
+        <p id="selected-stock">Stock: {{product.details.[0].quantity}} available</p>
       </div>
+
+      {{#each product.details}}
+      <button class="size-option border p-2" data-product-id="{{../product._id}}" data-size="{{this.size}}"
+        data-quantity="{{this.quantity}}" data-price="{{this.price}}" data-details-id="{{@index}}"
+        onclick="updatePriceAndStock(this)">
+        {{this.size}}
+      </button>
+      {{/each}}
+
+      <br><br>
 
       <!-- Stock Status -->
       <div class="stock-status">
         {{#if product.isOutOfStock}}
-          <p class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</p>
+        <p class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</p>
         {{else if product.isSoldOut}}
-          <p class="sold-out"><i class="fas fa-times-circle"></i> Sold Out</p>
+        <p class="sold-out"><i class="fas fa-times-circle"></i> Sold Out</p>
         {{else}}
-          <p class="in-stock"><i class="fas fa-check-circle"></i> In Stock ({{product.stock}} available)</p>
+        <p class="in-stock"><i class="fas fa-check-circle"></i> In Stock ({{product.stock}} available)</p>
         {{/if}}
       </div>
 
@@ -72,14 +86,14 @@
         <h3>Product Highlights</h3>
         <ul>
           {{#each product.highlights}}
-            <li><i class="fas fa-check"></i> {{this}}</li>
+          <li><i class="fas fa-check"></i> {{this}}</li>
           {{/each}}
         </ul>
       </div>
 
       <!-- Add to Cart / Buy Now -->
       <div class="action-buttons">
-        <button class="btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
+        <button onclick="addToCart()" class="btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
           <i class="fas fa-shopping-cart"></i> Add to Cart
         </button>
         <button class="btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
@@ -89,10 +103,10 @@
 
       <!-- Coupons -->
       <div class="coupons">
-        <h3>Available Coupons</h3>
+        {{!-- <h3>Available Coupons</h3> --}}
         <ul>
           {{#each product.coupons}}
-            <li><i class="fas fa-tag"></i> {{this.code}} - {{this.discount}}% off</li>
+          <li><i class="fas fa-tag"></i> {{this.code}} - {{this.discount}}% off</li>
           {{/each}}
         </ul>
       </div>
@@ -103,15 +117,15 @@
   <div class="reviews-section container">
     <h2>Customer Reviews</h2>
     {{#if product.reviews.length}}
-      {{#each product.reviews}}
-        <div class="review">
-          <p class="review-author">{{this.author}}</p>
-          <p class="review-rating">Rating: {{this.rating}}/5</p>
-          <p class="review-text">{{this.comment}}</p>
-        </div>
-      {{/each}}
+    {{#each product.reviews}}
+    <div class="review">
+      <p class="review-author">{{this.author}}</p>
+      <p class="review-rating">Rating: {{this.rating}}/5</p>
+      <p class="review-text">{{this.comment}}</p>
+    </div>
+    {{/each}}
     {{else}}
-      <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
+    <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
     {{/if}}
   </div>
 
@@ -120,12 +134,12 @@
     <h2>Related Products</h2>
     <div class="related-products-grid">
       {{#each relatedProducts}}
-        <div class="related-product-card">
-          <img src="{{this.images.[0].path}}" alt="{{this.name}}">
-          <h3>{{this.name}}</h3>
-          <p class="price">₹{{this.details.[0].price}}</p>
-          <a href="/user/singleproduct/{{this._id}}" class="btn-view-product">View Product</a>
-        </div>
+      <div class="related-product-card">
+        <img src="{{this.images.[0].path}}" alt="{{this.name}}">
+        <h3>{{this.name}}</h3>
+        <p class="price">₹{{this.details.[0].price}}</p>
+        <a href="/user/singleproduct/{{this._id}}" class="btn-view-product">View Product</a>
+      </div>
       {{/each}}
     </div>
   </div>
@@ -133,10 +147,165 @@
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/zoom.js/0.0.1/zoom.min.js"></script>
   <script>
-    // Change main image on thumbnail click
-    function changeMainImage(src) {
-      document.querySelector('.main-image img').src = src;
+    // Update Price and Stock when a size option is clicked
+    function updatePriceAndStock(element) {
+      console.log('Size button clicked');
+      // Remove active class from all size options
+      document.querySelectorAll('.size-option').forEach(option => {
+        option.classList.remove('active');
+      });
+      element.classList.add('active');
+
+      const price = element.getAttribute('data-price');
+      const stock = element.getAttribute('data-quantity');
+      const productDetailsId = element.getAttribute('data-details-id');
+      const productId = element.getAttribute('data-product-id');
+
+      console.log('Selected Details ID:', productDetailsId);
+      console.log('Selected Product ID:', productId);
+
+      document.getElementById('selected-price').textContent = `Price: ₹${price}`;
+      document.getElementById('selected-stock').textContent = `Stock: ${stock} available`;
+
+      const addToCartButton = document.querySelector('.btn-add-to-cart');
+      addToCartButton.setAttribute('data-details-id', productDetailsId);
+      addToCartButton.setAttribute('data-product-id', productId);
     }
+
+    // Add to Cart function with AJAX call and popup/validation error
+    async function addToCart() {
+      const addToCartButton = document.querySelector('.btn-add-to-cart');
+      const productId = addToCartButton.getAttribute('data-product-id');
+      const productDetailsId = addToCartButton.getAttribute('data-details-id');
+
+      console.log('Product ID:', productId);
+      console.log('Details ID:', productDetailsId);
+
+      if (productId && productDetailsId) {
+        try {
+          const response = await fetch(`/user/addtocart/${productId}/${productDetailsId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          });
+          const data = await response.json();
+
+          // Show popup message based on response
+          showPopup(data.message, data.success ? "success" : "error");
+
+          // Update cart count if available
+          if (data.cartCount) {
+            updateCartCount(data.cartCount);
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+          showPopup("Something went wrong. Please try again.", "error");
+        }
+      } else {
+        // If no size selected, show validation error on size options
+        showValidationError();
+      }
+    }
+
+    // Show popup message function
+    function showPopup(message, type = "success") {
+      const popup = document.createElement("div");
+      popup.className = `popup ${type}`;
+      popup.textContent = message;
+      document.body.appendChild(popup);
+      setTimeout(() => {
+        popup.remove();
+      }, 3000); // Popup lasts for 3 seconds
+    }
+
+    // Update cart count in UI
+    function updateCartCount(count) {
+      const cartCountEl = document.getElementById("cart-count");
+      if (cartCountEl) {
+        cartCountEl.textContent = count;
+      }
+    }
+
+    // Show validation error by adding shaking red background to size options
+    function showValidationError() {
+      const sizeOptions = document.querySelectorAll('.size-option');
+      sizeOptions.forEach(option => {
+        option.classList.add('validation-error');
+      });
+      // Remove validation effect after 1 second
+      setTimeout(() => {
+        sizeOptions.forEach(option => {
+          option.classList.remove('validation-error');
+        });
+      }, 1000);
+    }
+
+    // Magnify function for zoom effect on the main image
+    function magnify(imgID, zoom) {
+      const img = document.getElementById(imgID);
+      let magnifierGlass = document.createElement("div");
+      magnifierGlass.setAttribute("class", "magnifier");
+      img.parentElement.insertBefore(magnifierGlass, img);
+
+      // Set background properties for the magnifier
+      magnifierGlass.style.backgroundImage = "url('" + img.src + "')";
+      magnifierGlass.style.backgroundRepeat = "no-repeat";
+      magnifierGlass.style.backgroundSize = (img.offsetWidth * zoom) + "px " + (img.offsetHeight * zoom) + "px";
+
+      // Add mouse and touch move events on the image container (not on magnifier)
+      img.addEventListener("mousemove", moveMagnifier);
+      img.addEventListener("touchmove", moveMagnifier);
+
+      function moveMagnifier(e) {
+        e.preventDefault();
+        const pos = getCursorPos(e);
+        let x = pos.x;
+        let y = pos.y;
+        const w = magnifierGlass.offsetWidth / 2;
+        const h = magnifierGlass.offsetHeight / 2;
+
+        // Prevent the magnifier from going outside the image boundaries
+        if (x > img.offsetWidth - (w / zoom)) { x = img.offsetWidth - (w / zoom); }
+        if (x < w / zoom) { x = w / zoom; }
+        if (y > img.offsetHeight - (h / zoom)) { y = img.offsetHeight - (h / zoom); }
+        if (y < h / zoom) { y = h / zoom; }
+
+        magnifierGlass.style.left = (x - w) + "px";
+        magnifierGlass.style.top = (y - h) + "px";
+        magnifierGlass.style.display = "block";
+        magnifierGlass.style.backgroundPosition = "-" + ((x * zoom) - w) + "px -" + ((y * zoom) - h) + "px";
+      }
+
+      function getCursorPos(e) {
+        const rect = img.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        return { x: x, y: y };
+      }
+
+      // Hide magnifier when mouse leaves the image
+      img.addEventListener("mouseleave", () => {
+        magnifierGlass.style.display = "none";
+      });
+    }
+
+    // Change main image when a thumbnail is clicked and update the magnifier
+    function changeMainImage(newSrc) {
+      const mainImg = document.getElementById("main-image");
+      mainImg.src = newSrc;
+      const magnifierGlass = document.querySelector(".magnifier");
+      if (magnifierGlass) {
+        magnifierGlass.style.backgroundImage = "url('" + newSrc + "')";
+      }
+    }
+
+    // Initialize magnifier on DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", function () {
+      magnify("main-image", 2);
+    });
+
   </script>
 </body>
+
 </html>

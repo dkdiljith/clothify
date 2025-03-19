@@ -29,14 +29,14 @@
                     {{#each user}}
                     <tr>
                         <td style="display: flex; align-items: center; gap: 0.75rem;">
-                            {{!-- <img src="https://via.placeholder.com/36" class="user-avatar" alt="Avatar"> --}}
+                            <img src="https://i.postimg.cc/TwCBBcvg/0684456b-aa2b-4631-86f7-93ceaf33303c.jpg" class="user-avatar" alt="Avatar">
                             <span>{{this.name}}</span>
                         </td>
                         <td>{{this.email}}</td>
                         <td> {{#if this.phone }}
                                 {{this.phone}}
                             {{else}}
-                                <span> 🚫Not Available</span>
+                                <span> null</span>
                             {{/if}}
                         </td>
                         <td> {{#if this.isVerified }}
@@ -54,7 +54,7 @@
                         <td>{{#if this.createdAt }}
                                 <span id="createdAt-{{@index}}">{{this.createdAt}}</span>
                             {{else}}
-                                <span>🚫Not Available</span>
+                                <span>null</span>
                             {{/if}}
                         <td>
                             {{#if this.blocked}}

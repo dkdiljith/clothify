@@ -1,8 +1,238 @@
 
+
+<head>
+
+	
+{{!-- ============================================================================================= --}}
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="/images/user/images/icons/favicon.png"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/fonts/iconic/css/material-design-iconic-font.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/fonts/linearicons-v1.0.0/icon-font.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/animate/animate.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/animsition/css/animsition.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/select2/select2.min.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/daterangepicker/daterangepicker.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/slick/slick.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/MagnificPopup/magnific-popup.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/perfect-scrollbar/perfect-scrollbar.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/util.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/main.css">
+<!--===============================================================================================-->
+
+
+	<!-- Add styles for better appearance -->
+<style>
+    .top-bar {
+        background-color: #f8f8f8;
+        font-size: 14px;
+    }
+    .top-bar .top-bar-link {
+        color: #555;
+        margin-left: 15px;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .top-bar .top-bar-link:hover {
+        color: #000;
+    }
+    .menu-desktop .main-menu li {
+        display: inline-block;
+        margin-right: 15px;  /* Reduced the margin between items */
+    }
+    .menu-desktop .main-menu li a {
+        text-decoration: none;
+        font-weight: bold;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+    .menu-desktop .main-menu li a:hover {
+        color: #007bff;
+    }
+    .wrap-icon-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;  /* Increased the gap between icons */
+    }
+    .wrap-icon-header .icon-header-item {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;  /* Increased icon size */
+        width: 50px;   /* Increased icon size */
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        position: relative;
+        font-size: 22px;  /* Increased font size for icons */
+    }
+    .wrap-icon-header .icon-header-item:hover {
+        background-color: #f1f1f1;
+    }
+    .user-profile-icon {
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .icon-header-noti[data-notify]:after {
+        content: attr(data-notify);
+        position: absolute;
+        top: 0px;
+        right: -5px;
+        background: #ff4747;
+        color: white;
+        border-radius: 50%;
+        font-size: 12px;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-header-item i {
+        font-size: 22px;  /* Increased icon size */
+        color: #333;
+    }
+    /* Search input styling */
+    .search-container {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+    .search-input {
+        padding: 8px 12px;
+        font-size: 16px;  /* Increased input font size */
+        width: 220px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding-right: 40px;  /* Space for the search icon */
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    .search-icon {
+        position: absolute;
+        right: 10px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    .search-icon i {
+        font-size: 20px;  /* Increased search icon size */
+        color: #333;
+    }
+    /* Ensure icons are aligned properly */
+    .wrap-icon-header button, .wrap-icon-header a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    /* Fix hover alignment issues */
+    .icon-header-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    /* Remove persistent hover for user profile */
+    .user-profile-icon {
+        background-color: transparent;
+        box-shadow: none;
+    }
+    .user-profile-icon:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+</head>
 <div class="animsition">
 	
 	<!-- Header -->
 	<header>
+		<!-- Header desktop -->
+<div class="container-menu-desktop">
+    {{!-- <!-- Topbar (Optional for additional info like promotions) -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="flex-w flex-sb-m p-t-10 p-b-10">
+                <div class="left-top-bar">
+                    Free Shipping on Orders Over $50
+                </div>
+                <div class="right-top-bar">
+                    <a href="#" class="top-bar-link">Help & FAQs</a>
+                    <a href="/user/login" class="top-bar-link">Login</a>
+                    <a href="/user/register" class="top-bar-link">Register</a>
+                </div>
+            </div>
+        </div>
+    </div> --}}
+
+    <div class="wrap-menu-desktop">
+        <nav class="limiter-menu-desktop container" role="navigation">
+            <!-- Logo desktop -->        
+            <a href="index.html" class="logo">
+                <img src="/images/user/images/icons/logo-01.png" style="width: 150px; height: auto;" alt="Website Logo">
+            </a>
+
+            <!-- Menu desktop -->
+            <div class="menu-desktop">
+                <ul class="main-menu">
+                    <li><a href="/user/home">Home</a></li>
+                    <li><a href="/user/mens">Mens</a></li>
+                    <li><a href="/user/womens">Womens</a></li>
+                    {{!-- <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li> --}}
+                </ul>
+            </div>
+
+            <!-- Icon header -->
+            <div class="wrap-icon-header flex-w flex-r-m">
+                <!-- Search Icon and Input Box -->
+                
+                <div class="search-container">
+    <input type="text" class="search-input" id="search-input" placeholder="Search by name...">
+    <button class="search-icon"><i class="fa fa-search"></i></button>
+</div>
+
+
+
+
+
+                <!-- Cart Icon -->
+                <button class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2" aria-label="Shopping Cart">
+                    <i class="fa fa-shopping-cart"></i>
+                </button>
+
+                <!-- Wishlist Icon -->
+                <a href="/user/wishlist" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0" aria-label="Wishlist">
+                    <i class="fa fa-heart"></i>
+                </a>
+
+
+                <!-- User Profile Icon -->
+                <a class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-profile-icon" href="/user/login" aria-label="User Profile">
+                    <i class="fa fa-user"></i>
+                </a>
+            </div>
+        </nav>
+    </div>    
+</div>
+
 
 		<!-- Header Mobile -->
 		<div class="wrap-header-mobile">
@@ -1337,3 +1567,101 @@
 		</div>
 	</div>
 </div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white pt-5 pb-5">
+  <div class="container">
+    <div class="row">
+      <!-- Categories Section -->
+      <div class="col-md-3 mb-4">
+        <h5 class="text-uppercase mb-3">Categories</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-white hov-cl1 trans-04">Women</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">Men</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">Shoes</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">Watches</a></li>
+        </ul>
+      </div>
+
+      <!-- Help Section -->
+      <div class="col-md-3 mb-4">
+        <h5 class="text-uppercase mb-3">Help</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-white hov-cl1 trans-04">Track Order</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">Returns</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">Shipping</a></li>
+          <li><a href="#" class="text-white hov-cl1 trans-04">FAQs</a></li>
+        </ul>
+      </div>
+
+      <!-- Get in Touch Section -->
+      <div class="col-md-3 mb-4">
+        <h5 class="text-uppercase mb-3">Get in Touch</h5>
+        <p class="stext-107 mb-3">Any questions? Let us know at 8th Floor, Shakthan Thampuran Nagar, Thrissur, Kerala 680001, or call us at (+91) 95 1234 5678.</p>
+        <div class="social-icons">
+          <a href="#" class="text-white fs-18 mx-2 hov-cl1 trans-04"><i class="fa fa-facebook"></i></a>
+          <a href="https://www.instagram.com/dkdiljith/" target="_blank" class="text-white fs-18 mx-2 hov-cl1 trans-04"><i class="fa fa-instagram"></i></a>
+          <a href="#" class="text-white fs-18 mx-2 hov-cl1 trans-04"><i class="fa fa-pinterest-p"></i></a>
+        </div>
+      </div>
+
+      <!-- Newsletter Section -->
+      <div class="col-md-3 mb-4">
+        <h5 class="text-uppercase mb-3">Newsletter</h5>
+        <form>
+          <div class="form-group">
+            <input type="email" class="form-control mb-3" placeholder="youremail@example.com">
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Copyright Section -->
+    <div class="text-center pt-3">
+      <p class="stext-107 cl6">
+        © <span id="year"></span> All rights reserved | Made with <i class="fa fa-heart-o"></i> by <a href="https://www.linkedin.com/in/dkdiljith/" target="_blank" class="text-white">Diljith D K</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to top Button -->
+<div class="btn-back-to-top" id="myBtn">
+  <span class="symbol-btn-back-to-top">
+    <i class="zmdi zmdi-chevron-up"></i>
+  </span>
+</div>
+
+
+
+<!--===============================================================================================-->	
+	<script src="/javascripts/user/vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/bootstrap/js/popper.js"></script>
+	<script src="/javascripts/user/vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/daterangepicker/moment.min.js"></script>
+	<script src="/javascripts/user/vendor/daterangepicker/daterangepicker.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/slick/slick.min.js"></script>
+	<script src="/javascripts/user/js/slick-custom.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/parallax100/parallax100.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/isotope/isotope.pkgd.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/sweetalert/sweetalert.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/javascripts/user/js/main.js"></script>
+
+
+
