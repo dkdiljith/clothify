@@ -138,7 +138,13 @@ exports.couponEdit = async (req, res) => {
             { new: true }
         );
 
-        if (updatedCoupon) {
+        if(updatedCoupon.endDate >= new Date()){
+            updatedCoupon.isActive = true
+        }
+
+        const result = updatedCoupon.save()
+
+        if (result) {
             res.status(200).json({
                 success: true,
                 type: 'success',
