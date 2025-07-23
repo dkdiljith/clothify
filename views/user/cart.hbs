@@ -6,37 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Shopping Cart</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
   <style>
     /* General Styles */
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --success-color: #2ecc71;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e0e0e0;
+      --dark-gray: #333;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      color: #333;
-      background-color: #f9f9f9;
+      color: var(--dark-gray);
+      background-color: var(--light-gray);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
     }
 
     .cart-container {
-      /* Wrapping container for the box */
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
       display: flex;
+      gap: 30px;
+      margin-top: 30px;
     }
 
     /* Cart Items Section */
     .cart-items-section {
       flex: 2;
-      padding-right: 20px;
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: var(--shadow);
     }
 
     h1 {
       font-size: 28px;
+      margin-bottom: 25px;
+      color: var(--primary-color);
+      font-weight: 600;
+      border-bottom: 1px solid var(--medium-gray);
+      padding-bottom: 15px;
+    }
+
+    .empty-cart-message {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .empty-cart-message i {
+      font-size: 60px;
+      color: var(--medium-gray);
       margin-bottom: 20px;
+    }
+
+    .empty-cart-message h3 {
+      font-size: 22px;
+      color: var(--dark-gray);
+      margin-bottom: 15px;
+    }
+
+    .empty-cart-message p {
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .btn-shop {
+      display: inline-block;
+      padding: 12px 25px;
+      background-color: var(--secondary-color);
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .btn-shop:hover {
+      background-color: #2980b9;
     }
 
     .cart-items {
@@ -47,14 +103,22 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      padding: 15px;
-      border: 1px solid #eee;
-      border-radius: 5px;
+      padding: 20px;
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
       margin-bottom: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cart-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
     }
 
     .item-image img {
       width: 100px;
+      height: 100px;
+      object-fit: cover;
       border-radius: 5px;
     }
 
@@ -63,55 +127,77 @@
     }
 
     .item-details h3 {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .item-variation {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
     }
 
     .item-details .price {
       font-size: 16px;
-      color: #e74c3c;
+      color: var(--accent-color);
+      font-weight: 600;
     }
 
     .quantity-selector {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin: 10px 0;
+      gap: 8px;
+      margin: 12px 0;
     }
 
     .quantity-selector input {
       width: 50px;
-      padding: 5px;
+      padding: 8px;
       text-align: center;
-      border: 1px solid #ddd;
+      border: 1px solid var(--medium-gray);
       border-radius: 5px;
+      font-weight: 500;
     }
 
     .btn-quantity {
-      padding: 5px 10px;
-      background-color: #3498db;
+      padding: 8px 12px;
+      background-color: var(--secondary-color);
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
     }
 
     .btn-quantity:hover {
       background-color: #2980b9;
     }
 
+    .btn-quantity:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
     .total-price {
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
+      color: var(--primary-color);
     }
 
     .btn-remove {
-      background-color: #e74c3c;
+      background-color: var(--accent-color);
       color: white;
       border: none;
       padding: 10px 15px;
       border-radius: 5px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.2s;
     }
 
     .btn-remove:hover {
@@ -122,245 +208,577 @@
     .cart-summary-section {
       flex: 1;
       position: sticky;
-      top: 80px;
+      top: 20px;
       height: fit-content;
     }
 
     .price-summary {
-      padding: 20px;
-      border: 1px solid #eee;
-      border-radius: 5px;
+      padding: 25px;
+      background-color: var(--white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
       margin-bottom: 20px;
+      box-shadow: var(--shadow);
     }
 
     .price-summary h2 {
-      margin: 0 0 15px;
-      font-size: 24px;
+      margin: 0 0 20px;
+      font-size: 22px;
+      color: var(--primary-color);
+      font-weight: 600;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--medium-gray);
     }
 
     .summary-item {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 16px;
+    }
+
+    /* Coupon Styles */
+    .coupons-available {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px dashed #ddd;
+    }
+
+    .coupons-available h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .coupons-available h3 i {
+      color: var(--success-color);
+    }
+
+    .coupon-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid var(--medium-gray);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .coupon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .coupon-code {
+      font-weight: bold;
+      color: var(--success-color);
+      font-size: 16px;
+    }
+
+    .coupon-discount {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .coupon-details {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .coupon-min-purchase {
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .btn-apply-coupon {
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-apply-coupon:hover {
+      background-color: #27ae60;
+    }
+
+    .applied-coupon-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: var(--success-color);
+      color: white;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .no-coupons-message {
+      text-align: center;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
     }
 
     .summary-item.total {
       font-weight: bold;
       font-size: 18px;
-      border-top: 1px solid #ddd;
-      padding-top: 10px;
+      border-top: 1px solid var(--medium-gray);
+      padding-top: 15px;
+      margin-top: 15px;
+      color: var(--primary-color);
     }
 
     .btn-checkout {
       width: 100%;
-      padding: 15px 30px;
+      padding: 15px;
       font-size: 16px;
+      font-weight: 500;
       border: none;
       border-radius: 5px;
-      background-color: #2ecc71;
+      background-color: var(--success-color);
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn-checkout:hover {
       background-color: #27ae60;
     }
 
-    .btn-continue-shopping {
-      display: none;
+    .btn-checkout:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
     }
 
- .popup-message {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #4caf50;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 14px;
-    z-index: 1000;
-    transition: opacity 0.5s ease-in-out;
-}
+    .btn-checkout i {
+      font-size: 18px;
+    }
 
-.popup-message.error {
-    background: #f44336;
-}
+    .popup-message {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--success-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 1000;
+      transition: opacity 0.5s ease-in-out;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+    }
 
-.popup-message.fade-out {
-    opacity: 0;
-}
+    .popup-message i {
+      font-size: 18px;
+    }
 
+    .popup-message.error {
+      background: var(--accent-color);
+    }
+
+    .popup-message.fade-out {
+      opacity: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .cart-container {
+        flex-direction: column;
+      }
+
+      .cart-summary-section {
+        position: static;
+      }
+    }
   </style>
 </head>
 
 <br><br>
 <br><br>
-<br><br>
 
 <body>
-  <div class="cart-container">
-    <div class="cart-items-section">
-      <h1>Your Shopping Cart</h1>
-      <div class="cart-items">
-        {{#if cart.items}}
-        {{#each cart.items}}
-        <div class="cart-item">
-          <div class="item-image">
-            <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}">
-          </div>
-          <div class="item-details">
-            <h3>
-              {{this.productId.name}}
-              {{#if (getDetail this.productId.details this.variationIndex "size")}}
-              ({{getDetail this.productId.details this.variationIndex "size"}})
-              {{else}}
-              (Size Not Found)
-              {{/if}}
-            </h3>
-            <p class="price">
-              ₹{{#if (getDetail this.productId.details this.variationIndex "price")}}
-              {{getDetail this.productId.details this.variationIndex "price"}}
-              {{else}}
-              Price not found
-              {{/if}} per unit
-            </p>
-            <p>
-              Quantity: {{this.quantity}}
-            </p>
-            <div class="quantity-selector">
-              <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}"
-                data-variation-index="{{this.variationIndex}}">-</button>
-              <input type="number" value="{{this.quantity}}" min="1" class="quantity-input"
-                data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}} readonly">
-              <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}"
-                data-variation-index="{{this.variationIndex}}">+</button>
-            </div>
-            <p class="total-price">
-              Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}}
-            </p>
-          </div>
-          <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}"
-            data-variation-index="{{this.variationIndex}}">
-            <i class="fas fa-trash"></i> Remove
-          </button>
-        </div>
-        {{/each}}
-        {{else}}
-        <p>Your cart is empty.</p>
-        {{/if}}
-      </div>
-    </div>
+  <div class="container">
+    <div class="cart-container">
 
-    <div class="cart-summary-section">
-      <div class="price-summary cart-summary">
-        <h2>Order Summary</h2>
-        <div class="summary-item">
-          <span>Subtotal</span>
-          <span>₹{{subtotal}}</span>
-        </div>
-        <div class="summary-item">
-          <span>Shipping</span>
-          <span>₹{{shippingFee}}</span>
-        </div>
-        <div class="summary-item total">
-          <span>Total</span>
-          <span>₹{{totalAmount}}</span>
+       {{#if coupons.length}}
+          <div class="coupons-available">
+            <h3><i class="fas fa-tag"></i> Available Coupons</h3>
+            {{#each coupons}}
+            <div class="coupon-card {{#if (eq this._id ../cart.couponId)}}applied-coupon{{/if}}">
+              {{#if (eq this._id ../cart.couponId)}}
+              <div class="applied-coupon-badge" title="Currently Applied">
+                <i class="fas fa-check"></i>
+              </div>
+              {{/if}}
+              <div class="coupon-header">
+                <span class="coupon-code">{{this.couponCode}}</span>
+                <span class="coupon-discount">
+                  {{#if (eq this.discountType 'percentage')}}
+                    {{this.discountValue}}% OFF
+                  {{else}}
+                    ₹{{this.discountValue}} OFF
+                  {{/if}}
+                </span>
+              </div>
+              <div class="coupon-details">
+                {{#if (eq this.discountType 'percentage')}}
+                  Get {{this.discountValue}}% discount on your order
+                {{else}}
+                  Get flat ₹{{this.discountValue}} discount on your order
+                {{/if}}
+              </div>
+              <div class="coupon-min-purchase">
+                Min. purchase: ₹{{this.minimumPurchaseAmount}}
+              </div>
+              {{#if (eq this._id ../cart.couponId)}}
+                <button class="btn-apply-coupon" onclick="removeCoupon()">
+                  <i class="fas fa-times"></i> Remove Coupon
+                </button>
+              {{else}}
+                <button class="btn-apply-coupon" onclick="applyCoupon('{{this._id}}')">
+                  <i class="fas fa-tag"></i> Apply Coupon
+                </button>
+              {{/if}}
+            </div>
+            {{/each}}
+          </div>
+          {{/if}}
+
+          
+      <div class="cart-items-section">
+        <h1>Your Shopping Cart</h1>
+        <div class="cart-items">
+          {{#if cart.items}}
+          {{#each cart.items}}
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}">
+            </div>
+            <div class="item-details">
+              <h3>{{this.productId.name}}</h3>
+              <p class="item-variation">
+                {{#if (getDetail this.productId.details this.variationIndex "size")}}
+                Size: {{getDetail this.productId.details this.variationIndex "size"}}
+                {{else}}
+                Size: Not Specified
+                {{/if}}
+              </p>
+              <p class="price">
+                ₹{{#if (getDetail this.productId.details this.variationIndex "price")}}
+                {{getDetail this.productId.details this.variationIndex "price"}}
+                {{else}}
+                Price not available
+                {{/if}} per unit
+              </p>
+              <div class="quantity-selector">
+                <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}"
+                  data-variation-index="{{this.variationIndex}}" {{#if (lte this.quantity 1)}}disabled{{/if}}>
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" value="{{this.quantity}}" min="1" class="quantity-input"
+                  data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" readonly>
+                <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}"
+                  data-variation-index="{{this.variationIndex}}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <p class="total-price">
+                Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}}
+              </p>
+            </div>
+            <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}"
+              data-variation-index="{{this.variationIndex}}">
+              <i class="fas fa-trash"></i> Remove
+            </button>
+          </div>
+          {{/each}}
+          {{else}}
+          <div class="empty-cart-message">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your Cart is Empty</h3>
+            <p>Looks like you haven't added anything to your cart yet</p>
+            <a href="/user/home" class="btn-shop">
+              <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
+          </div>
+          {{/if}}
         </div>
       </div>
-      <button onclick="location.href='/user/addressInCart'"  class="btn-checkout">Proceed to Checkout</button>
+
+      {{#if cart.items}}
+      <div class="cart-summary-section">
+        <div class="price-summary cart-summary">
+          <h2>Order Summary</h2>
+          <div class="summary-item">
+            <span>Subtotal ({{cart.totalItems}} items)</span>
+            <span>₹{{subtotal}}</span>
+          </div>
+          <div class="summary-item">
+            <span>Shipping</span>
+            <span>₹{{shippingFee}}</span>
+          </div>
+          <div class="summary-item">
+            <span>Tax</span>
+            <span>₹{{tax}}</span>
+          </div>
+          
+         
+          
+          {{#if cart.couponId}}
+          <div class="summary-item">
+            <span>Coupon Discount</span>
+            <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
+          </div>
+          {{/if}}
+
+          {{#if cart.offerDiscount}}
+          <div class="summary-item">
+            <span>Discount</span>
+            <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
+          </div>
+          {{/if}}
+          
+          <div class="summary-item total">
+            <span>Total Amount</span>
+            <span>₹{{totalAmount}}</span>
+          </div>
+        </div>
+        <button onclick="location.href='/user/addressInCart'" class="btn-checkout">
+          <i class="fas fa-lock"></i> Proceed to Checkout
+        </button>
+      </div>
+      {{else}}
+      <div class="cart-summary-section">
+        <div class="price-summary cart-summary">
+          <h2>Order Summary</h2>
+          <div class="summary-item">
+            <span>Subtotal (0 items)</span>
+            <span>₹0.00</span>
+          </div>
+          <div class="summary-item">
+            <span>Shipping</span>
+            <span>₹0.00</span>
+          </div>
+          <div class="summary-item">
+            <span>Tax</span>
+            <span>₹0.00</span>
+          </div>
+          <div class="summary-item total">
+            <span>Total Amount</span>
+            <span>₹0.00</span>
+          </div>
+        </div>
+        <button class="btn-checkout" disabled>
+          <i class="fas fa-lock"></i> Proceed to Checkout
+        </button>
+      </div>
+      {{/if}}
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-   document.addEventListener("DOMContentLoaded", function () {
-    function showPopupMessage(message, type = "success") {
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function showPopupMessage(message, type = "success") {
         const popup = document.createElement("div");
         popup.className = `popup-message ${type}`;
-        popup.textContent = message;
+        popup.innerHTML = `
+          <i class="fas fa-${type === "success" ? "check-circle" : "exclamation-circle"}"></i>
+          ${message}
+        `;
         document.body.appendChild(popup);
 
         setTimeout(() => {
-            popup.classList.add("fade-out");
-            setTimeout(() => popup.remove(), 500);
+          popup.classList.add("fade-out");
+          setTimeout(() => popup.remove(), 500);
         }, 3000);
+      }
+
+      // Quantity adjustment buttons
+      document.querySelectorAll(".btn-quantity").forEach((button) => {
+        button.addEventListener("click", async function () {
+          const productId = this.getAttribute("data-product-id");
+          const variationIndex = this.getAttribute("data-variation-index");
+          const isIncrement = this.classList.contains("increment-quantity");
+
+          const quantityChange = isIncrement ? 1 : -1;
+
+          try {
+            const response = await fetch(`/user/cart/${productId}/${variationIndex}/quantity`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ quantity: quantityChange }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              if (quantityChange > 0) {
+                showPopupMessage("Quantity increased successfully", "success");
+              } else {
+                showPopupMessage("Quantity decreased successfully", "success");
+              }
+              location.reload();
+            } else {
+              showPopupMessage(data.message || "Operation failed", "error");
+            }
+          } catch (error) {
+            console.error("Request failed:", error);
+            showPopupMessage("Something went wrong. Please try again.", "error");
+          }
+        });
+      });
+
+      // Remove item buttons
+      document.querySelectorAll(".btn-remove").forEach((button) => {
+        button.addEventListener("click", async function () {
+          const productId = this.getAttribute("data-product-id");
+          const variationIndex = this.getAttribute("data-variation-index");
+
+          try {
+            const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
+              method: "DELETE"
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              showPopupMessage("Item removed from cart", "success");
+              location.reload();
+            } else {
+              showPopupMessage(data.message || "Failed to remove item", "error");
+            }
+          } catch (error) {
+            console.error("Request failed:", error);
+            showPopupMessage("Failed to remove item. Please try again.", "error");
+          }
+        });
+      });
+    });
+
+    async function applyCoupon(couponId) {
+      const couponCard = document.querySelector(`.coupon-card button[onclick="applyCoupon('${couponId}')"]`).closest('.coupon-card');
+      const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
+      const currentSubtotal = parseFloat('{{subtotal}}');
+      
+      if ( currentSubtotal < minPurchase) {
+        showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
+        return;
+      }
+
+      const confirmation = await Swal.fire({
+        title: 'Apply Coupon?',
+        html: `Are you sure you want to apply this coupon?<br><br>
+              <strong>${couponCard.querySelector('.coupon-code').textContent}</strong><br>
+              ${couponCard.querySelector('.coupon-discount').textContent}<br><br>
+              Current discount will be replaced.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, apply it!',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!confirmation.isConfirmed) return;
+
+      try {
+        const response = await fetch('/user/cart/apply-coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            couponId: couponId,
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showPopupMessage('Coupon applied successfully!', 'success');
+          location.reload();
+        } else {
+          showPopupMessage(data.message || 'Failed to apply coupon', 'error');
+        }
+      } catch (error) {
+        console.error('Error applying coupon:', error);
+        showPopupMessage('Failed to apply coupon. Please try again.', 'error');
+      }
     }
 
-    document.querySelectorAll(".btn-quantity").forEach((button) => {
-        button.addEventListener("click", async function () {
-            const productId = this.getAttribute("data-product-id");
-            const variationIndex = this.getAttribute("data-variation-index");
-            const isIncrement = this.classList.contains("increment-quantity");
+    async function removeCoupon() {
+      const confirmation = await Swal.fire({
+        title: 'Remove Coupon?',
+        text: 'Are you sure you want to remove the applied coupon?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel'
+      });
 
-            const quantityChange = isIncrement ? 1 : -1;
-            console.log(`Button clicked! Product ID: ${productId}, Variation: ${variationIndex}, Change: ${quantityChange}`);
+      if (!confirmation.isConfirmed) return;
 
-            try {
-                const response = await fetch(`/user/cart/${productId}/${variationIndex}/quantity`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ quantity: quantityChange }),
-                });
-
-                const data = await response.json();
-                console.log("Server Response:", data);
-
-                if (data.success) {
-                    if (quantityChange > 0) {
-                        showPopupMessage("Quantity increased!", "success");
-                    } else {
-                        showPopupMessage("Quantity decreased!", "success");
-                    }
-                    location.reload();
-                } else {
-                    showPopupMessage(data.message, "error");
-                }
-            } catch (error) {
-                console.error("Request failed:", error);
-                showPopupMessage("Something went wrong!", "error");
-            }
+      try {
+        const response = await fetch('/user/cart/remove-coupon', {
+          method: 'DELETE'
         });
-    });
 
-    document.querySelectorAll(".btn-remove").forEach((button) => {
-        button.addEventListener("click", async function () {
-            const productId = this.getAttribute("data-product-id");
-            const variationIndex = this.getAttribute("data-variation-index");
+        const data = await response.json();
+        if (data.success) {
+          showPopupMessage('Coupon removed successfully!', 'success');
+          location.reload();
+        } else {
+          showPopupMessage(data.message || 'Failed to remove coupon', 'error');
+        }
+      } catch (error) {
+        console.error('Error removing coupon:', error);
+        showPopupMessage('Failed to remove coupon. Please try again.', 'error');
+      }
+    }
 
-            console.log(`Remove button clicked! Product ID: ${productId}, Variation: ${variationIndex}`);
+    function showPopupMessage(message, type = "success") {
+      const popup = document.createElement("div");
+      popup.className = `popup-message ${type}`;
+      popup.innerHTML = `
+        <i class="fas fa-${type === "success" ? "check-circle" : "exclamation-circle"}"></i>
+        ${message}
+      `;
+      document.body.appendChild(popup);
 
-            try {
-                const response = await fetch(`/user/cart/${productId}/${variationIndex}`, { method: "DELETE" });
-
-                const data = await response.json();
-                console.log("Server Response:", data);
-
-                if (data.success) {
-                    showPopupMessage("Item removed from cart!", "success");
-                    location.reload();
-                } else {
-                    showPopupMessage(data.message, "error");
-                }
-            } catch (error) {
-                console.error("Request failed:", error);
-                showPopupMessage("Something went wrong!", "error");
-            }
-        });
-    });
-});
-
-
-</script>
-
-
+      setTimeout(() => {
+        popup.classList.add("fade-out");
+        setTimeout(() => popup.remove(), 500);
+      }, 3000);
+    }
+  </script>
 </body>
 
 <br><br>
-<br><br>
-
 
 </html>

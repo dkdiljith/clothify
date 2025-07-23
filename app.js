@@ -1,37 +1,33 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var exphbs = require('express-handlebars');
-var session = require("express-session")
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const exphbs = require('express-handlebars');
+const session = require("express-session")
 require('dotenv').config();
-const flash = require('connect-flash'); 
 
-var adminRouter = require(`./routes/adminRoute`)
-var userRouter = require('./routes/userRoute');
-var db = require("./config/connection")
 
-var app = express();
+const adminRouter = require(`./routes/adminRoute`)
+const userRouter = require('./routes/userRoute');
+const db = require("./config/connection")
+
+const app = express();
 
 const nocache = require(`nocache`)
 app.use(nocache())
 
 
+//HBS Connections
 const hbs = exphbs.create({
-  extname: 'hbs', 
-  defaultLayout: 'layout', 
-  layoutsDir: path.join(__dirname, 'views', 'layout'), 
-  partialsDir: path.join(__dirname, 'views', 'partials'), 
-  helpers: {
-    ifEquals: function (arg1, arg2, options) {
-      return arg1 == arg2 ? options.fn(this) : options.inverse(this);
-    }
-  }
+  extname: 'hbs',
+  defaultLayout: 'layout',
+  layoutsDir: path.join(__dirname, 'views', 'layout'),
+  partialsDir: path.join(__dirname, 'views', 'partials'),
 });
 
 //REGISTERING HBS HELPERS
-var hbsHelpers = require('./middlewares/hbsHelpers')
-for (const helperName in hbsHelpers) {  
+const hbsHelpers = require('./middlewares/hbsHelpers')
+for (const helperName in hbsHelpers) {
   hbs.handlebars.registerHelper(helperName, hbsHelpers[helperName]);
 }
 
@@ -41,19 +37,24 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
-
+const MongoStore = require('connect-mongo')
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 600000,
+    maxAge: 600000, // Adjust as needed
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
   },
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/Clothify', 
+    ttl: 14 * 24 * 60 * 60, // Optional: Session TTL in seconds (e.g., 14 days)
+    autoRemove: 'native', 
+  }),
 }));
-app.use(flash())
+
 
 // Logger and Middleware
 const bodyparser = require(`body-parser`)

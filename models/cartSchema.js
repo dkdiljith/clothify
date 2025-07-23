@@ -25,6 +25,10 @@ const cartSchema = new mongoose.Schema({
     }], // Close the array definition here
     subtotal: { type: Number, default: 0 },
     shippingFee: { type: Number, default: 0 },
+    tax:{ type: Number, default: 0 },
+    couponId:{type:mongoose.Schema.Types.ObjectId, default:null},
+    couponDiscount:{type:Number,default:0},
+    offerDiscount:{type:Number,default:0},
     totalAmount: { type: Number, default: 0 }
 }, { timestamps: true });
 

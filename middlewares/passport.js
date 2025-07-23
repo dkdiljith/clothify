@@ -2,7 +2,43 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema'); 
+const Wallet = require(`../models/walletSchema`)
 require('dotenv').config();
+
+
+
+
+//////////////wallet cretaion/////////////////////
+async function createWallet(userId) {
+  try {
+    const existingWallet = await Wallet.findOne({ userId });
+
+    if (existingWallet) {
+      return existingWallet;
+    }
+
+    const newWallet = new Wallet({
+      userId: userId,
+      balance: 0,
+      transactions: [],
+    });
+
+    const savedWallet = await newWallet.save();
+    return savedWallet;
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error
+      console.error("Wallet creation failed: Wallet already exists for this user.");
+      return null; // Or throw a specific error object
+    } else {
+      console.error("Error creating wallet:", error);
+      throw error; // Rethrow other errors
+    }
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 passport.use(new GoogleStrategy(
   {
@@ -57,12 +93,17 @@ passport.deserializeUser(async (req,id, done) => {
       gender:user.gender,
       blocked:user.blocked
     })
-    console.log()
+    createWallet(user._id)
 
     done(null, user);
   } catch (error) {
     done(error);
   }
 });
+
+
+
+
+
 
 module.exports = passport;

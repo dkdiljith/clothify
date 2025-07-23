@@ -1,44 +1,87 @@
 <head>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="/stylesheets/admin/orders.css"
-  />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/orders.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
 </head>
 
 <body>
-   <main class="main-content">
-        <div class="orders-header">
-            <h1>Order Management</h1>
-            {{!-- <button class="btn-primary">+ Add New Order</button> --}}
+    <main class="dashboard-container">
+        <div style="display:flex; justify-content:space-between;" class="orders-header">
+            <h1 class="page-title">Order Management</h1>
+
+
+             {{!-- serach --}}
+            {{!-- <form method="GET" action='/admin/orders/search' role="search">
+                <div class="search-container">
+                    <input type="search" name="query" class="search-input" id="search-input"
+                        placeholder="Search orders..." {{#if query}} value={{query}} {{/if}}>
+                </div>
+            </form> --}}
+
         </div>
 
         <div class="orders-table">
             <table>
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>No:Of Items</th>
-                        <th>Amount</th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Order Number</th>
+                        <th>Client</th>
+                        <th>Order Date</th>
+                        <th>Item Count</th>
+                        <th>Total Amount</th>
+                        <th>View Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each order}}
                     <tr>
-                        <td>#{{this._id}}</td>
+                        <td>{{incrementedIndex @index}}</td>
+                        <td style="display: flex; align-items: center; gap: 0.75rem;">
+                            <img src="https://i.postimg.cc/KvXw8MSK/2660420.png" class="user-avatar" alt="Avatar"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            <div class="order-number-container">
+                                #{{this._id}}
+                                {{#if (hasReturnRequest this.items)}}
+                                <span class="return-alert" title="Return Requested - Needs Attention">
+                                    <i class="fas fa-exclamation"></i>
+                                </span>
+                                {{/if}}
+                            </div>
+                        </td>
                         <td>{{this.deliveryAddress.name}}</td>
                         <td>{{formatDate this.createdAt}}</td>
                         <td><span class="status status-success">{{this.items.length}}</span></td>
                         <td>₹{{this.totalAmount}}</td>
-                        <td><button onclick="location.href='/admin/orderDetails/{{this._id}}'" class="btn-primary">View</button></td>
+                        <td><button onclick="location.href='/admin/orderDetails/{{this._id}}'"
+                                class="btn-primary">View</button></td>
                     </tr>
                     {{/each}}
                 </tbody>
             </table>
         </div>
+
+        {{#if (gt pagination.totalPages 1)}}
+        <div class="pagination">
+            {{#if pagination.hasPrevPage}}
+            <a href="/admin/orders/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {{/if}}
+
+            <span class="pagination-info">
+                Page {{pagination.page}} of {{pagination.totalPages}}
+            </span>
+
+            {{#if pagination.hasNextPage}}
+            <a href="/admin/orders/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {{/if}}
+        </div>
+        {{/if}}
+
+
     </main>
-  <script src="/javascripts/admin/orders.js" defer></script>
+    <script src="/javascripts/admin/orders.js" defer></script>
 </body>

@@ -1,45 +1,130 @@
-
-/* Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-    transition: background 0.3s ease, color 0.3s ease;
+.coupon-management-layout {
+    position: relative;
+    width: 100%;
 }
 
-body {
-    background: var(--background);
-    color: var(--text);
-    padding: 2rem;
+/* Coupons List Container */
+.coupons-list-container {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    width: 100%;
+    /* Ensure it takes full width */
+    max-width: 100%;
+    /* Prevent any overflow */
 }
 
-.container {
-    max-width: 100% !important; 
-    margin: 0 auto;
-}
-
-h1 {
-    color: var(--text);
+.coupons-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 }
 
+.coupons-table-header h3 {
+    font-size: 1.25rem;
+    color: var(--text);
+    margin: 0;
+}
+
+.table-actions {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.coupons-table-wrapper {
+    overflow-x: auto;
+}
+
+/* Coupons Table */
+.coupons-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.coupons-table th {
+    background: var(--background);
+    color: var(--text);
+    font-weight: 500;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.coupons-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.coupons-table tr:last-child td {
+    border-bottom: none;
+}
+
+.coupon-code {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.coupon-icon {
+    font-size: 1.1em;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background-color: var(--success-light);
+    color: var(--success-dark);
+}
+
+.status-badge.expired {
+    background-color: var(--danger-light);
+    color: var(--danger-dark);
+}
+
+.add-coupon-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.add-coupon-card h3 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
 /* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
 .form-label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--text);
     font-weight: 500;
+    color: var(--text);
 }
 
 .form-control {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
+    border-radius: 8px;
+    background: var(--background);
     color: var(--text);
-    margin-bottom: 1rem;
+    font-size: 1rem;
 }
 
 .form-control:focus {
@@ -48,12 +133,36 @@ h1 {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+.error-message {
+    font-size: 0.75rem;
+    color: var(--danger);
+    margin-top: 0.25rem;
+    min-height: 1rem;
+}
+
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Buttons */
+.btnForm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
     font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
 }
 
 .btn-primary {
@@ -61,56 +170,313 @@ h1 {
     color: white;
 }
 
-.btn-success {
-    background: var(--success);
+.btn-edit {
+    background: var(--warning);
     color: white;
 }
 
-.btn-danger {
+.btn-delete {
     background: var(--danger);
     color: white;
 }
 
-.btn:hover {
-    filter: brightness(1.1);
+.btn-edit:hover,
+.btn-delete:hover {
+    opacity: 0.9;
 }
 
-/* Table Styles */
-.table {
-    width: 100%;
-    background: var(--surface);
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-muted);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* Notification styles */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    margin-bottom: 10px;
     border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    color: #fff;
+    animation: fadeIn 0.5s, fadeOut 0.5s 3.5s forwards;
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #F44336;
+}
+
+.notification .close-btn {
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .coupon-management-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .add-coupon-container {
+        position: static;
+    }
+
+    .form-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 15px;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background-color: #2c3e50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-button:hover {
+    background-color: #1a2634;
+    transform: translateY(-2px);
+}
+
+.pagination-info {
+    padding: 8px 16px;
+    color: #666;
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* search input*/
+.search-input {
+    padding: 0.5rem 1rem;
     border: 1px solid var(--border);
-    overflow: hidden;
-    margin-top: 2rem;
-}
-
-.table th,
-.table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-.table th {
+    border-radius: 6px;
     background: var(--background);
     color: var(--text);
-    font-weight: 500;
 }
 
-.table tr:last-child td {
-    border-bottom: none;
+/*dropdown conflict*/
+.select2-container {
+    margin-bottom: 5px;
 }
 
-/* Theme Toggle */
-.theme-toggle {
+.select2-selection {
+    padding: 0.75rem !important;
+    height: auto !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+
+/* Fix for Select2 scrollbar */
+.select2-container--open .select2-dropdown {
+    overflow: hidden !important; /* Hide scrollbar */
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.select2-results__options {
+    max-height: 200px !important; /* Set fixed height */
+    overflow-y: auto !important; /* Only show scroll when needed */
+}
+
+.select2-results__option {
+    padding: 8px 12px !important;
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////////////////////////*/
+
+/* Modal Container */
+.add-coupon-overlay {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 0.5rem;
-    border-radius: 50%;
-    cursor: pointer;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.add-coupon-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Card - Fixed Size */
+.add-coupon-card {
+    position: relative; /* For absolute positioning of close button */
+    width: 800px;
+    min-height: 550px; /* Fixed height that accommodates all content */
+    max-height: 90vh;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+/* Form Header */
+.form-header {
+    position: relative;
+    width: 100%;
+    text-align: center; /* Center the title */
+}
+
+
+/* Close Button Positioning */
+#closeFormBtn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 5px;
+}
+
+/* Form Columns Layout */
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Form Groups with Fixed Height */
+.form-group {
+    min-height: 80px; 
+}
+
+/* Error Messages - Fixed Space */
+.error-message {
+    height: 20px; /* Fixed height */
+    font-size: 0.75rem;
+    color: var(--danger);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.error-message.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Form Actions - Bottom Center */
+.form-actions {
+    margin-top: auto; /* Pushes to bottom */
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .add-coupon-card {
+        width: 90%;
+        min-height: auto;
+        padding: 20px;
+    }
+    
+    .form-columns {
+        grid-template-columns: 1fr;
+    }
 }

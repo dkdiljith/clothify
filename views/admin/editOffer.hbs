@@ -1,0 +1,290 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/coupon.css">
+    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <h1 class="page-title">Edit Offer</h1>
+
+        <form id="offerForm" novalidate>
+            <div class="form-columns">
+                <div class="form-column">
+                    <div class="mb-3">
+                        <label class="form-label">Offer Code</label>
+                        <input maxlength="6" type="text" id="offerCode" name="offerCode" class="form-control" required
+                            style="text-transform: uppercase;" value="{{offer.offerCode}}" />
+                        <div class="error-message" id="code-error"></div>
+                    </div>
+                    <div style="padding-bottom:10px;"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Offer Type</label>
+                        <select id="offerType" name="offerType" class="form-control" required>
+                            <option value="{{offer.offerType}}" disabled selected>{{offer.offerType}}</option>
+                            <option value="" disabled>Select Type ▼</option>
+                            <option value="category">Category wise</option>
+                            <option value="subcategory">Subcategory wise</option>
+                            <option value="product">Product wise</option>
+                        </select>
+                        <div class="error-message" id="offerType-error"></div>
+                    </div>
+                    <div style="padding-bottom:10px;"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Target IDs</label>
+                        <select id="categoryTargetIds" name="categoryTargetIds" class="form-control {{#unless (eq offer.offerType 'category')}}hidden{{/unless}}" multiple required>
+                            <optgroup label="Categories">
+                                {{#each categories}}
+                                <option value="{{this._id}}" {{#if (contains offer.categoryTargetIds this._id)}}selected{{/if}}>{{this.name}}</option>
+                                {{/each}}
+                            </optgroup>
+                        </select>
+
+                        <select id="subcategoryTargetIds" name="subcategoryTargetIds" class="form-control {{#unless (eq offer.offerType 'subcategory')}}hidden{{/unless}}" multiple required>
+                            {{#each categories}}
+                            <optgroup label="{{this.name}}">
+                                {{#each this.subcategories}}
+                                <option value="{{this._id}}" {{#if (contains offer.subcategoryTargetIds this._id)}}selected{{/if}}>{{this.name}}</option>
+                                {{/each}}
+                            </optgroup>
+                            {{/each}}
+                        </select>
+
+                        <select id="productTargetIds" name="productTargetIds" class="form-control {{#unless (eq offer.offerType 'product')}}hidden{{/unless}}" multiple required>
+                            <optgroup label="Products">
+                                {{#each product}}
+                                <option value="{{this._id}}" {{#if (contains offer.productTargetIds this._id)}}selected{{/if}}>{{this.name}}</option>
+                                {{/each}}
+                            </optgroup>
+                        </select>
+                        <div class="error-message" id="targetIds-error"></div>
+                    </div>
+                    <div style="padding-bottom:10px;"></div>
+                </div>
+
+                <div class="form-column">
+                   
+                    <div style="padding-bottom:10px;"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Discount Type</label>
+                        <select id="discountType" name="discountType" class="form-control" required>
+                            <option value="{{offer.discountType}}" disabled selected>{{offer.discountType}}</option>
+                            <option value="" disabled>Select Type ▼</option>
+                            <option value="percentage">Percentage</option>
+                            <option value="price">Price</option>
+                        </select>
+                        <div class="error-message" id="discountType-error"></div>
+                    </div>
+                    <div style="padding-bottom:10px;"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Discount Value</label>
+                        <input type="number" id="discountValue" name="discountValue" class="form-control" min="0"
+                            required value="{{offer.discountValue}}" />
+                        <div class="error-message" id="discountValue-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" id="endDate" name="endDate" class="form-control" required value="{{formatDateInput offer.endDate}}" />
+                        <div class="error-message" id="endDate-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">Update Offer</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('offerForm');
+            const codeInput = document.getElementById('offerCode');
+            const minPurchaseInput = document.getElementById('minPurchase');
+            const discountTypeInput = document.getElementById('discountType');
+            const discountValueInput = document.getElementById('discountValue');
+            const endDateInput = document.getElementById('endDate');
+            const offerTypeInput = document.getElementById('offerType');
+            const categoryTargetIdsInput = document.getElementById('categoryTargetIds');
+            const subcategoryTargetIdsInput = document.getElementById('subcategoryTargetIds');
+            const productTargetIdsInput = document.getElementById('productTargetIds');
+
+            // ✅ Automatically convert offer code to uppercase while typing
+            codeInput.addEventListener('input', () => {
+                codeInput.value = codeInput.value.toUpperCase();
+            });
+
+            // ✅ Notification function
+            const showNotification = (type, message) => {
+                const container = document.querySelector('.notification-container') || createNotificationContainer();
+                const notification = document.createElement('div');
+                notification.classList.add('notification', type);
+                notification.innerHTML = `
+                    <span>${message}</span>
+                    <span class="close-btn">&times;</span>
+                `;
+
+                container.appendChild(notification);
+
+                // Remove notification after 4 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 4000);
+
+                // Close button functionality
+                notification.querySelector('.close-btn').addEventListener('click', () => {
+                    notification.remove();
+                });
+            };
+
+            const createNotificationContainer = () => {
+                const container = document.createElement('div');
+                container.classList.add('notification-container');
+                document.body.appendChild(container);
+                return container;
+            };
+
+            // ✅ Validation functions
+            const showError = (input, message) => {
+                const errorElement = input.nextElementSibling;
+                if (!errorElement) {
+                    const newErrorElement = document.createElement('div');
+                    newErrorElement.textContent = message;
+                    newErrorElement.style.color = 'red';
+                    input.parentElement.appendChild(newErrorElement);
+                } else {
+                    errorElement.textContent = message;
+                    errorElement.style.color = 'red';
+                }
+            };
+
+            const clearError = (input) => {
+                const errorElement = input.nextElementSibling;
+                if (errorElement) {
+                    errorElement.textContent = '';
+                }
+            };
+            const validateForm = () => {
+                let isValid = true;
+                const today = new Date().toISOString().split('T')[0];
+
+                // ✅ Offer Code Validation
+                const codeRegex = /^[A-Z0-9]{6}$/;
+                if (!codeRegex.test(codeInput.value)) {
+                    showError(codeInput, 'Code must be 6 uppercase alphanumeric characters.');
+                    isValid = false;
+                } else {
+                    clearError(codeInput);
+                }
+
+              
+
+                // ✅ Discount Value Validation
+                const discountValue = parseFloat(discountValueInput.value);
+
+                if (discountTypeInput.value === 'percentage') {
+                    if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+                        showError(discountValueInput, 'For percentage, value must be between 0 and 100.');
+                        isValid = false;
+                    } else {
+                        clearError(discountValueInput);
+                    }
+                } else if (discountTypeInput.value === 'price') {
+                    if (isNaN(discountValue) || discountValue < 0 || discountValue > 10000) {
+                        showError(discountValueInput, 'For price, value must be between ₹0 and ₹10,000.');
+                        isValid = false;
+                    } else {
+                        clearError(discountValueInput);
+                    }
+                }
+
+                // ✅ Minimum Purchase Validation
+                const minPurchase = parseFloat(minPurchaseInput.value);
+                if (isNaN(minPurchase) || minPurchase < 0) {
+                    showError(minPurchaseInput, 'Min purchase must be a non-negative number.');
+                    isValid = false;
+                } else {
+                    clearError(minPurchaseInput);
+                }
+
+                // ✅ Date Validation
+                if (endDateInput.value <= today) {
+                    showError(endDateInput, 'End date must be in the future.');
+                    isValid = false;
+                } else {
+                    clearError(endDateInput);
+                }
+
+                return isValid;
+            };
+
+            // ✅ Real-time validation event listeners
+            [codeInput, minPurchaseInput, discountTypeInput, discountValueInput, endDateInput, offerTypeInput, categoryTargetIdsInput, subcategoryTargetIdsInput, productTargetIdsInput].forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('blur', validateForm);
+                if (input.tagName === 'SELECT') {
+                    input.addEventListener('change', validateForm);
+                }
+            });
+
+            // ✅ Form Submission with PUT Request
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    return; // Block submission if validation fails
+                }
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                data.categoryTargetIds = Array.from(categoryTargetIdsInput.selectedOptions).map(option => option.value);
+                data.subcategoryTargetIds = Array.from(subcategoryTargetIdsInput.selectedOptions).map(option => option.value);
+                data.productTargetIds = Array.from(productTargetIdsInput.selectedOptions).map(option => option.value);
+
+                const offerId = window.location.pathname.split('/').pop(); // Extract offer ID from URL
+                try {
+                    const response = await fetch(`/admin/offer/${offerId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showNotification('success', 'Offer updated successfully!');
+                        setTimeout(() => {
+                            window.location.href = '/admin/offer';
+                        }, 2000);
+                    } else {
+                        showNotification('error', result.message || 'Failed to update offer.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('error', 'Something went wrong!');
+                }
+            });
+
+            // Offer type change handler
+            document.getElementById('offerType').addEventListener('change', function () {
+                document.getElementById('categoryTargetIds').classList.add('hidden');
+                document.getElementById('subcategoryTargetIds').classList.add('hidden');
+                document.getElementById('productTargetIds').classList.add('hidden');
+
+                const selectedValue = this.value;
+                if (selectedValue === 'category') {
+                    document.getElementById('categoryTargetIds').classList.remove('hidden');
+                } else if (selectedValue === 'subcategory') {
+                    document.getElementById('subcategoryTargetIds').classList.remove('hidden');
+                } else if (selectedValue === 'product') {
+                    document.getElementById('productTargetIds').classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>

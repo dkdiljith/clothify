@@ -1,187 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clothify - Delete Account</title>
+    <title>Delete Account | Clothify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-      
-        .delete-container { /* Main container */
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 800px;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .profile-header {
             display: flex;
-            margin-left: 150px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--medium-gray);
         }
 
-        .delete-sidebar { /* Sidebar */
-            width: 200px;
-            border-right: 1px solid #eee;
-            padding-right: 20px;
+        .profile-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
         }
 
-        .delete-sidebar ul {
+        .profile-container {
+            display: flex;
+            gap: 30px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .profile-sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            padding: 25px 0;
+        }
+
+        .profile-sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .delete-sidebar li {
-            padding: 10px 0;
+        .profile-sidebar li {
+            padding: 12px 25px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid transparent;
         }
 
-        .delete-sidebar li:hover {
-            background-color: #f0f0f0;
+        .profile-sidebar li:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
         }
 
-        .delete-sidebar li.active {
-            font-weight: bold;
-            color: #007bff;
+        .profile-sidebar li.active {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 500;
         }
 
-        .delete-content-area { /* Main content area */
+        .profile-sidebar li i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-content {
             flex: 1;
-            padding-left: 20px;
+            padding: 30px;
         }
 
-        .delete-content-area h2 {
-            color: #007bff;
+        /* Delete Account Content Styles */
+        .delete-section {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .delete-icon {
+            font-size: 60px;
+            color: var(--accent-color);
             margin-bottom: 20px;
         }
 
-        .delete-content-area img {
-            max-width: 200px;
-            margin-bottom: 20px;
-        }
-
-        .delete-content-area p {
+        .delete-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-color);
             margin-bottom: 15px;
         }
 
-        .delete-content-area ul {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin-bottom: 20px;
+        .delete-subtitle {
+            font-size: 16px;
+            color: var(--dark-gray);
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .delete-content-area li {
-            margin-bottom: 10px;
+        .delete-warning-card {
+            background-color: #fff9f9;
+            border-left: 4px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            text-align: left;
         }
 
-        .delete-content-area a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .delete-content-area a:hover {
-            text-decoration: underline;
-        }
-
-        .delete-checkbox-container {
-            margin-bottom: 20px;
+        .delete-warning-title {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
 
-        .delete-checkbox-container input[type="checkbox"] {
-            margin-right: 10px;
+        .delete-warning-list {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        .delete-warning-list li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .delete-confirm-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin: 25px 0;
+            padding: 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            background-color: var(--light-gray);
+        }
+
+        .delete-confirm-checkbox input {
+            margin-right: 15px;
+            margin-top: 3px;
+        }
+
+        .delete-confirm-label {
+            color: var(--dark-gray);
+            font-size: 15px;
         }
 
         .delete-actions {
             display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
         }
 
-        .delete-anyway-button { /* More descriptive button class */
-            background-color: #d9534f;
-            color: #fff;
-            padding: 10px 20px;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            gap: 8px;
+            font-size: 16px;
         }
 
-        .delete-anyway-button:hover {
-            background-color: #c9302c;
+        .btn-danger {
+            background-color: var(--accent-color);
+            color: white;
         }
 
-        .delete-anyway-button:disabled {
-            background-color: #aaa;
-            cursor: default;
+        .btn-danger:hover {
+            background-color: #c0392b;
         }
 
-        .keep-account-button { /* More descriptive button class */
-            background-color: #ccc;
-            color: #333;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-left: 10px;
+        .btn-secondary {
+            background-color: var(--medium-gray);
+            color: var(--dark-gray);
         }
 
-        .keep-account-button:hover {
-            background-color: #bbb;
+        .btn-secondary:hover {
+            background-color: #bdc3c7;
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .profile-container {
+                flex-direction: column;
+            }
+
+            .profile-sidebar {
+                width: 100%;
+                padding: 15px 0;
+            }
+
+            .profile-sidebar ul {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 15px;
+            }
+
+            .profile-sidebar li {
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                padding: 10px 15px;
+            }
+
+            .profile-sidebar li.active {
+                border-left: none;
+                border-bottom: 3px solid var(--accent-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .delete-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
-<br><br>
-<br><br>
-<br><br>
-
 <body>
+    <div class="container" style="margin-top:20px;">
+        <div class="profile-header">
 
-<div class="container">
-<div class="delete-container">
-    <div class="delete-sidebar">
-        <ul>
-            <li onclick="location.href='/user/profile'">Profile</li>
-            <li onclick="location.href='/user/orders'" >Orders</li>
-            <li onclick="location.href='/user/address'">Addresses</li>
-            <li onclick="location.href='/user/deleteuser'" class="active">Delete Account</li>
-        </ul>
-    </div>
-    <div class="delete-content-area">
-        <h2>Delete Account</h2>
-        <div class="delete-content">
-            <img src="https://i.postimg.cc/wBJnRSMF/image.png" alt="Delete Account Illustration">
-            <p>Is this goodbye? We're sad to see you go, but we understand. Before you delete your account, please take a moment to review the following:</p>
-            <ul>
-                <li>You'll lose your order history, saved details, Clothify Credit, Clothify Cash, Clothify Coins, and all other coupons and benefits.</li>
-                <li>Any account-related benefits will be forfeited once the account is deleted and will no longer be available to you. You cannot recover them. However, you can always create a new account. By deleting your account, you acknowledge you have read our <a href="#">Privacy Policy</a>.</li>
-                <li>Any pending orders, exchanges, returns, or refunds will no longer be accessible via your account.</li>
-                <li>Clothify will try to complete the open transactions within the next 30 days on a best-effort basis. However, we cannot ensure tracking and traceability of transactions once the account is deleted.</li>
-                <li>Clothify may not extend a New User coupon if an account is created with the same mobile number or email ID.</li>
-                <li>Clothify may refuse or delay deletion in case there are any pending grievances related to orders, shipments, cancellations, or any other services offered by Clothify.</li>
-                <li>Clothify may retain certain data for legitimate reasons, such as security, fraud prevention, future abuse, regulatory compliance, including the exercise of legal rights or compliance with legal orders under applicable laws.</li>
-            </ul>
-            <div class="delete-checkbox-container">
-                <input type="checkbox" id="agreeTerms" onchange="toggleDeleteButton()">
-                <label for="agreeTerms">I agree to all the terms and conditions</label>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <ul>
+                    <li onclick="location.href='/user/profile'">
+                        <i class="fas fa-user"></i> Profile
+                    </li>
+                    <li onclick="location.href='/user/security'">
+                        <i class="fas fa-lock"></i> Security & Password
+                    </li>
+                    <li onclick="location.href='/user/wallet'">
+                        <i class="fas fa-wallet"></i> Wallet
+                    </li>
+                    <li onclick="location.href='/user/orders'">
+                        <i class="fas fa-shopping-bag"></i> Orders
+                    </li>
+                    <li onclick="location.href='/user/address'">
+                        <i class="fas fa-map-marker-alt"></i> Addresses
+                    </li>
+                    <li class="active" onclick="location.href='/user/deleteuser'">
+                        <i class="fas fa-trash-alt"></i> Delete Account
+                    </li>
+                </ul>
             </div>
-            <div class="delete-actions">
-                <button onclick="location.href='/user/deleteuseraccount'" class="delete-anyway-button" disabled>DELETE ANYWAY</button>
-                <button class="keep-account-button">KEEP ACCOUNT</button>
+
+            <div class="profile-content">
+                <div class="delete-section">
+                    <div class="delete-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2 class="delete-title">Delete Your Clothify Account</h2>
+                    <p class="delete-subtitle">
+                        We're sorry to see you go. Before you proceed, please understand that this action is permanent
+                        and cannot be undone.
+                    </p>
+
+                    <div class="delete-warning-card">
+                        <h3 class="delete-warning-title">
+                            <i class="fas fa-exclamation-circle"></i> What happens when you delete your account
+                        </h3>
+                        <ul class="delete-warning-list">
+                            <li>All your personal data, order history, saved payment methods, and addresses will be
+                                permanently removed from our systems.</li>
+                            <li>Any active Clothify Credit, Clothify Cash, or promotional balances will be forfeited
+                                immediately.</li>
+                            <li>Pending orders, returns, or refunds may be affected. We recommend completing all
+                                transactions before deletion.</li>
+                            <li>You will lose access to any digital content associated with your account.</li>
+                            <li>Account deletion may take up to 30 days to process completely from our backup systems.
+                            </li>
+                            <li>Certain data may be retained as required by law or for legitimate business purposes
+                                (fraud prevention, dispute resolution, etc.).</li>
+                        </ul>
+                    </div>
+
+                    <div class="delete-confirm-checkbox">
+                        <input type="checkbox" id="confirmDeletion" onchange="toggleDeleteButton()">
+                        <label for="confirmDeletion" class="delete-confirm-label">
+                            I understand that deleting my account is permanent and cannot be undone.
+                            I have reviewed the <a href="/privacy" target="_blank"
+                                style="color: var(--secondary-color);">Privacy Policy</a>
+                            and understand how my data will be handled.
+                        </label>
+                    </div>
+
+                    <div class="delete-actions">
+                        <button id="deleteButton" class="btn btn-danger" disabled onclick="confirmAccountDeletion()">
+                            <i class="fas fa-trash-alt"></i> Delete Account Permanently
+                        </button>
+                        <button class="btn btn-secondary" onclick="location.href='/user/profile'">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</div>
-<script>
-    function toggleDeleteButton() {
-        const agreeTerms = document.getElementById('agreeTerms');
-        const deleteButton = document.querySelector('.delete-anyway-button');
 
-        deleteButton.disabled = !agreeTerms.checked;
-    }
-</script>
+    <script>
+        function toggleDeleteButton() {
+            const confirmCheckbox = document.getElementById('confirmDeletion');
+            const deleteButton = document.getElementById('deleteButton');
+            deleteButton.disabled = !confirmCheckbox.checked;
+        }
 
+        function confirmAccountDeletion() {
+            if (confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+                // Show loading state
+                const deleteButton = document.getElementById('deleteButton');
+                deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                deleteButton.disabled = true;
+
+                // Submit deletion request
+                fetch('/user/deleteuseraccount', {
+                    method: 'delete',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ confirm: true })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Deletion failed');
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert('Your account has been scheduled for deletion. You will be logged out shortly.');
+                            window.location.href = '/user/login';
+                        } else {
+                            alert(data.message || 'Account deletion failed. Please try again.');
+                            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Account Permanently';
+                            deleteButton.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred during account deletion. Please try again.');
+                        deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Account Permanently';
+                        deleteButton.disabled = false;
+                    });
+            }
+        }
+    </script>
 </body>
-<br><br>
+
 </html>

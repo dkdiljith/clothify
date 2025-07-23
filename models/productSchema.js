@@ -2,17 +2,30 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    categoryId: {  
+    categoryId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",  
-        required: true 
+        ref: "Category",
+        required: true
     },
     details: [{
         size: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
+
+
+        discountPrice: {
+            type: Number, default: 0, validate: {
+                validator: function (value) {
+                    return value <= this.price;
+                },
+                message: 'Discount price cannot be greater than original price'
+            }
+        },
+        currentOffer: { type: mongoose.Schema.Types.ObjectId, default: null }
+
+
     }],
-    gender:{type:String , required:true },
+    gender: { type: String, required: true },
     description: { type: String },
     images: [{
         path: String,
@@ -25,8 +38,15 @@ const productSchema = new mongoose.Schema({
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-productSchema.index({ name: 'text', description: 'text' });
-productSchema.index({ category: 1 });
+
+//Search Indexes
+// In your Product model
+productSchema.index({ name: 'text', description: 'text', gender: 'text' });
+productSchema.index({ 'details.price': 1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ salesCount: -1 });
+
 
 const Product = mongoose.model("Product", productSchema);
+
 module.exports = Product;

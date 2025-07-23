@@ -12,12 +12,13 @@ exports.userIsLoggedIn = async (req, res, next) => {
       const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
-        return res.redirect("/user/login"); // Redirect if user not found
+        req.session.destroy()
       }
       if (user.blocked) {
         //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
       }
+      
 
       next();
     } else {
@@ -36,7 +37,7 @@ exports.userIsLoggedOut = async (req, res, next) => {
       const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
-        return res.redirect("/user/login"); // Redirect if user not found
+        req.session.destroy()
       }
       if (user.blocked) {
         //  Check user.blocked correctly
@@ -44,8 +45,25 @@ exports.userIsLoggedOut = async (req, res, next) => {
       }
 
       const product = await Product.find().lean()
+
+      if(product){
+        for(let i = 0 ; i < product.length/2 ; i ++){
+          let temp = product[i]
+          product[i] = product[product.length - 1 - i]
+          product[product.length - 1 - i] = temp
+        }
+      }
+    
+      let product8 = []
+    
+      if(product){
+        for(let i = 0 ; i < 8 ; i ++){
+          product8[i] = product[i]
+        }
+      }
+
   res.render(`user/home` ,{
-    product:product
+    product:product8
   })
     } else {
       next(); // User is not logged in, proceed to the next middleware

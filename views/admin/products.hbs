@@ -1,98 +1,107 @@
 <head>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="/stylesheets/admin/products.css"
-  />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/products.css" />
+    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
 </head>
+
 <body>
     <div class="dashboard-container">
-        <!-- Header -->
         <div class="header">
             <h1 class="page-title">Product Management</h1>
-            <button onclick="location.href='/admin/addProducts'" class="add-product-btn">+ Add Product</button>
-        </div>
-
-        <!-- Controls -->
-        {{!-- <div class="controls">
-            <input type="text" class="search-input" placeholder="Search products...">
-            <select class="filter-select">
-                <option>All Categories</option>
-                <option>Electronics</option>
-                <option>Apparel</option>
-            </select>
-            <select class="filter-select">
-                <option>All Statuses</option>
-                <option>Active</option>
-                <option>Draft</option>
-            </select>
-        </div> --}}
-
-        <!-- Product Grid Header -->
-        <div class="product-grid grid-header">
-            <div></div>
-            <div>Product Name</div>
-            <div>Category</div>
-            <gender>Gender</gender>
-            <div>Price</div>
-            <div>Stock</div>
-            {{!-- <div>Status</div> --}}
-            <div>Actions</div>
+            <div style="display:flex;">
+                <form method="GET" action='/admin/products/search' role="search" style="margin-right:15px;">
+                    <div class="search-container">
+                        <input type="search" name="query" class="search-input" id="search-input"
+                            placeholder="Search products..." {{#if query}} value={{query}} {{/if}}>
+                    </div>
+                </form>
+                <button onclick="location.href='/admin/addProducts'" class="add-product-btn">+ Add Product</button>
+            </div>
         </div>
 
         {{#if products.length}}
-        <!-- Product Items -->
-        {{#each products}}
-        <div class="product-grid product-item">
-            {{#if this.images.length}}
-            <img src="{{this.images.[0].path}}" class="product-thumbnail" alt="{{this.name}}">
-            {{else}}
-            <div class="no-image">📦</div>
-            {{/if}}
-            <div>{{this.name}}</div>
-            <div>{{getCategoryName this.categoryId ../categories}}</div>
-            <div>{{this.gender}}</div>
-            {{#if this.details.length}}
-            <div>₹{{this.details.[0].price}}</div>
-            <div>{{this.details.[0].quantity}}</div>
-            {{/if}}
-            {{!-- <div><span class="status-badge {{#ifEquals this.status 'Active'}}status-active{{else}}status-inactive{{/ifEquals}}">{{this.status}}</span></div> --}}
-            <div>
-                
-
-                <span onclick="location.href='/admin/editproducts/{{this._id}}'" class="action-icon">✏️</span>
-                <span onclick="location.href='/admin/delete-product/{{this._id}}'" class="action-icon">🗑️</span>
-                {{!-- <span class="action-icon">👁️</span> --}}
-          
-            </div>
-        </div>
-        {{/each}}
-        
-        <!-- Pagination -->
-        <div class="pagination-wrapper">
-            <nav>
-                <ul class="pagination">
-                    {{#if prevPage}}
-                    <li><a href="/admin/products?page={{prevPage}}&searchQuery={{searchQuery}}">⬅️</a></li>
-                    {{/if}}
-                    {{#each pages}}
-                    <li class="{{#ifEquals this ../currentPage}}active{{/ifEquals}}">
-                        <a href="/admin/products?page={{this}}">{{this}}</a>
-                    </li>
+        <div class="orders-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Product Image</th>
+                        <th>Item Name</th>
+                        <th>Product Category</th>
+                        <th>Target Audience</th>
+                        <th>Unit Price</th>
+                        <th>Inventory</th>
+                        <th>Management</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each products}}
+                    <tr>
+                        <td>{{incrementedIndex @index}}</td>
+                        <td>
+                            {{#if this.images.length}}
+                            <img src="{{this.images.[0].path}}" class="product-thumbnail" alt="{{this.name}}">
+                            {{else}}
+                            <div class="no-image">📦</div>
+                            {{/if}}
+                        </td>
+                        <td>{{this.name}}</td>
+                        <td>{{getCategoryName this.categoryId ../categories}}</td>
+                        <td>{{this.gender}}</td>
+                        {{#if this.details.length}}
+                        <td>₹{{this.details.[0].price}}</td>
+                        <td>{{this.details.[0].quantity}}</td>
+                        {{else}}
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        {{/if}}
+                        <td>
+                            <span onclick="location.href='/admin/editproducts/{{this._id}}'"
+                                class="action-icon">✏️</span>
+                            <span onclick="location.href='/admin/delete-product/{{this._id}}'"
+                                class="action-icon">🗑️</span>
+                        </td>
+                    </tr>
                     {{/each}}
-                    {{#if nextPage}}
-                    <li><a href="/admin/products?page={{nextPage}}&searchQuery={{searchQuery}}">➡️</a></li>
-                    {{/if}}
-                </ul>
-            </nav>
+                </tbody>
+            </table>
         </div>
-        
+
+        {{#if (gt pagination.totalPages 1)}}
+        <div class="pagination">
+            {{#if pagination.hasPrevPage}}
+            <a href="/admin/products/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+                class="pagination-button">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {{/if}}
+
+            <span class="pagination-info">
+                Page {{pagination.page}} of {{pagination.totalPages}}
+            </span>
+
+            {{#if pagination.hasNextPage}}
+            <a href="/admin/products/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+                class="pagination-button">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {{/if}}
+        </div>
+        {{/if}}
         {{else}}
-        <!-- No Products Found -->
-        <div class="no-products-content text-center">
-            <h4>No Products Found</h4>
-            <p>Try adjusting your search or add a new product</p>
-            <button onclick="window.location.href='/admin/addProducts'" class="add-product-btn">Add Your First Product</button>
+        <div class="empty-state">
+            <!-- Inline SVG for "No Products Found" -->
+            <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M3 3h18v2H3V3zm2 4h14l-1.5 9H6.5L5 7zm2.75 11a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm8.5 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5z" />
+            </svg>
+
+            <h2>No Products Found</h2>
+            {{#unless query}}<p>There are currently no products in your store. Add your first product to get started!
+            </p>{{/unless}}
+            <button onclick="window.location.href='/admin/products'" class="add-product-btn empty-state-btn">
+                Refresh
+            </button>
         </div>
         {{/if}}
     </div>

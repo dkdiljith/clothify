@@ -35,33 +35,32 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
-  transition: background-color 0.1s, color 0.1s, border-color 0.2s;
 }
 
 body {
   background: var(--background);
   color: var(--text);
+  font-size: 1.rem;
+  font-weight: 600;
 }
 
  /* Sidebar Layout */
  .sidebar-container {
   display: grid;
-  grid-template-columns: 240px 1fr;
   min-height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
   background: var(--surface);
-  padding: 1.5rem;
-  border-right: 1px solid var(--border);
-  position: sticky;
-  top: 0;
+  padding: 1.3rem;
+  padding-top:0.95em;
   height: 100vh;
+  position: fixed;
 }
 
 .nav-item {
-  padding: 1rem;
+  padding: 0.8rem;
   margin: 0.5rem 0;
   border-radius: 8px;
   cursor: pointer;
@@ -71,11 +70,10 @@ body {
   background: var(--background);
 }
 
-
-
 /* DashBoard starts here */
  .main-content {
-  padding: 2rem;
+  padding: 1.4rem;
+  margin-left: 230px;
 }
 
 /* Header */
@@ -83,9 +81,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   background-color: var(--surface);
-  border-radius: 8px; /* Optional: Add rounded corners */
+  border-radius: 15px; 
   padding: 15px;
   width: 100%;
 }
@@ -104,4 +102,25 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
+.bar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
+/* ///////////////////////////////////////////////////////////////////// */
+/* Container */
+.dashboard-container {
+  max-width: 100% !important; 
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+/* ///////////////////////////////////////////////////////////////////// */

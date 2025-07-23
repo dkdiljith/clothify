@@ -1,111 +1,435 @@
-<div class="container mt-5">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center mb-4" style="color: #007bff;">Order Details</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #{{order._id}} | Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-bg: #f8f9fc;
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .order-header {
+            background: white;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+            padding: 1rem 1.35rem;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background-color: #f6e3a1; color: #856404; }
+        .status-shipped { background-color: #b8daff; color: #004085; }
+        .status-completed { background-color: #c3e6cb; color: #155724; }
+        .status-return-requested { background-color: #ffeeba; color: #856404; }
+        .status-return-accepted { background-color: #c3e6cb; color: #155724; }
+        .status-return-rejected { background-color: #f5c6cb; color: #721c24; }
+        .status-returned { background-color: #d6d8db; color: #383d41; }
+        
+        .product-img-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            border: 1px solid #e3e6f0;
+        }
+        
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .attention-required {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            box-shadow: 0 0 0 2px white;
+        }
+        
+        .return-reason-box {
+            background-color: #fff3f3;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            border-left: 3px solid var(--danger-color);
+        }
+        
+        .alert-row {
+            background-color: #fffaf0;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e3e6f0;
+        }
+        
+        .summary-total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+        
+        .address-container {
+            background-color: #f8f9fc;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .payment-icon {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid py-4">
+    <!-- Order Header -->
+    <div class="order-header d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <div class="d-flex align-items-center gap-3">
+                <h1 class="h4 mb-0 fw-bold text-gray-800">Order #{{order._id}}</h1>
+                <span class="badge bg-primary">Total Items: {{order.items.length}}</span>
+            </div>
+            <div class="d-flex flex-wrap gap-3 mt-2">
+                <span class="text-muted"><i class="far fa-calendar-alt me-1"></i> Placed on {{formatDate order.createdAt}}</span>
+                <span class="text-muted"><i class="fas fa-sync-alt me-1"></i> Last updated: {{formatDate order.updatedAt}}</span>
+            </div>
+        </div>
+        <div>
+            <a href="/admin/orders" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Orders
+            </a>
+        </div>
+    </div>
 
-        <table class="table table-bordered">
-            <tr>
-                <th>Order ID</th>
-                <td>#{{order._id}}</td>
-            </tr>
-            <tr>
-                <th>Customer Name</th>
-                <td>{{order.deliveryAddress.name}}</td>
-            </tr>
-
-            <tr>
-                <th>Shipping Fee</th>
-                <td>₹{{order.shippingFee}}</td>
-            </tr>
-            <tr>
-                <th>Total Price</th>
-                <td>₹{{order.totalAmount}}</td>
-            </tr>
-            <tr>
-                <th>Payment Method</th>
-                <td class="payment-method">
-                    {{order.paymentMethod}}<br>
-
-                    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
-                        {{order.paymentStatus}}
-                    </span>
-
-                </td>
-            </tr>
-
-            <tr>
-                <th>Order Date</th>
-                <td>{{formatDate order.createdAt}}</td>
-            </tr>
-            <tr>
-                <th>Delivery Address</th>
-                <td>
-                    <strong>{{order.deliveryAddress.name}}</strong><br>
-                    {{order.deliveryAddress.streetAddress}}, {{order.deliveryAddress.city}},<br>
-                    {{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}
-                </td>
-            </tr>
-            <tr>
-                <th colspan="2" class="text-center">Ordered Items</th>
-            </tr>
-            <tr>
-                <th>Product</th>
-                <th>Details</th>
-            </tr>
-            {{#each order.items}}
-            <tr>
-                <td>
-                    <img src="{{this.productImg}}" alt="{{this.productName}}"
-                        style="width: 100px; height: 100px; object-fit: cover;">
-                </td>
-                <td>
-                    <strong>{{this.productName}}</strong><br>
-                    Quantity: {{this.quantity}}<br>
-                    Price: ₹{{this.productPrice}}<br>
-                    Size: {{this.productSize}}<br>
-                    <div>Status:
-                        <select onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (eq this.status "Completed")}}disabled{{/if}}>
-                            <option value="Pending" {{#ifEquals this.status "Pending" }}selected{{/ifEquals}}>Pending
-                            </option>
-                            <option value="Shipped" {{#ifEquals this.status "Shipped" }}selected{{/ifEquals}}>Shipped
-                            </option>
-                            <option value="Completed" {{#ifEquals this.status "Completed" }}selected{{/ifEquals}}>
-                                Completed</option>
-                        </select>
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Order Items Card -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Order Items</h5>
+                    <span class="badge bg-primary">{{order.items.length}} items</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="width: 100px;">Item</th>
+                                    <th>Product Details</th>
+                                    <th style="width: 200px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each order.items}}
+                                <tr class="{{#if (eq this.status 'Return Requested')}}alert-row{{/if}}">
+                                    <td>
+                                        <div class="product-img-container">
+                                            <img src="{{this.productImg}}" alt="{{this.productName}}" class="product-img">
+                                            {{#if (eq this.status 'Return Requested')}}
+                                            <div class="attention-required" title="Return Request - Requires Action">
+                                                <i class="fas fa-exclamation"></i>
+                                            </div>
+                                            {{/if}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <strong>{{this.productName}}</strong>
+                                            <small class="text-muted mb-1">
+                                                ₹{{this.productPrice}} × {{this.quantity}} | Size: {{this.productSize}}
+                                            </small>
+                                            {{#if this.returnReason.length}}
+                                            <div class="return-reason-box">
+                                                <strong class="d-block mb-1"><i class="fas fa-undo me-1"></i>Return Reason</strong>
+                                                <p class="mb-0 small">{{this.returnReason.[0].reason}}</p>
+                                            </div>
+                                            {{/if}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            {{#if (or  (eq this.status "Return Requested") (eq this.status "Return Accepted") (eq this.status "Return Rejected"))}}
+                                            <select class="form-select form-select-sm mb-2" onchange="updateItemStatus('{{this._id}}', this.value)"{{#if (or (eq this.status "Returned") (eq this.status "Cancelled"))}}disabled{{/if}}>
+                                                <option value="Return Accepted" {{#ifEquals this.status "Return Accepted" }}selected{{/ifEquals}}>default</option>
+                                                <option value="Return Rejected" {{#ifEquals this.status "Return Rejected" }}selected{{/ifEquals}}>Reject Return</option>
+                                                <option value="Returned" {{#ifEquals this.status "Returned" }}selected{{/ifEquals}}>Accept Return</option>
+                                            </select>
+                                            {{else}}
+                                            <select class="form-select form-select-sm mb-2" onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or (eq this.status "Completed") (eq this.status "Returned") (eq this.status "Cancelled"))}}disabled{{/if}}>
+                                                <option value="Pending" {{#ifEquals this.status "Pending" }}selected{{/ifEquals}}>Pending</option>
+                                                <option value="Shipped" {{#ifEquals this.status "Shipped" }}selected{{/ifEquals}}>Shipped</option>
+                                                <option value="Completed" {{#ifEquals this.status "Completed" }}selected{{/ifEquals}}>Completed</option>
+                                            </select>
+                                            {{/if}}
+                                            <span class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
+                                                {{this.status}}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
                     </div>
-                </td>
-            </tr>
-            {{/each}}
-        </table>
+                </div>
+            </div>
 
-        <div class="mt-4 text-center">
-            <a href="/admin/orders" class="btn" style="background-color: #007bff; color:white;">Back to Orders</a>
+            <!-- Delivery Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Delivery Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h6 class="text-uppercase text-muted mb-3">Shipping Address</h6>
+                            <div class="address-container">
+                                <h6 class="fw-bold mb-2">{{order.deliveryAddress.name}}</h6>
+                                <p class="mb-1">{{order.deliveryAddress.streetAddress}}</p>
+                                {{#if order.deliveryAddress.landmark}}
+                                <p class="mb-1">Landmark: {{order.deliveryAddress.landmark}}</p>
+                                {{/if}}
+                                <p class="mb-1">{{order.deliveryAddress.city}}, {{order.deliveryAddress.state}} {{order.deliveryAddress.zip}}</p>
+                                <p class="mb-1">{{order.deliveryAddress.country}}</p>
+                                <p class="mb-0"><i class="fas fa-phone me-1"></i> {{order.deliveryAddress.phone}}</p>
+                            </div>
+                        </div>
+                        {{!-- <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted mb-3">Shipping Method</h6>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                    <i class="fas fa-shipping-fast text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Standard Delivery</h6>
+                                    <small class="text-muted">3-5 business days</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                <span>Order Placed</span>
+                                <span class="float-end">Out for Delivery</span>
+                            </div>
+                        </div> --}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Order Summary Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="summary-item">
+                        <span>Subtotal ({{order.items.length}} items)</span>
+                        <span>₹{{order.subtotal}}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping Fee</span>
+                        <span>₹{{order.shippingFee}}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Tax</span>
+                        <span>₹{{order.tax}}</span>
+                    </div>
+                    {{#if order.couponDiscount}}
+                    <div class="summary-item text-danger">
+                        <span>Coupon Discount</span>
+                        <span>-₹{{order.couponDiscount}}</span>
+                    </div>
+                    {{/if}}
+                    <div class="summary-item pt-2 mt-2 summary-total">
+                        <span>Total Amount</span>
+                        <span>₹{{order.totalAmount}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-uppercase text-muted mb-2">Payment Method</h6>
+                        <div class="payment-method">
+                            <div class="payment-icon">
+                                {{#ifEquals order.paymentMethod "wallet"}}
+                                <i class="fas fa-wallet"></i>
+                                {{else ifEquals order.paymentMethod "cod"}}
+                                <i class="fas fa-money-bill-wave"></i>
+                                {{else ifEquals order.paymentMethod "card"}}
+                                <i class="far fa-credit-card"></i>
+                                {{else}}
+                                <i class="fas fa-money-check-alt"></i>
+                                {{/ifEquals}}
+                            </div>
+                            <div>
+                                <p class="mb-0 text-capitalize">{{order.paymentMethod}}</p>
+                                <span class="badge bg-{{#ifEquals order.paymentStatus "Completed"}}success{{else}}warning{{/ifEquals}}">
+                                    {{order.paymentStatus}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {{#if order.transactionId}}
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2">Transaction Details</h6>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="text-muted">ID:</span>
+                            <span class="font-monospace">{{order.transactionId}}</span>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+
+            <!-- Customer Actions Card -->
+            {{!-- <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-cog me-2"></i>Customer Actions</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-envelope me-2"></i> Contact Customer
+                    </button>
+                    <button class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-print me-2"></i> Print Invoice
+                    </button>
+                </div>
+            </div> --}}
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function updateItemStatus(itemId, newStatus) {
-    const orderId = "{{order._id}}"; 
-    fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        const orderId = "{{order._id}}";
+        if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) {
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Status updated:', data);
         
-         window.location.reload();
-    })
-    .catch(error => {
-        console.error('Error updating status:', error);
-       
-    });
-}
+        fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            showAlert(`Status updated to ${newStatus}`, 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error updating status:', error);
+            showAlert('Failed to update status', 'danger');
+        });
+    }
+
+    function showAlert(message, type) {
+        // Remove any existing alerts first
+        const existingAlert = document.querySelector('.alert-position-fixed');
+        if (existingAlert) existingAlert.remove();
+        
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show alert-position-fixed shadow`;
+        alert.style.position = 'fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.style.minWidth = '300px';
+        alert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                <div>${message}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        }, 3000);
+    }
 </script>
+</body>
+</html>

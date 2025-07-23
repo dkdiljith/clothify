@@ -1,0 +1,434 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
+</head>
+
+<br><br>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Products - Your Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css">
+    <style>
+        /* Product Listing Page Specific Styles */
+        .product-listing-page {
+            padding: 60px 0;
+            background-color: #f9f9f9;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .product-listing-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        /* Product Grid */
+        .product-grid-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sort-dropdown {
+            position: relative;
+        }
+
+        .sort-button {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .sort-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px 0;
+            margin-top: 5px;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+        }
+
+        .sort-dropdown-menu.show {
+            display: block;
+        }
+
+        .sort-dropdown-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .sort-dropdown-item:hover {
+            background: #f8f8f8;
+            color: #e65540;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .pagination-list {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pagination-item {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-item:hover,
+        .pagination-item.active {
+            background: #e65540;
+            color: #fff;
+            border-color: #e65540;
+        }
+
+        .pagination-item.active {
+            background: #e65540;
+            color: #fff;
+            border-color: #e65540;
+            pointer-events: none;
+            /* Disable clicking on active page */
+        }
+
+        .pagination-item:hover:not(.active) {
+            background: #f8f8f8;
+            color: #e65540;
+        }
+
+        /* Mobile Filter Toggle */
+        .mobile-filter-toggle {
+            display: none;
+            background: #e65540;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .product-listing-container {
+                flex-direction: column;
+            }
+
+            .filter-sidebar {
+                display: none;
+                width: 100%;
+            }
+
+            .filter-sidebar.show {
+                display: block;
+            }
+
+            .mobile-filter-toggle {
+                display: block;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .product-grid-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="product-listing-page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Shop Products</h1>
+                <p class="page-subtitle">Discover our premium collection of fashion items for men and women</p>
+            </div>
+
+            <button class="mobile-filter-toggle">
+                <i class="fas fa-filter"></i> Filter Products
+            </button>
+
+            <div class="product-listing-container" <!-- Product Grid Section -->
+                <div class="product-grid-section">
+                    <div class="product-grid-header">
+                        <div class="product-count">
+                            Showing {{products.length}} of {{totalProducts}} products
+                            {{#if query}}matching "{{query}}"{{/if}}
+                        </div>
+                        <!-- Replace your current sort dropdown with this -->
+                        <div class="sort-dropdown">
+                            <form id="sortForm" method="GET" action="/user/collections" class="d-flex align-items-end">
+                                <input type="hidden" name="query" value="{{query}}">
+                                <select name="sort" id="sortSelect" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Sort By</option>
+                                    <option value="price-low-high" {{#if (eq sort "price-low-high" )}}selected{{/if}}>
+                                        Price: Low to High</option>
+                                    <option value="price-high-low" {{#if (eq sort "price-high-low" )}}selected{{/if}}>
+                                        Price: High to Low</option>
+                                    <option value="name-a-z" {{#if (eq sort "name-a-z" )}}selected{{/if}}>Name: A-Z
+                                    </option>
+                                    <option value="newest" {{#if (eq sort "newest" )}}selected{{/if}}>Newest</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+
+
+                    <div class="product-grid">
+                        {{#if products.length}}
+                        {{#each products}}
+                        <div class="product-card-wrapper">
+                            <div class="product-card">
+                                {{#if this.latestCollection}}
+                                <div class="product-badge">New</div>
+                                {{/if}}
+                                {{#if this.details.[0].currentOffer}}
+                                <div class="product-badge sale">Sale</div>
+                                <div class="discount-badge">
+                                    {{calculateDiscountPercentage (subtractDiscountPrice this.details.[0].price
+                                    this.details.[0].discountPrice) this.details.[0].price}}% OFF
+                                </div>
+                                {{/if}}
+
+                                <div class="product-image">
+                                    <a href="/user/singleproduct/{{this._id}}">
+                                        <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
+                                    </a>
+                                    <div class="product-wishlist-container">
+                                        <button class="add-to-wishlist js-addwish-b2" data-product-id="{{this._id}}"
+                                            data-variation-index="0">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button class="added-to-wishlist" data-product-id="{{this._id}}"
+                                            data-variation-index="0" style="display: none;">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="product-details">
+                                    <h3 class="product-title">
+                                        <a href="/user/singleproduct/{{this._id}}">{{this.name}}</a>
+                                    </h3>
+                                    <p class="product-description">{{this.description}}</p>
+                                    <div class="price-container">
+                                        {{#if this.details.[0].currentOffer}}
+                                        <span class="original-price">₹{{this.details.[0].price}}</span>
+                                        <span class="product-price">₹{{subtractDiscountPrice this.details.[0].price
+                                            this.details.[0].discountPrice}}</span>
+                                        {{else}}
+                                        <span class="product-price">₹{{this.details.[0].price}}</span>
+                                        {{/if}}
+                                    </div>
+                                    {{#if this.bestSeller}}
+                                    <div class="best-seller-badge">Bestseller</div>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                        {{else}}
+                        <div class="no-products" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                            <h3>No products found</h3>
+                            <p>We couldn't find any products matching your criteria.</p>
+                            <a href="/user/collections" class="btn btn-primary">Browse All Products</a>
+                        </div>
+                        {{/if}}
+                    </div>
+
+
+                    <div class="pagination">
+                        <div class="pagination-list">
+                            {{#if (gt currentPage 1)}}
+                            <a href="?page={{subtract currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {{/if}}
+
+                            {{#if (gt currentPage 3)}}
+                            <a href="?page=1{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item">1</a>
+                            <span class="pagination-item">...</span>
+                            {{/if}}
+
+                            {{#each (range (max 1 (subtract currentPage 2)) (min totalPages (add currentPage 2)))}}
+                            <a href="?page={{this}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item {{#if (eq this ../currentPage)}}active{{/if}}">
+                                {{this}}
+                            </a>
+                            {{/each}}
+
+                            {{#if (lt currentPage (subtract totalPages 2))}}
+                            <span class="pagination-item">...</span>
+                            <a href="?page={{totalPages}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item">{{totalPages}}</a>
+                            {{/if}}
+
+                            {{#if (lt currentPage totalPages)}}
+                            <a href="?page={{add currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile filter toggle
+            const mobileFilterToggle = document.querySelector('.mobile-filter-toggle');
+            const filterSidebar = document.querySelector('.filter-sidebar');
+
+            if (mobileFilterToggle && filterSidebar) {
+                mobileFilterToggle.addEventListener('click', function () {
+                    filterSidebar.classList.toggle('show');
+                });
+            }
+
+            // Wishlist functionality
+            async function addToWishlist(productId, variationIndex) {
+                try {
+                    const response = await fetch(`/user/addtowishlist/${productId}/${variationIndex}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    const data = await response.json();
+
+                    showPopup(data.message, data.success ? "success" : "error");
+
+                    if (data.success) {
+                        const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
+                        const addedButton = document.querySelector(`.added-to-wishlist[data-product-id="${productId}"]`);
+
+                        if (addButton && addedButton) {
+                            addButton.style.display = "none";
+                            addedButton.style.display = "inline-flex";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error adding to wishlist:", error);
+                    showPopup("Something went wrong. Please try again.", "error");
+                }
+            }
+
+            function showPopup(message, type = "success") {
+                const popup = document.createElement("div");
+                popup.className = `popup ${type}`;
+                popup.textContent = message;
+                document.body.appendChild(popup);
+                setTimeout(() => {
+                    popup.remove();
+                }, 3000);
+            }
+
+            // Attach wishlist event listeners
+            const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
+            addToWishlistButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = event.currentTarget.getAttribute('data-product-id');
+                    const variationIndex = event.currentTarget.getAttribute('data-variation-index');
+                    addToWishlist(productId, variationIndex);
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
