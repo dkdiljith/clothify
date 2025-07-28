@@ -7,7 +7,7 @@ const razorpay = new Razorpay({
 
 
 exports.walletRender = async (req, res) => {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const wallet = await Wallet.findOne({ userId }).lean();
     
     // Pagination variables
@@ -87,7 +87,7 @@ exports.amountDeposit = async (req, res) => {
 
 //wallet payment verification
 exports.walletPaymentVerification = async (req, res) => {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const crypto = require('crypto');
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
 
@@ -134,7 +134,7 @@ exports.walletPayment = async (req, res) => {
     const IntegerAmount = parseInt(amount)
 
     try {
-        const userId = req.session.userIsLoggedIn.id;
+        const userId = res.locals.user._id
         if (!userId) {
             res.status(500).json({ error: `User not found` })
         }

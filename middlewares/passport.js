@@ -84,15 +84,9 @@ passport.deserializeUser(async (req,id, done) => {
   try {
     const user = await User.findById(id);
 
-    req.session.userIsLoggedIn = ({
-      id:user._id,
-      name:user.name,
-      email:user.email,
-      phone:user.phone,
-      dateOfBirth:user.dateOfBirth,
-      gender:user.gender,
-      blocked:user.blocked
-    })
+    if(user){
+       req.session.user = { _id: user._id };
+    }
     createWallet(user._id)
 
     done(null, user);

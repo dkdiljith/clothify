@@ -337,7 +337,7 @@ exports.register = async (req, res) => {
       );
 
       if (checkPassword) {
-        req.session.user = { userId: existingUser._id, userEmail: existingUser.email }
+        req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
         await verificationEmailSend(req.body.email, verificationToken);
         res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
       } else {
@@ -359,7 +359,7 @@ exports.register = async (req, res) => {
       let result = await user.save();
 
       if (result) {
-        req.session.user = { userId: user._id, userEmail: user.email }
+        req.session.unknown_user = { _id: user._id, email: user.email }
         await verificationEmailSend(req.body.email, verificationToken);
         user.verificationAttempts += 1
         user.verificationTimer = Date.now() + 60000; //1 munute timer
@@ -406,15 +406,7 @@ exports.login = async (req, res) => {
     }
 
     // Save session
-    req.session.userIsLoggedIn = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      dateOfBirth: user.dateOfBirth,
-      gender: user.gender,
-      blocked: user.blocked
-    };
+    req.session.user = { _id: user._id };
 
     // Create wallet if needed
     await createWallet(user._id);
@@ -431,7 +423,7 @@ exports.login = async (req, res) => {
 
 exports.emailVerification = async (req, res) => {
   try {
-    const userId = req.session.user.userId
+    const userId = req.session.unknown_user._id
     const user = await User.findById(userId);
 
     if (!userId) {
@@ -455,15 +447,7 @@ exports.emailVerification = async (req, res) => {
         user.verificationTimer = null
         await user.save();
 
-        req.session.userIsLoggedIn = ({
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          dateOfBirth: user.dateOfBirth,
-          gender: user.gender,
-          blocked: user.blocked
-        });
+        req.session.user = { _id: user._id };
         createWallet(user._id);
 
 
@@ -487,8 +471,8 @@ exports.emailVerification = async (req, res) => {
 
 
 exports.resendEmailVerification = async (req, res) => {
-  const userId = req.session.user.userId
-  const userEmail = req.session.user.userEmail
+  const userId = req.session.unknown_user._id
+  const userEmail = req.session.unknown_user.email
   const user = await User.findById(userId);
 
   if (!userId) {

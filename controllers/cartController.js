@@ -10,7 +10,7 @@ const Coupon = require(`../models/couponSchema`)
 //cartdataIcon
 exports.cartDataIcon = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const cart = await Cart.findOne({ userId });
 
     if (cart) {
@@ -123,7 +123,7 @@ async function recalculateCartSummary(userId) {
 
 exports.cartRender = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const cart = await Cart.findOne({ userId: userId })
       .populate('items.productId')
       .populate('couponId')
@@ -196,7 +196,7 @@ exports.cartRender = async (req, res) => {
 
 exports.addToCart = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const productId = req.params.id;
     const variationIndex = parseInt(req.params.variationIndex);
 
@@ -259,7 +259,7 @@ exports.addToCart = async (req, res) => {
 ////////////////////////////////////////////////////////////OPERATIONS///////////////////////////////////////////////////////////////
 exports.operation = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn?.id;
+    const userId = res.locals.user._id
     if (!userId) return res.status(401).json({ success: false, message: "User not logged in" });
 
     const productId = req.params.productId;
@@ -314,7 +314,7 @@ exports.operation = async (req, res) => {
 
 exports.deleteCart = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const productId = req.params.productId;
     const variationIndex = parseInt(req.params.variationIndex);
 
@@ -347,7 +347,7 @@ exports.deleteCart = async (req, res) => {
 
 exports.getAddressInCart = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const cart = await Cart.findOne({ userId: userId }).lean();
     const address = await Address.find({ userId: userId }).lean();
 
@@ -368,7 +368,7 @@ exports.getAddressInCart = async (req, res) => {
 exports.renderEditForm = async (req, res) => {
   try {
     const addressId = req.params.id;
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
 
     // Get address and verify it belongs to user
     const address = await Address.findOne({ _id: addressId, userId }).lean();
@@ -413,7 +413,7 @@ exports.renderEditForm = async (req, res) => {
 // Add new address
 exports.addAddress = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const {
       name, phone, zip, streetAddress, landmark,
       city, state, country, isDefault
@@ -495,7 +495,7 @@ exports.addAddress = async (req, res) => {
   exports.editAddress = async (req, res) => {
     try {
       const addressId = req.params.id;
-      const userId = req.session.userIsLoggedIn.id;
+      const userId = res.locals.user._id
       const {
         name, phone, zip, streetAddress, landmark,
         city, state, country, isDefault
@@ -581,7 +581,7 @@ exports.addAddress = async (req, res) => {
   exports.deleteAddress = async (req, res) => {
     try {
       const addressId = req.params.id;
-      const userId = req.session.userIsLoggedIn.id;
+      const userId = res.locals.user._id
 
       // Verify address belongs to user
       const address = await Address.findOne({ _id: addressId, userId });
@@ -624,7 +624,7 @@ exports.addAddress = async (req, res) => {
   exports.setDefaultAddress = async (req, res) => {
     try {
       const addressId = req.params.id;
-      const userId = req.session.userIsLoggedIn.id;
+      const userId = res.locals.user._id
 
       // Verify address exists and belongs to user
       const address = await Address.findOne({ _id: addressId, userId });
@@ -669,7 +669,7 @@ exports.addAddress = async (req, res) => {
 
 exports.payment = async (req, res) => {
   try {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const cart = await Cart.findOne({ userId }).lean();
     const address = await Address.find({ userId: userId }).lean();
     const wallet = await Wallet.findOne({ userId }).lean();
@@ -693,7 +693,7 @@ exports.payment = async (req, res) => {
 exports.placeOrder = async (req, res) => {
   try {
 
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     const addressId = req.query.selectedAddressId
     const paymentMethod = req.query.selectedPayment
 

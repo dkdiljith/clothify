@@ -3,113 +3,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Report</title>
     <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/sales-report.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .order-details {
-            margin-top: 5px;
-            font-size: 0.9em;
-            color: #666;
-        }
-        .order-details span {
-            margin-right: 15px;
-        }
-        .product-item {
-            border-bottom: 1px solid #eee;
-            padding: 5px 0;
-        }
-        .product-item:last-child {
-            border-bottom: none;
-        }
-        .filter-container {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .filter-container input[type="date"] {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
-        }
-        #applyFilter {
-            padding: 8px 20px;
-            background-color: #4e73df;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        #applyFilter:hover {
-            background-color: #3a5bc7;
-            transform: translateY(-1px);
-        }
-        .users-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .page-title {
-            margin: 0;
-        }
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .export-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .export-btn:hover {
-            transform: translateY(-1px);
-        }
-        .pdf-btn {
-            background-color: #e74a3b;
-            color: white;
-        }
-        .pdf-btn:hover {
-            background-color: #d62c1a;
-        }
-        .excel-btn {
-            background-color: #1cc88a;
-            color: white;
-        }
-        .excel-btn:hover {
-            background-color: #17a673;
-        }
-        @media (max-width: 768px) {
-            .filter-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .users-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .export-buttons {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
-    </style>
+ 
 </head>
 
 <body>
@@ -118,17 +15,23 @@
             <h1 class="page-title">Sales Report</h1>
             <div class="export-buttons">
                 <button class="export-btn pdf-btn" id="exportPdf">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.523 10.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.082.022a1 1 0 0 1-.304-.063 1 1 0 0 1-.196-.288q-.085-.218-.085-.436v-.21q0-.18.106-.353.106-.172.319-.323.213-.15.494-.233a4 4 0 0 1 1.082-.08l.018-.002zm4.974 0q-.21-.124-.459-.238a8 8 0 0 0 .45.606c.28.337.498.516.635.572l.082.022a1 1 0 0 0 .304-.063 1 1 0 0 0 .196-.288q.085-.218.085-.436v-.21q0-.18-.106-.353-.106-.172-.319-.323-.213-.15-.494-.233a4 4 0 0 0-1.082-.08l-.018-.002z"/>
-                        <path fill-rule="evenodd" d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m.165 11.668q.32.18.66.182c.434 0 .732-.28.732-.783 0-.442-.27-.72-.733-.72-.265 0-.506.11-.659.28l-.011.012c-.086.11-.158.27-.158.49v.33q0 .136.038.223h-.008a.7.7 0 0 0-.185.29.7.7 0 0 0-.012.302zm3.761-2.052q.32.18.66.182c.434 0 .732-.28.732-.783 0-.442-.27-.72-.733-.72-.265 0-.506.11-.659.28l-.012.012c-.086.11-.158.27-.158.49v.33q0 .136.038.223h-.008a.7.7 0 0 0-.185.29.7.7 0 0 0-.012.302z"/>
-                        <path d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M5.523 10.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.082.022a1 1 0 0 1-.304-.063 1 1 0 0 1-.196-.288q-.085-.218-.085-.436v-.21q0-.18.106-.353.106-.172.319-.323.213-.15.494-.233a4 4 0 0 1 1.082-.08l.018-.002zm4.974 0q-.21-.124-.459-.238a8 8 0 0 0 .45.606c.28.337.498.516.635.572l.082.022a1 1 0 0 0 .304-.063 1 1 0 0 0 .196-.288q.085-.218.085-.436v-.21q0-.18-.106-.353-.106-.172-.319-.323-.213-.15-.494-.233a4 4 0 0 0-1.082-.08l-.018-.002z" />
+                        <path fill-rule="evenodd"
+                            d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m.165 11.668q.32.18.66.182c.434 0 .732-.28.732-.783 0-.442-.27-.72-.733-.72-.265 0-.506.11-.659.28l-.011.012c-.086.11-.158.27-.158.49v.33q0 .136.038.223h-.008a.7.7 0 0 0-.185.29.7.7 0 0 0-.012.302zm3.761-2.052q.32.18.66.182c.434 0 .732-.28.732-.783 0-.442-.27-.72-.733-.72-.265 0-.506.11-.659.28l-.012.012c-.086.11-.158.27-.158.49v.33q0 .136.038.223h-.008a.7.7 0 0 0-.185.29.7.7 0 0 0-.012.302z" />
+                        <path d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
                     </svg>
                     Export as PDF
                 </button>
                 <button class="export-btn excel-btn" id="exportExcel">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
-                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+                        <path
+                            d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1" />
                     </svg>
                     Export as Excel
                 </button>
@@ -141,10 +44,12 @@
             </div>
         </div>
 
+        {{#if orders.length}}
         <div class="users-table">
             <table id="salesTable">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Products</th>
@@ -156,6 +61,7 @@
                 <tbody id="ordersTableBody">
                     {{#each orders}}
                     <tr>
+                        <td>{{incrementedIndex @index}}</td>
                         <td>#{{shortId this._id}}</td>
                         <td>
                             {{this.deliveryAddress.name}}<br>
@@ -184,165 +90,47 @@
                     {{/each}}
                 </tbody>
             </table>
+
+            {{#if (gt pagination.totalPages 1)}}
+            <div class="pagination">
+                {{#if pagination.hasPrevPage}}
+                <a href="/admin/salesReport?page={{pagination.prevPage}}" class="pagination-button">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+                {{/if}}
+
+                <span class="pagination-info">
+                    Page {{pagination.page}} of {{pagination.totalPages}}
+                </span>
+
+                {{#if pagination.hasNextPage}}
+                <a href="/admin/salesReport?page={{pagination.nextPage}}" class="pagination-button">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+                {{/if}}
+            </div>
+            {{/if}}
+            {{else}}
+            <div class="empty-state">
+                <!-- Sales/analytics icon as SVG - consistent with your other pages -->
+                <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h2>No Sales Data Available</h2>
+                <p>There are currently no sales records for the selected period.</p>
+                <div class="empty-state-actions">
+                    <a href="/admin/salesReport" class="btn btn-primary">Refresh</a>
+                </div>
+            </div>
+            {{/if}}
+
         </div>
     </main>
     <script src="/javascripts/admin/usersList.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates (last 30 days)
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 30);
-            
-            document.getElementById('startDate').valueAsDate = startDate;
-            document.getElementById('endDate').valueAsDate = endDate;
-            
-            // Apply filter button click handler
-            document.getElementById('applyFilter').addEventListener('click', function() {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                
-                if (!startDate || !endDate) {
-                    Swal.fire('Error', 'Please select both start and end dates', 'error');
-                    return;
-                }
-                
-                if (new Date(startDate) > new Date(endDate)) {
-                    Swal.fire('Error', 'Start date cannot be after end date', 'error');
-                    return;
-                }
-                
-                fetchSalesData(startDate, endDate);
-            });
-            
-            // Export to PDF
-            document.getElementById('exportPdf').addEventListener('click', exportToPdf);
-            
-            // Export to Excel
-            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
-            
-            function fetchSalesData(startDate, endDate) {
-                fetch('/admin/salesReport', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        startDate: startDate,
-                        endDate: endDate
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        renderOrders(data.orders);
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to fetch sales data', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'An error occurred while fetching data', 'error');
-                });
-            }
-            
-            function renderOrders(orders) {
-                const tbody = document.getElementById('ordersTableBody');
-                tbody.innerHTML = '';
-                
-                if (orders.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No orders found for the selected period</td></tr>';
-                    return;
-                }
-                
-                orders.forEach(order => {
-                    const row = document.createElement('tr');
-                    
-                    // Format your order data here similar to your Handlebars template
-                    row.innerHTML = `
-                        <td>#${order._id.toString().substring(18, 24)}</td>
-                        <td>${order.deliveryAddress.name}</td>
-                        <td>
-                            ${order.items.map(item => `
-                                <div class="product-item">
-                                    ${item.productName} (${item.productSize}) × ${item.quantity}<br>
-                                    <small>₹${item.productPrice} each</small>
-                                </div>
-                            `).join('')}
-                        </td>
-                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td>
-                            ${order.paymentMethod}<br>
-                            <small>${order.paymentStatus}</small>
-                        </td>
-                        <td>
-                            ₹${order.totalAmount}<br>
-                            <div class="order-details">
-                                <span>Subtotal: ₹${order.subtotal}</span>
-                                <span>Tax: ₹${order.tax}</span>
-                                <span>Shipping: ₹${order.shippingFee}</span>
-                            </div>
-                        </td>
-                    `;
-                    
-                    tbody.appendChild(row);
-                });
-            }
-            
-            function exportToPdf() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Get table data
-                const table = document.getElementById('salesTable');
-                const title = "Sales Report";
-                const dateRange = `From ${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}`;
-                
-                // Add title and date range
-                doc.setFontSize(18);
-                doc.text(title, 14, 15);
-                doc.setFontSize(12);
-                doc.text(dateRange, 14, 22);
-                
-                // Generate table
-                doc.autoTable({
-                    html: table,
-                    startY: 30,
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: 2,
-                        valign: 'middle'
-                    },
-                    headStyles: {
-                        fillColor: [78, 115, 223],
-                        textColor: 255,
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: {
-                        fillColor: [240, 240, 240]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 20 },
-                        1: { cellWidth: 25 },
-                        2: { cellWidth: 45 },
-                        3: { cellWidth: 20 },
-                        4: { cellWidth: 20 },
-                        5: { cellWidth: 30 }
-                    }
-                });
-                
-                // Save the PDF
-                doc.save(`sales_report_${new Date().toISOString().slice(0,10)}.pdf`);
-            }
-            
-            function exportToExcel() {
-                const table = document.getElementById('salesTable');
-                const workbook = XLSX.utils.table_to_book(table);
-                XLSX.writeFile(workbook, `sales_report_${new Date().toISOString().slice(0,10)}.xlsx`);
-            }
-        });
-    </script>
+    <script src="/javascripts/admin/sales-report.js"></script>
 </body>

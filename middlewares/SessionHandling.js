@@ -1,15 +1,16 @@
 const ErrorMessage = require(`../middlewares/ErrorMessage`);
 const Product = require('../models/productSchema')
 const User = require("../models/userSchema");
+const Admin = require(`../models/adminSchema`)
 
 //=======================================================================================================
 //USER SESSION MANAGEMENT
 
 exports.userIsLoggedIn = async (req, res, next) => {
   try {
-    res.locals.user = req.session.userIsLoggedIn;
-    if (req.session.userIsLoggedIn) {
-      const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
+
+    if (req.session.user) {
+      const user = await User.findOne({_id:req.session.user._id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
         req.session.destroy()
@@ -17,6 +18,10 @@ exports.userIsLoggedIn = async (req, res, next) => {
       if (user.blocked) {
         //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
+      }
+
+      res.locals.user = {
+        _id:user._id ,
       }
       
 
@@ -30,11 +35,12 @@ exports.userIsLoggedIn = async (req, res, next) => {
   }
 };
 
+
 exports.userIsLoggedOut = async (req, res, next) => {
   try {
-    res.locals.user = req.session.userIsLoggedIn;
-    if (req.session.userIsLoggedIn) {
-      const user = await User.findOne({_id:req.session.userIsLoggedIn.id}).lean()
+    
+    if (req.session.user) {
+      const user = await User.findOne({_id:req.session.user._id}).lean()
       if (!user) {
         console.error("❌ User not found in database");
         req.session.destroy()
@@ -42,6 +48,10 @@ exports.userIsLoggedOut = async (req, res, next) => {
       if (user.blocked) {
         //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
+      }
+
+      res.locals.user = {
+        _id:user._id ,
       }
 
       const product = await Product.find().lean()
@@ -79,7 +89,18 @@ exports.userIsLoggedOut = async (req, res, next) => {
 
 exports.adminIsLoggedIn = async (req, res, next) => {
   try {
-    if (req.session.adminIsLoggedIn) {
+    if (req.session.admin) {
+
+      const admin = await Admin.findOne({_id:req.session.admin._id}).lean()
+
+      if (!admin) {
+        console.error("❌ Admin not found in database");
+        req.session.destroy()
+      }
+     
+      res.locals.admin = {
+        _id:admin._id ,
+      }
 
     next();
     } else {
@@ -91,9 +112,23 @@ exports.adminIsLoggedIn = async (req, res, next) => {
   }
 };
 
+
+
 exports.adminIsLoggedOut = async (req, res, next) => {
   try {
-    if (req.session.adminIsLoggedIn) {
+    if (req.session.admin) {
+
+       const admin = await Admin.findOne({_id:req.session.admin._id}).lean()
+      
+      if (!admin) {
+        console.error("❌ Admin not found in database");
+        req.session.destroy()
+      }
+     
+      res.locals.admin = {
+        _id:admin._id ,
+      }
+
       res.render('admin/dashboard' , { admin: true });
 
       } else {

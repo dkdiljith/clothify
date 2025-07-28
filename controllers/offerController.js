@@ -5,7 +5,7 @@ const Product = require(`../models/productSchema`);
 
 
 // Helper function to update product discount prices with offer reference in details -- products
-async function updateProductPrices(productIds, discountType, discountValue, offerId) {
+async function applyProductOffer(productIds, discountType, discountValue, offerId) {
     try {
         const products = await Product.find({ _id: { $in: productIds } });
 
@@ -221,31 +221,71 @@ async function applyCategoryOffer(categoryId, discountType, discountValue, offer
 
 
 exports.offerRender = async (req, res) => {
-    const offer = await Offer.find().lean()
-    const product = await Product.find().lean()
+  try {
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // 5 offers per page
 
-    if (offer) {
-        for (let i = 0; i < offer.length / 2; i++) {
-            let temp = offer[i]
-            offer[i] = offer[offer.length - 1 - i]
-            offer[offer.length - 1 - i] = temp
-        }
-    }
+    // Get total count of offers
+    const totalOffers = await Offer.countDocuments();
+    const totalPages = Math.ceil(totalOffers / limit);
 
-    const categories = await Category.find().lean()
+    // Get paginated offers (sorted by newest first)
+    let offer = await Offer.find()
+      .sort({ createdAt: -1 }) // newest first
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const product = await Product.find().lean();
+
+    const categories = await Category.find().lean();
     const groupedCategories = categories
-        .filter(cat => !cat.parentCategory)
-        .map(parent => ({
-            ...parent,
-            subcategories: categories.filter(sub =>
-                sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-            )
-        }));
+      .filter(cat => !cat.parentCategory)
+      .map(parent => ({
+        ...parent,
+        subcategories: categories.filter(sub =>
+          sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
+        )
+      }));
 
-    console.log(groupedCategories, "this si sgroup categoris")
+    console.log(groupedCategories, "this is groupedCategories");
 
-    res.render(`admin/offer`, { offer, product, categories: groupedCategories, admin: true })
-}
+    res.render(`admin/offer`, {
+      offer,
+      product,
+      categories: groupedCategories,
+      admin: true,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching offers:", error);
+    res.render(`admin/offer`, {
+      offer: [],
+      product: [],
+      categories: [],
+      admin: true,
+      pagination: {
+        page: 1,
+        limit: 5,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
+      },
+      errorMessage: "Error fetching offers. Please try again later."
+    });
+  }
+};
+
 
 
 
@@ -324,7 +364,7 @@ exports.createOffer = async (req, res) => {
 
         // If offer is product-wise, update product prices
         if (offerType === 'product' && targetIds.length > 0) {
-            await updateProductPrices(targetIds, discountType, discountValue, savedOffer._id);
+            await applyProductOffer(targetIds, discountType, discountValue, savedOffer._id);
         } else if (offerType === 'subcategory' && targetIds.length > 0) {
             await applySubcategoryOffer(targetIds, discountType, discountValue, savedOffer._id)
         } else if (offerType === 'category' && targetIds.length > 0) {

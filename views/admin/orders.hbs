@@ -9,17 +9,16 @@
         <div style="display:flex; justify-content:space-between;" class="orders-header">
             <h1 class="page-title">Order Management</h1>
 
-
-             {{!-- serach --}}
+            {{!-- serach --}}
             {{!-- <form method="GET" action='/admin/orders/search' role="search">
                 <div class="search-container">
                     <input type="search" name="query" class="search-input" id="search-input"
                         placeholder="Search orders..." {{#if query}} value={{query}} {{/if}}>
                 </div>
             </form> --}}
-
         </div>
 
+        {{#if order.length}}
         <div class="orders-table">
             <table>
                 <thead>
@@ -80,8 +79,17 @@
             {{/if}}
         </div>
         {{/if}}
-
-
+        {{else}}
+        <div class="empty-state">
+            <!-- Inline SVG for "No orders found" -->
+            <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <h2>No Orders Found</h2>
+            {{#unless query}} <p>There are currently no orders in the system.</p> {{/unless}}
+            <a href="/admin/orders" class="btn btn-primary">Refresh</a>
+        </div>
+        {{/if}}
     </main>
     <script src="/javascripts/admin/orders.js" defer></script>
 </body>

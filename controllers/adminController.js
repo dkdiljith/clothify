@@ -65,44 +65,121 @@ exports.activityLogRender = async(req,res)=>{
 
 
 exports.salesReportRender = async (req, res) => {
-  const orders = await Order.find({ paymentStatus: 'Completed' }).lean()
-  for (let i = 0; i < orders.length / 2; i++) {
-    let temp = orders[i]
-    orders[i] = orders[orders.length - 1 - i]
-    orders[orders.length - 1 - i] = temp
-  }
-  res.render(`admin/salesReport`, { admin: true, orders })
-}
+    try {
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5; // 5 orders per page (you can adjust this)
+
+        // Get total count of completed orders
+        const totalOrders = await Order.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        // Get paginated orders (newest first)
+        const orders = await Order.find()
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        res.render('admin/salesReport', {
+            admin: true,
+            orders,
+            pagination: {
+                page,
+                limit,
+                totalPages,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching sales report:", error);
+        res.render('admin/salesReport', {
+            admin: true,
+            orders: [],
+            pagination: {
+                page: 1,
+                limit: 5,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false
+            },
+            errorMessage: "Error fetching sales report. Please try again later."
+        });
+    }
+};
+
+
 
 
 exports.salesReport = async (req, res) => {
   try {
     const { startDate, endDate } = req.body;
+    const page = parseInt(req.query.page) || 1; // Get page from query params
+    const limit = 5; // Same as coupon page
 
     if (!startDate || !endDate) {
-      return res.status(400).json({ success: false, message: 'Both start and end dates are required' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Both start and end dates are required' 
+      });
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
-    end.setHours(23, 59, 59, 999); 
+    end.setHours(23, 59, 59, 999);
 
-    const orders = await Order.find({
+    // Build query
+    const query = {
       paymentStatus: 'Completed',
       createdAt: {
         $gte: start,
         $lte: end
       }
-    }).sort({ createdAt: -1 });
+    };
 
-    res.json({ success: true, orders });
+    // Get total count for pagination
+    const totalOrders = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    // Get paginated results
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    res.json({ 
+      success: true, 
+      orders,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+    
   } catch (error) {
     console.error('Sales report error:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Error filtering orders',
-      error: error.message 
+      error: error.message,
+      orders: [],
+      pagination: {
+        page: 1,
+        limit: 5,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
+      }
     });
   }
 }
@@ -141,23 +218,20 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const adminDataa = await Admin.findOne({ email: req.body.email });
+    const admin = await Admin.findOne({ email: req.body.email });
 
-    if (!adminDataa) {
+    if (!admin) {
       return res.render("admin/login", { message: "Invalid Email or Password", isAdminLogin: true });
     }
 
-    const checkPassword = adminDataa.password
-      ? await bcrypt.compare(req.body.password, adminDataa.password)
+    const checkPassword = admin.password
+      ? await bcrypt.compare(req.body.password, admin.password)
       : false;
 
     if (checkPassword) {
-      req.session.adminIsLoggedIn = ({
-        name: adminDataa.name,
-        phone: adminDataa.phone,
-        email: adminDataa.email,
-      })
-      res.locals.admin = req.session.adminIsLoggedIn
+
+      req.session.admin = { _id:admin._id }
+    
       return res.render("admin/dashboard", { admin: true });
     } else {
       return res.render("admin/login", { message: "Invalid Email or Password", isAdminLogin: true });

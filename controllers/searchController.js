@@ -303,7 +303,7 @@ exports.users = async (req, res) => {
 
 exports.coupons = async (req, res) => {
   try {
-    
+
     const query = req.query.query || '';
 
     // Build search query
@@ -313,7 +313,6 @@ exports.coupons = async (req, res) => {
         $or: [
           { couponCode: { $regex: query, $options: 'i' } },
           { discountType: { $regex: query, $options: 'i' } },
-          { isActive: { $regex: query, $options: 'i' } }
         ],
       });
     } else {
@@ -375,32 +374,89 @@ exports.coupons = async (req, res) => {
 
 
 
-
 exports.offers = async (req, res) => {
-  const offer = await Offer.find().lean()
-  const product = await Product.find().lean()
+  try {
+    const query = req.query.query || '';
 
-  if (offer) {
-    for (let i = 0; i < offer.length / 2; i++) {
-      let temp = offer[i]
-      offer[i] = offer[offer.length - 1 - i]
-      offer[offer.length - 1 - i] = temp
+    // Search filter (optional)
+    let searchQuery;
+    if (query) {
+      searchQuery = Offer.find({
+        $or: [
+          { offerCode: { $regex: query, $options: 'i' } },
+          { offerType: { $regex: query, $options: 'i' } },
+          { discountType: { $regex: query, $options: 'i' } },
+        ],
+      });
+    } else {
+      searchQuery = Offer.find();
     }
+
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    // Get total count
+    const totalOffers = await Offer.countDocuments(searchQuery._conditions);
+    const totalPages = Math.ceil(totalOffers / limit);
+
+    // Get paginated offers (newest first)
+    searchQuery.skip(skip).limit(limit);
+    let offer = await searchQuery.lean();
+
+    // Reverse the array if needed (optional)
+    offer = offer.reverse();
+
+    // Get products and categories
+    const product = await Product.find().lean();
+    const categories = await Category.find().lean();
+
+    const groupedCategories = categories
+      .filter(cat => !cat.parentCategory)
+      .map(parent => ({
+        ...parent,
+        subcategories: categories.filter(sub =>
+          sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
+        )
+      }));
+
+    res.render(`admin/offer`, {
+      offer,
+      product,
+      categories: groupedCategories,
+      admin: true,
+      query,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching offers:", error);
+    res.render('admin/offer', {
+      offer: [],
+      product: [],
+      categories: [],
+      admin: true,
+      query: req.query.query || '',
+      pagination: {
+        page: 1,
+        limit: 5,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
+      },
+      errorMessage: "Error fetching offers. Please try again later."
+    });
   }
+};
 
-  const categories = await Category.find().lean()
-  const groupedCategories = categories
-    .filter(cat => !cat.parentCategory)
-    .map(parent => ({
-      ...parent,
-      subcategories: categories.filter(sub =>
-        sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-      )
-    }));
-
-  console.log(groupedCategories, "this si sgroup categoris")
-
-  res.render(`admin/offer`, { offer, product, categories: groupedCategories, admin: true })
-}
 
 

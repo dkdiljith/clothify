@@ -54,18 +54,6 @@ exports.couponRender = async (req, res) => {
 
 
 
-exports.couponEditRender = async (req, res) => {
-    try {
-        const coupon = await Coupon.findById(req.params.couponId);
-        res.json(coupon);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-
-
-
-
 
 
 
@@ -197,7 +185,7 @@ exports.couponDelete = async (req, res) => {
 exports.applyCoupon = async (req, res) => {
     try {
         const { couponId } = req.body;
-        const userId = req.session.userIsLoggedIn.id
+        const userId = res.locals.user._id
 
         // Find the coupon
         const coupon = await Coupon.findById(couponId);
@@ -235,7 +223,7 @@ exports.applyCoupon = async (req, res) => {
 // Remove coupon route
 exports.removeCoupon = async (req, res) => {
     try {
-        const userId = req.session.userIsLoggedIn.id
+        const userId = res.locals.user._id
         const cart = await Cart.findOne({ userId });
 
         cart.couponId = null;

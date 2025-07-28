@@ -1,39 +1,35 @@
 const mongoose = require(`mongoose`)
 
 const recentActivitySchema = new mongoose.Schema({
-    userId: {
-      type: "ObjectId",
+    adminId: {
+        type: "ObjectId",
+        required: true
     },
     activityType: {
-      type: "String",
-      required: true,
-      enum: [ 
-        'order_placed',
-        'order_confirmed',
-        'order_processing',
-        'order_shipped',
-        'order_delivered',
-        'order_cancelled',
-        'order_returned',
-        'refund_requested',
-        'refund_approved',
-        'refund_initiated',
-        'refund_completed',
-        'refund_rejected',
-        'user_registered',
-        'user_logged_in',
-        'user_logged_out',
-        'password_reset_requested',
-        'password_reset_successful',
-        'profile_updated',
-        'address_added',
-        'address_updated',
-    ]
+        type: "String",
+        required: true,
+        enum: [ 
+            'product_added',
+            'product_edited',
+            'product_deleted',
+            'category_added',
+            'category_edited',
+            'category_deleted',
+            'coupon_added',
+            'coupon_edited',
+            'coupon_deleted',
+            'offer_added',
+            'offer_eligibility_denied',
+            'offer_edited',
+            'offer_deleted',
+            'user_blocked',
+            'user_unblocked'
+        ]
     },
     description: {
-      type: "String",
+        type: "String",
+        required: true
     },
-  }, { timestamps: true })
+}, { timestamps: true })
 
-  module.exports = mongoose.model('Activities', recentActivitySchema);
-  
+module.exports = mongoose.model('Activities', recentActivitySchema);

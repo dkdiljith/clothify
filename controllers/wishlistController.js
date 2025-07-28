@@ -8,7 +8,7 @@ const Product = require(`../models/productSchema`)
 //wishlistDataIcon
 exports.wishlistDataIcon = async (req, res) => {
     try {
-        const userId = req.session.userIsLoggedIn.id;
+        const userId = res.locals.user._id
 
         const wishlist = await Wishlist.findOne({ userId: userId });
 
@@ -27,7 +27,7 @@ exports.wishlistDataIcon = async (req, res) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.wishlistRender = async (req, res) => {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
@@ -93,7 +93,7 @@ exports.wishlistRender = async (req, res) => {
 
 exports.addToWishlist = async (req, res) => {
     try {
-        const userId = req.session.userIsLoggedIn.id;
+        const userId = res.locals.user._id
         const productId = req.params.id;
         const variationIndex = parseInt(req.params.variationIndex);
         console.log(productId , "this is productId")
@@ -140,7 +140,7 @@ exports.addToWishlist = async (req, res) => {
 
 exports.removeFromWishlist = async (req, res) => {
     try {
-        const userId = req.session.userIsLoggedIn.id;
+        const userId = res.locals.user._id
         const productId = req.params.id;
         console.log(productId , "this is productId")
 

@@ -10,21 +10,21 @@ const crypto = require("crypto");
 
 //profile page
 exports.profileRender = async (req, res) => {
-    const userId = res.locals.user.id
+    const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
     const address = await Address.findOne({ userId: userId, isDefault: true }).lean();
     res.render(`user/profileView`, { userData: userData, address: address })
 }
 
 exports.profileEditRender = async (req, res) => {
-    const userId = res.locals.user.id
+    const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
     res.render(`user/profileEdit`, { userData: userData , })
 }
 
 exports.addressRender = async (req, res) => {
     try {
-        const userId = res.locals.user.id;
+        const userId = res.locals.user._id
         const addresses = await Address.find({ userId }).lean();
         res.render('user/address', { addresses: addresses ,  });
     } catch (error) {
@@ -42,7 +42,7 @@ exports.editAddressRender = async (req, res) => {
 
 
 exports.securityRender = async (req, res) => {
-    const userId = res.locals.user.id;
+    const userId = res.locals.user._id
     const user = await User.findOne({ _id: userId })
 
     const now = Date.now();
@@ -66,7 +66,7 @@ exports.securityRender = async (req, res) => {
 
 exports.setDefaultAddress = async (req, res) => {
     const addressId = req.params.id;
-    const userId = req.session.userIsLoggedIn.id
+    const userId = res.locals.user._id
 
     try {
 
@@ -128,7 +128,7 @@ exports.deleteUserRender = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     req.session.destroy()
-    let userId = res.locals.user.id
+    const userId = res.locals.user._id
     const deleted = await User.findByIdAndDelete(userId)
     if(deleted){
         res.status(200).json({ 
@@ -138,7 +138,7 @@ exports.deleteUser = async (req, res) => {
 }
 
 exports.userOrders = async (req, res) => {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
@@ -182,7 +182,7 @@ exports.userOrders = async (req, res) => {
         });
     }
 };exports.userOrders = async (req, res) => {
-    const userId = req.session.userIsLoggedIn.id;
+    const userId = res.locals.user._id
     
     // Pagination variables
     const page = parseInt(req.query.page) || 1;
@@ -249,7 +249,7 @@ exports.profileEdit = async (req, res) => {
 
     try {
         const { name, phone, gender, dateOfBirth } = req.body;
-        const userId = res.locals.user.id
+        const userId = res.locals.user._id
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
@@ -278,7 +278,8 @@ exports.profileEdit = async (req, res) => {
 exports.addAddress = async (req, res) => {
     try {
         const { streetAddress, landmark, city, state, zip, country, phone, name } = req.body;
-        const userId = req.session.userIsLoggedIn.id
+        const userId = res.locals.user._id
+        console.log(userId , "this is userId")
         const addresses = await Address.find({ userId: userId }).lean()
 
         const isFirstAddress = addresses.length === 0;

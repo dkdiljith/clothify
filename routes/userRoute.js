@@ -18,17 +18,16 @@ const passport = require(`../middlewares/passport`)
 const razorpay = require(`../middlewares/razorpay`)
 
 
-//for header
+//for Header Icon
 router.get(`/cartDataIcon` , SessionHandling.userIsLoggedIn , cartController.cartDataIcon)
 router.get(`/wishlistDataIcon`, SessionHandling.userIsLoggedIn , wishlistController.wishlistDataIcon)
 
 
 
 // USER SIGNUP
-router.get('/',functions.validity_manager, userController.homeRender)
 router.get(`/login`, SessionHandling.userIsLoggedOut, userController.loginRender)
 router.get(`/register`, SessionHandling.userIsLoggedOut, userController.registerRender)
-router.get('/resetpassword/:token'  ,userController.resetPasswordRender)
+router.get('/resetpassword/:token' ,SessionHandling.userIsLoggedOut ,userController.resetPasswordRender)
 router.get(`/forgetpassword`, SessionHandling.userIsLoggedOut, userController.forgetPasswordRender)
 router.get(`/logout`, userController.userLogout)
 
@@ -56,9 +55,10 @@ router.get('/auth/google/callback',
   }
 );
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+router.get('/',functions.validity_manager, userController.homeRender)
 router.get(`/home`, functions.validity_manager, userController.homeRender)
-router.get(`/mens`,  userController.mensRender)
-router.get(`/womens`,  userController.womensRender)
 router.get('/singleproduct/:id',functions.validity_manager, productController.singleProductPage)
 
 //search 
@@ -66,33 +66,33 @@ router.get('/collections', functions.validity_manager,searchController.collectio
 
 //ADD TO CART
 router.post(`/addtocart/:id/:variationIndex`, SessionHandling.userIsLoggedIn, cartController.addToCart)
-router.get(`/cart`, SessionHandling.userIsLoggedIn, cartController.cartRender)
+router.get(`/cart`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.cartRender)
 router.delete('/cart/:productId/:variationIndex', SessionHandling.userIsLoggedIn, cartController.deleteCart)
 router.post('/cart/:productId/:variationIndex/quantity', SessionHandling.userIsLoggedIn, cartController.operation)
-router.get(`/addressInCart`, SessionHandling.userIsLoggedIn, cartController.getAddressInCart)
+router.get(`/addressInCart`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.getAddressInCart)
 
-router.get('/address/:id', cartController.renderEditForm)
-router.post('/postAddressInCart', cartController.addAddress);
-router.put('/address/:id', cartController.editAddress);
-router.delete('/address/:id', cartController.deleteAddress);
-router.put('/address/default/:id', cartController.setDefaultAddress);
+router.get('/address/:id',SessionHandling.userIsLoggedIn, cartController.renderEditForm)
+router.post('/postAddressInCart',SessionHandling.userIsLoggedIn, cartController.addAddress);
+router.put('/address/:id',SessionHandling.userIsLoggedIn, cartController.editAddress);
+router.delete('/address/:id',SessionHandling.userIsLoggedIn, cartController.deleteAddress);
+router.put('/address/default/:id',SessionHandling.userIsLoggedIn, cartController.setDefaultAddress);
 
-router.get('/payment', SessionHandling.userIsLoggedIn, cartController.payment);
-router.get(`/placeorder`, SessionHandling.userIsLoggedIn, cartController.placeOrder)
+router.get('/payment', SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.payment);
+router.get(`/placeorder`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.placeOrder)
 
 //coupon
-router.post(`/cart/apply-coupon` , couponController.applyCoupon)
-router.delete(`/cart/remove-coupon` , couponController.removeCoupon)
+router.post(`/cart/apply-coupon` ,SessionHandling.userIsLoggedIn, couponController.applyCoupon)
+router.delete(`/cart/remove-coupon` ,SessionHandling.userIsLoggedIn, couponController.removeCoupon)
 
 
 //WIshlist
-router.get(`/wishlist` , SessionHandling.userIsLoggedIn , wishlistController.wishlistRender)
+router.get(`/wishlist` , SessionHandling.userIsLoggedIn ,functions.validity_manager, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex` , SessionHandling.userIsLoggedIn, wishlistController.addToWishlist)
 router.delete(`/removeFromWishlist/:id` , SessionHandling.userIsLoggedIn , wishlistController.removeFromWishlist)
 
 
 //USER PROFILE
-router.get(`/profile`, SessionHandling.userIsLoggedIn, userProfileController.profileRender)
+router.get(`/profile`, SessionHandling.userIsLoggedIn,functions.validity_manager, userProfileController.profileRender)
 router.get(`/profileedit`, SessionHandling.userIsLoggedIn, userProfileController.profileEditRender)
 router.get(`/address`, SessionHandling.userIsLoggedIn, userProfileController.addressRender)
 router.get(`/setdefaultaddress/:id`, SessionHandling.userIsLoggedIn, userProfileController.setDefaultAddress)
@@ -106,11 +106,11 @@ router.get(`/orderDetails/:orderId/:itemId`, SessionHandling.userIsLoggedIn, use
 router.get(`/order-invoice/:orderId`, SessionHandling.userIsLoggedIn, userProfileController.invoice_render)
 router.get(`/security` , SessionHandling.userIsLoggedIn ,userProfileController.securityRender)
 
-router.post('/cancel-order',orderController.orderCancel)
-router.post('/return-order',orderController.orderReturn)
-router.post(`/profileedit`, SessionHandling.userIsLoggedIn, userProfileController.profileEdit)
-router.post(`/addaddress`, userProfileController.addAddress)
-router.post(`/editaddress/:id`, userProfileController.editAddress)
+router.post('/cancel-order' , SessionHandling.userIsLoggedIn ,orderController.orderCancel)
+router.post('/return-order' , SessionHandling.userIsLoggedIn ,orderController.orderReturn)
+router.post(`/profileedit`, SessionHandling.userIsLoggedIn , userProfileController.profileEdit)
+router.post(`/addaddress`, SessionHandling.userIsLoggedIn , userProfileController.addAddress)
+router.post(`/editaddress/:id`, SessionHandling.userIsLoggedIn , userProfileController.editAddress)
 
 
 
@@ -122,8 +122,8 @@ router.post('/payment/verify', SessionHandling.userIsLoggedIn, razorpay.razorpay
 //WALLET
 router.get(`/wallet` , SessionHandling.userIsLoggedIn, walletController.walletRender)
 router.post(`/payment/wallet` ,SessionHandling.userIsLoggedIn, walletController.walletPayment)
-router.post('/wallet/create-razorpay-order', walletController.amountDeposit)
-router.post('/wallet/verify-payment',walletController.walletPaymentVerification)
+router.post('/wallet/create-razorpay-order',SessionHandling.userIsLoggedIn, walletController.amountDeposit)
+router.post('/wallet/verify-payment',SessionHandling.userIsLoggedIn,walletController.walletPaymentVerification)
 
 
 module.exports = router;

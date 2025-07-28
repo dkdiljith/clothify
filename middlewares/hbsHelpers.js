@@ -229,6 +229,11 @@ subtractDiscountPrice: function(price, discount) {
     return objectId.toString().substring(18, 24);
   },
 
+  //offer page helper
+  capitalize: function(str){
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 
 };
 
