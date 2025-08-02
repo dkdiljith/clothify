@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const categoryId = window.location.pathname.split('/').pop();
 
         try {
-            const response = await fetch(`/admin/category/${categoryId}`, {
+            const response = (`/admin/category/${categoryId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

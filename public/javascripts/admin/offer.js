@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Select2 for all select elements
     $('#offerType, #discountType').select2({
@@ -11,6 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
         width: '100%',
         placeholder: 'Select options',
         closeOnSelect: false
+    }).on('select2:opening', function() {
+        // Prevent opening if no offer type is selected
+        if (!offerTypeInput.value) {
+            $(this).select2('close');
+            showError(this, 'Please select an offer type first');
+            return false;
+        }
     });
 
     // Toggle offer form visibility
@@ -33,22 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Offer type change handler
-    document.getElementById('offerType').addEventListener('change', function () {
-        document.getElementById('categoryTargetIds').classList.add('hidden');
-        document.getElementById('subcategoryTargetIds').classList.add('hidden');
-        document.getElementById('productTargetIds').classList.add('hidden');
-
-        const selectedValue = this.value;
-        if (selectedValue === 'category') {
-            document.getElementById('categoryTargetIds').classList.remove('hidden');
-        } else if (selectedValue === 'subcategory') {
-            document.getElementById('subcategoryTargetIds').classList.remove('hidden');
-        } else if (selectedValue === 'product') {
-            document.getElementById('productTargetIds').classList.remove('hidden');
-        }
-    });
-
+    // Form elements
     const form = document.getElementById('offerForm');
     const codeInput = document.getElementById('offerCode');
     const discountTypeInput = document.getElementById('discountType');
@@ -58,6 +49,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryTargetIdsInput = document.getElementById('categoryTargetIds');
     const subcategoryTargetIdsInput = document.getElementById('subcategoryTargetIds');
     const productTargetIdsInput = document.getElementById('productTargetIds');
+
+    // Function to hide all target selectors and their Select2 containers
+    const hideAllTargetSelectors = () => {
+        [categoryTargetIdsInput, subcategoryTargetIdsInput, productTargetIdsInput].forEach(selector => {
+            selector.classList.add('hidden');
+            $(selector).val(null).trigger('change');
+            $(selector).next('.select2-container').addClass('hidden');
+            clearError(selector);
+        });
+    };
+
+    // Hide all target selectors initially
+    hideAllTargetSelectors();
+
+    // Offer type change handler
+    offerTypeInput.addEventListener('change', function() {
+        hideAllTargetSelectors();
+        
+        // Show the appropriate selector based on offer type
+        switch(this.value) {
+            case 'category':
+                categoryTargetIdsInput.classList.remove('hidden');
+                $(categoryTargetIdsInput).next('.select2-container').removeClass('hidden');
+                break;
+            case 'subcategory':
+                subcategoryTargetIdsInput.classList.remove('hidden');
+                $(subcategoryTargetIdsInput).next('.select2-container').removeClass('hidden');
+                break;
+            case 'product':
+                productTargetIdsInput.classList.remove('hidden');
+                $(productTargetIdsInput).next('.select2-container').removeClass('hidden');
+                break;
+        }
+    });
 
     // Automatically convert offer code to uppercase while typing
     codeInput.addEventListener('input', () => {
@@ -70,9 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const notification = document.createElement('div');
         notification.classList.add('notification', type);
         notification.innerHTML = `
-                    <span>${message}</span>
-                    <span class="close-btn">&times;</span>
-                `;
+            <span>${message}</span>
+            <span class="close-btn">&times;</span>
+        `;
 
         container.appendChild(notification);
 
@@ -98,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearError = (input) => {
         const errorElement = input.nextElementSibling;
         errorElement.classList.remove('show');
+        errorElement.textContent = '';
         input.style.borderColor = '';
     };
 
@@ -133,9 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showError(productTargetIdsInput, 'Please select at least one product.');
             isValid = false;
         } else {
-            if (offerTypeInput.value === 'category') clearError(categoryTargetIdsInput);
-            if (offerTypeInput.value === 'subcategory') clearError(subcategoryTargetIdsInput);
-            if (offerTypeInput.value === 'product') clearError(productTargetIdsInput);
+            clearError(categoryTargetIdsInput);
+            clearError(subcategoryTargetIdsInput);
+            clearError(productTargetIdsInput);
         }
 
         // Discount Type Validation
@@ -147,26 +173,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Discount Value Validation
-        const discountValue = parseFloat(discountValueInput.value);
-
-        if (discountTypeInput.value === 'percentage') {
-            if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
-                showError(discountValueInput, 'For percentage, value must be between 0 and 100.');
-                isValid = false;
-            } else {
-                clearError(discountValueInput);
-            }
-        } else if (discountTypeInput.value === 'price') {
-            if (isNaN(discountValue) || discountValue < 0 || discountValue > 10000) {
-                showError(discountValueInput, 'For price, value must be between ₹0 and ₹10,000.');
-                isValid = false;
-            } else {
-                clearError(discountValueInput);
+        if (!discountValueInput.value) {
+            showError(discountValueInput, 'Discount value is required.');
+            isValid = false;
+        } else {
+            const discountValue = parseFloat(discountValueInput.value);
+            
+            if (discountTypeInput.value === 'percentage') {
+                if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+                    showError(discountValueInput, 'For percentage, value must be between 0 and 100.');
+                    isValid = false;
+                } else {
+                    clearError(discountValueInput);
+                }
+            } else if (discountTypeInput.value === 'price') {
+                if (isNaN(discountValue) || discountValue < 0 || discountValue > 10000) {
+                    showError(discountValueInput, 'For price, value must be between ₹0 and ₹10,000.');
+                    isValid = false;
+                } else {
+                    clearError(discountValueInput);
+                }
             }
         }
 
         // Date Validation
-        if (endDateInput.value <= today) {
+        if (!endDateInput.value) {
+            showError(endDateInput, 'Expiry date is required.');
+            isValid = false;
+        } else if (endDateInput.value <= today) {
             showError(endDateInput, 'End date must be in the future.');
             isValid = false;
         } else {
@@ -210,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 showNotification('success', result.message);
                 form.reset();
+                hideAllTargetSelectors();
                 addOfferOverlay.classList.remove('active');
                 setTimeout(() => {
                     window.location.reload();

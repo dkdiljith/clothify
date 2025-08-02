@@ -215,7 +215,7 @@ async function createWallet(userId) {
 //GET METHODS / RENDERING PAGES
 
 exports.indexRender = async (req, res) => {
-  res.render("user/index", { isAdminLogin: true });
+  return res.render("user/index", { isAdminLogin: true });
 };
 
 
@@ -231,28 +231,10 @@ exports.homeRender = async (req, res) => {
 
   let product8 = []
   if (product) {
-      product8 = product.reverse().slice(0, 8);
+    product8 = product.reverse().slice(0, 8);
   }
-  res.render(`user/home`, {
+  return res.render(`user/home`, {
     product: product8
-  })
-}
-
-
-
-exports.mensRender = async (req, res) => {
-  const product = await Product.find({ gender: 'Men' }).lean();
-  res.render('user/mens', {
-    product
-  })
-}
-
-
-
-exports.womensRender = async (req, res) => {
-  const product = await Product.find({ gender: 'Women' }).lean();
-  res.render('user/womens', {
-    product
   })
 }
 
@@ -276,14 +258,14 @@ exports.resetPasswordRender = async (req, res) => {
     }
 
     // Render reset password page with token
-    res.render('user/resetPassword', {
+    return res.render('user/resetPassword', {
       token,
       isAdminLogin: true
     });
 
   } catch (error) {
     console.error('Reset password load error:', error);
-    res.redirect('/user/forgetPassword');
+    return res.redirect('/user/forgetPassword');
   }
 }
 
@@ -299,20 +281,20 @@ exports.resetPasswordRender = async (req, res) => {
 
 
 exports.registerRender = async (req, res) => {
-  res.render("user/register", { isAdminLogin: true });
+  return res.render("user/register", { isAdminLogin: true });
 };
 
 exports.loginRender = async (req, res) => {
-  res.render("user/login", { isAdminLogin: true });
+  return res.render("user/login", { isAdminLogin: true });
 };
 
 exports.forgetPasswordRender = async (req, res) => {
-  res.render("user/forgetPassword", { isAdminLogin: true });
+  return res.render("user/forgetPassword", { isAdminLogin: true });
 };
 
 exports.userLogout = async (req, res) => {
   req.session.destroy()
-  res.redirect(`/user/login`)
+  return res.redirect(`/user/login`)
 }
 
 //========================================================================================================
@@ -329,7 +311,7 @@ exports.register = async (req, res) => {
   const existingUser = await User.findOne({ email: req.body.email });
   if (existingUser) {
     if (existingUser.isVerified) {
-      res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
+      return res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
     } else {
       const checkPassword = await bcrypt.compare(
         req.body.password,
@@ -339,9 +321,9 @@ exports.register = async (req, res) => {
       if (checkPassword) {
         req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
         await verificationEmailSend(req.body.email, verificationToken);
-        res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
+        return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
       } else {
-        res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
+        return res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
       }
     }
 
@@ -364,11 +346,11 @@ exports.register = async (req, res) => {
         user.verificationAttempts += 1
         user.verificationTimer = Date.now() + 60000; //1 munute timer
         await user.save()
-        res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: user.verificationTimer, verificationAttempts: user.verificationAttempts });
+        return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: user.verificationTimer, verificationAttempts: user.verificationAttempts });
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      res.render('user/register', { message: "Error during registration", isAdminLogin: true });
+      return res.render('user/register', { message: "Error during registration", isAdminLogin: true });
     }
   }
 };
@@ -489,10 +471,10 @@ exports.resendEmailVerification = async (req, res) => {
 
     await verificationEmailSend(userEmail, verificationToken);
     if (verificationEmailSend) {
-      res.json({ success: true, newTimer: user.verificationTimer }); // send new timer back
+      return res.json({ success: true, newTimer: user.verificationTimer }); // send new timer back
     }
   } else {
-    res.json({ success: false, newTimer: user.verificationTimer, error: "Reached Maximum Limit" });
+    return res.json({ success: false, newTimer: user.verificationTimer, error: "Reached Maximum Limit" });
   }
 
 };
@@ -538,14 +520,14 @@ exports.forgetPassword = async (req, res) => {
     await sendResetEmail(user.email, token);
 
     // Render page with timer
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       resetTimer: user.resetTimer
     });
 
   } catch (error) {
     console.error('Password reset error:', error);
-    res.status(500).json({ error: 'Error processing request' });
+    return res.status(500).json({ error: 'Error processing request' });
   }
 };
 
@@ -585,14 +567,14 @@ exports.resendResetEmail = async (req, res) => {
     const resetUrl = `${req.protocol}://${req.get('host')}/resetpassword?token=${token}`;
     await sendResetEmail(user.email, resetUrl);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       newResetTimer: user.resetTimer
     });
 
   } catch (error) {
     console.error('Resend reset email error:', error);
-    res.status(500).json({ error: 'Error processing request' });
+    return res.status(500).json({ error: 'Error processing request' });
   }
 };
 
@@ -642,14 +624,14 @@ exports.resetPassword = async (req, res) => {
 
     sendPasswordChangedEmail(user.email)
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Password reset successful'
     });
 
   } catch (error) {
     console.error('Password reset error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -658,51 +640,51 @@ exports.resetPassword = async (req, res) => {
 
 
 exports.showUsers = async (req, res) => {
-    try {
-        // Pagination parameters
-        const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 users per page
-        
-        // Get total count of users
-        const totalUsers = await User.countDocuments();
-        const totalPages = Math.ceil(totalUsers / limit);
-        
-        // Get paginated users (newest first)
-        const users = await User.find()
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+  try {
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // 5 users per page
 
-        res.render('admin/usersList', {
-            admin: true,
-            user: users,
-            pagination: {
-                page,
-                limit,
-                totalPages,
-                nextPage: page + 1,
-                prevPage: page - 1,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
-            }
-        });
+    // Get total count of users
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers / limit);
 
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        res.render('admin/usersList', {
-            admin: true,
-            user: [],
-            pagination: {
-                page: 1,
-                limit: 5,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            },
-            errorMessage: "Error fetching users. Please try again later."
-        });
-    }
+    // Get paginated users (newest first)
+    const users = await User.find()
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    return res.render('admin/usersList', {
+      admin: true,
+      user: users,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.render('admin/usersList', {
+      admin: true,
+      user: [],
+      pagination: {
+        page: 1,
+        limit: 5,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
+      },
+      errorMessage: "Error fetching users. Please try again later."
+    });
+  }
 };
 
 
@@ -724,9 +706,9 @@ exports.blockUser = async (req, res) => {
     // Toggle blocked status
     user.blocked = !user.blocked;
     await user.save();
-    res.redirect('back');
+    return res.redirect('back');
   } catch (error) {
     console.error("Error in blocking user:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };

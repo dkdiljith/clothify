@@ -10,12 +10,12 @@
             <h1 class="page-title">Order Management</h1>
 
             {{!-- serach --}}
-            {{!-- <form method="GET" action='/admin/orders/search' role="search">
+            <form method="GET" action='/admin/orders/search' role="search">
                 <div class="search-container">
                     <input type="search" name="query" class="search-input" id="search-input"
                         placeholder="Search orders..." {{#if query}} value={{query}} {{/if}}>
                 </div>
-            </form> --}}
+            </form>
         </div>
 
         {{#if order.length}}
@@ -40,7 +40,7 @@
                             <img src="https://i.postimg.cc/KvXw8MSK/2660420.png" class="user-avatar" alt="Avatar"
                                 style="width: 50px; height: 50px; object-fit: cover;">
                             <div class="order-number-container">
-                                #{{this._id}}
+                                #{{this.orderId}}
                                 {{#if (hasReturnRequest this.items)}}
                                 <span class="return-alert" title="Return Requested - Needs Attention">
                                     <i class="fas fa-exclamation"></i>

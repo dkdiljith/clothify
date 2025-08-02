@@ -44,7 +44,7 @@ exports.addProductsRender = async (req, res) => {
                 sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
             )
         }));
-    res.render('admin/addProducts', {
+    return res.render('admin/addProducts', {
         admin: true,
         categories: groupedCategories
     });
@@ -67,7 +67,7 @@ exports.editProductsRender = async (req, res) => {
             )
         }));
 
-    res.render('admin/editProduct', {
+    return res.render('admin/editProduct', {
         admin: true,
         product: product,
         categories: groupedCategories,
@@ -139,7 +139,7 @@ exports.addProducts = async (req, res) => {
                         sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
                     )
                 }));
-            res.render('admin/addProducts', {
+            return res.render('admin/addProducts', {
                 admin: true,
                 categories: groupedCategories
             });
@@ -148,7 +148,7 @@ exports.addProducts = async (req, res) => {
         });
     } catch (err) {
         console.error('Error adding product:', err);
-        res.status(500).json({ success: false, error: err.message });
+        return res.status(500).json({ success: false, error: err.message });
     }
 };
 
@@ -210,11 +210,11 @@ exports.updateProduct = async (req, res) => {
                 return res.status(404).json({ success: false, message: "Product not found" });
             }
 
-            res.redirect(`/admin/products`);
+            return res.redirect(`/admin/products`);
         });
     } catch (err) {
         console.error('Error updating product:', err);
-        res.status(500).json({ success: false, error: err.message });
+        return res.status(500).json({ success: false, error: err.message });
     }
 };
 
@@ -227,11 +227,11 @@ exports.showProducts = async (req, res) => {
         // Pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = 5; // 5 products per page
-        
+
         // Get total count of products
         const totalProducts = await Product.countDocuments();
         const totalPages = Math.ceil(totalProducts / limit);
-        
+
         // Get paginated products (newest first)
         const products = await Product.find()
             .sort({ createdAt: -1 }) // Sort by newest first
@@ -241,7 +241,7 @@ exports.showProducts = async (req, res) => {
 
         const categories = await Category.find().lean();
 
-        res.render('admin/products', {
+        return res.render('admin/products', {
             admin: true,
             products: products,
             categories: categories,
@@ -258,7 +258,7 @@ exports.showProducts = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching products:", error);
-        res.render('admin/products', {
+        return res.render('admin/products', {
             admin: true,
             products: [],
             categories: [],
@@ -292,15 +292,15 @@ exports.singleProductPage = async (req, res) => {
 
         const offers = await Offer.find().lean()
 
-        res.render('user/singleProductPage', {
+        return res.render('user/singleProductPage', {
             product: product,
             relatedProducts: relatedProducts,
             categories: categories,
-            offers:offers ,
+            offers: offers,
         });
     } catch (err) {
         console.error('Error fetching product:', err);
-        res.status(500).render('error', { message: 'Server error' });
+        return res.status(500).render('error', { message: 'Server error' });
     }
 }
 
@@ -309,10 +309,10 @@ exports.deleteProducts = async (req, res) => {
     try {
         const productId = req.params.id;
         await Product.findByIdAndDelete(productId);
-        res.redirect('/admin/products');
+        return res.redirect('/admin/products');
     } catch (error) {
         console.error("Error deleting product:", error);
-        res.status(500).send("Error deleting product.");
+        return res.status(500).send("Error deleting product.");
     }
 }
 

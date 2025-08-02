@@ -15,15 +15,31 @@ exports.cartDataIcon = async (req, res) => {
 
     if (cart) {
       const itemCount = cart.items ? cart.items.length : 0;
-      res.json({ itemCount: itemCount });
+      return res.json({ itemCount: itemCount });
     } else {
-      res.json({ itemCount: 0 });
+      return res.json({ itemCount: 0 });
     }
   } catch (error) {
     console.error("Error fetching cart data for icon:", error);
-    res.status(500).json({ error: "Failed to fetch cart data" }); // Send an error response
+    return res.status(500).json({ error: "Failed to fetch cart data" }); // Send an error response
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//OrderId - creation
+
+const orderIdGeneration = async () => {
+  const orderId = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  if (orderId) {
+    const order = await Order.findOne({ orderId })
+    if (order) {
+      return await orderIdGeneration();
+    } else {
+      return orderId
+    }
+  }
+}
+
 
 
 
@@ -34,24 +50,24 @@ async function recalculateCartSummary(userId) {
     .populate('couponId');
 
   if (!cart) {
-    return { subtotal: 0, shippingFee: 0, tax: 0, couponDiscount: 0,  offerDiscount: 0, totalAmount: 0};
+    return { subtotal: 0, shippingFee: 0, tax: 0, couponDiscount: 0, offerDiscount: 0, totalAmount: 0 };
   }
 
   //Essential fields
-  let subtotal = 0 
-  let shippingFee = 0 
+  let subtotal = 0
+  let shippingFee = 0
   let tax = 0
-  let couponDiscount = 0 
-  let offerDiscount = 0  
+  let couponDiscount = 0
+  let offerDiscount = 0
   let totalAmount = 0
 
   // Calculate subtotal , offerDiscount and discountedPrice (productPrice - offerAmount) 
-   let discountedPrice = 0
+  let discountedPrice = 0
 
   cart.items.forEach(item => {
-    let productPrice = item.productId.details[item.variationIndex].price * item.quantity ;
-    let offerAmount = item.productId.details[item.variationIndex].discountPrice * item.quantity ;
-     
+    let productPrice = item.productId.details[item.variationIndex].price * item.quantity;
+    let offerAmount = item.productId.details[item.variationIndex].discountPrice * item.quantity;
+
     subtotal += productPrice
     offerDiscount += offerAmount
     discountedPrice += productPrice - offerAmount
@@ -59,37 +75,37 @@ async function recalculateCartSummary(userId) {
   });
 
   // Coupon Finding and recalculating discountedPrice
-  if(cart.couponId !== null){
-    const coupon = await Coupon.findOne({_id:cart.couponId})
-    if(coupon){
-      if(coupon.discountType == 'price'){
-      couponDiscount = coupon.discountValue
-      discountedPrice -= coupon.discountValue
-    }else{
-      let result = discountedPrice * (coupon.discountValue / 100)
-      couponDiscount = result
-      discountedPrice -= result
-    }
+  if (cart.couponId !== null) {
+    const coupon = await Coupon.findOne({ _id: cart.couponId })
+    if (coupon) {
+      if (coupon.discountType == 'price') {
+        couponDiscount = coupon.discountValue
+        discountedPrice -= coupon.discountValue
+      } else {
+        let result = discountedPrice * (coupon.discountValue / 100)
+        couponDiscount = result
+        discountedPrice -= result
+      }
     }
   }
 
   //Tax calculation
-   const TAX_RATE = 0.06; // 6% tax
-   tax = discountedPrice * TAX_RATE
+  const TAX_RATE = 0.06; // 6% tax
+  tax = discountedPrice * TAX_RATE
 
-   //Shipping Fee
-   if((discountedPrice + tax ) >= 2000){
+  //Shipping Fee
+  if ((discountedPrice + tax) >= 2000) {
     shippingFee = 0
-   }else{
+  } else {
     shippingFee = 80
-   }
+  }
 
-   //Total Amount
-   tax = Math.round(tax)
-   totalAmount = discountedPrice + tax + shippingFee
+  //Total Amount
+  tax = Math.round(tax)
+  totalAmount = discountedPrice + tax + shippingFee
 
-   //Rounding
-   totalAmount = Math.round(totalAmount)
+  //Rounding
+  totalAmount = Math.round(totalAmount)
 
 
   // Update cart with all calculated values
@@ -157,11 +173,11 @@ exports.cartRender = async (req, res) => {
     }).lean();
 
     // Filter coupons based on minimum purchase using the recalculated subtotal and total amount
-    const availableCoupons = coupons.filter(coupon=>{
-      if(totalAmount >= coupon.minimumPurchaseAmount){
-        if(coupon.discountType == 'price' && totalAmount >= coupon.discountValue ){
+    const availableCoupons = coupons.filter(coupon => {
+      if (totalAmount >= coupon.minimumPurchaseAmount) {
+        if (coupon.discountType == 'price' && totalAmount >= coupon.discountValue) {
           return coupon
-        }else if(coupon.discountType == 'percentage'){
+        } else if (coupon.discountType == 'percentage') {
           return coupon
         }
       }
@@ -177,7 +193,7 @@ exports.cartRender = async (req, res) => {
       .populate('couponId')
       .lean();
 
-    res.render('user/cart', {
+    return res.render('user/cart', {
       cart: updatedCart,
       subtotal,
       shippingFee,
@@ -188,7 +204,7 @@ exports.cartRender = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   }
 };
 
@@ -247,7 +263,7 @@ exports.addToCart = async (req, res) => {
 
   } catch (error) {
     console.error("Error adding to cart:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'An error occurred. Please try again later.'
     });
@@ -302,11 +318,11 @@ exports.operation = async (req, res) => {
 
     const summary = await recalculateCartSummary(userId);
 
-    res.json({ success: true, ...summary });
+    return res.json({ success: true, ...summary });
 
   } catch (error) {
     console.error('Operation error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
@@ -335,11 +351,11 @@ exports.deleteCart = async (req, res) => {
 
 
 
-    res.json({ success: true, message: 'Item removed successfully', ...summary });
+    return res.json({ success: true, message: 'Item removed successfully', ...summary });
 
   } catch (error) {
     console.error('Delete error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
@@ -355,10 +371,10 @@ exports.getAddressInCart = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.render('user/addressInCheckout', { cart: cart, address: address });
+    return res.render('user/addressInCheckout', { cart: cart, address: address });
   } catch (error) {
     console.error('Error fetching address page data:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
@@ -386,7 +402,7 @@ exports.renderEditForm = async (req, res) => {
     const states = ["Kerala"];
     const countries = ["India"];
 
-    res.render('user/editAddress', {
+    return res.render('user/editAddress', {
       address,
       cities,
       states,
@@ -405,7 +421,7 @@ exports.renderEditForm = async (req, res) => {
 
   } catch (error) {
     console.error("Error rendering edit form:", error);
-    res.status(500).render('error', { message: 'Failed to load edit form' });
+    return res.status(500).render('error', { message: 'Failed to load edit form' });
   }
 };
 
@@ -476,7 +492,7 @@ exports.addAddress = async (req, res) => {
       await Address.findByIdAndUpdate(newAddress._id, { $set: { isDefault: true } });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Address added successfully',
       address: newAddress
@@ -484,7 +500,7 @@ exports.addAddress = async (req, res) => {
 
   } catch (error) {
     console.error('Error adding address:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
@@ -562,7 +578,7 @@ exports.addAddress = async (req, res) => {
         { new: true }
       );
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Address updated successfully',
         address: updatedAddress
@@ -570,7 +586,7 @@ exports.addAddress = async (req, res) => {
 
     } catch (error) {
       console.error('Error editing address:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Internal server error'
       });
@@ -606,14 +622,14 @@ exports.addAddress = async (req, res) => {
         }
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Address deleted successfully'
       });
 
     } catch (error) {
       console.error('Error deleting address:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Failed to delete address'
       });
@@ -648,7 +664,7 @@ exports.addAddress = async (req, res) => {
         { new: true }
       );
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Default address updated',
         address: updatedAddress
@@ -656,7 +672,7 @@ exports.addAddress = async (req, res) => {
 
     } catch (error) {
       console.error("Error setting default address:", error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Server error'
       });
@@ -678,11 +694,11 @@ exports.payment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.render('user/paymentPage', { cart, address, wallet });
+    return res.render('user/paymentPage', { cart, address, wallet });
 
   } catch (error) {
     console.error('Error fetching order details:', error);
-    res.status(500).send('Server error');
+    return res.status(500).send('Server error');
   }
 };
 
@@ -700,8 +716,8 @@ exports.placeOrder = async (req, res) => {
     const cart = await Cart.findOne({ userId: userId }).populate('items.productId')
     const address = await Address.findById(addressId)
 
-
     const order = new Order({
+      orderId: await orderIdGeneration(),
       userId: userId,
       items: cart.items.map((item) => ({
         productId: item.productId._id,
@@ -730,9 +746,9 @@ exports.placeOrder = async (req, res) => {
       subtotal: cart.subtotal,
       shippingFee: cart.shippingFee,
       tax: cart.tax,
-      couponId:cart.couponId,
-      couponDiscount:cart.couponDiscount,
-      offerDiscount:cart.offerDiscount,
+      couponId: cart.couponId,
+      couponDiscount: cart.couponDiscount,
+      offerDiscount: cart.offerDiscount,
       totalAmount: cart.totalAmount,
     });
     await order.save();
@@ -763,10 +779,10 @@ exports.placeOrder = async (req, res) => {
     //delete the cart
     await Cart.findByIdAndDelete(cart._id)
 
-    res.render('user/orderSuccess', { isAdminLogin: true })
+    return res.render('user/orderSuccess', { isAdminLogin: true })
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ message: "Failed to place order." });
+    return res.status(500).json({ message: "Failed to place order." });
   }
 };
 

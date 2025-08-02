@@ -70,7 +70,7 @@
 
                     // Format your order data here similar to your Handlebars template
                     row.innerHTML = `
-                        <td>#${order._id.toString().substring(18, 24)}</td>
+                        <td>#${order.orderId.toString().substring(18, 24)}</td>
                         <td>${order.deliveryAddress.name}</td>
                         <td>
                             ${order.items.map(item => `

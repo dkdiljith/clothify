@@ -20,7 +20,7 @@ exports.couponRender = async (req, res) => {
             .limit(limit)
             .lean();
 
-        res.render('admin/coupon', {
+        return res.render('admin/coupon', {
             coupon: coupons,
             admin: true,
             pagination: {
@@ -36,7 +36,7 @@ exports.couponRender = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching coupons:", error);
-        res.render('admin/coupon', {
+        return res.render('admin/coupon', {
             coupon: [],
             admin: true,
             pagination: {
@@ -50,6 +50,18 @@ exports.couponRender = async (req, res) => {
         });
     }
 };
+
+
+
+
+exports.couponEditJson = async (req, res) => {
+    try {
+        const coupon = await Coupon.findById(req.params.couponId);
+        return res.json(coupon);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
 
 
 
@@ -71,6 +83,21 @@ exports.createCoupon = async (req, res) => {
     try {
         const { couponCode, discountType, discountValue, minimumPurchaseAmount, endDate } = req.body;
 
+        //existence of coupon checking
+        if (couponCode) {
+            const coupon = await Coupon.find({ couponCode })
+            if (coupon) {
+                for (let i = 0; i < coupon.length; i++) {
+                    if (coupon[i].couponCode === couponCode) {
+                        return res.status(500).json({
+                            success: false,
+                            type: "error",
+                            message: "Coupon with same name detected",
+                        });
+                    }
+                }
+            }
+        }
         const coupon = new Coupon({
             couponCode,
             discountType,
@@ -83,7 +110,7 @@ exports.createCoupon = async (req, res) => {
 
         if (result) {
 
-            res.status(201).json({
+            return res.status(201).json({
                 success: true,
                 type: "success",
                 message: "Coupon created successfully",
@@ -91,7 +118,7 @@ exports.createCoupon = async (req, res) => {
             });
         } else {
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 type: "error",
                 message: "Failed to create coupon",
@@ -99,7 +126,7 @@ exports.createCoupon = async (req, res) => {
         }
     } catch (err) {
         console.error("Error creating coupon:", err);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             type: "error",
             message: "Internal server error",
@@ -114,6 +141,32 @@ exports.couponEdit = async (req, res) => {
         const couponId = req.params.couponId;
         const { couponCode, discountType, discountValue, minimumPurchaseAmount, endDate } = req.body;
 
+        //existence of coupon checking
+        if (couponCode) {
+            const coupon = await Coupon.find({ couponCode })
+            if (coupon) {
+                for (let i = 0; i < coupon.length; i++) {
+                    if (coupon[i].couponCode === couponCode) {
+                        const sameCoupon = await Coupon.findById(couponId)
+                        if (sameCoupon._id.toString() === coupon[i]._id.toString()) {
+                        } else {
+                            return res.status(500).json({
+                                success: false,
+                                type: "error",
+                                message: "Coupon with same name detected",
+                            });
+                        }
+                    } else {
+                        return res.status(500).json({
+                            success: false,
+                            type: "error",
+                            message: "Coupon with same name detected",
+                        });
+                    }
+                }
+            }
+        }
+
         const updatedCoupon = await Coupon.findByIdAndUpdate(
             couponId,
             {
@@ -126,21 +179,21 @@ exports.couponEdit = async (req, res) => {
             { new: true }
         );
 
-        if(updatedCoupon.endDate >= new Date()){
+        if (updatedCoupon.endDate >= new Date()) {
             updatedCoupon.isActive = true
         }
 
         const result = updatedCoupon.save()
 
         if (result) {
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 type: 'success',
                 message: 'Coupon updated successfully',
                 coupon: updatedCoupon
             });
         } else {
-             res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 type: "error",
                 message: "Failed to edit coupon",
@@ -148,7 +201,7 @@ exports.couponEdit = async (req, res) => {
         }
     } catch (error) {
         console.error('Error updating coupon:', error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             type: "error",
             message: "Internal server error",
@@ -166,13 +219,13 @@ exports.couponDelete = async (req, res) => {
         const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
 
         if (deletedCoupon) {
-            res.status(200).json({ success: true, message: 'Coupon deleted successfully' });
+            return res.status(200).json({ success: true, message: 'Coupon deleted successfully' });
         } else {
-            res.status(404).json({ success: false, message: 'Coupon not found' });
+            return res.status(404).json({ success: false, message: 'Coupon not found' });
         }
     } catch (err) {
         console.error('Error deleting coupon:', err);
-        res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
     }
 }
 
@@ -213,10 +266,10 @@ exports.applyCoupon = async (req, res) => {
 
         await cart.save();
 
-        res.json({ success: true });
+        return res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: 'Error applying coupon' });
+        return res.json({ success: false, message: 'Error applying coupon' });
     }
 }
 
@@ -230,9 +283,9 @@ exports.removeCoupon = async (req, res) => {
         cart.couponDiscount = 0;
         await cart.save();
 
-        res.json({ success: true });
+        return res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: 'Error removing coupon' });
+        return res.json({ success: false, message: 'Error removing coupon' });
     }
 }

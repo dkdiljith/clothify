@@ -65,7 +65,7 @@ exports.collections = async (req, res) => {
       });
     }
 
-    res.render('user/collections', {
+    return res.render('user/collections', {
       products,
       query,
       sort,
@@ -76,7 +76,7 @@ exports.collections = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching products:', error);
-    res.status(500).render('error', {
+    return res.status(500).render('error', {
       message: 'Server error occurred while fetching products'
     });
   }
@@ -121,7 +121,7 @@ exports.products = async (req, res) => {
     const products = await searchQuery.lean();
     const categories = await Category.find().lean();
 
-    res.render('admin/products', {
+    return res.render('admin/products', {
       admin: true,
       products: products,
       categories: categories,
@@ -139,7 +139,7 @@ exports.products = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.render('admin/products', {
+    return res.render('admin/products', {
       admin: true,
       query: query,
       products: [],
@@ -166,10 +166,11 @@ exports.orders = async (req, res) => {
     const query = req.query.query || '';
 
     // Build search query
-    let searchQuery 
+    let searchQuery
     if (query) {
-      const mongooseQuery = new mongoose.Types.ObjectId(query)
-      searchQuery = await Order.find({_id:mongooseQuery})
+      searchQuery = Order.find({
+        orderId: { $regex: query, $options: 'i' }
+      });
     } else {
       searchQuery = Order.find({});
     }
@@ -187,7 +188,7 @@ exports.orders = async (req, res) => {
     searchQuery.skip(skip).limit(parseInt(limit));
     const orders = await searchQuery.lean();
 
-    res.render('admin/orders', {
+    return res.render('admin/orders', {
       order: orders,
       admin: true,
       query,
@@ -204,10 +205,10 @@ exports.orders = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching orders:", error);
-    res.render('admin/orders', {
+    return res.render('admin/orders', {
       order: [],
       admin: true,
-      query,
+      // query,
       pagination: {
         page: 1,
         limit: 5,
@@ -259,7 +260,7 @@ exports.users = async (req, res) => {
     searchQuery.skip(skip).limit(parseInt(limit));
     const users = await searchQuery.lean()
 
-    res.render('admin/usersList', {
+    return res.render('admin/usersList', {
       admin: true,
       user: users,
       query,
@@ -276,7 +277,7 @@ exports.users = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.render('admin/usersList', {
+    return res.render('admin/usersList', {
       admin: true,
       user: [],
       query,
@@ -332,7 +333,7 @@ exports.coupons = async (req, res) => {
     searchQuery.skip(skip).limit(parseInt(limit));
     const coupons = await searchQuery.lean();
 
-    res.render('admin/coupon', {
+    return res.render('admin/coupon', {
       coupon: coupons,
       admin: true,
       query,
@@ -349,7 +350,7 @@ exports.coupons = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching coupons:", error);
-    res.render('admin/coupon', {
+    return res.render('admin/coupon', {
       coupon: [],
       admin: true,
       query,
@@ -421,7 +422,7 @@ exports.offers = async (req, res) => {
         )
       }));
 
-    res.render(`admin/offer`, {
+    return res.render(`admin/offer`, {
       offer,
       product,
       categories: groupedCategories,
@@ -440,7 +441,7 @@ exports.offers = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching offers:", error);
-    res.render('admin/offer', {
+    return res.render('admin/offer', {
       offer: [],
       product: [],
       categories: [],

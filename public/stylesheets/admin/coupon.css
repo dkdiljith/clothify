@@ -219,64 +219,7 @@
     margin-bottom: 1.5rem;
 }
 
-/* Notification styles */
-.notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-}
 
-.notification {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-    color: #fff;
-    animation: fadeIn 0.5s, fadeOut 0.5s 3.5s forwards;
-}
-
-.notification.success {
-    background-color: #4CAF50;
-}
-
-.notification.error {
-    background-color: #F44336;
-}
-
-.notification .close-btn {
-    margin-left: 10px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-}
 
 /* Responsive Design */
 @media (max-width: 1024px) {

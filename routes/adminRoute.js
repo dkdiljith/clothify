@@ -30,6 +30,7 @@ router.get(`/logout`, SessionHandling.adminIsLoggedIn, adminController.logout)
 
 //Search
 router.get(`/products/search` , SessionHandling.adminIsLoggedIn , searchController.products)
+router.get(`/orders/search` , SessionHandling.adminIsLoggedIn , searchController.orders)
 router.get(`/users/search` , SessionHandling.adminIsLoggedIn , searchController.users)
 router.get(`/coupons/search` , SessionHandling.adminIsLoggedIn , searchController.coupons)
 router.get(`/offer/search` , SessionHandling.adminIsLoggedIn , searchController.offers)
@@ -65,6 +66,7 @@ router.delete("/category/:id", SessionHandling.adminIsLoggedIn, categoryControll
 ///COUPON MANAGEMENT///
 router.get(`/coupons`, SessionHandling.adminIsLoggedIn, couponController.couponRender)
 router.post("/coupon/addCoupon",SessionHandling.adminIsLoggedIn, couponController.createCoupon)
+router.get(`/coupon/:couponId` , SessionHandling.adminIsLoggedIn , couponController.couponEditJson)
 router.put('/coupon/:couponId', SessionHandling.adminIsLoggedIn,couponController.couponEdit)
 router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponController.couponDelete);
 

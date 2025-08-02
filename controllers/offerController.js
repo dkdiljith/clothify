@@ -221,69 +221,69 @@ async function applyCategoryOffer(categoryId, discountType, discountValue, offer
 
 
 exports.offerRender = async (req, res) => {
-  try {
-    // Pagination parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 5 offers per page
+    try {
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5; // 5 offers per page
 
-    // Get total count of offers
-    const totalOffers = await Offer.countDocuments();
-    const totalPages = Math.ceil(totalOffers / limit);
+        // Get total count of offers
+        const totalOffers = await Offer.countDocuments();
+        const totalPages = Math.ceil(totalOffers / limit);
 
-    // Get paginated offers (sorted by newest first)
-    let offer = await Offer.find()
-      .sort({ createdAt: -1 }) // newest first
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+        // Get paginated offers (sorted by newest first)
+        let offer = await Offer.find()
+            .sort({ createdAt: -1 }) // newest first
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
 
-    const product = await Product.find().lean();
+        const product = await Product.find().lean();
 
-    const categories = await Category.find().lean();
-    const groupedCategories = categories
-      .filter(cat => !cat.parentCategory)
-      .map(parent => ({
-        ...parent,
-        subcategories: categories.filter(sub =>
-          sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-        )
-      }));
+        const categories = await Category.find().lean();
+        const groupedCategories = categories
+            .filter(cat => !cat.parentCategory)
+            .map(parent => ({
+                ...parent,
+                subcategories: categories.filter(sub =>
+                    sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
+                )
+            }));
 
-    console.log(groupedCategories, "this is groupedCategories");
+        console.log(groupedCategories, "this is groupedCategories");
 
-    res.render(`admin/offer`, {
-      offer,
-      product,
-      categories: groupedCategories,
-      admin: true,
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
-    });
+        return res.render(`admin/offer`, {
+            offer,
+            product,
+            categories: groupedCategories,
+            admin: true,
+            pagination: {
+                page,
+                limit,
+                totalPages,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            }
+        });
 
-  } catch (error) {
-    console.error("Error fetching offers:", error);
-    res.render(`admin/offer`, {
-      offer: [],
-      product: [],
-      categories: [],
-      admin: true,
-      pagination: {
-        page: 1,
-        limit: 5,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      },
-      errorMessage: "Error fetching offers. Please try again later."
-    });
-  }
+    } catch (error) {
+        console.error("Error fetching offers:", error);
+        return res.render(`admin/offer`, {
+            offer: [],
+            product: [],
+            categories: [],
+            admin: true,
+            pagination: {
+                page: 1,
+                limit: 5,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false
+            },
+            errorMessage: "Error fetching offers. Please try again later."
+        });
+    }
 };
 
 
@@ -305,7 +305,7 @@ exports.offerEditRender = async (req, res) => {
             )
         }));
 
-    res.render(`admin/editOffer`, { offer, product, categories: groupedCategories, admin: true })
+    return res.render(`admin/editOffer`, { offer, product, categories: groupedCategories, admin: true })
 }
 
 
@@ -331,6 +331,22 @@ exports.createOffer = async (req, res) => {
             endDate
         } = req.body;
 
+
+         //existence of offer checking
+                if (offerCode) {
+                    const offer = await Offer.find({ offerCode })
+                    if (offer) {
+                        for (let i = 0; i < offer.length; i++) {
+                            if (offer[i].offerCode === offerCode) {
+                                return res.status(500).json({
+                                    success: false,
+                                    type: "error",
+                                    message: "Offer with same name detected",
+                                });
+                            }
+                        }
+                    }
+                }
 
 
         // Determine targetIds based on offerType
@@ -371,7 +387,7 @@ exports.createOffer = async (req, res) => {
             await applyCategoryOffer(targetIds, discountType, discountValue, savedOffer._id)
         }
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             type: "success",
             message: "Offer created successfully",
@@ -403,7 +419,7 @@ exports.createOffer = async (req, res) => {
         }
 
         // Generic error handler
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             type: "error",
             message: "Internal server error",
@@ -432,6 +448,34 @@ exports.editOffer = async (req, res) => {
             minimumPurchaseAmount,
             endDate,
         } = req.body;
+
+
+         //existence of offer checking
+                if (offerCode) {
+                    const offer = await Offer.find({ offerCode })
+                    if (offer) {
+                        for (let i = 0; i < offer.length; i++) {
+                            if (offer[i].offerCode === offerCode) {
+                                const sameOffer = await Offer.findById(offerId)
+                                if (sameOffer._id.toString() === offer[i]._id.toString()) {
+                                } else {
+                                    return res.status(500).json({
+                                        success: false,
+                                        type: "error",
+                                        message: "Offer with same name detected",
+                                    });
+                                }
+                            } else {
+                                return res.status(500).json({
+                                    success: false,
+                                    type: "error",
+                                    message: "Offer with same name detected",
+                                });
+                            }
+                        }
+                    }
+                }
+
 
         // Find the existing offer
         const existingOffer = await Offer.findById(offerId);
@@ -485,7 +529,7 @@ exports.editOffer = async (req, res) => {
         // Save the updated offer
         const updatedOffer = await existingOffer.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             type: "success",
             message: "Offer updated successfully",
@@ -525,7 +569,7 @@ exports.editOffer = async (req, res) => {
         }
 
         // Generic error handler
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             type: "error",
             message: "Internal server error",
@@ -568,7 +612,7 @@ exports.offerDelete = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Offer deleted successfully',
             productsReset: updateResult.nModified
@@ -576,7 +620,7 @@ exports.offerDelete = async (req, res) => {
 
     } catch (err) {
         console.error('Error deleting offer:', err);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Internal server error',
             error: err.message

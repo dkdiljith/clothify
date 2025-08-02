@@ -465,7 +465,7 @@
                 <div class="logo-placeholder">CLOTHIFY</div>
                 <div>
                     <h1 class="invoice-title">INVOICE</h1>
-                    <div class="invoice-id">Order #{{order._id}}</div>
+                    <div class="invoice-id">Order #{{order.orderId}}</div>
                 </div>
             </div>
             <div class="invoice-date">
@@ -477,27 +477,29 @@
         </div>
 
         <div class="company-address">
-            <div>
-                <div class="address-title">Clothify</div>
-                <div class="address-text">
-                    8th Floor, near Shakthan Thampuran<br>
+            <div class="company-address-section">
+                <div class="address-title" style="font-weight: 600; font-size: 18px; color: #2c3e50;">Clothify</div>
+                <div class="address-text" style="line-height: 1.6; color: #444;">
+                    <strong>8th Floor, near Shakthan Thampuran</strong><br>
                     Thrissur, Kerala 680001<br>
                     India<br>
-                    Phone: (+91) 95 1234 5678<br>
-                    Email: support@clothify.com {{!-- Assuming this email address is still correct --}}
+                    <strong>Phone:</strong> (+91) 95 1234 5678<br>
+                    <strong>Email:</strong> support@clothify.com
                 </div>
             </div>
+
             <div>
                 <div class="address-title">Billed To</div>
                 <div class="address-text">
                     <strong>{{order.deliveryAddress.name}}</strong><br>
                     {{order.deliveryAddress.streetAddress}}<br>
                     {{order.deliveryAddress.landmark}}<br>
-                    {{order.deliveryAddress.city}}, {{order.deliveryAddress.state}} {{order.deliveryAddress.zip}}<br>
+                    {{order.deliveryAddress.city}}, {{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}<br>
                     {{order.deliveryAddress.country}}<br>
-                    Phone: {{order.deliveryAddress.phone}}
+                    <strong>Phone:</strong> {{order.deliveryAddress.phone}}
                 </div>
             </div>
+
         </div>
 
         <div class="invoice-body">
@@ -552,18 +554,42 @@
                         <td>Subtotal:</td>
                         <td class="text-right">₹{{order.subtotal}}.00</td>
                     </tr>
+
                     <tr>
                         <td>Shipping:</td>
+                        {{#ifEquals order.shippingFee 0}}
+                        <td class="text-right text-success">Free</td>
+                        {{else}}
                         <td class="text-right">₹{{order.shippingFee}}.00</td>
+                        {{/ifEquals}}
                     </tr>
+
                     <tr>
                         <td>Tax:</td>
                         <td class="text-right">₹{{order.tax}}.00</td>
                     </tr>
+
+                    {{#if order.couponDiscount}}
                     <tr>
-                        <td>Discount:</td>
+                        <td>Coupon Discount:</td>
                         <td class="text-right text-success">-₹{{order.couponDiscount}}.00</td>
                     </tr>
+                    {{/if}}
+
+                    {{#if order.offerDiscount}}
+                    <tr>
+                        <td>Offer Discount:</td>
+                        <td class="text-right text-success">-₹{{order.offerDiscount}}.00</td>
+                    </tr>
+                    {{/if}}
+
+                    {{#if (or (eq order.paymentMethod "razorpay") (eq order.paymentMethod "Wallet"))}}
+                    <tr>
+                        <td>Wallet Amount Used:</td>
+                        <td class="text-right text-success">-₹{{order.walletAmountUsed}}.00</td>
+                    </tr>
+                    {{/if}}
+
                     <tr>
                         <td><strong>Total Amount:</strong></td>
                         <td class="text-right"><strong>₹{{order.totalAmount}}.00</strong></td>
@@ -572,34 +598,46 @@
 
                 <div class="payment-method">
                     <p><strong>Payment Method:</strong> {{order.paymentMethod}}</p>
-                    <p><strong>Payment Status:</strong> <span
-                            style="color: var(--success);">{{order.paymentStatus}}</span></p>
-                    <p><strong>Order Date:</strong> {{formatDate order.createdAt}}</p> {{!-- Assuming you have a HBS
-                    helper for date formatting --}}
+                    <p><strong>Payment Status:</strong>
+                        <span style="color: {{#if (eq order.paymentStatus "
+                            Paid")}}var(--success){{else}}#e74c3c{{/if}}">
+                            {{order.paymentStatus}}
+                        </span>
+                    </p>
+                    <p><strong>Order Date:</strong> {{formatDate order.createdAt}}</p>
                     <div class="legal-note">
-                        This is a computer generated invoice and does not require a physical signature.
+                        This is a computer-generated invoice and does not require a physical signature.
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="invoice-footer">
-            <div class="footer-note">Thank you for shopping with Clothify!</div>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
+        <div class="invoice-footer" style="margin-top: 40px; text-align: center; font-size: 14px; color: #555;">
+            <div class="footer-note" style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">
+                Thank you for shopping with <span style="color: #000;">Clothify</span>!
             </div>
-            <div>If you have any questions about this invoice, please contact:</div>
-            <div><strong>support@clothify.com</strong> | <strong>(+91) 95 1234 5678</strong></div>
-            <div class="footer-links">
-                © 2025 Clothify. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of
-                    Service</a>
+
+            <div class="social-links" style="margin-bottom: 10px;">
+                <a href="#" style="margin: 0 10px; color: #555;"><i class="fab fa-instagram"></i></a>
+                <a href="#" style="margin: 0 10px; color: #555;"><i class="fab fa-facebook"></i></a>
+                <a href="#" style="margin: 0 10px; color: #555;"><i class="fab fa-twitter"></i></a>
+            </div>
+
+            <div style="margin-bottom: 4px;">If you have any questions about this invoice, please contact:</div>
+            <div style="margin-bottom: 10px;">
+                <strong>support@clothify.com</strong> | <strong>(+91) 95 1234 5678</strong>
+            </div>
+
+            <div class="footer-links" style="font-size: 13px; color: #888;">
+                © 2025 <strong>Clothify</strong>. All rights reserved.
+                | <a href="#" style="color: #888;">Privacy Policy</a>
+                | <a href="#" style="color: #888;">Terms of Service</a>
             </div>
         </div>
     </div>
 
 
+    <br><br>
     <br><br>
 
     <script>

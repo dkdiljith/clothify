@@ -9,27 +9,27 @@
         <div class="action-controls">
             <div class="search-filter">
                 {{!-- <input type="text" placeholder="Search activities..." class="search-input"> --}}
-                <form method="GET" action='/user/collections' role="search">
+                {{!-- <form method="GET" action='/user/collections' role="search">
                     <div class="search-container">
                         <input type="search" name="query" class="search-input" id="search-input"
                             placeholder="Search activities..." {{#if query}} value={{query}} {{/if}}>
                     </div>
-                </form>
+                </form> --}}
 
-                <select class="filter-select">
+                {{!-- <select class="filter-select">
                     <option value="all">All Actions</option>
                     <option value="product">Product Changes</option>
                     <option value="order">Order Updates</option>
                     <option value="user">User Modifications</option>
                 </select>
-                <button class="filter-btn">Apply</button>
+                <button class="filter-btn">Apply</button> --}}
             </div>
         </div>
     </div>
 
     <div class="activity-log-container">
         <table class="activity-table">
-            <thead>
+            {{!-- <thead>
                 <tr>
                     <th>Timestamp</th>
                     <th>Action Type</th>
@@ -74,13 +74,15 @@
                     <td>Discount set to 30%</td>
                     <td><button class="view-details-btn">View Details</button></td>
                 </tr>
-            </tbody>
-        </table>
+            </tbody> --}}
 
-        <div class="pagination-controls">
-            <button class="pagination-btn" disabled>Previous</button>
-            <span class="page-info">Page 1 of 5</span>
-            <button class="pagination-btn">Next</button>
+             <div class="activity-log-coming-soon" style="text-align: center; padding: 80px 20px; color: #555;">
+            <h2 style="font-size: 28px; margin-bottom: 15px;">🚧 Coming Soon!</h2>
+            <p style="font-size: 16px;">
+                The Activity Log feature is under development. Stay tuned for updates!
+            </p>
         </div>
+        
+        </table>
     </div>
 </div>

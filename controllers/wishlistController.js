@@ -14,13 +14,13 @@ exports.wishlistDataIcon = async (req, res) => {
 
         if (wishlist && wishlist.items) {
             const wishlistCount = wishlist.items.length;
-            res.json({ wishlistCount: wishlistCount });
+            return res.json({ wishlistCount: wishlistCount });
         } else {
-            res.json({ wishlistCount: 0 });
+            return res.json({ wishlistCount: 0 });
         }
     } catch (error) {
         console.error("Error fetching wishlist data for icon:", error);
-        res.status(500).json({ error: "Failed to fetch wishlist data" });
+        return res.status(500).json({ error: "Failed to fetch wishlist data" });
     }
 };
 
@@ -28,16 +28,16 @@ exports.wishlistDataIcon = async (req, res) => {
 
 exports.wishlistRender = async (req, res) => {
     const userId = res.locals.user._id
-    
+
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
-    const limit = 12; // 6 products per page
-    
+    const limit = 12; // 12 products per page
+
     try {
         const wishlist = await Wishlist.findOne({ userId: userId }).lean();
 
         if (!wishlist || !wishlist.items || wishlist.items.length === 0) {
-            return res.render('user/wishlist', { 
+            return res.render('user/wishlist', {
                 product: [],
                 pagination: {
                     page: 1,
@@ -52,7 +52,7 @@ exports.wishlistRender = async (req, res) => {
         const productIds = wishlist.items.map(item => item.productId);
         const totalProducts = productIds.length;
         const totalPages = Math.ceil(totalProducts / limit);
-        
+
         // Get paginated product IDs
         const startIndex = (page - 1) * limit;
         const paginatedProductIds = productIds.slice(startIndex, startIndex + limit);
@@ -61,7 +61,7 @@ exports.wishlistRender = async (req, res) => {
             .select('name images details latestCollection bestSeller') // Include necessary fields for badges
             .lean();
 
-        res.render('user/wishlist', { 
+        return res.render('user/wishlist', {
             product: products,
             pagination: {
                 page,
@@ -76,7 +76,7 @@ exports.wishlistRender = async (req, res) => {
 
     } catch (error) {
         console.error('Error rendering wishlist:', error);
-        res.status(500).render('user/wishlist', { 
+        return res.status(500).render('user/wishlist', {
             product: [],
             pagination: {
                 page: 1,
@@ -96,7 +96,7 @@ exports.addToWishlist = async (req, res) => {
         const userId = res.locals.user._id
         const productId = req.params.id;
         const variationIndex = parseInt(req.params.variationIndex);
-        console.log(productId , "this is productId")
+        console.log(productId, "this is productId")
 
         let wishlist = await Wishlist.findOne({ userId: userId })
 
@@ -126,7 +126,7 @@ exports.addToWishlist = async (req, res) => {
 
     } catch (error) {
         console.error("Error adding to wishlist:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'An error occurred. Please try again later.'
         });
@@ -142,7 +142,7 @@ exports.removeFromWishlist = async (req, res) => {
     try {
         const userId = res.locals.user._id
         const productId = req.params.id;
-        console.log(productId , "this is productId")
+        console.log(productId, "this is productId")
 
         const wishlist = await Wishlist.findOne({ userId });
 
@@ -156,11 +156,11 @@ exports.removeFromWishlist = async (req, res) => {
 
         await wishlist.save();
 
-        res.json({ success: true, message: 'Item removed from wishlist successfully' });
+        return res.json({ success: true, message: 'Item removed from wishlist successfully' });
 
     } catch (error) {
         console.error('Wishlist remove error:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 

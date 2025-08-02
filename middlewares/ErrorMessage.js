@@ -71,7 +71,7 @@ exports.ErrorContent = async (req, res) => {
     </body>
     </html>
   `;
-  res.status(404).send(htmlContent);
+  return res.status(404).send(htmlContent);
 };
 
 
@@ -164,5 +164,5 @@ exports.userBlockedError = async (req, res) => {
     </body>
     </html>
   `;
-  res.status(403).send(htmlContent);
+  return res.status(403).send(htmlContent);
 };

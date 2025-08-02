@@ -478,7 +478,7 @@
 
 <body>
 
-    
+
     <div class="container">
         <div class="address-container">
             <div class="address-section">
@@ -536,27 +536,31 @@
                     </div>
                     <div class="summary-item">
                         <span>Shipping</span>
+                        {{#ifEquals cart.shippingFee 0}}
+                        <span style="color: var(--success-color);">Free</span>
+                        {{else}}
                         <span>₹{{cart.shippingFee}}</span>
+                        {{/ifEquals}}
                     </div>
                     <div class="summary-item">
                         <span>Tax</span>
                         <span>₹{{cart.tax}}</span>
                     </div>
 
-                     {{#if cart.couponId}}
-          <div class="summary-item">
-            <span>Coupon Discount</span>
-            <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
-          </div>
-          {{/if}}
+                    {{#if cart.couponId}}
+                    <div class="summary-item">
+                        <span>Coupon Discount</span>
+                        <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
+                    </div>
+                    {{/if}}
 
-          {{#if cart.offerDiscount}}
-          <div class="summary-item">
-            <span>Discount</span>
-            <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
-          </div>
-          {{/if}}
-          
+                    {{#if cart.offerDiscount}}
+                    <div class="summary-item">
+                        <span>Discount</span>
+                        <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
+                    </div>
+                    {{/if}}
+
                     <div class="summary-item total">
                         <span>Total Amount</span>
                         <span>₹{{cart.totalAmount}}</span>

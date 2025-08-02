@@ -265,7 +265,7 @@
       padding: 15px;
       margin: 10px 0;
       border: 1px solid var(--medium-gray);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       position: relative;
     }
 
@@ -330,7 +330,7 @@
       align-items: center;
       justify-content: center;
       font-size: 14px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .no-coupons-message {
@@ -428,51 +428,51 @@
   <div class="container">
     <div class="cart-container">
 
-       {{#if coupons.length}}
-          <div class="coupons-available">
-            <h3><i class="fas fa-tag"></i> Available Coupons</h3>
-            {{#each coupons}}
-            <div class="coupon-card {{#if (eq this._id ../cart.couponId)}}applied-coupon{{/if}}">
-              {{#if (eq this._id ../cart.couponId)}}
-              <div class="applied-coupon-badge" title="Currently Applied">
-                <i class="fas fa-check"></i>
-              </div>
-              {{/if}}
-              <div class="coupon-header">
-                <span class="coupon-code">{{this.couponCode}}</span>
-                <span class="coupon-discount">
-                  {{#if (eq this.discountType 'percentage')}}
-                    {{this.discountValue}}% OFF
-                  {{else}}
-                    ₹{{this.discountValue}} OFF
-                  {{/if}}
-                </span>
-              </div>
-              <div class="coupon-details">
-                {{#if (eq this.discountType 'percentage')}}
-                  Get {{this.discountValue}}% discount on your order
-                {{else}}
-                  Get flat ₹{{this.discountValue}} discount on your order
-                {{/if}}
-              </div>
-              <div class="coupon-min-purchase">
-                Min. purchase: ₹{{this.minimumPurchaseAmount}}
-              </div>
-              {{#if (eq this._id ../cart.couponId)}}
-                <button class="btn-apply-coupon" onclick="removeCoupon()">
-                  <i class="fas fa-times"></i> Remove Coupon
-                </button>
-              {{else}}
-                <button class="btn-apply-coupon" onclick="applyCoupon('{{this._id}}')">
-                  <i class="fas fa-tag"></i> Apply Coupon
-                </button>
-              {{/if}}
-            </div>
-            {{/each}}
+      {{#if coupons.length}}
+      <div class="coupons-available">
+        <h3><i class="fas fa-tag"></i> Available Coupons</h3>
+        {{#each coupons}}
+        <div class="coupon-card {{#if (eq this._id ../cart.couponId)}}applied-coupon{{/if}}">
+          {{#if (eq this._id ../cart.couponId)}}
+          <div class="applied-coupon-badge" title="Currently Applied">
+            <i class="fas fa-check"></i>
           </div>
           {{/if}}
+          <div class="coupon-header">
+            <span class="coupon-code">{{this.couponCode}}</span>
+            <span class="coupon-discount">
+              {{#if (eq this.discountType 'percentage')}}
+              {{this.discountValue}}% OFF
+              {{else}}
+              ₹{{this.discountValue}} OFF
+              {{/if}}
+            </span>
+          </div>
+          <div class="coupon-details">
+            {{#if (eq this.discountType 'percentage')}}
+            Get {{this.discountValue}}% discount on your order
+            {{else}}
+            Get flat ₹{{this.discountValue}} discount on your order
+            {{/if}}
+          </div>
+          <div class="coupon-min-purchase">
+            Min. purchase: ₹{{this.minimumPurchaseAmount}}
+          </div>
+          {{#if (eq this._id ../cart.couponId)}}
+          <button class="btn-apply-coupon" onclick="removeCoupon()">
+            <i class="fas fa-times"></i> Remove Coupon
+          </button>
+          {{else}}
+          <button class="btn-apply-coupon" onclick="applyCoupon('{{this._id}}')">
+            <i class="fas fa-tag"></i> Apply Coupon
+          </button>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
 
-          
+
       <div class="cart-items-section">
         <h1>Your Shopping Cart</h1>
         <div class="cart-items">
@@ -543,15 +543,19 @@
           </div>
           <div class="summary-item">
             <span>Shipping</span>
+            {{#ifEquals shippingFee 0}}
+            <span style="color: var(--success-color);">Free</span>
+            {{else}}
             <span>₹{{shippingFee}}</span>
+            {{/ifEquals}}
           </div>
           <div class="summary-item">
             <span>Tax</span>
             <span>₹{{tax}}</span>
           </div>
-          
-         
-          
+
+
+
           {{#if cart.couponId}}
           <div class="summary-item">
             <span>Coupon Discount</span>
@@ -561,11 +565,11 @@
 
           {{#if cart.offerDiscount}}
           <div class="summary-item">
-            <span>Discount</span>
+            <span>Discount For You</span>
             <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
           </div>
           {{/if}}
-          
+
           <div class="summary-item total">
             <span>Total Amount</span>
             <span>₹{{totalAmount}}</span>
@@ -690,8 +694,8 @@
       const couponCard = document.querySelector(`.coupon-card button[onclick="applyCoupon('${couponId}')"]`).closest('.coupon-card');
       const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
       const currentSubtotal = parseFloat('{{subtotal}}');
-      
-      if ( currentSubtotal < minPurchase) {
+
+      if (currentSubtotal < minPurchase) {
         showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
         return;
       }

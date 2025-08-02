@@ -9,7 +9,7 @@ const razorpay = new Razorpay({
 exports.walletRender = async (req, res) => {
     const userId = res.locals.user._id
     const wallet = await Wallet.findOne({ userId }).lean();
-    
+
     // Pagination variables
     const page = parseInt(req.query.page) || 1;
     const limit = 3; // 3 transactions per page
@@ -18,34 +18,34 @@ exports.walletRender = async (req, res) => {
     let credit = 0;
     let debit = 0;
 
-    if(wallet) {
+    if (wallet) {
         // Reverse transactions to show latest first
         const reversedTransactions = wallet.transactions.reverse();
-        
+
         // Calculate total pages
         totalPages = Math.ceil(reversedTransactions.length / limit);
-        
+
         // Get transactions for current page
         const startIndex = (page - 1) * limit;
         paginatedTransactions = reversedTransactions.slice(startIndex, startIndex + limit);
-        
+
         // Calculate credit and debit totals
         credit = reversedTransactions.reduce((sum, transaction) => {
             return transaction.type === 'credit' ? sum + transaction.amount : sum;
         }, 0);
-        
+
         debit = reversedTransactions.reduce((sum, transaction) => {
             return transaction.type === 'debit' ? sum + transaction.amount : sum;
         }, 0);
-        
+
         // Update wallet object with paginated transactions
         wallet.transactions = paginatedTransactions;
     }
 
-    res.render('user/wallet', { 
-        wallet, 
-        credit, 
-        debit, 
+    return res.render('user/wallet', {
+        wallet,
+        credit,
+        debit,
         pagination: {
             page,
             limit,
@@ -75,11 +75,11 @@ exports.amountDeposit = async (req, res) => {
         const order = await razorpay.orders.create(options);
 
         if (order) {
-            res.json(order);
+            return res.json(order);
         }
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 }
 
@@ -103,7 +103,7 @@ exports.walletPaymentVerification = async (req, res) => {
         // Add funds to wallet
         const wallet = await Wallet.findOne({ userId });
         if (!wallet) {
-            res.status(500).send('Wallet notfound');
+            return res.status(500).send('Wallet notfound');
         }
         wallet.balance += IntegerAmount;
 
@@ -116,13 +116,13 @@ exports.walletPaymentVerification = async (req, res) => {
 
         await wallet.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Payment verified',
             payment_id: razorpay_payment_id
         });
     } else {
-        res.status(500).send('Failed to create order');
+        return res.status(500).send('Failed to create order');
     }
 
 }
@@ -136,7 +136,7 @@ exports.walletPayment = async (req, res) => {
     try {
         const userId = res.locals.user._id
         if (!userId) {
-            res.status(500).json({ error: `User not found` })
+            return res.status(500).json({ error: `User not found` })
         }
 
         const wallet = await Wallet.findOne({ userId })
@@ -156,7 +156,7 @@ exports.walletPayment = async (req, res) => {
         const result = await wallet.save();
 
         if (result) {
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: 'Payment verified'
             });

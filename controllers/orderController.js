@@ -42,7 +42,9 @@ async function calculateRefund(orderId, itemId) {
 
   /////////////////////////// Handle Coupon 
   let newCouponDiscount = 0;
-  const coupon = await Coupon.findById(order.couponId.toString())
+
+  if (order.couponId) {
+    const coupon = await Coupon.findById(order.couponId.toString())
     // Check if the remaining items still meet the coupon criteria
     if (coupon) {
       if (newDiscountedPrice >= coupon.minimumPurchaseAmount) {
@@ -54,6 +56,7 @@ async function calculateRefund(orderId, itemId) {
       }
       // If criteria not met, newCouponDiscount remains 0, effectively removing it.
     }
+  }
 
   newDiscountedPrice -= newCouponDiscount;
 
@@ -137,7 +140,7 @@ exports.ordersRender = async (req, res) => {
       .limit(limit)
       .lean();
 
-    res.render('admin/orders', {
+    return res.render('admin/orders', {
       order: orders,
       admin: true,
       pagination: {
@@ -153,7 +156,7 @@ exports.ordersRender = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching orders:", error);
-    res.render('admin/orders', {
+    return res.render('admin/orders', {
       order: [],
       admin: true,
       pagination: {
@@ -175,7 +178,7 @@ exports.orderDetails = async (req, res) => {
 
   const order = await Order.findById(orderId).lean()
 
-  res.render(`admin/orderDetails`, { order: order, admin: true })
+  return res.render(`admin/orderDetails`, { order: order, admin: true })
 }
 
 
@@ -237,7 +240,7 @@ exports.orderStatusChange = async (req, res) => {
       wallet.transactions.push({
         type: "credit",
         amount: refundAmount,
-        description: `Refund for Order #${order._id}: ₹${refundAmount} credited for returned item (${item.productName})`,
+        description: `Refund for Order #${order.orderId}: ₹${refundAmount} credited for returned item (${item.productName})`,
       });
       await wallet.save();
     }
@@ -343,7 +346,7 @@ exports.orderCancel = async (req, res) => {
         wallet.transactions.push({
           type: "credit",
           amount: refundAmount,
-          description: `Refund for Order #${order._id}: ₹${refundAmount} credited for cancelled item (${item.productName})`,
+          description: `Refund for Order #${order.orderId}: ₹${refundAmount} credited for cancelled item (${item.productName})`,
         });
         await wallet.save();
       }

@@ -584,7 +584,7 @@
                         <h2 class="order-title">
                             <i class="fas fa-clipboard-list"></i> Order Details
                         </h2>
-                        <div class="order-number">Order #{{order._id}}</div>
+                        <div class="order-number">Order #{{order.orderId}}</div>
                     </div>
 
                     <div>
@@ -646,11 +646,14 @@
                     <div class="address-details">
                         <p><strong>{{order.deliveryAddress.name}}</strong></p>
                         <p>{{order.deliveryAddress.streetAddress}}</p>
-                        <p>{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},
-                            {{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}</p>
+                        <p>Landmark: {{order.deliveryAddress.landmark}}</p>
+                        <p>{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},</p>
+                        <p>{{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}</p>
+                        <p>{{order.deliveryAddress.country}}</p>
                         <p>Phone: {{order.deliveryAddress.phone}}</p>
                     </div>
                 </div>
+
 
                 <!-- Price Details Card -->
                 <div class="order-card price-details-card">
@@ -658,27 +661,63 @@
                         <div class="order-card-title">Payment Details</div>
                     </div>
                     <div class="price-summary">
-                        {{!-- <div class="price-row">
-                            <span class="price-label">Item Total</span>
-                            <span class="price-value">₹{{ order.totalAmount}}</span>
+
+                        <div class="price-row">
+                            <span class="price-label">Subtotal ({{order.totalItems}} items)</span>
+                            <span class="price-value">₹{{order.subtotal}}</span>
                         </div>
+
+                        <div class="price-row">
+                            <span class="price-label">Shipping</span>
+                            {{#ifEquals order.shippingFee 0}}
+                            <span class="price-value" style="color: var(--success-color);">Free</span>
+                            {{else}}
+                            <span class="price-value">₹{{order.shippingFee}}</span>
+                            {{/ifEquals}}
+                        </div>
+
+                        <div class="price-row">
+                            <span class="price-label">Tax</span>
+                            <span class="price-value">₹{{order.tax}}</span>
+                        </div>
+
+                        {{#if order.couponId}}
+                        <div class="price-row">
+                            <span class="price-label">Coupon Discount</span>
+                            <span class="price-value"
+                                style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
+                        </div>
+                        {{/if}}
+
+                        {{#if order.offerDiscount}}
+                        <div class="price-row">
+                            <span class="price-label">Discount</span>
+                            <span class="price-value"
+                                style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
+                        </div>
+                        {{/if}}
+
                         {{#if (or (eq order.paymentMethod "razorpay") (eq order.paymentMethod "Wallet"))}}
                         <div class="price-row">
                             <span class="price-label">Wallet Amount Used</span>
-                            <span class="price-value">- ₹{{ order.walletAmountUsed}}</span>
+                            <span class="price-value"
+                                style="color: var(--success-color);">-₹{{order.walletAmountUsed}}</span>
                         </div>
-                        {{/if}} --}}
+                        {{/if}}
+
                         <div class="price-row total-price">
                             <span class="price-label"><strong>Amount {{#if (or (eq order.paymentMethod "razorpay") (eq
                                     order.paymentMethod "Wallet"))}}Paid{{else}}To Pay{{/if}}</strong></span>
-                            <span class="price-value"><strong>₹{{ order.totalAmount}}</strong></span>
+                            <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
                         </div>
+
                         <div class="payment-method">
                             <span class="price-label">Payment Method:</span>
                             <span class="price-value">{{order.paymentMethod}}</span>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
@@ -694,6 +733,8 @@
                     </button>
                 </div>
 
+
+                {{#if (gt order.items.length 1)}}
                 <!-- Other Items in Order -->
                 <div class="order-card other-items-card">
                     <div class="order-card-header">
@@ -715,6 +756,8 @@
                     {{/if}}
                     {{/each}}
                 </div>
+
+                {{/if}}
             </div>
         </div>
     </div>
@@ -809,7 +852,7 @@
                 }
 
                 const data = {
-                    orderId: "{{order._id}}",
+                    orderId: "{{order.orderId}}",
                     itemId: "{{item._id}}",
                     variationIndex: "{{item.variationIndex}}",
                     reason: reason
@@ -876,7 +919,7 @@
                 errorElement.style.display = "none";
 
                 const data = {
-                    orderId: "{{order._id}}",
+                    orderId: "{{order.orderId}}",
                     itemId: "{{item._id}}",
                     reason: reason
                 };
