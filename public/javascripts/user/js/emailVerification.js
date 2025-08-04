@@ -1,99 +1,99 @@
-      
-      
-      document.addEventListener("DOMContentLoaded", function () {
-  const verificationForm = document.getElementById("emailVerificationForm");
-  const verificationCode = document.getElementById("verificationCode");
-  const verificationCodeError = document.getElementById("verificationCodeError");
-  const sendButton = document.querySelector(".btn-primary"); // Assuming the resend button has this class
-  const resendText = document.getElementById("resendTimer"); // Corrected this line to match the element id
-  const resendMessage = document.getElementById("resendMessage")
-  let countdownInterval;
-  let countdownValue = 60; // Timer for 60 seconds
-  let resendCount = 0;
-  let resendLimit = 5; // Maximum resend attempts
+document.addEventListener("DOMContentLoaded", function () {
+    const emailVerificationForm = document.getElementById("emailVerificationForm");
+    const verificationCodeInput = document.getElementById("verificationCode");
+    const verificationCodeErrorDiv = document.getElementById("verificationCodeError");
+    const verifyButton = document.getElementById("verifyButton");
 
-  const verificationCodeMinLength = 6;
+    const resendButton = document.getElementById("resendButton");
+    const resendTimer = document.getElementById("resendTimer");
+    const csrfToken = emailVerificationForm.querySelector('input[name="_csrf"]').value;
+    const serverVerificationTime = document.getElementById("serverVerificationTime").value;
 
-  // Function to validate verification code
-  function validateVerificationCode() {
-    const codeValue = verificationCode.value.trim();
 
-    // Check if the input is empty
-    if (codeValue === "") {
-      verificationCodeError.textContent = "This field is required";
-      verificationCodeError.classList.add("visible");
-      verificationCodeError.classList.remove("hidden");
-      return false;
+
+    let timerInterval;
+
+    function startResendTimer(remainingSeconds) {
+      resendButton.disabled = true;
+      resendTimer.style.display = "inline";
+
+      timerInterval = setInterval(() => {
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          resendButton.disabled = false;
+          resendTimer.style.display = "none";
+        } else {
+          resendTimer.textContent = `(${remainingSeconds}s)`;
+          remainingSeconds--;
+        }
+      }, 1000);
     }
 
-    // Check if the length of the input is less than the required length
-    if (codeValue.length < verificationCodeMinLength) {
-      verificationCodeError.textContent = `Enter a ${verificationCodeMinLength}-digit verification code`;
-      verificationCodeError.classList.add("visible");
-      verificationCodeError.classList.remove("hidden");
-      return false;
+    function calculateRemainingTime() {
+      const serverTime = new Date(serverVerificationTime).getTime();
+      const now = Date.now();
+      const remainingMillis = serverTime - now;
+      return Math.max(Math.floor(remainingMillis / 1000), 0);
     }
 
-    // If all checks pass, hide the error message
-    verificationCodeError.classList.add("hidden");
-    verificationCodeError.classList.remove("visible");
-    return true;
-  }
+    // Start timer based on backend time
+    startResendTimer(calculateRemainingTime());
 
-  // Start timer for resend functionality
-  function startTimer() {
-    resendMessage.style.display = "block"; // show timer message when countdown starts
-    resendText.style.display = "inline"; // Show timer when countdown starts
-    countdownInterval = setInterval(function () {
-      if (countdownValue <= 0) {
-        clearInterval(countdownInterval);
-        resendMessage.style.display = "none"; // Hide timer message when countdown ends
-        sendButton.classList.remove("btn-disabled");
-        sendButton.classList.add("btn-primary");
-      } else {
-        resendText.textContent = countdownValue;
-        countdownValue--;
+    resendButton.addEventListener("click", async () => {
+      try {
+        const response = await fetch('/user/resend-verification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+          const newTime = new Date(data.newVerificationTimer).getTime();
+          const now = Date.now();
+          const remainingSeconds = Math.max(Math.floor((newTime - now) / 1000), 60);
+          startResendTimer(remainingSeconds);
+          
+        } else {
+          alert('Error resending code: ' + data.error);
+        }
+      } catch (error) {
+        console.error("Error resending verification code:", error);
       }
-    }, 1000); // Update every 1 second
-  }
+    });
 
-  // Reset timer for a fresh start
-  function resetTimer() {
-    clearInterval(countdownInterval); // Clear any existing interval
-    countdownValue = 59; // Reset the countdown value
-    resendText.textContent = countdownValue;
-  }
+    emailVerificationForm.addEventListener("submit", function (event) {
+      event.preventDefault();
 
-  // Real-time verification code validation
-  verificationCode.addEventListener("input", function () {
-    if (validateVerificationCode()) {
-      verificationForm.submit(); // Auto-submit form after validation
-    }
+      const verificationCode = verificationCodeInput.value.trim();
+
+      verificationCodeErrorDiv.textContent = "";
+      verificationCodeErrorDiv.classList.remove("visible");
+
+      fetch('/user/emailverification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({ verificationCode: verificationCode })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/user/home';
+        } else {
+          verificationCodeErrorDiv.textContent = data.error;
+          verificationCodeErrorDiv.classList.add("visible");
+        }
+      })
+      .catch(error => {
+        console.error("Error verifying email:", error);
+        verificationCodeErrorDiv.textContent = "An unexpected error occurred. Please try again.";
+        verificationCodeErrorDiv.classList.add("visible");
+      });
+    });
   });
-
-  // Send button click handler (to simulate resend logic)
-  sendButton.addEventListener("click", function (event) {
-    event.preventDefault(); // Prevent form submission if click on resend button
-
-    // If maximum resend attempts are reached
-    if (resendCount >= resendLimit) {
-      verificationCodeError.textContent = "You have reached the maximum resend attempts.";
-      verificationCodeError.classList.add("visible");
-      verificationCodeError.classList.remove("hidden");
-      return; // Prevent further resends
-    }
-
-    resendCount++; // Increment resend count
-    verificationCodeError.classList.add("hidden"); // Hide error messages
-    resetTimer(); // Reset timer
-    startTimer(); // Start the countdown
-    sendButton.classList.add("btn-disabled"); // Disable the button
-    sendButton.classList.remove("btn-primary");
-  });
-
-  // Initially disable the resend button and start the timer
-        startTimer();
-        sendButton.classList.add("btn-disabled");
-        sendButton.classList.remove("btn-primary");
-});
-

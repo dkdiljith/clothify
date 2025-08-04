@@ -1,108 +1,114 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const resetForm = document.getElementById("resetForm");
-    const newPassword = document.getElementById("newPassword");
-    const confirmPassword = document.getElementById("confirmPassword");
-    const newPasswordError = document.getElementById("newPasswordError");
-    const confirmPasswordError = document.getElementById("confirmPasswordError");
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('resetForm');
+  const newPasswordInput = document.getElementById('newPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const togglePassword = document.getElementById('togglePassword');
+  const newPasswordError = document.getElementById('newPasswordError');
+  const confirmPasswordError = document.getElementById('confirmPasswordError');
+  const submitButton = form.querySelector('button[type="submit"]');
 
-    const passwordMinLength = 8; // Set the minimum length limit for the password
-    const passwordMaxLength = 20; // Set the maximum length limit for the password
 
-    // Validation for the new password
-    function validateNewPassword() {
-      const passwordValue = newPassword.value.trim();
-
-      // Remove spaces while typing
-      newPassword.value = newPassword.value.replace(/\s/g, "");
-
-      // Check if password is empty
-      if (passwordValue === "") {
-        newPasswordError.textContent = "This field is required";
-        newPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      // Check for minimum password length
-      if (passwordValue.length < passwordMinLength) {
-        newPasswordError.textContent = `Password must be at least ${passwordMinLength} characters long`;
-        newPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      // Limit password length and show error when limit is reached
-      if (passwordValue.length > passwordMaxLength) {
-        newPassword.value = passwordValue.substring(0, passwordMaxLength); // Cut the excess characters
-        newPasswordError.textContent = `Password exceeds maximum length of ${passwordMaxLength} characters`;
-        newPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      // Check for mix of uppercase, lowercase, numbers, and symbols
-      const passwordRegex =
-        /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,20}$/;
-
-      if (
-        !/[A-Z]/.test(passwordValue) ||
-        !/[a-z]/.test(passwordValue) ||
-        !/[0-9]/.test(passwordValue) ||
-        !/[!@#$%^&*]/.test(passwordValue)
-      ) {
-        newPasswordError.textContent =
-          "Use a mix of letters, numbers & symbols";
-        newPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      newPasswordError.style.visibility = "hidden";
-      return true;
-    }
-
-    // Validation for the confirm password field
-    function validateConfirmPassword() {
-      if (confirmPassword.value.trim() === "") {
-        confirmPasswordError.textContent = "This field is required.";
-        confirmPasswordError.style.visibility = "visible";
-        return false;
-      } else if (confirmPassword.value !== newPassword.value) {
-        confirmPasswordError.textContent = "Passwords do not match.";
-        confirmPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      // Limit confirm password length and show error when limit is reached
-      const confirmPasswordValue = confirmPassword.value.trim();
-      if (confirmPasswordValue.length > passwordMaxLength) {
-        confirmPassword.value = confirmPasswordValue.substring(0, passwordMaxLength); // Cut the excess characters
-        confirmPasswordError.textContent = `Password exceeds maximum length of ${passwordMaxLength} characters`;
-        confirmPasswordError.style.visibility = "visible";
-        return false;
-      }
-
-      confirmPasswordError.textContent = "";
-      confirmPasswordError.style.visibility = "hidden";
-      return true;
-    }
-
-    // Attach event listeners to validate input fields
-    newPassword.addEventListener("input", validateNewPassword);
-    confirmPassword.addEventListener("input", validateConfirmPassword);
-
-    // Prevent form submission if validation fails
-    resetForm.addEventListener("submit", function (event) {
-      const isNewPasswordValid = validateNewPassword();
-      const isConfirmPasswordValid = validateConfirmPassword();
-      if (!isNewPasswordValid || !isConfirmPasswordValid) {
-        event.preventDefault();
-      }
-    });
-
-     // Eye toggle functionality
-  const togglePassword = document.getElementById("togglePassword");
-  togglePassword.addEventListener("click", function () {
-    const type = newPassword.type === "password" ? "text" : "password";
-    newPassword.type = type;
-    togglePassword.classList.toggle("fa-eye");
-    togglePassword.classList.toggle("fa-eye-slash");
+  // Toggle password visibility
+  togglePassword.addEventListener('click', function() {
+    const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    newPasswordInput.setAttribute('type', type);
+    this.classList.toggle('fa-eye-slash');
   });
 
+  // Validate new password
+  function validateNewPassword() {
+    const password = newPasswordInput.value;
+    let isValid = true;
+    newPasswordError.textContent = '';
+    
+    if (!password) {
+      newPasswordError.textContent = 'Password is required';
+      isValid = false;
+    } else if (password.length < 8) {
+      newPasswordError.textContent = 'Password must be at least 8 characters';
+      isValid = false;
+    } else if (!/[A-Z]/.test(password)) {
+      newPasswordError.textContent = 'Password must contain at least one uppercase letter';
+      isValid = false;
+    } else if (!/[0-9]/.test(password)) {
+      newPasswordError.textContent = 'Password must contain at least one number';
+      isValid = false;
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      newPasswordError.textContent = 'Password must contain at least one special character';
+      isValid = false;
+    }
+    
+    return isValid;
+  }
+
+  // Validate password confirmation
+  function validateConfirmPassword() {
+    const password = newPasswordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    let isValid = true;
+    confirmPasswordError.textContent = '';
+    
+    if (!confirmPassword) {
+      confirmPasswordError.textContent = 'Please confirm your password';
+      isValid = false;
+    } else if (password !== confirmPassword) {
+      confirmPasswordError.textContent = 'Passwords do not match';
+      isValid = false;
+    }
+    
+    return isValid;
+  }
+
+  // Form submission handler
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const isNewPasswordValid = validateNewPassword();
+    const isConfirmPasswordValid = validateConfirmPassword();
+    
+    if (!isNewPasswordValid || !isConfirmPasswordValid) {
+      return;
+    }
+
+    // Disable submit button during request
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+
+    try {
+      const response = await fetch(`/user/resetpassword`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          newPassword: newPasswordInput.value,
+          confirmPassword: confirmPasswordInput.value,
+          token: token.value,
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reset password');
+      }
+
+      // Success - redirect to login with success message
+      window.location.href = '/user/login?message=Password reset successfully';
+      
+    } catch (error) {
+      console.error('Password reset error:', error);
+      newPasswordError.textContent = error.message;
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Reset Password';
+    }
   });
+
+  // Real-time validation
+  newPasswordInput.addEventListener('input', validateNewPassword);
+  newPasswordInput.addEventListener('blur', validateNewPassword);
+  confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+  confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
+});

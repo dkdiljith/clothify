@@ -1,105 +1,76 @@
+ document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.getElementById('addCategoryForm');
+            const categoryNameInput = document.getElementById('categoryName');
+            const categoryNameError = document.getElementById('categoryNameError');
 
+            function validateCategoryName() {
+                const value = categoryNameInput.value.trim();
+                
+                if (value === '') {
+                    categoryNameError.textContent = 'Category name is required';
+                    categoryNameError.style.display = 'block';
+                    categoryNameInput.classList.add('error');
+                    return false;
+                }
+                
+                if (value.length < 6) {
+                    categoryNameError.textContent = 'Category name must be at least 6 characters long';
+                    categoryNameError.style.display = 'block';
+                    categoryNameInput.classList.add('error');
+                    return false;
+                }
+                
+                categoryNameError.style.display = 'none';
+                categoryNameInput.classList.remove('error');
+                return true;
+            }
 
-const editButtons = document.querySelectorAll('.edit-button');
-const modalBody = document.getElementById('modalBody');
-const saveChangesButton = document.getElementById('saveChanges');
+            // Real-time validation
+            categoryNameInput.addEventListener('input', function() {
+                validateCategoryName();
+            });
 
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                if (!validateCategoryName()) {
+                    e.preventDefault();
+                    categoryNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    categoryNameInput.focus();
+                }
+            });
 
-editButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const categoryId = button.dataset.id;
-    const categoryName = button.dataset.name;
-    const parentCategoryId = button.dataset.parent;
+            // Delete category functionality
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const categoryId = button.getAttribute('data-id');
 
-    // Fetch subcategories (replace with your actual API endpoint)
-    fetch(`/admin/category/getSubcategories/${categoryId}`) // Example API endpoint
-      .then(response => response.json())
-      .then(subcategories => {
-        let modalContent = `<h3>${categoryName}</h3>`;
+                    const confirmed = confirm(
+                        "⚠️ Are you sure you want to delete this category?\n\n" +
+                        "🔸 This action will also delete all subcategories under it.\n" +
+                        "🔸 It can affect all products that are using this category.\n\n" +
+                        "🚫 This action cannot be undone!"
+                    );
+                    if (!confirmed) return;
 
-        if (subcategories.length === 0) {
-          modalContent += "<p>No subcategories found.</p>";
-        } else {
-           modalContent += "<ul>";
-          subcategories.forEach(subcategory => {
-            modalContent += `<li>
-              <input type="text" value="${subcategory.name}" data-id="${subcategory._id}">
-              <button class="btn btn-sm btn-danger delete-subcategory" data-id="${subcategory._id}">Delete</button>
-            </li>`;
-          });
-          modalContent += "</ul>";
-        }
-        modalContent += "<input type='text' id='newSubcategory' placeholder='Add new subcategory'>";
-        modalContent += "<button id='addSubcategory' class='btn btn-sm btn-success'>Add</button>";
+                    alert("⏳ Deleting the category... Please wait.");
 
+                    try {
+                        const response = await fetch(`/admin/category/${categoryId}`, {
+                            method: 'DELETE'
+                        });
 
-        modalBody.innerHTML = modalContent;
-
-        // Add event listeners for delete buttons
-        const deleteSubcategoryButtons = document.querySelectorAll('.delete-subcategory');
-        deleteSubcategoryButtons.forEach(deleteButton => {
-          deleteButton.addEventListener('click', () => {
-            const subcategoryId = deleteButton.dataset.id;
-            // Implement your delete logic here (e.g., using fetch API)
-            console.log("Deleting subcategory:", subcategoryId);
-          });
+                        if (response.ok) {
+                            alert("✅ Category and its subcategories deleted successfully!");
+                            location.reload();
+                        } else {
+                            const errorData = await response.json();
+                            alert("❌ Failed to delete: " + errorData.message);
+                        }
+                    } catch (error) {
+                        alert("🚫 Error occurred: " + error.message);
+                    }
+                });
+            });
         });
-
-        // Event listener for adding a subcategory
-        const addSubcategoryButton = document.getElementById('addSubcategory');
-        addSubcategoryButton.addEventListener('click', () => {
-          const newSubcategoryName = document.getElementById('newSubcategory').value;
-           // Implement your add logic here (e.g., using fetch API)
-          console.log("Adding subcategory:", newSubcategoryName, "to category:", categoryId);
-        });
-      })
-      .catch(error => {
-        console.error("Error fetching subcategories:", error);
-        modalBody.innerHTML = "<p>Error loading subcategories.</p>";
-      });
-  });
-});
-
-saveChangesButton.addEventListener('click', () => {
-  // Implement your save changes logic here (e.g., using fetch API)
-  console.log("Saving changes...");
-  const subcategoryInputs = document.querySelectorAll('#modalBody input[type="text"]');
-  subcategoryInputs.forEach(input => {
-    const subcategoryId = input.dataset.id;
-    const newSubcategoryName = input.value;
-    console.log("Subcategory:", subcategoryId, "New name:", newSubcategoryName);
-  });
-});
-
-
-
-  const categoriesContainer = document.getElementById("categories-container");
-  const modal = document.getElementById("myModal");
-  const modalContentInner = document.getElementById("modal-content-inner");
-  const closeButton = document.querySelector(".close");
-
-
-  categoriesContainer.addEventListener("click", (event) => {
-    if (event.target.classList.contains("edit-button2")) {
-      const categoryId = event.target.dataset.categoryId;
-      const category = subcategories.find(cat => cat.id === parseInt(categoryId));
-
-      if (category) {
-        modalContentInner.innerHTML = `<h2>Edit ${category.name}</h2>
-                                       <input type="text" value="${category.name}">
-                                       <button>Save</button>`;
-
-        modal.style.display = "block";
-      }
-    }
-  });
-
-  closeButton.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
-
-  window.addEventListener("click", (event) => {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  });

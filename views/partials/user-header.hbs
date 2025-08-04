@@ -1,24 +1,330 @@
-<!-- Header desktop -->
-<div class="container-menu-desktop">
-    {{!-- <!-- Topbar (Optional for additional info like promotions) -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="flex-w flex-sb-m p-t-10 p-b-10">
-                <div class="left-top-bar">
-                    Free Shipping on Orders Over $50
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/util.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/main.css">
+
+
+<!-- Add styles for better appearance -->
+<style>
+    .user-profile-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        right: 0;
+        opacity: 0;
+        /* Initially hidden with opacity */
+        transform: translateY(-10px);
+        /* Start slightly above */
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        /* Smooth transitions */
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 12px;
+        text-decoration: none;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .show {
+        display: block;
+        /* Needed for positioning context */
+        opacity: 1;
+        /* Fade in */
+        transform: translateY(0);
+        /* Move into place */
+    }
+
+    .top-bar {
+        background-color: #f8f8f8;
+        font-size: 14px;
+    }
+
+    .top-bar .top-bar-link {
+        color: #555;
+        margin-left: 15px;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .top-bar .top-bar-link:hover {
+        color: #000;
+    }
+
+    .menu-desktop .main-menu li {
+        display: inline-block;
+        margin-right: 15px;
+        /* Reduced the margin between items */
+    }
+
+    .menu-desktop .main-menu li a {
+        text-decoration: none;
+        font-weight: bold;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    .menu-desktop .main-menu li a:hover {
+        color: #007bff;
+    }
+
+    .wrap-icon-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;
+        /* Increased the gap between icons */
+    }
+
+    .wrap-icon-header .icon-header-item {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+        /* Increased icon size */
+        width: 50px;
+        /* Increased icon size */
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        position: relative;
+        font-size: 22px;
+        /* Increased font size for icons */
+    }
+
+    .wrap-icon-header .icon-header-item:hover {
+        background-color: #f1f1f1;
+    }
+
+    .user-profile-icon {
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+   .notify-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ff4747;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(25%, -25%);
+}
+
+/* Remove the old notification style */
+.icon-header-noti[data-notify]:after {
+    display: none;
+}
+
+
+    .icon-header-item i {
+        font-size: 22px;
+        position: relative;
+        color: #333;
+    }
+
+    /* Ensure icons are aligned properly */
+    .wrap-icon-header button,
+    .wrap-icon-header a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    /* Fix hover alignment issues */
+    .icon-header-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Remove persistent hover for user profile */
+    .user-profile-icon {
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .user-profile-icon:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Search input styling */
+    .search-container {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    .search-input {
+        padding: 8px 12px;
+        font-size: 16px;
+        /* Increased input font size */
+        width: 220px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding-right: 40px;
+        /* Space for the search icon */
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 10px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .search-icon i {
+        font-size: 20px;
+        /* Increased search icon size */
+        color: #333;
+    }
+
+    .wrap-menu-desktop {
+  top: 0 !important; /* Override any JavaScript setting */
+  background-color: white !important; /* Make it always white */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Add shadow for better visibility */
+}
+
+/* Remove the top bar spacing effect */
+.container-menu-desktop {
+  height: auto;
+}
+
+/* Adjust the mobile header to match */
+.wrap-header-mobile {
+  height: 70px;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Remove the shrinking effect */
+.fix-menu-desktop .wrap-menu-desktop {
+  height: 84px !important; /* Keep it at original height */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; /* Consistent shadow */
+}
+
+
+    /* ////////////////////////////////// */
+
+</style>
+
+
+
+{{!-- //header when size is small --}}
+<div class="animsition">
+    <!-- Header -->
+    <header>
+
+        <!-- Header Mobile -->
+        <div class="wrap-header-mobile">
+            <!-- Logo moblie -->
+            <div class="logo-mobile">
+                <a href="index.html"><img src="/images/user/images/icons/logo-01.png" alt="IMG-LOGO"></a>
+            </div>
+
+            <!-- Icon DIV -->
+            <div class="wrap-icon-header flex-w flex-r-m m-r-15">
+
+                {{!-- search icon --}}
+                <div class="icon-header-item cl2 p-r-11 js-show-modal-search" aria-label="Search" role="button"
+                    tabindex="0">
+                    <i class="fas fa-search search-icon"></i>
                 </div>
-                <div class="right-top-bar">
-                    <a href="#" class="top-bar-link">Help & FAQs</a>
-                    <a href="/user/login" class="top-bar-link">Login</a>
-                    <a href="/user/register" class="top-bar-link">Register</a>
+
+                <!-- Cart Icon -->
+                <button onclick="location.href='/user/cart'" 
+        class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-cart"
+        aria-label="Shopping Cart" style="padding: 10px 25px; font-size: 1.2em;">
+    <i class="fa fa-shopping-cart"></i>
+    <span class="notify-badge" data-notify="0" style="display: none;"></span>
+</button>
+
+                <!-- Wishlist Icon -->
+                <a href="/user/wishlist" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11" aria-label="Wishlist">
+    <i class="fa fa-heart"></i>
+    <span class="notify-badge" data-notify="0" style="display: none;"></span>
+</a>
+
+
+                <!-- User Profile Icon -->
+                <div class="user-profile-container">
+                    <a class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-profile-icon"
+                        aria-label="User Profile" onclick="toggleDropdownMobile()">
+                        <i class="fa fa-user"></i>
+                    </a>
+
+                    <div id="userDropdownMobile" class="dropdown-content">
+                        <a href="/user/profile">Profile</a>
+                        <a href="/user/logout">Logout</a>
+                    </div>
+
                 </div>
+
+
+            </div>
+
+            <!-- Button show menu -->
+            <div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
             </div>
         </div>
-    </div> --}}
+
+
+        <!-- Menu Mobile -->
+        <div class="menu-mobile">
+
+            <ul class="main-menu-m">
+                <ul class="main-menu">
+                    <li><a href="/user/home">Home</a></li>
+                    <li><a href="/user/collections" >Collections</a></li>
+                    {{!-- <li><a href="/user/mens">Mens</a></li>
+                    <li><a href="/user/womens">Womens</a></li> --}}
+                    {{!-- <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li> --}}
+                </ul>
+            </ul>
+        </div>
+
+
+    </header>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- Header desktop -->
+<div class="container-menu-desktop">
 
     <div class="wrap-menu-desktop">
         <nav class="limiter-menu-desktop container" role="navigation">
-            <!-- Logo desktop -->        
+            <!-- Logo desktop -->
             <a href="index.html" class="logo">
                 <img src="/images/user/images/icons/logo-01.png" style="width: 150px; height: auto;" alt="Website Logo">
             </a>
@@ -27,8 +333,9 @@
             <div class="menu-desktop">
                 <ul class="main-menu">
                     <li><a href="/user/home">Home</a></li>
-                    <li><a href="/user/mens">Mens</a></li>
-                    <li><a href="/user/womens">Womens</a></li>
+                    <li><a href="/user/collections" >Collections</a></li>
+                    {{!-- <li><a href="/user/mens">Mens</a></li>
+                    <li><a href="/user/womens">Womens</a></li> --}}
                     {{!-- <li><a href="about.html">About</a></li>
                     <li><a href="contact.html">Contact</a></li> --}}
                 </ul>
@@ -36,155 +343,185 @@
 
             <!-- Icon header -->
             <div class="wrap-icon-header flex-w flex-r-m">
+
                 <!-- Search Icon and Input Box -->
+                <form method="GET" action='/user/collections' role="search">
+                    <div class="search-container">
+                    <input type="search" name="query" class="search-input" id="search-input" placeholder="Search..." {{#if query}} value={{query}} {{/if}}>
+                    <button type="submit" class="search-icon" id="search-button" aria-label="Submit search">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+                </form>
                 
-                <div class="search-container">
-    <input type="text" class="search-input" id="search-input" placeholder="Search by name...">
-    <button class="search-icon"><i class="fa fa-search"></i></button>
-</div>
-
-
-
 
 
                 <!-- Cart Icon -->
-                <button class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2" aria-label="Shopping Cart">
-                    <i class="fa fa-shopping-cart"></i>
-                </button>
+                <button onclick="location.href='/user/cart'" 
+        class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-cart"
+        aria-label="Shopping Cart" style="padding: 10px 25px; font-size: 1.2em;">
+    <i class="fa fa-shopping-cart"></i>
+    <span class="notify-badge" data-notify="0" style="display: none;"></span>
+</button>
 
                 <!-- Wishlist Icon -->
-                <a href="/user/wishlist" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0" aria-label="Wishlist">
-                    <i class="fa fa-heart"></i>
-                </a>
+                <a href="/user/wishlist" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11" aria-label="Wishlist">
+    <i class="fa fa-heart"></i>
+    <span class="notify-badge" data-notify="0" style="display: none;"></span>
+</a>
 
 
                 <!-- User Profile Icon -->
-                <a class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-profile-icon" href="/user/login" aria-label="User Profile">
-                    <i class="fa fa-user"></i>
-                </a>
+
+                <div class="user-profile-container">
+                    <a onclick="toggleDropdown()"
+                        class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-profile-icon"
+                        aria-label="User Profile">
+                        <i class="fa fa-user"></i>
+                    </a>
+
+                    <div id="userDropdown" class="dropdown-content">
+                        <a href="/user/profile">Profile</a>
+                        <a href="/user/logout">Logout</a>
+                    </div>
+
+                </div>
+
             </div>
         </nav>
-    </div>    
+    </div>
 </div>
 
-<!-- Add styles for better appearance -->
-<style>
-    .top-bar {
-        background-color: #f8f8f8;
-        font-size: 14px;
+
+
+
+
+
+
+
+
+
+
+<script>
+    function toggleDropdownMobile() {
+        document.getElementById("userDropdownMobile").classList.toggle("show");
     }
-    .top-bar .top-bar-link {
-        color: #555;
-        margin-left: 15px;
-        text-decoration: none;
-        transition: color 0.3s ease;
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.user-profile-icon')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
     }
-    .top-bar .top-bar-link:hover {
-        color: #000;
+
+    function toggleDropdown() {
+        document.getElementById("userDropdown").classList.toggle("show");
     }
-    .menu-desktop .main-menu li {
-        display: inline-block;
-        margin-right: 15px;  /* Reduced the margin between items */
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.user-profile-icon')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
     }
-    .menu-desktop .main-menu li a {
-        text-decoration: none;
-        font-weight: bold;
-        color: #333;
-        transition: color 0.3s ease;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    //cart notification icon function
+    async function cartIcon() {
+    try {
+        const response = await fetch(`/user/cartDataIcon`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const itemCount = data.itemCount;
+
+        const cartBadges = document.querySelectorAll('.js-show-cart .notify-badge');
+        cartBadges.forEach(badge => {
+            if (itemCount > 0) {
+                badge.textContent = itemCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in cartIcon() function:", error);
     }
-    .menu-desktop .main-menu li a:hover {
-        color: #007bff;
+}
+
+    document.addEventListener('DOMContentLoaded', cartIcon);
+
+
+
+
+    //wishlist notification icon function
+    async function wishlistIcon() {
+    try {
+        const response = await fetch(`/user/wishlistDataIcon`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const wishlistCount = data.wishlistCount;
+
+        const wishlistBadges = document.querySelectorAll('[aria-label="Wishlist"] .notify-badge');
+        wishlistBadges.forEach(badge => {
+            if (wishlistCount > 0) {
+                badge.textContent = wishlistCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in wishlistIcon() function:", error);
     }
-    .wrap-icon-header {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 20px;  /* Increased the gap between icons */
-    }
-    .wrap-icon-header .icon-header-item {
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 50px;  /* Increased icon size */
-        width: 50px;   /* Increased icon size */
-        border-radius: 50%;
-        transition: all 0.3s ease;
-        position: relative;
-        font-size: 22px;  /* Increased font size for icons */
-    }
-    .wrap-icon-header .icon-header-item:hover {
-        background-color: #f1f1f1;
-    }
-    .user-profile-icon {
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .icon-header-noti[data-notify]:after {
-        content: attr(data-notify);
-        position: absolute;
-        top: 0px;
-        right: -5px;
-        background: #ff4747;
-        color: white;
-        border-radius: 50%;
-        font-size: 12px;
-        width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .icon-header-item i {
-        font-size: 22px;  /* Increased icon size */
-        color: #333;
-    }
-    /* Search input styling */
-    .search-container {
-        display: flex;
-        align-items: center;
-        position: relative;
-    }
-    .search-input {
-        padding: 8px 12px;
-        font-size: 16px;  /* Increased input font size */
-        width: 220px;
-        border: 1px solid #ccc;
-        border-radius: 20px;
-        padding-right: 40px;  /* Space for the search icon */
-    }
-    .search-input:focus {
-        outline: none;
-        border-color: #007bff;
-    }
-    .search-icon {
-        position: absolute;
-        right: 10px;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-    }
-    .search-icon i {
-        font-size: 20px;  /* Increased search icon size */
-        color: #333;
-    }
-    /* Ensure icons are aligned properly */
-    .wrap-icon-header button, .wrap-icon-header a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-    }
-    /* Fix hover alignment issues */
-    .icon-header-item:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-    /* Remove persistent hover for user profile */
-    .user-profile-icon {
-        background-color: transparent;
-        box-shadow: none;
-    }
-    .user-profile-icon:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-</style>
+}
+    document.addEventListener('DOMContentLoaded', wishlistIcon);
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+</script>
+
+
+<!--===============================================================================================-->
+<script src="/javascripts/user/vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+<script src="/javascripts/user/vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+<script src="/javascripts/user/js/main.js"></script>
+<!--===============================================================================================-->

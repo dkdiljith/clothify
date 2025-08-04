@@ -123,3 +123,33 @@
     color: #0056b3;
     text-decoration: underline;
   }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 4px;
+    color: white;
+    z-index: 1000;
+    animation: fadeIn 0.3s;
+  }
+  
+  .toast.success {
+    background-color: #28a745;
+  }
+  
+  .toast.error {
+    background-color: #dc3545;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #resendTimer {
+    font-weight: bold;
+    color: #ff5722;
+  }
+  

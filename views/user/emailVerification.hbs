@@ -1,55 +1,61 @@
 <head>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/emailVerification.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/emailVerification.css">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; img-src 'self' https://i.postimg.cc; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+
 </head>
-  <body style="background: url('https://i.postimg.cc/CM8Sjdw4/pexels-markus-winkler-1430818-3925956.jpg') no-repeat center center fixed; background-size: cover; position: relative;">
-    <img
-      src="https://i.postimg.cc/Njc59RgL/Clothify-logo-white.png"
-      alt="Clothify Logo"
-      class="website-logo"
-    />
 
-    <section class="d-flex justify-content-center align-items-center vh-100">
-      <div class="container">
-        <div class="row justify-content-end">
-          <div class="col-md-6 col-lg-5">
-            <div class="login-card">
-              <form id="emailVerificationForm" action="/user/emailverification" method="post" novalidate>
-                <h3 class="text-center">Email Verification</h3>
-                <p class="text-muted">Enter the verification code sent to your email address below.</p>
+<body
+  style="background: url('https://i.postimg.cc/CM8Sjdw4/pexels-markus-winkler-1430818-3925956.jpg') no-repeat center center fixed; background-size: cover; position: relative;">
 
-                <div class="form-group">
-                  <i class="fas fa-code"></i>
-                  <input
-                    type="text"
-                    name="verificationCode"
-                    id="verificationCode"
-                    class="form-control"
-                    placeholder="Enter Verification Code"
-                    maxlength="6"
-                    required
-                  />
-                  <div class="error-message" id="verificationCodeError">{{message}}</div>
-                </div>
+  <img src="https://i.postimg.cc/Njc59RgL/Clothify-logo-white.png" alt="Clothify Logo" class="website-logo">
 
-                <div class="text-center text-lg-start mt-4 pt-2">
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        Resend Verification code 
-                    </button>
-                  </div>
-                
+  <section class="d-flex justify-content-center align-items-center vh-100">
+    <div class="container">
+      <div class="row justify-content-end">
+        <div class="col-md-6 col-lg-5">
+          <div class="login-card">
+            <form id="emailVerificationForm" action="/user/emailverification" method="POST" novalidate>
+              <input type="hidden" name="_csrf" value="{{csrfToken}}">
+              <input type="hidden" id="serverVerificationTime" value="{{verificationTimer}}">
 
-                <div id="resendMessage" class="text-center mt-4 ">
-                  <p>Resend Code: <span id="resendTimer" style="color: #595959;" class="custom-links">60</span> seconds</p>
-                </div>
+              <h3 class="text-center">Email Verification</h3>
+              <p class="text-muted">You'll receive a verification code through the provided email address.</p>
 
-                <div class="custom-links">
-                  <a href="/user/login">Back to Login <i class="fas fa-sign-in-alt "></i></a>
-                </div>
-              </form>
-            </div>
+              <div class="form-group">
+                <i class="fas fa-code"></i>
+                <input type="text" name="verificationCode" id="verificationCode" class="form-control"
+                  placeholder="Enter 6-digit Verification Code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+                  required />
+                <div class="error-message text-danger" id="verificationCodeError"></div>
+              </div>
+
+              <div class="text-center text-lg-start mt-4 pt-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="verifyButton">
+                  Verify Email
+                </button>
+              </div>
+
+
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-link" id="resendButton" disabled>
+                  Resend Verification Code
+                </button>
+                <span id="resendTimer" class="text-muted ms-2">(60s)</span>
+              </div>
+
+              <div id="captchaContainer" class="mt-3" style="display: none;">
+                <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+              </div>
+
+              <div class="custom-links mt-3">
+                <a href="/user/login">Back to Login <i class="fas fa-sign-in-alt"></i></a>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </section>
-  </body>
-
+    </div>
+  </section>
+  <script src="/javascripts/user/js/emailVerification.js"></script>
+</body>

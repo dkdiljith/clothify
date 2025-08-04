@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Delivery Address</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            line-height: 1.6;
+        }
+
+        .address-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* Address Selection Section */
+        .address-section {
+            flex: 2;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom: 1px solid var(--medium-gray);
+            padding-bottom: 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-add-address {
+            padding: 10px 15px;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-add-address:hover {
+            background-color: #2980b9;
+        }
+
+        .address-list {
+            margin-bottom: 30px;
+        }
+
+        .address-card {
+            border: 1px solid var(--medium-gray);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .address-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .address-card.selected {
+            border: 2px solid var(--success-color);
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+
+        .address-details {
+            flex: 1;
+        }
+
+        .address-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .address-type {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .address-text {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .address-phone {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .address-pod {
+            color: var(--success-color);
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .address-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 100px;
+        }
+
+        .btn-edit,
+        .btn-remove {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-remove {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #c0392b;
+        }
+
+        .address-radio {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Empty State */
+        .empty-address {
+            text-align: center;
+            padding: 50px 20px;
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .empty-address i {
+            font-size: 60px;
+            color: var(--medium-gray);
+            margin-bottom: 20px;
+        }
+
+        .empty-address h3 {
+            font-size: 22px;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+        }
+
+        .empty-address p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* Order Summary Section */
+        .order-summary-section {
+            flex: 1;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .price-summary {
+            padding: 25px;
+            background-color: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .price-summary h2 {
+            margin: 0 0 20px;
+            font-size: 22px;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 1px solid var(--medium-gray);
+            padding-top: 15px;
+            margin-top: 15px;
+            color: var(--primary-color);
+        }
+
+        .btn-continue {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--success-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-continue:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-continue:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 50%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover {
+            color: var(--dark-gray);
+        }
+
+        .modal-title {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Address Form Styles */
+        .address-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .error-message {
+            color: var(--accent-color);
+            font-size: 13px;
+            margin-top: 3px;
+            display: none;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-save:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: var(--medium-gray);
+            color: var(--dark-gray);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #bdc3c7;
+        }
+
+        /* Popup Message */
+        .popup-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .popup-message.error {
+            background: var(--accent-color);
+        }
+
+        .popup-message.fade-out {
+            opacity: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .address-container {
+                flex-direction: column;
+            }
+
+            .order-summary-section {
+                position: static;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+
+<br><br>
+<br><br>
+
+<body>
+
+
+    <div class="container">
+        <div class="address-container">
+            <div class="address-section">
+                <div class="section-header">
+                    <h1>Select Delivery Address</h1>
+                    <button class="btn-add-address" id="addAddressBtn">
+                        <i class="fas fa-plus"></i> Add New Address
+                    </button>
+                </div>
+
+                {{#if address.length}}
+                <div class="address-list">
+                    {{#each address}}
+                    <div class="address-card" id="address-{{_id}}">
+                        <input type="radio" name="selectedAddress" value="{{_id}}" id="address-{{_id}}-radio"
+                            class="address-radio" {{#if isDefault}}checked{{/if}}>
+                        <div class="address-details">
+                            <div class="address-name">
+                                {{name}}
+                                <span class="address-type">{{#if isDefault}}DEFAULT{{else}}HOME{{/if}}</span>
+                            </div>
+                            <p class="address-text">{{streetAddress}}</p>
+                            {{#if landmark}}<p class="address-text">{{landmark}}</p>{{/if}}
+                            <p class="address-text">{{city}}, {{state}} - {{zip}}</p>
+                            <p class="address-text">{{country}}</p>
+                            <p class="address-phone"><i class="fas fa-phone"></i> {{phone}}</p>
+                            <p class="address-pod"><i class="fas fa-check-circle"></i> Pay on Delivery available</p>
+                        </div>
+                        <div class="address-actions">
+                            <button class="btn-edit" data-address-id="{{_id}}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn-remove" data-address-id="{{_id}}">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="empty-address">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>No Addresses Found</h3>
+                    <p>You haven't added any addresses yet. Please add an address to continue with your order.</p>
+                </div>
+                {{/if}}
+            </div>
+
+            <div class="order-summary-section">
+                <div class="price-summary">
+                    <h2>Order Summary</h2>
+                    <div class="summary-item">
+                        <span>Subtotal ({{cart.totalItems}} items)</span>
+                        <span>₹{{cart.subtotal}}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        {{#ifEquals cart.shippingFee 0}}
+                        <span style="color: var(--success-color);">Free</span>
+                        {{else}}
+                        <span>₹{{cart.shippingFee}}</span>
+                        {{/ifEquals}}
+                    </div>
+                    <div class="summary-item">
+                        <span>Tax</span>
+                        <span>₹{{cart.tax}}</span>
+                    </div>
+
+                    {{#if cart.couponId}}
+                    <div class="summary-item">
+                        <span>Coupon Discount</span>
+                        <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
+                    </div>
+                    {{/if}}
+
+                    {{#if cart.offerDiscount}}
+                    <div class="summary-item">
+                        <span>Discount</span>
+                        <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
+                    </div>
+                    {{/if}}
+
+                    <div class="summary-item total">
+                        <span>Total Amount</span>
+                        <span>₹{{cart.totalAmount}}</span>
+                    </div>
+                </div>
+                <button class="btn-continue" id="continueBtn" disabled>
+                    <i class="fas fa-lock"></i> Continue to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Address Modal -->
+    <div id="addressModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Add New Address</h2>
+            <form id="addressForm" class="address-form">
+                <input type="hidden" id="addressId" name="addressId" value="">
+
+                <div class="form-group">
+                    <label for="name">Address Name (e.g., Home, Office)</label>
+                    <input type="text" id="name" name="name" required>
+                    <div id="nameError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="streetAddress">Street Address</label>
+                    <input type="text" id="streetAddress" name="streetAddress" required>
+                    <div id="streetAddressError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="landmark">Landmark (Optional)</label>
+                    <input type="text" id="landmark" name="landmark">
+                    <div id="landmarkError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <select id="city" name="city" required>
+                        <option value="" disabled selected>Select City</option>
+                        <option value="Kasaragod">Kasaragod</option>
+                        <option value="Kannur">Kannur</option>
+                        <option value="Wayanad">Wayanad</option>
+                        <option value="Kozhikode">Kozhikode</option>
+                        <option value="Malappuram">Malappuram</option>
+                        <option value="Palakkad">Palakkad</option>
+                        <option value="Thrissur">Thrissur</option>
+                        <option value="Ernakulam">Ernakulam</option>
+                        <option value="Idukki">Idukki</option>
+                        <option value="Kottayam">Kottayam</option>
+                        <option value="Alappuzha">Alappuzha</option>
+                        <option value="Pathanamthitta">Pathanamthitta</option>
+                        <option value="Kollam">Kollam</option>
+                        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                    </select>
+                    <div id="cityError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State/Province</label>
+                    <select id="state" name="state" required>
+                        <option value="" disabled selected>Select State</option>
+                        <option value="Kerala">Kerala</option>
+                    </select>
+                    <div id="stateError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="zip">Postal/Zip Code</label>
+                    <input type="text" id="zip" name="zip" required pattern="[0-9]{6}">
+                    <div id="zipError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <select id="country" name="country" required>
+                        <option value="" disabled selected>Select Country</option>
+                        <option value="India">India</option>
+                    </select>
+                    <div id="countryError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}">
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isDefault" name="isDefault">
+                        Set as default address
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn-save">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // DOM Elements
+            const modal = document.getElementById('addressModal');
+            const addAddressBtn = document.getElementById('addAddressBtn') || document.getElementById('addAddressBtnEmpty');
+            const continueBtn = document.getElementById('continueBtn');
+            const addressForm = document.getElementById('addressForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const addressIdInput = document.getElementById('addressId');
+            const closeBtn = document.querySelector('.close');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            // Address selection
+            const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
+
+            // Edit buttons
+            const editButtons = document.querySelectorAll('.btn-edit');
+
+            // Current action (add or edit)
+            let currentAction = 'add';
+            let editAddressId = null;
+
+            // Show modal for adding new address
+            addAddressBtn.addEventListener('click', function () {
+                currentAction = 'add';
+                modalTitle.textContent = 'Add New Address';
+                addressForm.reset();
+                addressIdInput.value = '';
+                document.getElementById('country').value = 'India'; // Set default country
+                document.getElementById('isDefault').checked = false;
+                clearAllErrors();
+                modal.style.display = 'block';
+            });
+
+            // Show modal for editing address
+            editButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    currentAction = 'edit';
+                    editAddressId = this.getAttribute('data-address-id');
+                    modalTitle.textContent = 'Edit Address';
+                    clearAllErrors();
+
+                    // Fetch address details from backend
+                    fetch(`/user/address/${editAddressId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.address) {
+                                const address = data.address;
+
+                                // Populate form fields
+                                addressIdInput.value = address._id;
+                                document.getElementById('name').value = address.name;
+                                document.getElementById('streetAddress').value = address.streetAddress;
+                                document.getElementById('landmark').value = address.landmark || '';
+                                document.getElementById('city').value = address.city;
+                                document.getElementById('state').value = address.state;
+                                document.getElementById('zip').value = address.zip;
+                                document.getElementById('country').value = address.country || 'India';
+                                document.getElementById('phone').value = address.phone;
+                                document.getElementById('isDefault').checked = address.isDefault || false;
+
+                                // Show modal
+                                modal.style.display = 'block';
+                            } else {
+                                showPopupMessage(data.message || 'Failed to load address', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showPopupMessage('Failed to load address details', 'error');
+                        });
+                });
+            });
+
+            // Close modal
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            // Clear all error messages
+            function clearAllErrors() {
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+
+            // Form validation
+            addressForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearAllErrors();
+
+                // Validate form
+                if (validateForm()) {
+                    // Form is valid - submit it
+                    submitAddressForm();
+                }
+            });
+
+            function validateForm() {
+                let isValid = true;
+
+                // Validate name
+                if (!document.getElementById('name').value.trim()) {
+                    showError('nameError', 'Please enter a name for this address');
+                    isValid = false;
+                }
+
+                // Validate street address
+                if (!document.getElementById('streetAddress').value.trim()) {
+                    showError('streetAddressError', 'Please enter your street address');
+                    isValid = false;
+                }
+
+                // Validate city
+                if (!document.getElementById('city').value) {
+                    showError('cityError', 'Please select your city');
+                    isValid = false;
+                }
+
+                // Validate state
+                if (!document.getElementById('state').value) {
+                    showError('stateError', 'Please select your state');
+                    isValid = false;
+                }
+
+                // Validate zip
+                const zip = document.getElementById('zip').value;
+                if (!zip || !/^\d{6}$/.test(zip)) {
+                    showError('zipError', 'Please enter a valid 6-digit zip code');
+                    isValid = false;
+                }
+
+                // Validate country
+                if (!document.getElementById('country').value) {
+                    showError('countryError', 'Please select your country');
+                    isValid = false;
+                }
+
+                // Validate phone
+                const phone = document.getElementById('phone').value;
+                if (!phone || !/^\d{10}$/.test(phone)) {
+                    showError('phoneError', 'Please enter a valid 10-digit phone number');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            function showError(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+
+            // Form submission
+            function submitAddressForm() {
+                const formData = new FormData(addressForm);
+                const data = Object.fromEntries(formData.entries());
+
+                // Convert isDefault checkbox to boolean
+                data.isDefault = data.isDefault === 'on';
+
+                // Determine the endpoint based on action
+                const endpoint = currentAction === 'add'
+                    ? '/user/postAddressInCart'
+                    : `/user/editaddress/${editAddressId}`;
+
+                const method = currentAction === 'add' ? 'POST' : 'PUT';
+
+                fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => Promise.reject(err));
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showPopupMessage(
+                                currentAction === 'add'
+                                    ? 'Address added successfully!'
+                                    : 'Address updated successfully!',
+                                'success'
+                            );
+                            closeModal();
+                            // Refresh the page to show changes
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            // Handle field-specific errors
+                            if (data.errors) {
+                                Object.entries(data.errors).forEach(([field, message]) => {
+                                    const errorElement = document.getElementById(`${field}Error`);
+                                    if (errorElement) {
+                                        errorElement.textContent = message;
+                                        errorElement.style.display = 'block';
+                                    }
+                                });
+                            }
+                            showPopupMessage(data.message || 'An error occurred', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showPopupMessage('Failed to save address. Please try again.', 'error');
+                    });
+            }
+
+            // Address selection
+            addressRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Enable continue button when an address is selected
+                    continueBtn.disabled = false;
+
+                    // Highlight selected address
+                    document.querySelectorAll('.address-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('.address-card').classList.add('selected');
+
+                    // Store selected address in localStorage
+                    localStorage.setItem('selectedAddressId', this.value);
+                });
+            });
+
+            // Check if an address is already selected (from localStorage or default)
+            const selectedRadio = document.querySelector('input[name="selectedAddress"]:checked');
+            if (selectedRadio) {
+                continueBtn.disabled = false;
+                selectedRadio.closest('.address-card').classList.add('selected');
+            }
+
+            // Continue button click
+            continueBtn.addEventListener('click', function () {
+                const selectedAddressId = document.querySelector('input[name="selectedAddress"]:checked')?.value;
+                if (selectedAddressId) {
+                    window.location.href = `/user/payment?selectedAddressId=${selectedAddressId}`;
+                }
+            });
+
+            // Remove address buttons
+            document.querySelectorAll('.btn-remove').forEach(button => {
+                button.addEventListener('click', function () {
+                    const addressId = this.getAttribute('data-address-id');
+                    if (confirm('Are you sure you want to remove this address?')) {
+                        fetch(`/user/address/${addressId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showPopupMessage('Address removed successfully', 'success');
+                                    // Refresh the page to show changes
+                                    setTimeout(() => location.reload(), 1500);
+                                } else {
+                                    showPopupMessage(data.message || 'Failed to remove address', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showPopupMessage('Failed to remove address. Please try again.', 'error');
+                            });
+                    }
+                });
+            });
+
+            // Popup message function
+            function showPopupMessage(message, type = 'success') {
+                const popup = document.createElement('div');
+                popup.className = `popup-message ${type}`;
+                popup.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+        `;
+                document.body.appendChild(popup);
+
+                setTimeout(() => {
+                    popup.classList.add('fade-out');
+                    setTimeout(() => popup.remove(), 500);
+                }, 3000);
+            }
+        });
+    </script>
+
+    <br><br>
+
+</body>
+
+</html>

@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{product.name}} - Product Details</title>
-  <link rel="stylesheet" href="/stylesheets/user/css/singleProductPage.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>{{product.name}} | Premium Product Details</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zoom.js/0.0.1/zoom.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/singleProductPage.css">
+  <style>
+
+  </style>
 </head>
+
 <body>
   <!-- Breadcrumbs -->
   <nav class="breadcrumb-nav">
@@ -18,125 +25,529 @@
     </div>
   </nav>
 
-  <!-- Product Details Section -->
-  <div class="product-container container">
-    <!-- Product Images with Zoom -->
-    <div class="product-images">
-      <div class="main-image">
-        <img
-          src="{{product.images.[0].path}}"
-          alt="{{product.images.[0].altText}}"
-          data-action="zoom"
-        />
+  <div class="container">
+    {{#if messages.success}}
+    <div class="alert alert-success">
+      <i class="fas fa-check-circle"></i> {{messages.success}}
+    </div>
+    {{/if}}
+
+    {{#if messages.error}}
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-circle"></i> {{messages.error}}
+    </div>
+    {{/if}}
+
+    <!-- Product Details Section -->
+    <div class="product-container">
+      <!-- Product Images with Magnifier -->
+      <div class="product-images">
+        {{#if product.isNew}}
+        <div class="image-badge">NEW</div>
+        {{/if}}
+        {{#if product.isOnSale}}
+        <div class="image-badge" style="background-color: var(--accent-color);">SALE</div>
+        {{/if}}
+
+        <div class="main-image-container">
+          <img id="main-image" src="{{product.images.[0].path}}" alt="{{product.images.[0].altText}}" />
+          <div class="magnifier"></div>
+        </div>
+
+        <div class="thumbnail-gallery">
+          {{#each product.images}}
+          <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail{{#if @first}} active{{/if}}"
+            onclick="changeMainImage('{{this.path}}', this)" />
+          {{/each}}
+        </div>
       </div>
-      <div class="thumbnail-images">
-        {{#each product.images}}
-          <img
-            src="{{this.path}}"
-            alt="{{this.altText}}"
-            class="thumbnail"
-            onclick="changeMainImage('{{this.path}}')"
-          />
-        {{/each}}
+
+      <!-- Product Details -->
+      <div class="product-details">
+        <h1 class="product-title">{{product.name}}</h1>
+        <p class="product-subtitle">{{product.shortDescription}}</p>
+
+        <div class="ratings">
+          <div class="rating-stars">
+            {{#stars product.averageRating}}
+            {{#if this.full}}<i class="fas fa-star"></i>{{/if}}
+            {{#if this.half}}<i class="fas fa-star-half-alt"></i>{{/if}}
+            {{#if this.empty}}<i class="far fa-star"></i>{{/if}}
+            {{/stars}}
+          </div>
+          <span class="rating-count">({{product.reviews.length}} reviews)</span>
+          <span class="write-review">Write a review</span>
+        </div>
+
+        <!-- Price Display -->
+        <div class="price-section">
+          <div class="price-display">
+            <span class="discounted-price" id="selected-price">₹{{product.details.[0].price}}</span>
+            {{#if product.originalPrice}}
+            <span class="original-price">₹{{product.originalPrice}}</span>
+            <span class="discount-percentage">{{product.discountPercentage}}% OFF</span>
+            {{/if}}
+          </div>
+          <p class="tax-info">Inclusive of all taxes</p>
+        </div>
+
+        <!-- Stock Status -->
+        <div
+          class="stock-status {{#if product.isOutOfStock}}out-of-stock{{else if product.isSoldOut}}sold-out{{else}}in-stock{{/if}}">
+          <i
+            class="fas fa-{{#if product.isOutOfStock}}times-circle{{else if product.isSoldOut}}times-circle{{else}}check-circle{{/if}}"></i>
+          {{#if product.isOutOfStock}}
+          Out of Stock
+          {{else if product.isSoldOut}}
+          Sold Out
+          {{else}}
+          In Stock
+          {{/if}}
+        </div>
+
+        <!-- Size Selection -->
+        <div class="size-selection">
+          <div class="size-title">
+            Select Size
+            <span>Size Guide</span>
+          </div>
+          <div class="size-options">
+            {{#each product.details}}
+            <div class="size-option{{#if @first}} active{{/if}}" data-product-id="{{../product._id}}"
+              data-size="{{this.size}}" data-quantity="{{this.quantity}}" data-price="{{this.price}}"
+              data-details-id="{{this._id}}" onclick="updatePriceAndStock(this)">
+              {{this.size}}
+            </div>
+            {{/each}}
+          </div>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="quantity-selector">
+          <div class="quantity-title">Quantity</div>
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="adjustQuantity(-1)">-</button>
+            <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity">
+            <button class="quantity-btn" onclick="adjustQuantity(1)">+</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button onclick="addToCart()" class="action-btn btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
+            <i class="fas fa-shopping-cart"></i> Add to Cart
+          </button>
+          <button onclick="addToCart(); setTimeout(() => { window.location.href = '/user/cart'; }, 200);"
+            class="action-btn btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
+            <i class="fas fa-bolt"></i> Buy Now
+          </button>
+
+          <button class="add-to-wishlist action-btn btn-wishlist" data-product-id="{{product._id}}"
+            data-variation-index="0">
+            <i class="far fa-heart"></i> Wishlist
+          </button>
+        </div>
+
+        <!-- Highlights / Specs -->
+        <div class="highlights">
+          <h3 class="section-title">Product Highlights</h3>
+          <ul class="highlights-list">
+            {{#each product.highlights}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+
+        <!-- Coupons -->
+        {{#if product.coupons.length}}
+        <div class="coupons-section">
+          <h3 class="section-title">Available Offers</h3>
+          {{#each product.coupons}}
+          <div class="coupon-item">
+            <div class="coupon-icon">
+              <i class="fas fa-tag"></i>
+            </div>
+            <div class="coupon-details">
+              <div class="coupon-code">{{this.code}}</div>
+              <div class="coupon-description">{{this.description}}</div>
+            </div>
+            <button class="apply-coupon">Apply</button>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
       </div>
     </div>
 
-    <!-- Product Details -->
-    <div class="product-details">
-      <h1 class="product-title">{{product.name}}</h1>
-      <div class="ratings">
-        <span class="rating-stars">★★★★☆</span>
-        <span class="rating-count">({{product.reviews.length}} reviews)</span>
+    <!-- Product Tabs -->
+    <div class="product-tabs">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="openTab(event, 'description')">Description</button>
+        <button class="tab-btn" onclick="openTab(event, 'specifications')">Specifications</button>
+        <button class="tab-btn" onclick="openTab(event, 'reviews')">Reviews</button>
+        <button class="tab-btn" onclick="openTab(event, 'shipping')">Shipping & Returns</button>
       </div>
 
-      <!-- Price and Discount -->
-      <div class="price-section">
-        <span class="discounted-price">₹{{product.details.[0].price}}</span>
-        {{!-- <span class="discounted-price">₹{{product.discountedPrice}}</span>
-        <span class="discount-percentage">{{product.discount}}% off</span> --}}
+      <div id="description" class="tab-content active">
+        <h3>Product Description</h3>
+        <p>{{product.description}}</p>
       </div>
 
-      <!-- Stock Status -->
-      <div class="stock-status">
-        {{#if product.isOutOfStock}}
-          <p class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</p>
-        {{else if product.isSoldOut}}
-          <p class="sold-out"><i class="fas fa-times-circle"></i> Sold Out</p>
+      <div id="specifications" class="tab-content">
+        <h3>Technical Specifications</h3>
+        <table>
+          {{#each product.specifications}}
+          <tr>
+            <td><strong>{{@key}}:</strong></td>
+            <td>{{this}}</td>
+          </tr>
+          {{/each}}
+        </table>
+      </div>
+
+      <div id="reviews" class="tab-content">
+        <h3>Customer Reviews</h3>
+        {{#if product.reviews.length}}
+        {{#each product.reviews}}
+        <div class="review">
+          <div class="review-header">
+            <span class="review-author">{{this.author}}</span>
+            <span class="review-date">{{this.date}}</span>
+          </div>
+          <div class="review-rating">
+            {{#stars this.rating}}
+            {{#if this.full}}<i class="fas fa-star"></i>{{/if}}
+            {{#if this.half}}<i class="fas fa-star-half-alt"></i>{{/if}}
+            {{#if this.empty}}<i class="far fa-star"></i>{{/if}}
+            {{/stars}}
+          </div>
+          <p class="review-text">{{this.comment}}</p>
+        </div>
+        {{/each}}
         {{else}}
-          <p class="in-stock"><i class="fas fa-check-circle"></i> In Stock ({{product.stock}} available)</p>
+        <div class="no-reviews">
+          <p>No reviews yet. Be the first to review this product!</p>
+          <button class="add-review-btn">Write a Review</button>
+        </div>
         {{/if}}
       </div>
 
-      <!-- Highlights / Specs -->
-      <div class="highlights">
-        <h3>Product Highlights</h3>
-        <ul>
-          {{#each product.highlights}}
-            <li><i class="fas fa-check"></i> {{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-
-      <!-- Add to Cart / Buy Now -->
-      <div class="action-buttons">
-        <button class="btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
-          <i class="fas fa-shopping-cart"></i> Add to Cart
-        </button>
-        <button class="btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
-          <i class="fas fa-bolt"></i> Buy Now
-        </button>
-      </div>
-
-      <!-- Coupons -->
-      <div class="coupons">
-        <h3>Available Coupons</h3>
-        <ul>
-          {{#each product.coupons}}
-            <li><i class="fas fa-tag"></i> {{this.code}} - {{this.discount}}% off</li>
-          {{/each}}
-        </ul>
+      <div id="shipping" class="tab-content">
+        <h3>Shipping Information</h3>
+        <p>Free standard shipping on all orders. Express shipping available at additional cost.</p>
+        <h3>Returns Policy</h3>
+        <p>30-day easy returns. Items must be unused and in original condition.</p>
       </div>
     </div>
-  </div>
 
-  <!-- Reviews Section -->
-  <div class="reviews-section container">
-    <h2>Customer Reviews</h2>
-    {{#if product.reviews.length}}
-      {{#each product.reviews}}
-        <div class="review">
-          <p class="review-author">{{this.author}}</p>
-          <p class="review-rating">Rating: {{this.rating}}/5</p>
-          <p class="review-text">{{this.comment}}</p>
-        </div>
-      {{/each}}
-    {{else}}
-      <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
-    {{/if}}
-  </div>
-
-  <!-- Related Products -->
-  <div class="related-products container">
-    <h2>Related Products</h2>
-    <div class="related-products-grid">
-      {{#each relatedProducts}}
+    <!-- Related Products -->
+    <div class="related-products">
+      <h2 class="section-title">You May Also Like</h2>
+      <div class="related-products-grid">
+        {{#each relatedProducts}}
         <div class="related-product-card">
-          <img src="{{this.images.[0].path}}" alt="{{this.name}}">
-          <h3>{{this.name}}</h3>
-          <p class="price">₹{{this.details.[0].price}}</p>
-          <a href="/user/singleproduct/{{this._id}}" class="btn-view-product">View Product</a>
+          <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="related-product-image">
+          <div class="related-product-info">
+            <h3 class="related-product-title">{{this.name}}</h3>
+            <div class="related-product-price">₹{{this.details.[0].price}}</div>
+            <a href="/user/singleproduct/{{this._id}}" class="view-product-btn">View Product</a>
+          </div>
         </div>
-      {{/each}}
+        {{/each}}
+      </div>
     </div>
   </div>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/zoom.js/0.0.1/zoom.min.js"></script>
   <script>
-    // Change main image on thumbnail click
-    function changeMainImage(src) {
-      document.querySelector('.main-image img').src = src;
+    // Global variables
+    let selectedSize = null;
+    let selectedQuantity = 1;
+    let currentImageIndex = 0;
+
+    // Frequently used DOM elements (global)
+    const quantityInput = document.getElementById('quantity');
+    const addToCartButton = document.querySelector('.btn-add-to-cart');
+    const selectedPriceEl = document.getElementById('selected-price');
+    const selectedStockEl = document.getElementById('selected-stock');
+    const cartCountEl = document.getElementById("cart-count");
+    const mainImg = document.getElementById("main-image");
+
+    // Reusable helper function to fetch product-related data
+    function getCartDataFromElement(element) {
+      return {
+        productId: element.getAttribute('data-product-id'),
+        productDetailsId: element.getAttribute('data-details-id'),
+        price: element.getAttribute('data-price'),
+        stock: element.getAttribute('data-quantity'),
+      };
+    }
+
+    // Update Price and Stock when a size option is clicked
+    function updatePriceAndStock(element) {
+      console.log('Size button clicked');
+
+      // Remove active class from all size options
+      document.querySelectorAll('.size-option').forEach(option => {
+        option.classList.remove('active');
+      });
+
+      // Add active class to selected option
+      element.classList.add('active');
+
+      // Get all necessary data from the clicked element
+      const productId = element.getAttribute('data-product-id');
+      const detailsId = element.getAttribute('data-details-id');
+      const price = element.getAttribute('data-price');
+      const size = element.getAttribute('data-size');
+
+      // Find the variation index (position in the details array)
+      const sizeOptions = document.querySelectorAll('.size-option');
+      let variationIndex = -1;
+      sizeOptions.forEach((option, index) => {
+        if (option === element) variationIndex = index;
+      });
+
+      // Update selected size and quantity
+      selectedSize = size;
+      selectedQuantity = 1; // Reset to 1 when size changes
+      quantityInput.value = 1;
+
+      // Update displayed price
+      selectedPriceEl.textContent = `₹${price}`;
+
+      // Update Add to Cart button with ALL necessary data
+      addToCartButton.setAttribute('data-product-id', productId);
+      addToCartButton.setAttribute('data-details-id', detailsId);
+      addToCartButton.setAttribute('data-price', price);
+      addToCartButton.setAttribute('data-variation-index', variationIndex);
+
+      console.log('Updated Add to Cart button with:', {
+        productId,
+        detailsId,
+        price,
+        variationIndex
+      });
+    }
+
+    // Adjust quantity
+    function adjustQuantity(change) {
+      let newQuantity = parseInt(quantityInput.value) + change;
+      if (newQuantity < 1) newQuantity = 1;
+      if (newQuantity > 10) newQuantity = 10;
+
+      quantityInput.value = newQuantity;
+      selectedQuantity = newQuantity;
+    }
+
+    // Add to Cart function
+    async function addToCart() {
+      // Get all data from the Add to Cart button
+      const productId = addToCartButton.getAttribute('data-product-id');
+      const detailsId = addToCartButton.getAttribute('data-details-id');
+      const variationIndex = addToCartButton.getAttribute('data-variation-index');
+      const quantity = quantityInput.value;
+
+      console.log('Attempting to add to cart with:', {
+        productId,
+        detailsId,
+        variationIndex,
+        quantity
+      });
+
+      if (!productId || !variationIndex) {
+        showValidationError();
+        showPopup('Please select a size first', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/user/addtocart/${productId}/${variationIndex}?quantity=${quantity}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const data = await response.json();
+        showPopup(data.message, data.success ? "success" : "error");
+
+        if (data.cartCount) {
+          updateCartCount(data.cartCount);
+        }
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        showPopup("Login First :)", "error");
+      }
+    }
+    //Add to wishlist
+    async function addToWishlist(productId, variationIndex) {
+      try {
+        const response = await fetch(`/user/addtowishlist/${productId}/${variationIndex}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        const data = await response.json();
+
+        showPopup(data.message, data.success ? "success" : "error");
+
+        if (data.success) {
+          const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
+          const addedButton = document.querySelector(`.added-to-wishlist[data-product-id="${productId}"]`);
+
+          if (addButton && addedButton) {
+            addButton.style.display = "none";
+            addedButton.style.display = "inline-flex";
+          }
+        }
+      } catch (error) {
+        console.error("Error adding to wishlist:", error);
+        showPopup("Login First :)", "error");
+      }
+    }
+
+    // Show popup
+    function showPopup(message, type = "success") {
+      const popup = document.createElement("div");
+      popup.className = `popup ${type}`;
+
+      popup.innerHTML = type === "success"
+        ? `<i class="fas fa-check-circle"></i> ${message}`
+        : `<i class="fas fa-exclamation-circle"></i> ${message}`;
+
+      document.body.appendChild(popup);
+      setTimeout(() => popup.classList.add("show"), 10);
+      setTimeout(() => {
+        popup.classList.remove("show");
+        setTimeout(() => popup.remove(), 300);
+      }, 3000);
+    }
+
+    // Update cart count
+    function updateCartCount(count) {
+      if (cartCountEl) {
+        cartCountEl.textContent = count;
+        cartCountEl.style.transform = "scale(1.5)";
+        setTimeout(() => {
+          cartCountEl.style.transform = "scale(1)";
+        }, 300);
+      }
+    }
+
+    // Validation effect on size options
+    function showValidationError() {
+      const sizeOptions = document.querySelectorAll('.size-option');
+      sizeOptions.forEach(option => option.classList.add('validation-error'));
+      setTimeout(() => {
+        sizeOptions.forEach(option => option.classList.remove('validation-error'));
+      }, 1000);
+    }
+
+    // Change main image
+    function changeMainImage(newSrc, thumbnail) {
+      mainImg.src = newSrc;
+
+      document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+      });
+      thumbnail.classList.add('active');
+
+      const magnifierGlass = document.querySelector(".magnifier");
+      if (magnifierGlass) {
+        magnifierGlass.style.backgroundImage = `url('${newSrc}')`;
+      }
+    }
+
+    // Tab switching
+    function openTab(evt, tabName) {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
+    }
+
+    // Magnify zoom effect
+    function magnify(imgID, zoom) {
+      const img = document.getElementById(imgID);
+      const magnifierGlass = document.querySelector(".magnifier");
+
+      magnifierGlass.style.backgroundImage = `url('${img.src}')`;
+      magnifierGlass.style.backgroundRepeat = "no-repeat";
+      magnifierGlass.style.backgroundSize = `${img.offsetWidth * zoom}px ${img.offsetHeight * zoom}px`;
+
+      img.addEventListener("mousemove", moveMagnifier);
+      img.addEventListener("mouseenter", () => magnifierGlass.style.display = "block");
+      img.addEventListener("mouseleave", () => magnifierGlass.style.display = "none");
+
+      function moveMagnifier(e) {
+        e.preventDefault();
+        const pos = getCursorPos(e);
+        let x = pos.x;
+        let y = pos.y;
+        const w = magnifierGlass.offsetWidth / 2;
+        const h = magnifierGlass.offsetHeight / 2;
+
+        if (x > img.offsetWidth - (w / zoom)) x = img.offsetWidth - (w / zoom);
+        if (x < w / zoom) x = w / zoom;
+        if (y > img.offsetHeight - (h / zoom)) y = img.offsetHeight - (h / zoom);
+        if (y < h / zoom) y = h / zoom;
+
+        magnifierGlass.style.left = `${x - w}px`;
+        magnifierGlass.style.top = `${y - h}px`;
+        magnifierGlass.style.backgroundPosition = `-${(x * zoom) - w}px -${(y * zoom) - h}px`;
+      }
+
+      function getCursorPos(e) {
+        const rect = img.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+    }
+
+    // On page load
+    document.addEventListener("DOMContentLoaded", function () {
+      magnify("main-image", 2);
+
+      const firstSizeOption = document.querySelector('.size-option');
+      if (firstSizeOption) {
+        updatePriceAndStock(firstSizeOption);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
+
+      addToWishlistButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+          const productId = event.currentTarget.getAttribute('data-product-id');
+          const variationIndex = event.currentTarget.getAttribute('data-variation-index');
+          addToWishlist(productId, variationIndex);
+        });
+      });
+    });
+
+    // Star rating helper (for templating engine)
+    function stars(rating) {
+      const stars = [];
+      const fullStars = Math.floor(rating);
+      const hasHalfStar = rating % 1 >= 0.5;
+
+      for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars) {
+          stars.push({ full: true, half: false, empty: false });
+        } else if (i === fullStars + 1 && hasHalfStar) {
+          stars.push({ full: false, half: true, empty: false });
+        } else {
+          stars.push({ full: false, half: false, empty: true });
+        }
+      }
+
+      return stars;
     }
   </script>
-</body>
-</html>

@@ -1,37 +1,13 @@
 
 
-/* Status styles matching your pattern */
-.status-active {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.status-inactive {
-    background: #E0E7FF;
-    color: #3730A3;
-}
-
-.sidebar {
-    background: var(--surface);
-    padding: 1rem;
-    border-right: 1px solid var(--border);
-}
-
-.main-content {
-    padding: 2rem;
-}
-
 .users-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
-h1 {
-    font-size: 1.8rem;
-    color: var(--text);
-}
+
 
 .btn-primary {
     background: var(--primary);
@@ -48,7 +24,6 @@ h1 {
 
 .users-table {
     background: var(--surface);
-    border-radius: 8px;
     border: 1px solid var(--border);
     overflow: hidden;
 }
@@ -95,4 +70,114 @@ th {
     .users-table {
         overflow-x: auto;
     }
+}
+
+
+/*pagination*/
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 15px;
+    align-items: center;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background-color: #2c3e50; /* Using your primary color */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-button:hover {
+    background-color: #1a2634;
+    transform: translateY(-2px);
+}
+
+.pagination-info {
+    padding: 8px 16px;
+    color: #666;
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+
+/* search input*/
+.search-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--background);
+    color: var(--text);
+}
+
+
+/*empty error message*/
+/* Empty State Styles */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+.empty-state-image {
+    width: 200px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.empty-state h2 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+}
+
+
+/*permanent button size*/
+/* In your <style> block */
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex; /* Use inline-flex for nice alignment with potential icons */
+    align-items: center;  /* Vertically center content if button has height */
+    gap: 8px;             /* Spacing between text and icon, if any */
+    text-decoration: none;
+    border: none;
+    font-size: 14px;
+
+    /* --- Key properties for consistent sizing --- */
+    width: 90px; /* Adjust this value! */
+                  /* Aim for a width that comfortably fits "Unblock" with padding,
+                     then "Block" will look centered within it. */
+    justify-content: center; /* Horizontally center content inside the button */
 }

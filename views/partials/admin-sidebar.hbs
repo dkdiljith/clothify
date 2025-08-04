@@ -1,37 +1,44 @@
 <head>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="/stylesheets/admin/admin-sidebar.css"
-  />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/admin/admin-sidebar.css" />
+  <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBgGFA5jl/K8Pwi6isJxwyjhmd7CIDicQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
   <div class="sidebar-container">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h2>Admin Console</h2>
+
+      <div style="background-color: var(--background); border-radius: 15px; padding: 18px 0px 18px 10px; ">
+        <h2 class="page-title" style="font-weight: 1000; margin-bottom:0.07em; padding-right:15px; ">CLOTHIFY</h2>
+      </div>
+
       <nav>
-        <div onclick="location.href='/admin/dashboard'" class="nav-item">📊Dashboard</div>
-        <div onclick="location.href='/admin/products'" class="nav-item">📦Products</div>
-        <div onclick="location.href='/admin/orders'" class="nav-item">💵 Orders</div>
-        <div onclick="location.href='/admin/userslist'" class="nav-item">👥Users</div>
-        <div onclick="location.href='/admin/category'" class="nav-item">📂Category</div>
-        <div onclick="location.href='/admin/coupon'" class="nav-item">🏷️ Coupons</div>
-        <div onclick="location.href='/admin/logout'" class="nav-item">🚪 Logout</div>
+        <div onclick="location.href='/admin/dashboard'" class="nav-item bar-title">📊 Dashboard</div>
+        <div onclick="location.href='/admin/salesReport'" class="nav-item bar-title">📈 Sales Report</div>
+        <div onclick="location.href='/admin/products'" class="nav-item bar-title">📦 Products</div>
+        <div onclick="location.href='/admin/orders'" class="nav-item bar-title">💵 Orders</div>
+        <div onclick="location.href='/admin/users'" class="nav-item bar-title">👥 Users</div>
+        <div onclick="location.href='/admin/category'" class="nav-item bar-title">📂 Categories</div>
+        <div onclick="location.href='/admin/coupons'" class="nav-item bar-title">🏷️ Coupons</div>
+        <div onclick="location.href='/admin/offer'" class="nav-item bar-title">🛒 Offers</div>
+        <div onclick="location.href='/admin/activity-log'" class="nav-item bar-title">💻 Activity-Log</div>
       </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main style="margin-top:-7px;" class="main-content">
 
       <!-- Header -->
       <div class="dashboard-header">
-        <h1>Dashboard Overview</h1>
+        <h1 class="page-title " style="margin-bottom:3px; margin-left:10px;">Hi Admin !</h1>
         <div class="header-controls">
           <button id="theme-toggle" class="theme-btn">🌓 Toggle Theme</button>
           <button onclick="location.href='/admin/register'" class="theme-btn">👥
             Add New Admin</button>
+            <button onclick="location.href='/admin/logout'"  class="theme-btn">🚪 Logout</button>
         </div>
       </div>
 
@@ -39,5 +46,4 @@
 
     </main>
   </div>
-  <script src="/javascripts/admin/admin-sidebar.js" defer></script>
 </body>

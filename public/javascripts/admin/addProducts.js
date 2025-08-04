@@ -1,38 +1,64 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
+  // ================================
+  // Helpers for Error Messaging
+  // ================================
+  const displayError = (element, message) => {
+    clearError(element);
+    const error = document.createElement("p");
+    error.className = "error-message text-danger";
+    error.textContent = message;
+    element.insertAdjacentElement("afterend", error);
+  };
+
+  const clearError = (element) => {
+    const next = element.nextElementSibling;
+    if (next && next.classList.contains("error-message")) {
+      next.remove();
+    }
+  };
+
+  const clearErrors = (container) => {
+    container.querySelectorAll(".error-message").forEach((el) => el.remove());
+  };
+
+  // ================================
+  // Form Validation
+  // ================================
   const addProductForm = document.getElementById("add-product-form");
 
-  if (addProductForm) {
-    // Submit validation
-    addProductForm.addEventListener("submit", function (event) {
-      event.preventDefault(); ///////error happened here previously
+  const validateField = (input) => {
+    clearError(input);
+    const { name, value, files } = input;
 
-      // Clear previous error messages
-      clearErrors();
+    switch (name) {
+      case "name":
+        if (!value.trim()) displayError(input, "Product name is required.");
+        break;
+      case "categoryId":
+        if (!value.trim()) displayError(input, "Category is required.");
+        break;
+      case "price":
+        if (!value || value < 200 || value > 1000)
+          displayError(input, "Price must be between ₹200 and ₹1000.");
+        break;
+      case "gender":
+        if (!value) displayError(input, "Gender selection is required.");
+        break;
+      case "images":
+        if (!files.length)
+          displayError(input, "At least one image is required.");
+        break;
+      default:
+        break;
+    }
+  };
 
-      let valid = validateForm();
-
-      if (valid) addProductForm.submit();
-    });
-
-    // Real-time validation for input fields
-    addProductForm
-      .querySelectorAll(
-        '[name="name"], [name="category"], [name="price"], [name="gender"], [name="images"]'
-      )
-      .forEach((input) => {
-        input.addEventListener("input", function () {
-          validateField(input);
-        });
-      });
-  }
-
-  // Function to validate entire form
-  function validateForm() {
+  const validateForm = () => {
     let valid = true;
+    clearErrors(addProductForm);
 
     const productName = addProductForm.querySelector('[name="name"]');
-    const category = addProductForm.querySelector('[name="category"]');
-    const price = addProductForm.querySelector('[name="price"]');
+    const category = addProductForm.querySelector('[name="categoryId"]');
     const gender = addProductForm.querySelector('[name="gender"]');
     const imageInput = addProductForm.querySelector('[name="images"]');
 
@@ -40,348 +66,265 @@ document.addEventListener("DOMContentLoaded", function () {
       valid = false;
       displayError(productName, "Product name is required.");
     }
-
-   
-
+    if (!category.value.trim()) {
+      valid = false;
+      displayError(category, "Category is required.");
+    }
     if (!gender.value) {
       valid = false;
       displayError(gender, "Gender selection is required.");
     }
-
     if (!imageInput.files.length) {
       valid = false;
       displayError(imageInput, "At least one image is required.");
     } else {
-      const allowedFileTypes = ["image/jpeg", "image/jpg", "image/png"];
-      const maxFileSize = 10 * 1024 * 1024; // 10MB
-
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      const maxSize = 10 * 1024 * 1024; // 10MB
       for (let file of imageInput.files) {
-        if (!allowedFileTypes.includes(file.type)) {
+        if (!allowedTypes.includes(file.type)) {
           valid = false;
-          displayError(
-            imageInput,
-            "Only JPEG, JPG, and PNG files are allowed."
-          );
+          displayError(imageInput, "Only JPEG, JPG, and PNG files are allowed.");
           break;
         }
-        if (file.size > maxFileSize) {
+        if (file.size > maxSize) {
           valid = false;
           displayError(imageInput, "Each image must be smaller than 10MB.");
           break;
         }
       }
     }
+    return valid;
+  };
+
+  // ================================
+  // Combined Size Details Validation
+  // ================================
+  const sizesContainer = document.getElementById("details-container");
+  const sizeErrorDiv = document.getElementById("size-error");
+
+  const validateSizeDetails = () => {
+    let valid = true;
+    clearError(sizeErrorDiv);
+
+    const sizeGroups = sizesContainer.querySelectorAll(".size-group");
+
+    // Ensure at least one size group exists
+    if (sizeGroups.length === 0) {
+      valid = false;
+      displayError(sizeErrorDiv, "At least one size, quantity, and price field is required.");
+      return valid;
+    }
+
+    let selectedSizes = [];
+
+    sizeGroups.forEach((row) => {
+      const sizeSelect = row.querySelector('[name="sizeName[]"]');
+      const qtyInput = row.querySelector('[name="sizeQuantity[]"]');
+      const priceInput = row.querySelector('[name="sizePrice[]"]');
+
+      clearError(sizeSelect);
+      clearError(qtyInput);
+      clearError(priceInput);
+
+      // Validate size: must be selected and not duplicate
+      if (!sizeSelect.value.trim()) {
+        valid = false;
+        displayError(sizeErrorDiv, "Size field cannot be empty.");
+      }
+      if (selectedSizes.includes(sizeSelect.value)) {
+        valid = false;
+        displayError(sizeErrorDiv, "Duplicate sizes are not allowed.");
+      } else {
+        selectedSizes.push(sizeSelect.value);
+      }
+
+      // Validate quantity: must be provided and at least 1
+      const quantity = parseInt(qtyInput.value, 10);
+      if (!qtyInput.value || isNaN(quantity) || quantity < 1) {
+        valid = false;
+        displayError(sizeErrorDiv, "Quantity must be at least 1.");
+      }
+
+      // Validate price: must be provided and at least ₹200
+      const price = parseInt(priceInput.value, 10);
+      if (!priceInput.value || isNaN(price) || price < 200) {
+        valid = false;
+        displayError(sizeErrorDiv, "Price must be at least ₹200.");
+      }
+    });
 
     return valid;
-  }
+  };
 
-  // Function to validate a single field on input
-  function validateField(input) {
-    clearError(input);
-
-    if (input.name === "name" && !input.value.trim()) {
-      displayError(input, "Product name is required.");
-    } else if (input.name === "categor" && !input.value.trim()) {
-      displayError(input, "Category is required.");
-    } else if (input.name === "price") {
-      if (!input.value || input.value < 200 || input.value > 1000) {
-        displayError(input, "Price must be between ₹200 and ₹1000.");
+  if (addProductForm) {
+    // Submit handler: prevent submission if any validation fails
+    addProductForm.addEventListener("submit", (event) => {
+      if (!validateForm() || !validateSizeDetails()) {
+        event.preventDefault();
       }
-    } else if (input.name === "gender" && !input.value) {
-      displayError(input, "Gender selection is required.");
-    } else if (input.name === "images" && !input.files.length) {
-      displayError(input, "At least one image is required.");
-    }
-  }
+    });
 
-  // Function to show error messages
-  function displayError(element, message) {
-    clearError(element);
-    element.insertAdjacentHTML(
-      "afterend",
-      `<p class="error-message text-danger">${message}</p>`
-    );
-  }
-
-  // Function to remove previous errors for a field
-  function clearError(element) {
-    if (
-      element.nextElementSibling &&
-      element.nextElementSibling.classList.contains("error-message")
-    ) {
-      element.nextElementSibling.remove();
-    }
-  }
-
-  // Function to clear all error messages before validation
-  function clearErrors() {
+    // Real-time validation for basic fields
+    const fieldsToValidate = ["name", "categoryId", "price", "gender", "images"];
     addProductForm
-      .querySelectorAll(".error-message")
-      .forEach((error) => error.remove());
-  }
-});
-
-// Image Upload and Preview Logic
-const imageInput = document.getElementById("image");
-const previewContainer = document.createElement("div");
-previewContainer.classList.add("d-flex", "flex-wrap", "gap-2");
-imageInput.insertAdjacentElement("afterend", previewContainer);
-let imageCount = 0;
-let cropperInstances = {};
-const maxImages = 5;
-
-imageInput.addEventListener("change", function (event) {
-  const files = event.target.files;
-  if (files.length + imageCount > maxImages) {
-    const warningDiv = document.getElementById("image-error");
-    warningDiv.textContent = `You can only upload up to ${maxImages} images.`;
-    warningDiv.classList.add("text-danger");
-    return;
+      .querySelectorAll(fieldsToValidate.map((field) => `[name="${field}"]`).join(", "))
+      .forEach((input) => {
+        input.addEventListener("input", () => validateField(input));
+      });
   }
 
-  Array.from(files).forEach((file) => {
-    if (!file.type.startsWith("image/")) {
-      const warningDiv = document.getElementById("image-error");
-      warningDiv.textContent = "Only image files are allowed.";
-      warningDiv.classList.add("text-danger");
+  // ================================
+  // Image Upload and Preview Logic
+  // ================================
+  const imageInput = document.getElementById("image");
+  const imageErrorDiv = document.getElementById("image-error");
+  const previewContainer = document.createElement("div");
+  previewContainer.classList.add("d-flex", "flex-wrap", "gap-2");
+  imageInput.insertAdjacentElement("afterend", previewContainer);
+  let imageCount = 0;
+  const cropperInstances = {};
+  const maxImages = 5;
+
+  imageInput.addEventListener("change", (event) => {
+    const files = event.target.files;
+    if (files.length + imageCount > maxImages) {
+      imageErrorDiv.textContent = `You can only upload up to ${maxImages} images.`;
+      imageErrorDiv.classList.add("text-danger");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const imgWrapper = document.createElement("div");
-      imgWrapper.classList.add("position-relative", "border", "p-1");
-      imgWrapper.style.width = "120px";
-      imgWrapper.style.height = "120px";
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        imageErrorDiv.textContent = "Only image files are allowed.";
+        imageErrorDiv.classList.add("text-danger");
+        return;
+      }
 
-      const img = document.createElement("img");
-      img.src = e.target.result;
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.objectFit = "cover";
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imgWrapper = document.createElement("div");
+        imgWrapper.className = "position-relative border p-1";
+        imgWrapper.style.cssText = "width:120px; height:120px;";
 
-      const closeButton = document.createElement("button");
-      closeButton.innerHTML = "&times;";
-      closeButton.classList.add("btn", "btn-danger", "position-absolute");
-      closeButton.style.top = "5px";
-      closeButton.style.right = "5px";
-      closeButton.style.fontSize = "12px";
-      closeButton.style.padding = "2px 6px";
-      closeButton.addEventListener("click", () => {
-        previewContainer.removeChild(imgWrapper);
-        imageCount--;
-        delete cropperInstances[file.name];
-      });
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.style.cssText = "width:100%; height:100%; object-fit:cover;";
 
-      const cropButton = document.createElement("button");
-      cropButton.innerText = "✂️";
-      cropButton.classList.add(
-        "btn",
-        "btn-warning",
-        "btn-sm",
-        "position-absolute"
-      );
-      cropButton.style.top = "5px";
-      cropButton.style.left = "5px";
-      cropButton.type = "button";
-      cropButton.addEventListener("click", () =>
-        openCropModal(file, imgWrapper, img)
-      );
+        const closeButton = document.createElement("button");
+        closeButton.innerHTML = "&times;";
+        closeButton.className = "btn btn-danger position-absolute";
+        closeButton.style.cssText = "top:5px; right:5px; font-size:12px; padding:2px 6px;";
+        closeButton.addEventListener("click", () => {
+          previewContainer.removeChild(imgWrapper);
+          imageCount--;
+          delete cropperInstances[file.name];
+        });
 
-      imgWrapper.appendChild(img);
-      imgWrapper.appendChild(closeButton);
-      imgWrapper.appendChild(cropButton);
-      previewContainer.appendChild(imgWrapper);
-      imageCount++;
-    };
-    reader.readAsDataURL(file);
+        const cropButton = document.createElement("button");
+        cropButton.innerText = "✂️";
+        cropButton.className = "btn btn-warning btn-sm position-absolute";
+        cropButton.style.cssText = "top:5px; left:5px;";
+        cropButton.type = "button";
+        cropButton.addEventListener("click", () => openCropModal(file, imgWrapper, img));
+
+        imgWrapper.append(img, closeButton, cropButton);
+        previewContainer.appendChild(imgWrapper);
+        imageCount++;
+      };
+
+      reader.readAsDataURL(file);
+    });
   });
-});
 
-function openCropModal(file, imgWrapper, imgElement) {
-  let modal = document.getElementById("cropModal");
-  if (modal) modal.remove();
+  const openCropModal = (file, imgWrapper, imgElement) => {
+    let modal = document.getElementById("cropModal");
+    if (modal) modal.remove();
 
-  modal = document.createElement("div");
-  modal.innerHTML = `
-    <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Crop Image</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body d-flex justify-content-center">
-            <img id="cropper-image" style="max-width:100%;">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-           <button type="button" class="btn btn-primary" id="crop-btn" onclick="cropImage()">Crop</button>
+    modal = document.createElement("div");
+    modal.innerHTML = `
+      <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Crop Image</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center">
+              <img id="cropper-image" style="max-width:100%;">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="crop-btn">Crop</button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-  const cropModal = new bootstrap.Modal(document.getElementById("cropModal"));
-  cropModal.show();
+      </div>`;
+    document.body.appendChild(modal);
 
-  const cropperImg = document.getElementById("cropper-image");
-  cropperImg.src = imgElement.src;
-  const cropper = new Cropper(cropperImg, { aspectRatio: 1, viewMode: 2 });
-  cropperInstances[file.name] = cropper;
+    const cropModal = new bootstrap.Modal(document.getElementById("cropModal"));
+    cropModal.show();
 
-  document.getElementById("crop-btn").addEventListener(
-    "click",
-    function () {
-      const croppedCanvas = cropper.getCroppedCanvas();
-      imgElement.src = croppedCanvas.toDataURL();
-      cropModal.hide();
-    },
-    { once: true }
-  );
-}
+    const cropperImg = document.getElementById("cropper-image");
+    cropperImg.src = imgElement.src;
+    const cropper = new Cropper(cropperImg, { aspectRatio: 1, viewMode: 2 });
+    cropperInstances[file.name] = cropper;
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-document.addEventListener("DOMContentLoaded", function () {
-  const sizesContainer = document.getElementById("details-container");
-  const addSizeButton = document.getElementById("add-size");
-  const sizeErrorDiv = document.getElementById("size-error");
-  const price = document.getElementById("price")
-
-  function validateSizes() {
-    let selectedSizes = new Set();
-    let allValid = true;
-    sizeErrorDiv.textContent = "";
-
-    document.querySelectorAll('[name="sizeName[]"]').forEach((select) => {
-      const selectedValue = select.value;
-      if (selectedSizes.has(selectedValue)) {
-        allValid = false;
-        sizeErrorDiv.textContent = "Duplicate sizes are not allowed.";
-        sizeErrorDiv.classList.add("text-danger");
-      } else {
-        selectedSizes.add(selectedValue);
-      }
-    });
-
-    return allValid;
-  }
-
-  function validateQuantities() {
-    let allValid = true;
-    sizeErrorDiv.textContent = "";
-
-    document.querySelectorAll('[name="sizeQuantity[]"]').forEach((input) => {
-      if (!input.value || input.value <= 0) {
-        allValid = false;
-        sizeErrorDiv.textContent = "Quantity cannot be empty or zero.";
-        sizeErrorDiv.classList.add("text-danger");
-      }
-    });
-
-    return allValid;
-  }
-
-  function validatePrice() {
-    let allValid = true;
-    price.textContent = "";
-
-    document.querySelectorAll('[name="sizePrice[]"]').forEach((input) => {
-      if (!input.value || input.value <= 0) {
-        allValid = false;
-        sizeErrorDiv.textContent = "Quantity cannot be empty or zero.";
-        sizeErrorDiv.classList.add("text-danger");
-      }
-    });
-
-    return allValid;
-  }
-
-  // 🔴 Real-time Validation for Size Selection
-  sizesContainer.addEventListener("change", function (event) {
-    if (event.target.name === "sizeName[]") {
-      validateSizes();
-    }
-  });
-
-  // 🔴 Real-time Validation for Quantity Input
-  sizesContainer.addEventListener("input", function (event) {
-    if (event.target.name === "sizeQuantity[]") {
-      validateQuantities();
-    }
-  });
-
-  addSizeButton.addEventListener("click", function () {
-    const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-    const selectedSizes = Array.from(
-      document.querySelectorAll('[name="sizeName[]"]')
-    ).map((select) => select.value);
-    const availableSizes = allSizes.filter(
-      (size) => !selectedSizes.includes(size)
+    document.getElementById("crop-btn").addEventListener(
+      "click",
+      () => {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        imgElement.src = croppedCanvas.toDataURL();
+        cropModal.hide();
+      },
+      { once: true }
     );
+  };
 
-    if (availableSizes.length === 0) {
-      sizeErrorDiv.textContent = "All sizes are selected. Cannot add more.";
-      sizeErrorDiv.classList.add("text-danger");
+  // ================================
+  // Size Options Logic
+  // ================================
+  const addSizeButton = document.getElementById("add-size");
+
+  addSizeButton.addEventListener("click", () => {
+    const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+    const selectedSizes = Array.from(sizesContainer.querySelectorAll('[name="sizeName[]"]')).map((select) => select.value);
+    const availableSizes = allSizes.filter((size) => !selectedSizes.includes(size));
+
+    if (!availableSizes.length) {
+      displayError(sizeErrorDiv, "All sizes are selected. Cannot add more.");
       return;
     }
-
-    sizeErrorDiv.textContent = "";
-    sizeErrorDiv.classList.remove("text-danger");
+    clearError(sizeErrorDiv);
 
     const newSizeGroup = document.createElement("div");
-    newSizeGroup.classList.add("row", "mb-2", "size-group");
-
+    newSizeGroup.className = "row mb-2 size-group";
     newSizeGroup.innerHTML = `
       <div class="col-md-3">
         <select name="sizeName[]" class="form-control">
-          ${availableSizes
-            .map((size) => `<option value="${size}">${size}</option>`)
-            .join("")}
+          ${availableSizes.map((size) => `<option value="${size}">${size}</option>`).join("")}
         </select>
       </div>
       <div class="col-md-3">
         <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="1" />
       </div>
       <div class="col-md-3">
-                      <input
-                        type="number"
-                        name="price"
-                        id="price"
-                        class="form-control"
-                        placeholder="Price"
-                        min="200"
-                      />
-                    </div>
+        <input type="number" name="sizePrice[]" class="form-control" placeholder="Price" min="200" />
+      </div>
       <div class="col-md-3">
         <button type="button" class="btn btn-danger remove-size">Remove</button>
       </div>
     `;
-
     sizesContainer.appendChild(newSizeGroup);
   });
 
-  sizesContainer.addEventListener("click", function (event) {
+  sizesContainer.addEventListener("click", (event) => {
     if (event.target.classList.contains("remove-size")) {
-      if (document.querySelectorAll(".size-group").length > 1) {
+      const sizeGroups = sizesContainer.querySelectorAll(".size-group");
+      if (sizeGroups.length > 1) {
         event.target.closest(".size-group").remove();
       } else {
-        sizeErrorDiv.textContent = "At least one size is required.";
-        sizeErrorDiv.classList.add("text-danger");
+        displayError(sizeErrorDiv, "At least one size is required.");
       }
     }
   });
-
-  document
-    .getElementById("add-product-form")
-    .addEventListener("submit", function (event) {
-      let sizeValid = validateSizes();
-      let quantityValid = validateQuantities();
-
-      // Prevent submission if there are errors
-      if (!sizeValid || !quantityValid) {
-        event.preventDefault(); // Stop form submission
-      }
-    });
 });

@@ -1,3 +1,6 @@
+
+
+
 /* Metrics Section */
 .metrics-grid {
     display: grid;
@@ -6,12 +9,11 @@
     margin-bottom: 2rem;
 }
 
+
 .metric-card {
     background: var(--surface);
     padding: 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--border);
-    transition: transform 0.2s ease;
 }
 
 .metric-card:hover {
@@ -37,7 +39,6 @@
     background: var(--surface);
     padding: 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--border);
     min-height: 300px;
 }
 
@@ -72,27 +73,5 @@
     font-weight: 500;
 }
 
-.status-success {
-    background: #DCFCE7;
-    color: #166534;
-}
-
-.status-warning {
-    background: #FEF3C7;
-    color: #854D0E;
-}
-
-/* Dark Mode Overrides */
-[data-theme="dark"] .status-success {
-    background: #14532D;
-    color: #BBF7D0;
-    --border: #3D3D3D;
-}
-
-[data-theme="dark"] .status-warning {
-    background: #854D0E;
-    color: #FEF08A;
-}
 
 
-/* //////////////////////////////////////////////////////////////////////////////////////////// */
