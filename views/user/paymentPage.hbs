@@ -456,6 +456,7 @@
 
                 if (!selectedPaymentMethod) {
                     alert("Please select a payment method.");
+                    console.log("Please select a payment method.")
                     return;
                 }
 
@@ -490,16 +491,25 @@
                                     if (verify.ok) {
                                         console.log("Payment Success");
                                         placeOrder();
-                                    } else {
-                                        console.log("Payment Verification Failed");
-                                        alert("Payment verification failed. Please try again.");
                                     }
                                 },
                                 modal: {
                                     ondismiss: function () {
-                                        console.log("Payment modal dismissed");
+                                        console.log("Payment Verification Failed");
+                                        alert("⚠️ Payment was not completed. If money was deducted, it will be refunded automatically.\n\nPlease try again or choose another payment method.");
+
+                                        const placeOrderBtn = document.getElementById("placeOrderBtn");
+                                        placeOrderBtn.innerHTML = `<i class="fas fa-redo"></i> RETRY PAYMENT & PLACE ORDER`;
+                                        placeOrderBtn.disabled = false;
+
+                                        placeOrderBtn.style.backgroundColor = "orange";
+                                        placeOrderBtn.style.border = "none"; 
+                                        placeOrderBtn.style.color = "#fff";  
                                     }
                                 }
+
+
+
                             };
 
                             const rzp = new Razorpay(options);

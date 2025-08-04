@@ -50,7 +50,7 @@
                   {{#each product.details}}
                   <div class="row mb-2 size-group">
                     <div class="col-md-3">
-                      <select name="sizeName" class="form-control">
+                      <select name="sizeName[]" class="form-control">
                         <option value="XS" {{#if (eq this.size "XS" )}}selected{{/if}}>XS</option>
                         <option value="S" {{#if (eq this.size "S" )}}selected{{/if}}>S</option>
                         <option value="M" {{#if (eq this.size "M" )}}selected{{/if}}>M</option>
@@ -62,7 +62,7 @@
                       </select>
                     </div>
                     <div class="col-md-3">
-                      <input type="text" name="sizeQuantity" class="form-control" value="{{this.quantity}}" />
+                      <input type="text" name="sizeQuantity[]" class="form-control" value="{{this.quantity}}" />
                     </div>
                     <div class="col-md-3">
                       <input type="number" name="sizePrice[]" class="form-control" value="{{this.price}}" min="200" />
@@ -102,11 +102,19 @@
                 <label for="image" class="form-label">Images</label>
                 <input type="file" name="images" id="image" class="form-control" multiple />
                 <div class="error-message" id="image-error"></div>
-                <div id="image-preview">
+
+                <div id="existing-image-preview" class="d-flex flex-wrap gap-2 mb-3">
                   {{#each product.images}}
-                  <img src="{{this.path}}" alt="{{this.altText}}" width="100" height="100">
+                  <div class="position-relative border p-1 existing-image" data-image-id="{{this._id}}">
+                    <img src="{{this.path}}" alt="{{this.altText}}" width="100" height="100" style="object-fit:cover;">
+                    <button type="button"
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-existing-image"
+                      style="font-size:12px; padding:2px 6px;">✖️</button>
+                  </div>
                   {{/each}}
                 </div>
+                <input type="hidden" name="deletedImages" id="deletedImages" value="[]" />
+
               </div>
 
               <div class="mb-3">
@@ -135,6 +143,7 @@
       </div>
     </div>
   </div>
+   <input type="hidden" name="removedImageIndexes" value="0" /> <!-- dynamic values -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" defer></script>
   <script src="/javascripts/admin/editProducts.js" defer></script>
 </body>

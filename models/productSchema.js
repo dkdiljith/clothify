@@ -40,7 +40,6 @@ const productSchema = new mongoose.Schema({
 
 
 //Search Indexes
-// In your Product model
 productSchema.index({ name: 'text', description: 'text', gender: 'text' });
 productSchema.index({ 'details.price': 1 });
 productSchema.index({ createdAt: -1 });

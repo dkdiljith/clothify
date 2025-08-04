@@ -19,6 +19,7 @@ exports.razorpayReciept = async (req, res) => {
     return res.json(order);
   } catch (error) {
     console.error(error);
+     console.log("Failed tocreate order")
     return res.status(500).send('Failed to create order');
   }
 };
@@ -32,12 +33,18 @@ exports.razorpayVerification = async (req, res) => {
   const generatedSignature = hmac.digest('hex');
 
   if (generatedSignature === razorpay_signature) {
+    console.log("This is verification")
     return res.status(200).json({
       success: true,
       message: 'Payment verified',
       payment_id: razorpay_payment_id
     });
   } else {
-    return res.status(500).send('Failed to create order');
+    console.log("Failed to create order 2")
+    return res.status(500).json({
+      success: false,
+      message: 'Payment not verified',
+      payment_id: razorpay_payment_id
+    });
   }
 };

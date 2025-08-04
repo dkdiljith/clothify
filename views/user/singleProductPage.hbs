@@ -137,10 +137,13 @@
           <button onclick="addToCart()" class="action-btn btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
             <i class="fas fa-shopping-cart"></i> Add to Cart
           </button>
-          <button onclick="addToCart(); window.location.href='/user/cart'"   class="action-btn btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
+          <button onclick="addToCart(); setTimeout(() => { window.location.href = '/user/cart'; }, 200);"
+            class="action-btn btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
             <i class="fas fa-bolt"></i> Buy Now
           </button>
-          <button class="add-to-wishlist action-btn btn-wishlist"data-product-id="{{product._id}}" data-variation-index="0">
+
+          <button class="add-to-wishlist action-btn btn-wishlist" data-product-id="{{product._id}}"
+            data-variation-index="0">
             <i class="far fa-heart"></i> Wishlist
           </button>
         </div>
@@ -375,7 +378,7 @@
         }
       } catch (error) {
         console.error("Error adding to cart:", error);
-        showPopup("Login First :)" , "error");
+        showPopup("Login First :)", "error");
       }
     }
     //Add to wishlist
@@ -402,7 +405,7 @@
         }
       } catch (error) {
         console.error("Error adding to wishlist:", error);
-        showPopup("Login First :)" , "error");
+        showPopup("Login First :)", "error");
       }
     }
 

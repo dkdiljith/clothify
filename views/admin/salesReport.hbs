@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/sales-report.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- 
+
 </head>
 
 <body>
@@ -37,9 +37,9 @@
                 </button>
             </div>
             <div class="filter-container">
-                <input type="date" id="startDate" class="date-filter">
+                <input type="date" id="startDate" class="date-filter" value="{{startDate}}">
                 <span>to</span>
-                <input type="date" id="endDate" class="date-filter">
+                <input type="date" id="endDate" class="date-filter" value="{{endDate}}">
                 <button id="applyFilter" class="btn-filter">Apply Filter</button>
             </div>
         </div>
@@ -51,9 +51,9 @@
                     <tr>
                         <th></th>
                         <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Products</th>
                         <th>Date</th>
+                        <th>Coustomer</th>
+                        <th>Products</th>
                         <th>Payment</th>
                         <th>Total Amount</th>
                     </tr>
@@ -62,29 +62,21 @@
                     {{#each orders}}
                     <tr>
                         <td>{{incrementedIndex @index}}</td>
-                        <td>#{{shortId this.orderId}}</td>
-                        <td>
-                            {{this.deliveryAddress.name}}<br>
-                        </td>
+                        <td>#{{this.orderId}}</td>
+                        <td>{{formatDate this.createdAt}}</td>
+                        <td>{{this.deliveryAddress.name}}</td>
                         <td>
                             {{#each this.items}}
                             <div class="product-item">
                                 {{this.productName}} ({{this.productSize}}) × {{this.quantity}}<br>
-                                <small>₹{{this.productPrice}} each</small>
                             </div>
                             {{/each}}
                         </td>
-                        <td>{{formatDate this.createdAt}}</td>
                         <td>
                             {{this.paymentMethod}}<br>
                         </td>
                         <td>
                             ₹{{this.totalAmount}}<br>
-                            <div class="order-details">
-                                <span>Subtotal: ₹{{this.subtotal}}</span>
-                                <span>Tax: ₹{{this.tax}}</span>
-                                <span>Shipping: ₹{{this.shippingFee}}</span>
-                            </div>
                         </td>
                     </tr>
                     {{/each}}
@@ -92,9 +84,11 @@
             </table>
 
             {{#if (gt pagination.totalPages 1)}}
+
             <div class="pagination">
                 {{#if pagination.hasPrevPage}}
-                <a href="/admin/salesReport?page={{pagination.prevPage}}" class="pagination-button">
+                <a href="/admin/salesReport?page={{pagination.prevPage}}{{#if startDate}}&startDate={{startDate}}&endDate={{endDate}}{{/if}}"
+                    class="pagination-button">
                     <i class="fas fa-chevron-left"></i> Previous
                 </a>
                 {{/if}}
@@ -104,11 +98,13 @@
                 </span>
 
                 {{#if pagination.hasNextPage}}
-                <a href="/admin/salesReport?page={{pagination.nextPage}}" class="pagination-button">
+                <a href="/admin/salesReport?page={{pagination.nextPage}}{{#if startDate}}&startDate={{startDate}}&endDate={{endDate}}{{/if}}"
+                    class="pagination-button">
                     Next <i class="fas fa-chevron-right"></i>
                 </a>
                 {{/if}}
             </div>
+
             {{/if}}
             {{else}}
             <div class="empty-state">

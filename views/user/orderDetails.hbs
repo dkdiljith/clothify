@@ -697,7 +697,7 @@
                         </div>
                         {{/if}}
 
-                        {{#if (or (eq order.paymentMethod "razorpay") (eq order.paymentMethod "Wallet"))}}
+                        {{#if (eq order.paymentMethod "Wallet")}}
                         <div class="price-row">
                             <span class="price-label">Wallet Amount Used</span>
                             <span class="price-value"
@@ -852,7 +852,7 @@
                 }
 
                 const data = {
-                    orderId: "{{order.orderId}}",
+                    orderId: "{{order._id}}",
                     itemId: "{{item._id}}",
                     variationIndex: "{{item.variationIndex}}",
                     reason: reason
@@ -919,7 +919,7 @@
                 errorElement.style.display = "none";
 
                 const data = {
-                    orderId: "{{order.orderId}}",
+                    orderId: "{{order._id}}",
                     itemId: "{{item._id}}",
                     reason: reason
                 };

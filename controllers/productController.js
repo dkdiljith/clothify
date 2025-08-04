@@ -154,7 +154,6 @@ exports.addProducts = async (req, res) => {
 
 
 
-
 exports.updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -183,34 +182,55 @@ exports.updateProduct = async (req, res) => {
             const latestCollection = req.body.latestCollection === 'on';
             const bestSeller = req.body.bestSeller === 'on';
 
-            let images = [];
+            let newImages = [];
             if (req.files && req.files.length > 0) {
-                images = req.files.map((file, index) => ({
+                newImages = req.files.map((file, index) => ({
                     path: '/uploads/' + file.filename,
                     altText: `${name}-image(${index + 1})`
                 }));
             }
 
-            const updatedProduct = await Product.findByIdAndUpdate(
-                productId,
-                {
-                    name,
-                    categoryId,
-                    details,
-                    gender,
-                    description,
-                    latestCollection,
-                    bestSeller,
-                    ...(images.length > 0 && { images })
-                },
-                { new: true }
-            );
+            const removedImageIndexes = req.body.removedImageIndexes || [];
+            const indexesToRemove = Array.isArray(removedImageIndexes)
+                ? removedImageIndexes.map(Number)
+                : [Number(removedImageIndexes)];
 
-            if (!updatedProduct) {
+            let product = await Product.findById(productId);
+            if (!product) {
                 return res.status(404).json({ success: false, message: "Product not found" });
             }
 
-            return res.redirect(`/admin/products`);
+            // Remove selected images from DB and disk
+            const imagesToRemove = product.images.filter((_, index) =>
+                indexesToRemove.includes(index)
+            );
+
+            imagesToRemove.forEach((img) => {
+                const filePath = path.join(__dirname, '..', 'public', img.path);
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error("Error deleting file:", err);
+                });
+            });
+
+            // Filter out deleted images
+            product.images = product.images.filter((_, index) => !indexesToRemove.includes(index));
+
+            // Append new images (if any)
+            if (newImages.length > 0) {
+                product.images.push(...newImages);
+            }
+
+            // Update all other fields
+            product.name = name;
+            product.categoryId = categoryId;
+            product.description = description;
+            product.gender = gender;
+            product.details = details;
+            product.latestCollection = latestCollection;
+            product.bestSeller = bestSeller;
+
+            await product.save();
+            return res.redirect('/admin/products');
         });
     } catch (err) {
         console.error('Error updating product:', err);

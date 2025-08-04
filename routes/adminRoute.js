@@ -37,7 +37,7 @@ router.get(`/offer/search` , SessionHandling.adminIsLoggedIn , searchController.
 
 ///SALES REPORT///
 router.get(`/salesReport`, SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
-router.post('/salesReport' ,SessionHandling.adminIsLoggedIn, adminController.salesReport)
+router.post('/salesReport' ,SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
 
 //PRODUCT SIDE///
 router.get(`/products`, SessionHandling.adminIsLoggedIn, productController.showProducts)

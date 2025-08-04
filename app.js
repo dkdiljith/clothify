@@ -43,16 +43,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 600000, // Adjust as needed
+    maxAge: 900000., // 15 min // 300000 is 5min
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
-  },
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/Clothify', 
-    ttl: 14 * 24 * 60 * 60, // Optional: Session TTL in seconds (e.g., 14 days)
-    autoRemove: 'native', 
-  }),
+  }
 }));
 
 

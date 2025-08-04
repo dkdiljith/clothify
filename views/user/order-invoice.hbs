@@ -522,8 +522,6 @@
                                     <img src="{{this.productImg}}" alt="{{this.productName}}" class="product-img">
                                     <div>
                                         <div class="product-name">{{this.productName}}</div>
-                                        <div class="product-sku">SKU: {{this.productId}}</div> {{!-- Using productId as
-                                        SKU for now --}}
                                         <div>{{this.productSize}}</div>
                                         {{#if this.cancellationReason.length}}
                                         <div class="reason">Cancelled: {{this.cancellationReason.[0].reason}}</div>
@@ -583,7 +581,7 @@
                     </tr>
                     {{/if}}
 
-                    {{#if (or (eq order.paymentMethod "razorpay") (eq order.paymentMethod "Wallet"))}}
+                    {{#if (eq order.paymentMethod "Wallet")}}
                     <tr>
                         <td>Wallet Amount Used:</td>
                         <td class="text-right text-success">-₹{{order.walletAmountUsed}}.00</td>

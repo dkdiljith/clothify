@@ -66,21 +66,55 @@ exports.activityLogRender = async (req, res) => {
 
 exports.salesReportRender = async (req, res) => {
   try {
-    // Pagination parameters
+    const { startDate, endDate } = req.body;
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 5 orders per page (you can adjust this)
+    const limit = 5;
+    
+    // Build query based on whether dates were provided
+    let query = { paymentStatus: 'Completed' };
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      query.createdAt = {
+        $gte: start,
+        $lte: end
+      };
+    }
 
-    // Get total count of completed orders
-    const totalOrders = await Order.countDocuments();
+    // Get total count for pagination
+    const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / limit);
 
-    // Get paginated orders (newest first)
-    const orders = await Order.find()
-      .sort({ createdAt: -1 }) // Sort by newest first
+    // Get paginated results
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
 
+    // Return JSON for AJAX requests
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.json({
+        success: true,
+        orders,
+        pagination: {
+          page,
+          limit,
+          totalPages,
+          startDate,
+          endDate,
+          nextPage: page + 1,
+          prevPage: page - 1,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
+    }
+
+    // Return HTML for normal requests
     return res.render('admin/salesReport', {
       admin: true,
       orders,
@@ -92,11 +126,22 @@ exports.salesReportRender = async (req, res) => {
         prevPage: page - 1,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1
-      }
+      },
+      startDate: startDate || '',
+      endDate: endDate || ''
     });
 
   } catch (error) {
-    console.error("Error fetching sales report:", error);
+    console.error('Sales report error:', error);
+    
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({
+        success: false,
+        message: 'Error filtering orders',
+        error: error.message
+      });
+    }
+    
     return res.render('admin/salesReport', {
       admin: true,
       orders: [],
@@ -111,79 +156,6 @@ exports.salesReportRender = async (req, res) => {
     });
   }
 };
-
-
-
-
-exports.salesReport = async (req, res) => {
-  try {
-    const { startDate, endDate } = req.body;
-    const page = parseInt(req.query.page) || 1; // Get page from query params
-    const limit = 5; // Same as coupon page
-
-    if (!startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Both start and end dates are required'
-      });
-    }
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    // Build query
-    const query = {
-      paymentStatus: 'Completed',
-      createdAt: {
-        $gte: start,
-        $lte: end
-      }
-    };
-
-    // Get total count for pagination
-    const totalOrders = await Order.countDocuments(query);
-    const totalPages = Math.ceil(totalOrders / limit);
-
-    // Get paginated results
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-
-    return res.json({
-      success: true,
-      orders,
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
-    });
-
-  } catch (error) {
-    console.error('Sales report error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error filtering orders',
-      error: error.message,
-      orders: [],
-      pagination: {
-        page: 1,
-        limit: 5,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      }
-    });
-  }
-}
-
 
 
 

@@ -501,7 +501,7 @@
 </head>
 
 <body>
-    
+
     <div class="container" style="margin-top:20px;">
         <div class="profile-header">
         </div>
@@ -544,18 +544,27 @@
                         <h2 class="profile-name">{{#if userData.name}}{{userData.name}}{{else}}Your Name{{/if}}</h2>
                         <div class="profile-email">{{userData.email}}</div>
                         <div class="profile-stats">
-                            <div class="stat-item">
-                                <div class="stat-number">{{orderCount}}</div>
-                                <div class="stat-label">Orders</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">{{wishlistCount}}</div>
-                                <div class="stat-label">Wishlist</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">{{addressCount}}</div>
-                                <div class="stat-label">Addresses</div>
-                            </div>
+                            <a href="/user/orders">
+                                <div class="stat-item">
+                                    <div class="stat-number">{{orderCount}}</div>
+                                    <div class="stat-label">Orders</div>
+                                </div>
+                            </a>
+
+                            <a href="/user/wishlist">
+                                <div class="stat-item">
+                                    <div class="stat-number">{{wishlistCount}}</div>
+                                    <div class="stat-label">Wishlist</div>
+                                </div>
+                            </a>
+
+                            <a href="/user/address">
+                                <div class="stat-item">
+                                    <div class="stat-number">{{addressCount}}</div>
+                                    <div class="stat-label">Addresses</div>
+                                </div>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -620,7 +629,8 @@
                             {{#if address}}
                             <div class="address-details">
                                 <div class="address-line"><strong>Address Name:</strong> {{address.name}}</div>
-                                <div class="address-line"><strong>Street Address:</strong> {{address.streetAddress}}</div>
+                                <div class="address-line"><strong>Street Address:</strong> {{address.streetAddress}}
+                                </div>
                                 {{#if address.landmark}}
                                 <div class="address-line"><strong>Landmark:</strong> {{address.landmark}}</div>
                                 {{/if}}
@@ -686,7 +696,7 @@
 
     <script>
         // Profile picture upload functionality
-        document.querySelector('.profile-picture-upload').addEventListener('click', function() {
+        document.querySelector('.profile-picture-upload').addEventListener('click', function () {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -730,13 +740,13 @@
                 <div class="toast-message">${message}</div>
                 <i class="fas fa-times toast-close" onclick="this.parentElement.remove()"></i>
             `;
-            
+
             const toastContainer = document.getElementById('toastContainer');
             toastContainer.appendChild(toast);
-            
+
             // Show toast
             setTimeout(() => toast.classList.add('show'), 10);
-            
+
             // Auto-remove after 5 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -745,4 +755,5 @@
         }
     </script>
 </body>
+
 </html>
