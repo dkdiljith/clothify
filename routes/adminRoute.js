@@ -73,7 +73,7 @@ router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponControl
 ///OFFER MANAGEMENT///
 router.get(`/offer`, SessionHandling.adminIsLoggedIn,offerController.offerRender )
 router.post("/offer/addOffer" ,SessionHandling.adminIsLoggedIn,offerController.createOffer )
-router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditRender)
+router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
 router.put('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.editOffer)
 router.delete('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.offerDelete);
 

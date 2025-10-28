@@ -12,6 +12,7 @@ const categorySchema = new mongoose.Schema({
       ref: "Category",
       default: null
   },
+  offerId:{type:mongoose.Schema.Types.ObjectId, default:null}
 } , { timestamps: true });
 
 const Category = mongoose.model("Category", categorySchema);

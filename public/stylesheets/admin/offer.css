@@ -1,44 +1,50 @@
-/* Offer Management Layout */
-.offer-management-layout {
+.coupon-management-layout {
     position: relative;
     width: 100%;
 }
 
-/* Offers List Container */
-.offers-list-container {
+/* Coupons List Container */
+.coupons-list-container {
     background: var(--surface);
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     width: 100%;
+    /* Ensure it takes full width */
     max-width: 100%;
+    /* Prevent any overflow */
 }
 
-.offers-table-header {
+.coupons-table-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
 }
 
-.offers-table-header h3 {
+.coupons-table-header h3 {
     font-size: 1.25rem;
     color: var(--text);
     margin: 0;
 }
 
-.offers-table-wrapper {
+.table-actions {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.coupons-table-wrapper {
     overflow-x: auto;
 }
 
-/* Offers Table */
-.offers-table {
+/* Coupons Table */
+.coupons-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.offers-table th {
+.coupons-table th {
     background: var(--background);
     color: var(--text);
     font-weight: 500;
@@ -47,24 +53,24 @@
     border-bottom: 1px solid var(--border);
 }
 
-.offers-table td {
+.coupons-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
 }
 
-.offers-table tr:last-child td {
+.coupons-table tr:last-child td {
     border-bottom: none;
 }
 
-.offer-code {
+.coupon-code {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-weight: 500;
 }
 
-.offer-icon {
+.coupon-icon {
     font-size: 1.1em;
 }
 
@@ -85,10 +91,23 @@
     color: var(--danger-dark);
 }
 
+.add-coupon-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.add-coupon-card h3 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
 /* Form Styles */
 .form-group {
     margin-bottom: 1.5rem;
-    position: relative; /* For error positioning */
 }
 
 .form-label {
@@ -119,7 +138,6 @@
     color: var(--danger);
     margin-top: 0.25rem;
     min-height: 1rem;
-    display: block;
 }
 
 .form-columns {
@@ -201,232 +219,24 @@
     margin-bottom: 1.5rem;
 }
 
-/* Notification styles */
-.notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-}
 
-.notification {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-    color: #fff;
-    animation: fadeIn 0.5s, fadeOut 0.5s 3.5s forwards;
-}
 
-.notification.success {
-    background-color: #4CAF50;
-}
-
-.notification.error {
-    background-color: #F44336;
-}
-
-.notification .close-btn {
-    margin-left: 10px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .coupon-management-layout {
+        grid-template-columns: 1fr;
     }
-    to {
-        opacity: 1;
-        transform: translateX(0);
+
+    .add-coupon-container {
+        position: static;
+    }
+
+    .form-columns {
+        grid-template-columns: 1fr;
     }
 }
 
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-}
-
-/* Modal Container */
-.add-offer-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-}
-
-.add-offer-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Modal Card */
-.add-offer-card {
-    position: relative;
-    width: 800px;
-    min-height: 550px;
-    max-height: 90vh;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: visible;
-}
-
-/* Form Header */
-.form-header {
-    position: relative;
-    width: 100%;
-    text-align: center;
-}
-
-/* Close Button */
-#closeOfferFormBtn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 5px;
-}
-
-/* Select2 Customizations */
-.select2-container {
-    margin-bottom: 5px;
-    position: relative;
-    z-index: 1;
-    transition: none;
-}
-
-.select2-container.hidden {
-    display: none !important;
-}
-
-.select2-selection {
-    padding: 0.75rem;
-    height: auto;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--background);
-}
-
-.select2-container--open {
-    z-index: 1002;
-}
-
-.select2-container--open .select2-dropdown {
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    display: block;
-}
-
-.select2-dropdown.hidden {
-    display: none !important;
-}
-
-.select2-results__options {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.select2-results__option {
-    padding: 8px 12px;
-}
-
-/* Hidden State */
-.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-}
-
-select.hidden {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-}
-
-/* Search Input */
-.search-input {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--background);
-    color: var(--text);
-}
-
-/* Empty State */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    text-align: center;
-    background: var(--surface);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    margin-top: 1rem;
-}
-
-.empty-state-image {
-    width: 200px;
-    height: auto;
-    margin-bottom: 1.5rem;
-    opacity: 0.7;
-}
-
-.empty-state h2 {
-    color: var(--text);
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
-}
-
-.empty-state p {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    max-width: 400px;
-}
-
-/* Pagination */
+/* Pagination Styles */
 .pagination {
     display: flex;
     justify-content: center;
@@ -460,34 +270,191 @@ select.hidden {
     color: #666;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .offers-table-header {
+@media (max-width: 576px) {
+    .pagination {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        gap: 10px;
+    }
+}
+
+/* search input*/
+.search-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--background);
+    color: var(--text);
+}
+
+/*dropdown conflict*/
+.select2-container {
+    margin-bottom: 5px;
+}
+
+.select2-selection {
+    padding: 0.75rem !important;
+    height: auto !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+
+/* Fix for Select2 scrollbar */
+.select2-container--open .select2-dropdown {
+    overflow: hidden !important; /* Hide scrollbar */
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.select2-results__options {
+    max-height: 200px !important; /* Set fixed height */
+    overflow-y: auto !important; /* Only show scroll when needed */
+}
+
+.select2-results__option {
+    padding: 8px 12px !important;
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////////////////////////*/
+
+/* Modal Container */
+.add-coupon-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.add-coupon-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Card - Fixed Size */
+.add-coupon-card {
+    position: relative; /* For absolute positioning of close button */
+    width: 800px;
+    min-height: 550px; /* Fixed height that accommodates all content */
+    max-height: 90vh;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+/* Form Header */
+.form-header {
+    position: relative;
+    width: 100%;
+    text-align: center; /* Center the title */
+}
+
+
+/* Close Button Positioning */
+#closeFormBtn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 5px;
+}
+
+/* Form Columns Layout */
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Form Groups with Fixed Height */
+.form-group {
+    min-height: 80px; 
+}
+
+/* Error Messages - Fixed Space */
+.error-message {
+    height: 20px; /* Fixed height */
+    font-size: 0.75rem;
+    color: var(--danger);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.error-message.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Form Actions - Bottom Center */
+.form-actions {
+    margin-top: auto; /* Pushes to bottom */
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .add-coupon-card {
+        width: 90%;
+        min-height: auto;
+        padding: 20px;
     }
     
     .form-columns {
         grid-template-columns: 1fr;
     }
-    
-    .add-offer-card {
-        width: 90%;
-        min-height: auto;
-        max-height: 80vh;
-        padding: 20px;
-    }
-
-    .select2-dropdown {
-        position: fixed !important;
-        width: 90% !important;
-        left: 5% !important;
-    }
 }
 
-/* Error message positioning for Select2 */
-.select2-container ~ .error-message {
-    position: relative;
-    margin-top: 5px;
+
+
+/* Empty State Styles */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+.empty-state-image {
+    width: 200px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.empty-state h2 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    max-width: 400px;
 }
