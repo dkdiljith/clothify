@@ -1,4 +1,5 @@
 const Offer = require(`../models/offerSchema`)
+const Product = require(`../models/productSchema`)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,20 +106,7 @@ exports.createOffer = async (req, res) => {
             isActive: true
         });
 
-        // Save to database
         const savedOffer = await offer.save();
-
-
-        ////////////////////////////////////////////////////////////////////////////
-
-        // If offer is product-wise, update product prices
-        // if (offerType === 'product' && targetIds.length > 0) {
-        //     await applyProductOffer(targetIds, discountType, discountValue, savedOffer._id);
-        // } else if (offerType === 'subcategory' && targetIds.length > 0) {
-        //     await applySubcategoryOffer(targetIds, discountType, discountValue, savedOffer._id)
-        // } else if (offerType === 'category' && targetIds.length > 0) {
-        //     await applyCategoryOffer(targetIds, discountType, discountValue, savedOffer._id)
-        // }
 
         return res.status(201).json({
             success: true,
@@ -207,15 +195,121 @@ exports.editOffer = async (req, res) => {
         }
 
         // Update only the fields that were provided
-        if (offerCode !== undefined) {
-            existingOffer.offerCode = offerCode.toUpperCase();
+        if (existingOffer.offerCode !== offerCode) existingOffer.offerCode = offerCode.toUpperCase();
+        if (existingOffer.startDate !== startDate) existingOffer.endDate = new Date(startDate);
+        if (existingOffer.endDate !== endDate) existingOffer.endDate = new Date(endDate);
+
+
+        //DISCOUNT_TYPE || //DISCOUNT_VALUE
+        const newDiscountValue = Number(discountValue);
+        if (existingOffer.discountType !== discountType || existingOffer.discountValue !== newDiscountValue) {
+
+            const offerId = existingOffer._id;
+
+            const updateResult = await Product.updateMany(
+                // 1. QUERY: Match all products that currently have this offer applied
+                { "details.offerId": offerId },
+
+                // 2. UPDATE: Use an aggregation pipeline to calculate and update atomically
+                [
+                    {
+                        $set: {
+                            details: {
+                                $map: {
+                                    input: "$details",
+                                    as: "detail",
+                                    in: {
+                                        $cond: {
+                                            if: { $eq: ["$$detail.offerId", offerId] }, // Target only the details with the current offerId
+                                            then: {
+                                                $let: {
+                                                    vars: {
+                                                        originalPrice: "$$detail.price",
+                                                        // Calculate the final price after the new discount
+                                                        finalPrice: {
+                                                            $subtract: [
+                                                                "$$detail.price",
+                                                                {
+                                                                    $cond: {
+                                                                        if: { $eq: [discountType, 'percentage'] },
+                                                                        then: { $multiply: ["$$detail.price", { $divide: [newDiscountValue, 100] }] },
+                                                                        else: newDiscountValue
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    in: {
+                                                        $mergeObjects: ["$$detail", {
+                                                            $cond: {
+                                                                // Validation: Check if the final price is a valid discount (less than original and positive)
+                                                                if: {
+                                                                    $and: [
+                                                                        { $lt: ["$$finalPrice", "$$originalPrice"] },
+                                                                        { $gt: ["$$finalPrice", 0] }
+                                                                    ]
+                                                                },
+                                                                // VALID DISCOUNT: Set the new rounded price and keep offerId
+                                                                then: {
+                                                                    offerPrice: { $round: ["$$finalPrice", 0] }, // Round to nearest integer
+                                                                    offerId: offerId,
+                                                                },
+                                                                // INVALID DISCOUNT: Reset offer fields
+                                                                else: {
+                                                                    offerPrice: 0,
+                                                                    offerId: null,
+                                                                }
+                                                            }
+                                                        }]
+                                                    }
+                                                }
+                                            },
+                                            else: "$$detail" // Keep non-matching details as they are
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            );
+
+            // Update the offer object itself (must be done after product recalculation)
+            existingOffer.discountType = discountType;
+            existingOffer.discountValue = newDiscountValue;
+            await existingOffer.save();
+
+            console.log(`${updateResult.modifiedCount} products had their offer prices recalculated/removed.`);
         }
 
-        // Update other fields if provided
-        if (discountType !== undefined) existingOffer.discountType = discountType;
-        if (discountValue !== undefined) existingOffer.discountValue = Number(discountValue);
-        if (startDate !== undefined) existingOffer.endDate = new Date(startDate);
-        if (endDate !== undefined) existingOffer.endDate = new Date(endDate);
+        //OFFER_TYPE
+        if (existingOffer.offerType !== offerType) {
+
+            const offerId = existingOffer._id;
+            const updateResult = await Product.updateMany(
+                { "details.offerId": offerId },
+                {
+                    $set: {
+                        "details.$[detail].offerId": null,
+                        "details.$[detail].offerPrice": 0,
+                    }
+                },
+                {
+                    arrayFilters: [
+                        { "detail.offerId": offerId }
+                    ]
+                }
+            );
+
+            if (updateResult.modifiedCount > 0) {
+                console.log(`${updateResult.modifiedCount} documents updated. All CURRENT APPLIED OFFERS ARE REMOVED.`);
+            }
+
+            //apply the offerType to existing offer
+            existingOffer.offerType = offerType
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Validate the updated offer
         await existingOffer.validate();

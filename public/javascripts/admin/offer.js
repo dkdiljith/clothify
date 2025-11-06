@@ -95,7 +95,7 @@
                 let isValid = true;
                 const today = new Date().toISOString().split('T')[0];
 
-                // ✅ Coupon Code Validation
+                //  Offer Code Validation
                 const codeRegex = /^[A-Z0-9]{6}$/;
                 if (!codeRegex.test(offerCodeInput.value)) {
                     showError(offerCodeInput, 'Code must be 6 uppercase alphanumeric characters.');
@@ -104,7 +104,20 @@
                     clearError(offerCodeInput);
                 }
 
-                // ✅ Discount Type Validation
+                // Offer Type Validation
+                 if (!offerTypeInput.value) {
+                    // Target the parent container instead of the Select2 element
+                    const select2Container = document.querySelector('.select2-container');
+                    select2Container.style.border = '1px solid red';
+                    document.getElementById('type-error').textContent = 'Please select an offer type.';
+                    isValid = false;
+                } else {
+                    document.querySelector('.select2-container').style.border = '';
+                    document.getElementById('type-error').textContent = '';
+                }
+
+
+                //  Discount Type Validation
                 if (!discountTypeInput.value) {
                     // Target the parent container instead of the Select2 element
                     const select2Container = document.querySelector('.select2-container');
@@ -116,7 +129,7 @@
                     document.getElementById('type-error').textContent = '';
                 }
 
-                // ✅ Discount Value Validation
+                //  Discount Value Validation
                 const discountValue = parseFloat(discountValueInput.value);
                 const discountValueStr = discountValueInput.value.trim();
 
@@ -167,6 +180,12 @@
                 // ✅ Date Validation
                  
                 //startDate doesnt required future validation , while editing it can make several issues
+                 if (!startDateInput.value) {
+                    showError(startDateInput, 'Select a date as start date.');
+                    isValid = false;
+                } else {
+                    clearError(startDateInput);
+                }
 
                 if (endDateInput.value <= today) {
                     showError(endDateInput, 'End date must be in the future.');
@@ -195,9 +214,20 @@
                 });
             }
 
+            function cleanupSelect3() {
+                const select = $('#offerType');
+                select.val(null).trigger('change');
+                select.select2('destroy');
+                select.select2({
+                    minimumResultsForSearch: Infinity,
+                    width: '100%'
+                });
+            }
+
             //FUNCTION TO CLOSE MODAL
             function closeModal() {
                 cleanupSelect2();
+                cleanupSelect3()
                 // Reset the form
                 document.getElementById('couponForm').reset();
 

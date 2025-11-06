@@ -11,19 +11,8 @@ const productSchema = new mongoose.Schema({
         size: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
-
-
-        discountPrice: {
-            type: Number, default: 0, validate: {
-                validator: function (value) {
-                    return value <= this.price;
-                },
-                message: 'Discount price cannot be greater than original price'
-            }
-        },
-        currentOffer: { type: mongoose.Schema.Types.ObjectId, default: null }
-
-
+        offerId: { type: mongoose.Schema.Types.ObjectId, default: null },
+        offerPrice: { type: Number, default: null, message: 'Discount price cannot be greater than original price' }
     }],
     gender: { type: String, required: true },
     description: { type: String },

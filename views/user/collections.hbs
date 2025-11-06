@@ -272,11 +272,10 @@
                                 {{#if this.latestCollection}}
                                 <div class="product-badge">New</div>
                                 {{/if}}
-                                {{#if this.details.[0].currentOffer}}
+                                {{#if this.details.[0].offerId}}
                                 <div class="product-badge sale">Sale</div>
                                 <div class="discount-badge">
-                                    {{calculateDiscountPercentage (subtractDiscountPrice this.details.[0].price
-                                    this.details.[0].discountPrice) this.details.[0].price}}% OFF
+                                    {{calculateDiscountPercentage this.details.[0].price this.details.[0].offerPrice}}% OFF
                                 </div>
                                 {{/if}}
 
@@ -301,10 +300,9 @@
                                     </h3>
                                     <p class="product-description">{{this.description}}</p>
                                     <div class="price-container">
-                                        {{#if this.details.[0].currentOffer}}
+                                        {{#if this.details.[0].offerId}}
                                         <span class="original-price">₹{{this.details.[0].price}}</span>
-                                        <span class="product-price">₹{{subtractDiscountPrice this.details.[0].price
-                                            this.details.[0].discountPrice}}</span>
+                                        <span class="product-price">₹{{this.details.[0].offerPrice}}</span>
                                         {{else}}
                                         <span class="product-price">₹{{this.details.[0].price}}</span>
                                         {{/if}}

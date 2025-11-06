@@ -26,19 +26,19 @@ async function calculateRefund(orderId, itemId) {
 
   // calculating the total without the returning item
   let newSubtotal = 0;
-  let newOfferDiscount = 0;
+  let newOfferAmount = 0;
 
   // Filter out the returned item and calculate totals for the rest
   const remainingItems = order.items.filter(item => item._id.toString() !== itemId);
 
   remainingItems.forEach(item => {
     const productPrice = item.productId.details[item.variationIndex].price * item.quantity;
-    const offerAmount = item.productId.details[item.variationIndex].discountPrice * item.quantity;
+    const offerPrice = item.productId.details[item.variationIndex].offerPrice * item.quantity;
     newSubtotal += productPrice;
-    newOfferDiscount += offerAmount;
+    newOfferAmount += offerPrice;
   });
 
-  let newDiscountedPrice = newSubtotal - newOfferDiscount;
+  let newDiscountedPrice = newSubtotal - newOfferAmount;
 
   /////////////////////////// Handle Coupon 
   let newCouponDiscount = 0;

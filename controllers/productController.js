@@ -32,6 +32,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).array('images', 5);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 exports.addProductsRender = async (req, res) => {
 
     const categories = await Category.find().lean();
@@ -337,6 +338,83 @@ exports.deleteProducts = async (req, res) => {
 }
 
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////APPLY OFFER FUNCTIONS/////////////////////
+
+//Apply Offer Render Function
+exports.applyOfferJson = async (req, res) => {
+    try {
+        const offers = await Offer.find({ offerType: 'product' });
+        const product = await Product.findById(req.params.productId)
+        return res.json({ offers, product });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+//Apply Offer Function
+exports.applyOffer = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { offerId } = req.body;
+
+        const product = await Product.findById(productId);
+        const offer = await Offer.findById(offerId).lean();
+
+        // validations
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found." });
+        }
+        if (!offer) {
+            return res.status(404).json({ success: false, message: "Offer not found." });
+        }
+        if (offer.offerType === 'subcategory') {
+            return res.status(400).json({ success: false, message: "This offer is for subcategories, not products." });
+        }
+        if (offer.discountType === 'percentage' && offer.discountValue >= 100) {
+            return res.status(400).json({ success: false, message: "Percentage discount must be less than 100." });
+        }
+
+        //offerPrice calculating
+        product.details.forEach(detail => {
+            let calculatedOfferPrice = null;
+            const originalPrice = detail.price;
+
+            if (offer.discountType === 'percentage') {
+                calculatedOfferPrice = originalPrice - ((originalPrice * offer.discountValue) / 100);
+            } else if (offer.discountType === 'price') {
+                calculatedOfferPrice = originalPrice - offer.discountValue;
+            }
+
+            if (calculatedOfferPrice !== null && calculatedOfferPrice < originalPrice && calculatedOfferPrice > 0) {
+                //rounding price
+                detail.offerPrice = Math.round((calculatedOfferPrice * 100) / 100);
+                detail.offerId = offerId;
+            } else {
+                detail.offerPrice = null;
+                detail.offerId = null;
+                console.log(`Offer was not applicable for detail with price ${originalPrice}`);
+            }
+        });
+        await product.save();
+        return res.status(201).json({
+            success: true,
+            type: "success",
+            message: "Offer applied successfully!"
+        });
+
+    } catch (err) {
+        console.error("An Error Occurred while applying offer:", err);
+        return res.status(500).json({
+            success: false,
+            type: "error",
+            message: "An internal server error occurred."
+        });
+    }
+};
 
 
 

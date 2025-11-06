@@ -81,7 +81,7 @@ exports.couponEditJson = async (req, res) => {
 
 exports.createCoupon = async (req, res) => {
     try {
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount, endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount,startDate, endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -103,6 +103,7 @@ exports.createCoupon = async (req, res) => {
             discountType,
             discountValue,
             minimumPurchaseAmount,
+            startDate,
             endDate,
         });
 
@@ -139,7 +140,7 @@ exports.createCoupon = async (req, res) => {
 exports.couponEdit = async (req, res) => {
     try {
         const couponId = req.params.couponId;
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount, endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate,endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -174,6 +175,7 @@ exports.couponEdit = async (req, res) => {
                 discountType,
                 discountValue,
                 minimumPurchaseAmount,
+                startDate,
                 endDate,
             },
             { new: true }

@@ -40,6 +40,7 @@
             const discountTypeInput = document.getElementById('discountType');
             const discountValueInput = document.getElementById('discountValue');
             const endDateInput = document.getElementById('endDate');
+            const startDateInput = document.getElementById('startDate');
 
             // ✅ Automatically convert coupon code to uppercase while typing
             codeInput.addEventListener('input', () => {
@@ -173,6 +174,13 @@
                 }
 
                 // ✅ Date Validation
+                if (!startDateInput.value) {
+                    showError(startDateInput, 'Select a date as start date.');
+                    isValid = false;
+                } else {
+                    clearError(startDateInput);
+                }
+
                 if (endDateInput.value <= today) {
                     showError(endDateInput, 'End date must be in the future.');
                     isValid = false;
@@ -184,7 +192,7 @@
             };
 
             // ✅ Real-time validation event listeners
-            [codeInput, minPurchaseInput, discountTypeInput, discountValueInput, endDateInput].forEach(input => {
+            [codeInput, minPurchaseInput, discountTypeInput, discountValueInput, endDateInput,startDateInput].forEach(input => {
                 input.addEventListener('input', validateForm);
                 input.addEventListener('blur', validateForm);
             });
@@ -246,6 +254,7 @@
                     document.getElementById('discountType').value = coupon.discountType;
                     document.getElementById('minimumPurchaseAmount').value = coupon.minimumPurchaseAmount;
                     document.getElementById('discountValue').value = coupon.discountValue;
+                    document.getElementById('startDate').value = coupon.startDate.split('T')[0];
                     document.getElementById('endDate').value = coupon.endDate.split('T')[0];
 
                     // Trigger Select2 update if using it
