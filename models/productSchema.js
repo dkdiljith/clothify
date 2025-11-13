@@ -22,6 +22,7 @@ const productSchema = new mongoose.Schema({
     }],
     latestCollection: { type: Boolean, default: false },
     bestSeller: { type: Boolean, default: false },
+    active:{ type: Boolean, required: true , default:false}
 }, { timestamps: true });
 
 

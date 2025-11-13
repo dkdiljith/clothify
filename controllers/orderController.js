@@ -34,8 +34,14 @@ async function calculateRefund(orderId, itemId) {
   remainingItems.forEach(item => {
     const productPrice = item.productId.details[item.variationIndex].price * item.quantity;
     const offerPrice = item.productId.details[item.variationIndex].offerPrice * item.quantity;
+
     newSubtotal += productPrice;
-    newOfferAmount += offerPrice;
+    if(offerPrice){
+      newOfferAmount += (productPrice - offerPrice)
+    }else{
+      newOfferAmount += 0
+    }
+    
   });
 
   let newDiscountedPrice = newSubtotal - newOfferAmount;

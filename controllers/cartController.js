@@ -69,8 +69,12 @@ async function recalculateCartSummary(userId) {
     let offerPrice = item.productId.details[item.variationIndex].offerPrice * item.quantity;
 
     subtotal += productPrice
-    offerDiscount += productPrice - offerPrice
-    offerAmount += offerPrice
+    if (offerPrice) {
+      offerDiscount += (productPrice - offerPrice)
+      offerAmount += offerPrice
+    }else{
+      offerAmount += productPrice
+    }
 
   });
 
