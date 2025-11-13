@@ -82,10 +82,12 @@
         <!-- Price Display -->
         <div class="price-section">
           <div class="price-display">
+            {{#if product.details.[0].offerId}}
+            <span class="discounted-price" id="selected-price">₹{{product.details.[0].offerPrice}}</span>
+            <span class="original-price">₹{{product.details.[0].price}}</span>
+            <span class="discount-percentage">{{calculateDiscountPercentage product.details.[0].price product.details.[0].offerPrice}}% OFF</span>
+            {{else}}
             <span class="discounted-price" id="selected-price">₹{{product.details.[0].price}}</span>
-            {{#if product.originalPrice}}
-            <span class="original-price">₹{{product.originalPrice}}</span>
-            <span class="discount-percentage">{{product.discountPercentage}}% OFF</span>
             {{/if}}
           </div>
           <p class="tax-info">Inclusive of all taxes</p>
@@ -270,6 +272,7 @@
     const quantityInput = document.getElementById('quantity');
     const addToCartButton = document.querySelector('.btn-add-to-cart');
     const selectedPriceEl = document.getElementById('selected-price');
+    const originalPriceEl = document.getElementById('original-price');
     const selectedStockEl = document.getElementById('selected-stock');
     const cartCountEl = document.getElementById("cart-count");
     const mainImg = document.getElementById("main-image");
@@ -280,6 +283,7 @@
         productId: element.getAttribute('data-product-id'),
         productDetailsId: element.getAttribute('data-details-id'),
         price: element.getAttribute('data-price'),
+
         stock: element.getAttribute('data-quantity'),
       };
     }

@@ -1,0 +1,9 @@
+# Dependency directories
+node_modules/
+
+# Environment variables and sensitive data
+.env
+.env.local
+
+# IDE and Editor files
+.vscode/        # VS Code specific settings folder

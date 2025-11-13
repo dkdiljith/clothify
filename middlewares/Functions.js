@@ -1,3 +1,4 @@
+const Category = require(`../models/categorySchema`)
 const Product = require(`../models/productSchema`)
 const Coupon = require(`../models/couponSchema`)
 const Offer = require(`../models/offerSchema`)
@@ -10,10 +11,11 @@ exports.validity_manager = async (req, res, next) => {
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); // Normalize date
 
-        const [coupons, offers, products] = await Promise.all([
+        const [coupons, offers, products, categories] = await Promise.all([
             Coupon.find(),
             Offer.find(),
-            Product.find()
+            Product.find(),
+            Category.find()
         ]);
 
         // ====================
@@ -70,15 +72,15 @@ exports.validity_manager = async (req, res, next) => {
             let isModified = false;
 
             product.details = product.details.map(detail => {
-                const offerId = detail.currentOffer?.toString();
+                const offerId = detail.offerId?.toString();
 
                 if (
                     offerId &&
                     (!allOfferIds.has(offerId) || !activeOfferIds.has(offerId))
                 ) {
                     // Offer is either missing or inactive
-                    detail.currentOffer = null;
-                    detail.discountPrice = 0;
+                    detail.offerId = null;
+                    detail.offerPrice = 0;
                     isModified = true;
                 }
 
@@ -94,6 +96,42 @@ exports.validity_manager = async (req, res, next) => {
         if (updatedProductCount > 0) {
             console.log(`🧹 Cleaned invalid/missing offers from ${updatedProductCount} products`);
         }
+
+
+        // ====================
+        // CLEAN INVALID OFFERS FROM CATEGORIES
+        // ====================
+
+        let updatedCategoryCount = 0;
+
+        for (const category of categories) {
+            let isModified = false;
+
+            const offerId = category.offerId
+            if (
+                offerId &&
+                (!allOfferIds.has(offerId) || !activeOfferIds.has(offerId))
+            ) {
+                // Offer is either missing or inactive
+                category.offerId = null;
+                isModified = true;
+            }
+
+            if (isModified) {
+                await category.save();
+                updatedCategoryCount++;
+            }
+        }
+        if (updatedCategoryCount > 0) {
+            console.log(`🧹 Cleaned invalid/missing offers from ${updatedProductCount} categories`);
+        }
+
+
+        // ====================
+        // Check
+        // ====================
+
+
 
         return next(); // Proceed to next middleware/route handler
     } catch (error) {

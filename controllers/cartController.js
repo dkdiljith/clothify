@@ -61,40 +61,44 @@ async function recalculateCartSummary(userId) {
   let offerDiscount = 0
   let totalAmount = 0
 
-  // Calculate subtotal , offerDiscount and discountedPrice (productPrice - offerAmount) 
-  let discountedPrice = 0
+  // Calculate subtotal , offerDiscount and offerAmount
+  let offerAmount = 0
 
   cart.items.forEach(item => {
     let productPrice = item.productId.details[item.variationIndex].price * item.quantity;
-    let offerAmount = item.productId.details[item.variationIndex].discountPrice * item.quantity;
+    let offerPrice = item.productId.details[item.variationIndex].offerPrice * item.quantity;
 
     subtotal += productPrice
-    offerDiscount += offerAmount
-    discountedPrice += productPrice - offerAmount
+    if (offerPrice) {
+      offerDiscount += (productPrice - offerPrice)
+      offerAmount += offerPrice
+    }else{
+      offerAmount += productPrice
+    }
 
   });
 
-  // Coupon Finding and recalculating discountedPrice
+  // Coupon Finding and recalculating offerAmount
   if (cart.couponId !== null) {
     const coupon = await Coupon.findOne({ _id: cart.couponId })
     if (coupon) {
       if (coupon.discountType == 'price') {
         couponDiscount = coupon.discountValue
-        discountedPrice -= coupon.discountValue
+        offerAmount -= coupon.discountValue
       } else {
-        let result = discountedPrice * (coupon.discountValue / 100)
+        let result = offerAmount * (coupon.discountValue / 100)
         couponDiscount = result
-        discountedPrice -= result
+        offerAmount -= result
       }
     }
   }
 
   //Tax calculation
   const TAX_RATE = 0.06; // 6% tax
-  tax = discountedPrice * TAX_RATE
+  tax = offerAmount * TAX_RATE
 
   //Shipping Fee
-  if ((discountedPrice + tax) >= 2000) {
+  if ((offerAmount + tax) >= 2000) {
     shippingFee = 0
   } else {
     shippingFee = 80
@@ -102,7 +106,7 @@ async function recalculateCartSummary(userId) {
 
   //Total Amount
   tax = Math.round(tax)
-  totalAmount = discountedPrice + tax + shippingFee
+  totalAmount = offerAmount + tax + shippingFee
 
   //Rounding
   totalAmount = Math.round(totalAmount)

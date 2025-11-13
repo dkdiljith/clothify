@@ -462,7 +462,8 @@ exports.resendEmailVerification = async (req, res) => {
   }
 
   if (user.verificationTimer <= Date.now()) {
-    const { verificationToken, tokenExpiration } = generateVerificationCode();
+    let { verificationToken, tokenExpiration } = generateVerificationCode();
+
     user.verificationToken = verificationToken,
       user.verificationTokenExpires = tokenExpiration,
       user.verificationAttempts += 1

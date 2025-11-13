@@ -46,6 +46,9 @@ router.get(`/editproducts/:id`, SessionHandling.adminIsLoggedIn, productControll
 router.get('/delete-product/:id',SessionHandling.adminIsLoggedIn, productController.deleteProducts)
 router.post(`/addproducts`,SessionHandling.adminIsLoggedIn, productController.addProducts)
 router.post("/updateproduct/:id",SessionHandling.adminIsLoggedIn, productController.updateProduct);
+//offer adding section
+router.get(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn ,productController.applyOfferJson)
+router.put(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn , productController.applyOffer)
 
 ///ORDER MANAGEMENT///
 router.get(`/orders`, SessionHandling.adminIsLoggedIn, orderController.ordersRender)
@@ -62,6 +65,9 @@ router.post("/category", SessionHandling.adminIsLoggedIn, categoryController.add
 router.get("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategoryRender)
 router.put("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategory)
 router.delete("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.deleteCategory)
+//offer adding section
+router.get(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOfferJson)
+router.put(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOffer)
 
 ///COUPON MANAGEMENT///
 router.get(`/coupons`, SessionHandling.adminIsLoggedIn, couponController.couponRender)
@@ -73,7 +79,7 @@ router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponControl
 ///OFFER MANAGEMENT///
 router.get(`/offer`, SessionHandling.adminIsLoggedIn,offerController.offerRender )
 router.post("/offer/addOffer" ,SessionHandling.adminIsLoggedIn,offerController.createOffer )
-router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditRender)
+router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
 router.put('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.editOffer)
 router.delete('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.offerDelete);
 

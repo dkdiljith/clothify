@@ -1,86 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const deleteButtons = document.querySelectorAll('.btn-delete');
-
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const categoryId = button.getAttribute('data-id');
-
-            // ✅ Strong warning confirmation
-            const confirmed = confirm(
-                "⚠️ Are you sure you want to delete this sub category?\n\n" +
-                "🔸 It can affect all products that are using this sub category.\n\n" +
-                "🚫 This action cannot be undone!"
-            );
-            if (!confirmed) return;
-
-            // ✅ Optional: Alert while deleting
-            alert("⏳ Deleting the sub category... Please wait.");
-
-            try {
-                const response = await fetch(`/admin/category/${categoryId}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert("✅ Sub Categories deleted successfully!");
-                    location.reload();
-                } else {
-                    const errorData = await response.json();
-                    alert("❌ Failed to delete: " + errorData.message);
-                }
-            } catch (error) {
-                alert("🚫 Error occurred: " + error.message);
-            }
-        });
-    });
-
-
-    const form = document.querySelector('.form');
-    const categoryNameInput = document.getElementById('categoryName');
-    const subcategoryInput = document.getElementById('newSubcategory');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // prevent form submission
-
-        const name = categoryNameInput.value.trim();
-        const newSubcategory = subcategoryInput.value.trim();
-
-        // Extract category ID from the current URL (editCategory/:id)
-        const categoryId = window.location.pathname.split('/').pop();
-
-        try {
-            const response = (`/admin/category/${categoryId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, newSubcategory })
-            });
-
-            if (response.ok) {
-                alert("✅ Category updated successfully!");
-                location.reload();
-            } else {
-                const errorData = await response.json();
-                alert("❌ Failed to update: " + errorData.message);
-            }
-
-        } catch (error) {
-            console.error("🚫 Error updating category:", error);
-            alert("Something went wrong.");
-        }
-    });
-});
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///offerApplying section
-
 let filterOffers;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -90,14 +7,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainForm = document.getElementById("mainForm");
     const offerListContainer = document.getElementById('offerListContainer');
     const selectedOfferIdInput = document.getElementById('selectedOfferIdInput');
-    const selectedCategoryIdInput = document.getElementById('selectedCategoryIdInput');
+    const selectedProductIdInput = document.getElementById('selectedProductIdInput');
     const modalTitle = document.getElementById('formModalTitle');
     const offerSearchInput = document.getElementById('offerSearch');
 
     // --- STATE VARIABLES ---
     let availableOffers = [];
     let selectedOfferId = null;
-    let selectedCategoryId = null;
+    let selectedProductId = null;
 
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -126,16 +43,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const createNotificationContainer = () => {
-        const container = document.createElement("div");
-        container.id = "notification-container";
-        document.body.appendChild(container);
-        return container;
+      const container = document.createElement("div");
+      container.id = "notification-container";
+      document.body.appendChild(container);
+      return container;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////
 
     // --- MODAL & DATA FETCHING ---
-    async function openModal(categoryId) {
+    async function openModal(productId) {
         try {
             modalTitle.textContent = 'Loading...';
             mainOverlay.classList.add("active");
@@ -145,17 +62,17 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedOfferIdInput.value = "";
             offerSearchInput.value = "";
 
-            const response = await fetch(`/admin/category/apply-offer/${categoryId}`);
+            const response = await fetch(`/admin/products/apply-offer/${productId}`);
             if (!response.ok) throw new Error('Network response was not ok');
 
             const obj = await response.json();
 
-            selectedCategoryId = obj.category._id
-            selectedCategoryIdInput.value = obj.category._id;
+            selectedProductId = obj.product._id
+            selectedProductIdInput.value = obj.product._id;
             availableOffers = obj.offers || [];
             displayOffers(availableOffers);
 
-            modalTitle.textContent = 'Select an Offer for "' + obj.category.name + '"';
+            modalTitle.textContent = 'Select an Offer for "' + obj.product.name + '"';
 
         } catch (error) {
             console.error('Error loading offer modal:', error);
@@ -231,9 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.btn-edit').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            const categoryId = button.dataset.categoryId;
-            if (categoryId) {
-                openModal(categoryId);
+            const productId = button.dataset.productId;
+            if (productId) {
+                openModal(productId);
             }
         });
     });
@@ -254,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (offerListContainer) {
         offerListContainer.addEventListener('click', (event) => {
             const clickedOfferCard = event.target.closest('.offer-item');
-            if (!clickedOfferCard) return;
+            if (!clickedOfferCard) return; 
 
             const offerId = clickedOfferCard.dataset.offerId;
 
@@ -282,11 +199,11 @@ document.addEventListener("DOMContentLoaded", () => {
         mainForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const offerId = selectedOfferIdInput.value;
-            const categoryId = selectedCategoryIdInput.value
+            const productId = selectedProductIdInput.value
 
             if (offerId) {
                 try {
-                    const url = `/admin/category/apply-offer/${categoryId}`;
+                    const url = `/admin/products/apply-offer/${productId}`;
                     const method = 'PUT';
 
                     const response = await fetch(url, {

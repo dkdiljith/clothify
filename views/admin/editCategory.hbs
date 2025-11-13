@@ -31,6 +31,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Subcategory Name</th>
+                                <th>Offer Available</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -44,9 +45,17 @@
                                         {{this.name}}
                                     </div>
                                 </td>
+                                <td>
+                                    <div class="category-name">
+                                        {{#if this.offerId }}<span class="subcategory-icon">🧷</span> AVAILABLE {{else}} NOT-AVAILABLE {{/if}}
+                                    </div>
+                                </td>
                                 <td class="action-buttons">
                                     <button class="btn btn-sm btn-delete" data-id="{{this._id}}">
                                         <span class="icon">🗑️</span> Delete
+                                    </button>
+                                    <button class="btn btn-warning btn-edit" data-category-id="{{this._id}}">
+                                        <i class="bi bi-check2"></i> Apply Offer
                                     </button>
                                 </td>
                             </tr>
@@ -72,7 +81,7 @@
                         <div class="form-group">
                             <label for="categoryName" class="form-label">Category Name</label>
                             <input type="text" class="form-control" id="categoryName" name="name"
-                                value="{{parentCategory.name}}" required>
+                                value="{{parentCategory.name}}" disabled required>
                         </div>
 
                         <h4 class="form-subheader">Add New Subcategory</h4>
@@ -90,6 +99,44 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+
+
+
+    {{!-- // Add Offer Overlay (Initially Hidden) --}}
+    <div id="mainOverlay" class="app-overlay">
+        <div class="modal-card">
+            <div class="form-header">
+                <h1 class="page-title" id="formModalTitle">title here</h1>
+                <button id="closeFormBtn" class="btn btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Form now has flex properties to help with layout -->
+            <form id="mainForm" method="post" novalidate
+                style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+
+                <!-- Search input -->
+                <input type="text" id="offerSearch" class="form-control mb-3"
+                    placeholder="Type to search offer code or type..." onkeyup="filterOffers()">
+
+                <!-- (MODIFIED) Container for the offer cards -->
+                <div id="offerListContainer">
+                    <!-- Offer items will be dynamically generated here -->
+                </div>
+
+                <!-- (NEW) Hidden input to store the ID of the selected offer -->
+                <input type="hidden" id="selectedOfferIdInput" name="selectedOfferId" />
+                <input type="hidden" id="selectedCategoryIdInput" name="selectedCategoryId" />
+
+                <div class="form-actions">
+                    <button type="submit" class="btnForm btn-primary">
+                        <span class="icon"><i class="fas fa-check"></i></span>Apply Offer
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

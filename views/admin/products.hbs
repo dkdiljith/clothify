@@ -55,6 +55,9 @@
                         <td>N/A</td>
                         {{/if}}
                         <td>
+                            <button class="btn btn-warning btn-edit" data-product-id="{{this._id}}">
+                                <i class="bi bi-check2"></i> Apply Offer
+                            </button>
                             <span onclick="location.href='/admin/editproducts/{{this._id}}'"
                                 class="action-icon">✏️</span>
                             <span onclick="location.href='/admin/delete-product/{{this._id}}'"
@@ -105,4 +108,43 @@
         </div>
         {{/if}}
     </div>
+
+
+    {{!-- // Add Offer Overlay (Initially Hidden) --}}
+    <div id="mainOverlay" class="app-overlay">
+        <div class="modal-card">
+            <div class="form-header">
+                <h1 class="page-title" id="formModalTitle">title here</h1>
+                <button id="closeFormBtn" class="btn btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Form now has flex properties to help with layout -->
+            <form id="mainForm" method="post" novalidate
+                style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+
+                <!-- Search input -->
+                <input type="text" id="offerSearch" class="form-control mb-3"
+                    placeholder="Type to search offer code or type..." onkeyup="filterOffers()">
+
+                <!-- (MODIFIED) Container for the offer cards -->
+                <div id="offerListContainer">
+                    <!-- Offer items will be dynamically generated here -->
+                </div>
+
+                <!-- (NEW) Hidden input to store the ID of the selected offer -->
+                <input type="hidden" id="selectedOfferIdInput" name="selectedOfferId" />
+                <input type="hidden" id="selectedProductIdInput" name="selectedProductId" />
+
+                <div class="form-actions">
+                    <button type="submit" class="btnForm btn-primary">
+                        <span class="icon"><i class="fas fa-check"></i></span>Apply Offer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/javascripts/admin/product.js" defer></script>
 </body>
