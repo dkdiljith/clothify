@@ -102,29 +102,29 @@ exports.validity_manager = async (req, res, next) => {
         // CLEAN INVALID OFFERS FROM CATEGORIES
         // ====================
 
-        let updatedCategoryCount = 0;
+        // let updatedCategoryCount = 0;
 
-        for (const category of categories) {
-            let isModified = false;
+        // for (const category of categories) {
+        //     let isModified = false;
 
-            const offerId = category.offerId
-            if (
-                offerId &&
-                (!allOfferIds.has(offerId) || !activeOfferIds.has(offerId))
-            ) {
-                // Offer is either missing or inactive
-                category.offerId = null;
-                isModified = true;
-            }
+        //     const offerId = category.offerId
+        //     if (
+        //         offerId &&
+        //         (!allOfferIds.has(offerId) || !activeOfferIds.has(offerId))
+        //     ) {
+        //         // Offer is either missing or inactive
+        //         category.offerId = null;
+        //         isModified = true;
+        //     }
 
-            if (isModified) {
-                await category.save();
-                updatedCategoryCount++;
-            }
-        }
-        if (updatedCategoryCount > 0) {
-            console.log(`🧹 Cleaned invalid/missing offers from ${updatedProductCount} categories`);
-        }
+        //     if (isModified) {
+        //         await category.save();
+        //         updatedCategoryCount++;
+        //     }
+        // }
+        // if (updatedCategoryCount > 0) {
+        //     console.log(`🧹 Cleaned invalid/missing offers from ${updatedProductCount} categories`);
+        // }
 
 
         // ====================

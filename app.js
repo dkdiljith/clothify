@@ -1,10 +1,13 @@
+//load .env files
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const exphbs = require('express-handlebars');
 const session = require("express-session")
-require('dotenv').config();
+
 
 
 const adminRouter = require(`./routes/adminRoute`)
@@ -43,10 +46,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 900000., // 15 min // 300000 is 5min
+    maxAge: 900000, // 15 minutes in millisecond
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
   }
 }));
 
@@ -62,10 +65,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Database connection
 db.connect((err) => {
   if (err) {
-    console.log("Connection Failed")
+    console.log("Database Connection Failed")
     process.exit(1)
   }
-  console.log("Successfully Running")
+  console.log("Database Connected Successfully")
 })
 
 // Routes
