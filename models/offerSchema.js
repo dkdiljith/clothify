@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const offerSchema = new mongoose.Schema({
     offerCode: { type: String , uppercase: true , required: true },
     offerType:{type:String ,enum: ['subcategory', 'product'], required:true},
+
+     targetIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    }],
+
     discountType: { type: String, enum: ['percentage', 'price'], required: true },
     discountValue: { type: Number,min: 0 , required: true },
     startDate: { type: Date, required: true },

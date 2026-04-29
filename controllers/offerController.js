@@ -1,5 +1,6 @@
 const Offer = require(`../models/offerSchema`)
 const Product = require(`../models/productSchema`)
+const Category = require(`../models/categorySchema`)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,8 +60,6 @@ exports.offerRender = async (req, res) => {
 
 
 
-
-
 exports.createOffer = async (req, res) => {
     try {
         const {
@@ -69,40 +68,138 @@ exports.createOffer = async (req, res) => {
             discountType,
             discountValue,
             startDate,
-            endDate
+            endDate,
+            targetIds
         } = req.body;
 
-        console.log('offerCode :', offerCode, 'offerType :', offerType,
-            'discountType :', discountType, "discountVaue :", discountValue,
-            "startDate :", startDate, "endDate :", endDate
-        )
-
-
-        //existence of offer checking
-        if (offerCode) {
-            const offer = await Offer.find({ offerCode })
-            if (offer) {
-                for (let i = 0; i < offer.length; i++) {
-                    if (offer[i].offerCode === offerCode) {
-                        return res.status(500).json({
-                            success: false,
-                            type: "error",
-                            message: "Offer with same name detected",
-                        });
-                    }
-                }
-            }
+        // ===============================
+        // 1. REQUIRED FIELD VALIDATION
+        // ===============================
+        if (
+            !offerCode ||
+            !offerType ||
+            !discountType ||
+            discountValue === undefined ||
+            !startDate ||
+            !endDate
+        ) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "All required fields must be filled"
+            });
         }
 
+        // ===============================
+        // 2. OFFER TYPE VALIDATION
+        // ===============================
+        if (!["product", "subcategory"].includes(offerType)) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Invalid offer type"
+            });
+        }
 
-        // Create the offer
+        // ===============================
+        // 3. DISCOUNT TYPE VALIDATION
+        // ===============================
+        if (!["percentage", "price"].includes(discountType)) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Invalid discount type"
+            });
+        }
+
+        const numericDiscount = Number(discountValue);
+
+        if (isNaN(numericDiscount) || numericDiscount < 0) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Invalid discount value"
+            });
+        }
+
+        if (
+            discountType === "percentage" &&
+            (numericDiscount <= 0 || numericDiscount > 100)
+        ) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Percentage must be between 1 and 100"
+            });
+        }
+
+        // ===============================
+        // 4. DATE VALIDATION
+        // ===============================
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start) || isNaN(end)) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Invalid dates"
+            });
+        }
+
+        if (start >= end) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "End date must be after start date"
+            });
+        }
+
+        // ===============================
+        // 5. DUPLICATE OFFER CODE CHECK
+        // ===============================
+        const cleanCode = offerCode.trim().toUpperCase();
+
+        const existingOffer = await Offer.findOne({
+            offerCode: cleanCode
+        });
+
+        if (existingOffer) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Offer code already exists"
+            });
+        }
+
+        // ===============================
+        // 6. TARGET IDS VALIDATION
+        // ===============================
+        if (!Array.isArray(targetIds) || targetIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Please select at least one item"
+            });
+        }
+
+        // remove duplicates
+        const cleanedTargetIds = [...new Set(targetIds)];
+
+        // ===============================
+        // 7. CREATE OFFER
+        // ===============================
         const offer = new Offer({
-            offerCode,
+            offerCode: cleanCode,
             offerType,
             discountType,
-            discountValue,
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
+            discountValue: numericDiscount,
+
+            targetIds: cleanedTargetIds,
+
+            startDate: start,
+            endDate: end,
+
             isActive: true
         });
 
@@ -115,11 +212,9 @@ exports.createOffer = async (req, res) => {
             offer: savedOffer
         });
 
-
     } catch (err) {
-        console.error("Error creating offer:", err);
+        console.error("Create Offer Error:", err);
 
-        // Generic error handler
         return res.status(500).json({
             success: false,
             type: "error",
@@ -128,7 +223,6 @@ exports.createOffer = async (req, res) => {
         });
     }
 };
-
 
 
 
@@ -141,12 +235,136 @@ exports.offerEditJson = async (req, res) => {
     }
 }
 
+exports.totalListOfCategories = async (req, res) => {
+    try {
+        // ===============================
+        // 1. QUERY PARAMS
+        // ===============================
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const search = req.query.search?.trim() || "";
+
+        // ===============================
+        // 2. BASE FILTER
+        // only sub-categories
+        // ===============================
+        let filter = {
+            parentCategory: { $ne: null }
+        };
+
+        // ===============================
+        // 3. SEARCH FILTER
+        // ===============================
+        if (search) {
+            filter.name = {
+                $regex: search,
+                $options: "i"
+            };
+        }
+
+        // ===============================
+        // 4. COUNT FILTERED RESULTS
+        // ===============================
+        const totalCategories =
+            await Category.countDocuments(filter);
+
+        const totalPages =
+            Math.ceil(totalCategories / limit);
+
+        // ===============================
+        // 5. FETCH PAGINATED DATA
+        // ===============================
+        const subcategories =
+            await Category.find(filter)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+
+        // ===============================
+        // 6. RESPONSE
+        // ===============================
+        return res.json({
+            categories: subcategories,
+
+            pagination: {
+                page,
+                limit,
+                totalPages,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            },
+
+            search
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+};
+
+exports.totalListOfProducts = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 4;
+        const search = req.query.search?.trim() || "";
+
+        let filter = {};
+
+        if (search) {
+            filter.name = {
+                $regex: search,
+                $options: "i"
+            };
+        }
+
+        // Count ONLY matched products
+        const totalProducts =
+            await Product.countDocuments(filter);
+
+        const totalPages =
+            Math.ceil(totalProducts / limit);
+
+        // Get matched products with pagination
+        const products = await Product.find(filter)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        return res.json({
+            products,
+
+            pagination: {
+                page,
+                limit,
+                totalPages,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            },
+
+            search
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+};
 
 
 
 exports.editOffer = async (req, res) => {
     try {
         const { offerId } = req.params;
+
         const {
             offerCode,
             offerType,
@@ -154,38 +372,14 @@ exports.editOffer = async (req, res) => {
             discountValue,
             startDate,
             endDate,
+            targetIds
         } = req.body;
 
-
-        //existence of offer checking
-        if (offerCode) {
-            const offer = await Offer.find({ offerCode })
-            if (offer) {
-                for (let i = 0; i < offer.length; i++) {
-                    if (offer[i].offerCode === offerCode) {
-                        const sameOffer = await Offer.findById(offerId)
-                        if (sameOffer._id.toString() === offer[i]._id.toString()) {
-                        } else {
-                            return res.status(500).json({
-                                success: false,
-                                type: "error",
-                                message: "Offer with same name detected",
-                            });
-                        }
-                    } else {
-                        return res.status(500).json({
-                            success: false,
-                            type: "error",
-                            message: "Offer with same name detected",
-                        });
-                    }
-                }
-            }
-        }
-
-
-        // Find the existing offer
+        // ===============================
+        // 1. FIND OFFER
+        // ===============================
         const existingOffer = await Offer.findById(offerId);
+
         if (!existingOffer) {
             return res.status(404).json({
                 success: false,
@@ -194,140 +388,93 @@ exports.editOffer = async (req, res) => {
             });
         }
 
-        // Update only the fields that were provided
-        if (existingOffer.offerCode !== offerCode) existingOffer.offerCode = offerCode.toUpperCase();
-        if (existingOffer.startDate !== startDate) existingOffer.endDate = new Date(startDate);
-        if (existingOffer.endDate !== endDate) existingOffer.endDate = new Date(endDate);
+        // ===============================
+        // 2. DUPLICATE CODE CHECK
+        // ===============================
+        const cleanCode = offerCode.trim().toUpperCase();
 
+        const duplicate = await Offer.findOne({
+            offerCode: cleanCode,
+            _id: { $ne: offerId }
+        });
 
-        //DISCOUNT_TYPE || //DISCOUNT_VALUE
-        const newDiscountValue = Number(discountValue);
-        if (existingOffer.discountType !== discountType || existingOffer.discountValue !== newDiscountValue) {
-
-            const offerId = existingOffer._id;
-
-            const updateResult = await Product.updateMany(
-                // 1. QUERY: Match all products that currently have this offer applied
-                { "details.offerId": offerId },
-
-                // 2. UPDATE: Use an aggregation pipeline to calculate and update atomically
-                [
-                    {
-                        $set: {
-                            details: {
-                                $map: {
-                                    input: "$details",
-                                    as: "detail",
-                                    in: {
-                                        $cond: {
-                                            if: { $eq: ["$$detail.offerId", offerId] }, // Target only the details with the current offerId
-                                            then: {
-                                                $let: {
-                                                    vars: {
-                                                        originalPrice: "$$detail.price",
-                                                        // Calculate the final price after the new discount
-                                                        finalPrice: {
-                                                            $subtract: [
-                                                                "$$detail.price",
-                                                                {
-                                                                    $cond: {
-                                                                        if: { $eq: [discountType, 'percentage'] },
-                                                                        then: { $multiply: ["$$detail.price", { $divide: [newDiscountValue, 100] }] },
-                                                                        else: newDiscountValue
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    },
-                                                    in: {
-                                                        $mergeObjects: ["$$detail", {
-                                                            $cond: {
-                                                                // Validation: Check if the final price is a valid discount (less than original and positive)
-                                                                if: {
-                                                                    $and: [
-                                                                        { $lt: ["$$finalPrice", "$$originalPrice"] },
-                                                                        { $gt: ["$$finalPrice", 0] }
-                                                                    ]
-                                                                },
-                                                                // VALID DISCOUNT: Set the new rounded price and keep offerId
-                                                                then: {
-                                                                    offerPrice: { $round: ["$$finalPrice", 0] }, // Round to nearest integer
-                                                                    offerId: offerId,
-                                                                },
-                                                                // INVALID DISCOUNT: Reset offer fields
-                                                                else: {
-                                                                    offerPrice: 0,
-                                                                    offerId: null,
-                                                                }
-                                                            }
-                                                        }]
-                                                    }
-                                                }
-                                            },
-                                            else: "$$detail" // Keep non-matching details as they are
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
-            );
-
-            // Update the offer object itself (must be done after product recalculation)
-            existingOffer.discountType = discountType;
-            existingOffer.discountValue = newDiscountValue;
-            await existingOffer.save();
-
-            console.log(`${updateResult.modifiedCount} products had their offer prices recalculated/removed.`);
+        if (duplicate) {
+            return res.status(400).json({
+                success: false,
+                type: "error",
+                message: "Offer code already exists"
+            });
         }
 
-        //OFFER_TYPE
-        if (existingOffer.offerType !== offerType) {
-
-            const offerId = existingOffer._id;
-            const updateResult = await Product.updateMany(
-                { "details.offerId": offerId },
-                {
-                    $set: {
-                        "details.$[detail].offerId": null,
-                        "details.$[detail].offerPrice": 0,
-                    }
-                },
-                {
-                    arrayFilters: [
-                        { "detail.offerId": offerId }
-                    ]
-                }
-            );
-
-            if (updateResult.modifiedCount > 0) {
-                console.log(`${updateResult.modifiedCount} documents updated. All CURRENT APPLIED OFFERS ARE REMOVED.`);
-            }
-
-            //apply the offerType to existing offer
-            existingOffer.offerType = offerType
+        // ===============================
+        // 3. VALIDATIONS
+        // ===============================
+        if (!["product", "subcategory"].includes(offerType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid offer type"
+            });
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        if (!["percentage", "price"].includes(discountType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid discount type"
+            });
+        }
 
-        // Validate the updated offer
-        await existingOffer.validate();
+        const numericDiscount = Number(discountValue);
 
-        // Save the updated offer
-        const updatedOffer = await existingOffer.save();
+        if (isNaN(numericDiscount) || numericDiscount < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid discount value"
+            });
+        }
+
+        if (
+            discountType === "percentage" &&
+            (numericDiscount <= 0 || numericDiscount > 100)
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Percentage must be between 1 and 100"
+            });
+        }
+
+        if (!Array.isArray(targetIds) || targetIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Please select at least one target"
+            });
+        }
+
+        // ===============================
+        // 4. UPDATE FIELDS
+        // ===============================
+        existingOffer.offerCode = cleanCode;
+        existingOffer.offerType = offerType;
+        existingOffer.discountType = discountType;
+        existingOffer.discountValue = numericDiscount;
+        existingOffer.startDate = new Date(startDate);
+        existingOffer.endDate = new Date(endDate);
+        existingOffer.targetIds = [...new Set(targetIds)];
+
+        // ===============================
+        // 5. SAVE
+        // ===============================
+        await existingOffer.save();
 
         return res.status(200).json({
             success: true,
             type: "success",
             message: "Offer updated successfully",
-            offer: updatedOffer
+            offer: existingOffer
         });
 
     } catch (err) {
-        console.error("Error updating offer:", err);
+        console.error("Edit Offer Error:", err);
 
-        // Generic error handler
         return res.status(500).json({
             success: false,
             type: "error",
@@ -336,7 +483,6 @@ exports.editOffer = async (req, res) => {
         });
     }
 };
-
 
 
 

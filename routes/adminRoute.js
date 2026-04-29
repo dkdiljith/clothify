@@ -79,9 +79,14 @@ router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponControl
 ///OFFER MANAGEMENT///
 router.get(`/offer`, SessionHandling.adminIsLoggedIn,offerController.offerRender )
 router.post("/offer/addOffer" ,SessionHandling.adminIsLoggedIn,offerController.createOffer )
+
+router.get('/offer/totalProducts', SessionHandling.adminIsLoggedIn,offerController.totalListOfProducts);
+router.get('/offer/totalCategories', SessionHandling.adminIsLoggedIn,offerController.totalListOfCategories);
+
 router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
 router.put('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.editOffer)
 router.delete('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.offerDelete);
+
 
 
 module.exports = router

@@ -43,7 +43,7 @@ async function createWallet(userId) {
 passport.use(new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID.trim(),
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET.trim(),
     callbackURL: 'http://localhost:3000/user/auth/google/callback', 
   },
   async (accessToken, refreshToken, profile, done) => {

@@ -6,46 +6,40 @@
 </head>
 
 <body>
-
     <div class="coupon-management-layout">
-        <!-- Coupons List -->
         <div class="coupons-list-container">
 
             <div class="coupons-table-header">
                 <h1 class="page-title">Offer Management</h1>
 
                 <div style="display:flex;">
-
                     <form method="GET" action='/admin/offer/search' role="search">
                         <div class="search-container">
                             <input type="search" name="query" class="search-input" id="search-input"
-                                placeholder="Search by name or discount" {{#if query}} value={{query}} {{/if}}>
+                                placeholder="Search by name or discount" {{#if query}} value="{{query}}" {{/if}}>
                         </div>
                     </form>
                     <button id="toggleCouponForm" class="btn btn-primary" style="margin-left:15px;">
                         + Add Offer
                     </button>
-
                 </div>
             </div>
 
             {{#if offer.length}}
             <div class="coupons-table-wrapper">
                 <table class="coupons-table">
-
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Offer Code</th>
                             <th>Offer Type</th>
                             <th>Discount</th>
-                            <th>Offer Starts From</th>
-                            <th>Offer Ends In</th>
+                            <th>Starts From</th>
+                            <th>Ends In</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {{#each offer}}
                         <tr>
@@ -102,11 +96,9 @@
                     <i class="fas fa-chevron-left"></i> Previous
                 </a>
                 {{/if}}
-
                 <span class="pagination-info">
                     Page {{pagination.page}} of {{pagination.totalPages}}
                 </span>
-
                 {{#if pagination.hasNextPage}}
                 <a href="/admin/offer/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
                     class="pagination-button">
@@ -117,48 +109,65 @@
             {{/if}}
         </div>
 
-        <!-- Add Coupon Form (Initially hidden) -->
         <div id="addCouponOverlay" class="add-coupon-overlay">
             <div class="add-coupon-card">
-                <div style="display:flex; justify-content:center" class="form-header">
-
+                <div class="form-header" style="display:flex; justify-content:space-between; align-items:center;">
                     <h1 class="page-title" id="couponModalTitle">Create New Offer</h1>
                     <button id="closeFormBtn" class="btn btn-icon">
                         <i class="fas fa-times"></i>
                     </button>
-
                 </div>
-                <br><br>
+                <br>
                 <form id="couponForm" method="post" novalidate>
+                    <input type="hidden" id="editCouponId" name="editCouponId" value="">
+                    <input type="hidden" name="targetIds" id="targetIds" value="">
+
                     <div class="form-columns">
                         <div class="form-group">
                             <label for="offerCode" class="form-label">Offer Code</label>
                             <input type="text" name="offerCode" id="offerCode" maxlength="6" class="form-control"
-                                placeholder="e.g. SUMMER20" required />
+                                placeholder="e.g. SUMM20" required />
                             <div class="error-message" id="code-error"></div>
                         </div>
 
                         <div class="form-group">
-                            <label for="offerType" class="form-label">Offer Type</label>
-                            <select id="offerType" name="offerType" class="form-control" required>
-                                <option value="" disabled selected>Select Type</option>
-                                <option value="subcategory">Sub-Category</option>
-                                <option value="product">Product</option>
-                            </select>
-                            <div class="error-message" id="type-error"></div>
-                        </div>
+                            <label for="offerType" class="form-label">Offer Applied To</label>
 
+                            <div style="display:flex; gap:10px;">
+                                <select id="offerType" name="offerType" class="form-control" required
+                                    style="flex-grow:1;">
+                                    <option value="" disabled selected>Select Type</option>
+                                    <option value="subcategory">Sub-Category</option>
+                                    <option value="product">Product</option>
+                                </select>
+
+                                <button type="button" id="openSelectionBtn" class="btn btn-secondary"
+                                    style="white-space:nowrap;">
+                                    Apply To...
+                                </button>
+                            </div>
+
+                            <div id="selectionStatusBadge"
+                                style="display:none; margin-top:8px; color:#2ecc71; font-size:0.85rem; align-items:center; gap:5px;">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="badgeText">0 items selected</span>
+                            </div>
+
+                            <div class="error-message" id="offerType-error"></div>
+                        </div>
                     </div>
 
                     <div class="form-columns">
                         <div class="form-group">
                             <label for="discountType" class="form-label">Discount Type</label>
-                            <select id="discountType" name="discountType" class="form-control" required>
+
+                            <select id="discountType" name="discountType" class="form-control">
                                 <option value="" disabled selected>Select Type</option>
                                 <option value="percentage">Percentage</option>
                                 <option value="price">Fixed Amount</option>
                             </select>
-                            <div class="error-message" id="type-error"></div>
+
+                            <div class="error-message" id="discountType-error"></div>
                         </div>
 
                         <div class="form-group">
@@ -173,34 +182,56 @@
                         <div class="form-group">
                             <label for="startDate" class="form-label">Start Date</label>
                             <input type="date" name="startDate" id="startDate" class="form-control" required />
-                            <div class="error-message" id="date-error"></div>
+                            <div class="error-message" id="start-date-error"></div>
                         </div>
 
                         <div class="form-group">
                             <label for="endDate" class="form-label">Expiry Date</label>
                             <input type="date" name="endDate" id="endDate" class="form-control" required />
-                            <div class="error-message" id="date-error"></div>
+                            <div class="error-message" id="end-date-error"></div>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btnForm btn-primary">
-                            <span class="icon">💾</span>Submit
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="submit" class="btnForm btn-primary" style="width: 100%;">
+                            <span class="icon">💾</span> Save Offer
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
+        <div id="selectionModalOverlay" class="add-coupon-overlay">
+            <div class="add-coupon-card selection-card">
+                <div class="form-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1 class="page-title" id="selectionModalTitle">Select Items</h1>
+                    <button id="closeSelectionBtn" class="btn btn-icon">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
 
+                <div class="selection-body">
+                    <div class="search-container" style="margin: 15px 0;">
+                        <input type="text" id="selectionSearch" class="form-control" placeholder="Search items...">
+                    </div>
+
+                    <div id="selectionList" class="selection-list"
+                        style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+                        <p class="text-center">Loading...</p>
+                    </div>
+
+                    <div id="selectionPagination" class="pagination-container"></div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="button" id="confirmSelection" class="btnForm btn-primary" style="width: 100%;">
+                        Confirm Selection (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-
-    {{!-- Edit Coupon Essential --}}
-    <input type="hidden" id="editCouponId" value="">
-
-
-    <!-- Include jQuery and Select2 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="/javascripts/admin/offer.js" defer></script>
