@@ -63,7 +63,7 @@
         {{#if (gt pagination.totalPages 1)}}
         <div class="pagination">
             {{#if pagination.hasPrevPage}}
-            <a href="/admin/orders/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
+            <a href="/admin/orders?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
                 <i class="fas fa-chevron-left"></i> Previous
             </a>
             {{/if}}
@@ -73,7 +73,7 @@
             </span>
 
             {{#if pagination.hasNextPage}}
-            <a href="/admin/orders/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
+            <a href="/admin/orders?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}" class="pagination-button">
                 Next <i class="fas fa-chevron-right"></i>
             </a>
             {{/if}}

@@ -12,7 +12,8 @@ const productSchema = new mongoose.Schema({
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         offerId: { type: mongoose.Schema.Types.ObjectId, default: null },
-        offerPrice: { type: Number, default: null, message: 'Discount price cannot be greater than original price' }
+        offerPrice: { type: Number, default: null, message: 'Discount price cannot be greater than original price' },
+        offerLocked: { type: Boolean, default: false }
     }],
     gender: { type: String, required: true },
     description: { type: String },
@@ -22,7 +23,7 @@ const productSchema = new mongoose.Schema({
     }],
     latestCollection: { type: Boolean, default: false },
     bestSeller: { type: Boolean, default: false },
-    active:{ type: Boolean, required: true , default:false}
+    active: { type: Boolean, required: true, default: false }
 }, { timestamps: true });
 
 

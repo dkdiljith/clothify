@@ -82,7 +82,7 @@
         {{#if (gt pagination.totalPages 1)}}
         <div class="pagination">
             {{#if pagination.hasPrevPage}}
-            <a href="/admin/users/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/users?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
                 class="pagination-button">
                 <i class="fas fa-chevron-left"></i> Previous
             </a>
@@ -93,7 +93,7 @@
             </span>
 
             {{#if pagination.hasNextPage}}
-            <a href="/admin/users/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/users?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
                 class="pagination-button">
                 Next <i class="fas fa-chevron-right"></i>
             </a>

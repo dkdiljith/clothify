@@ -12,7 +12,9 @@ const categorySchema = new mongoose.Schema({
       ref: "Category",
       default: null
   },
-  offerId:{type:mongoose.Schema.Types.ObjectId, default:null}
+  offerId:{type:mongoose.Schema.Types.ObjectId, default:null},
+  offerLocked: { type: Boolean, default: false }
+
 } , { timestamps: true });
 
 const Category = mongoose.model("Category", categorySchema);

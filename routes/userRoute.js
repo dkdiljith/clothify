@@ -13,7 +13,6 @@ const couponController = require(`../controllers/couponController`)
 const searchController = require(`../controllers/searchController`)
 
 const SessionHandling = require(`../middlewares/SessionHandling`)
-const functions = require(`../middlewares/Functions`)
 const passport = require(`../middlewares/passport`)
 const razorpay = require(`../middlewares/razorpay`)
 
@@ -57,19 +56,19 @@ router.get('/auth/google/callback',
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-router.get('/',functions.validity_manager, userController.homeRender)
-router.get(`/home`, functions.validity_manager, userController.homeRender)
-router.get('/singleproduct/:id',functions.validity_manager, productController.singleProductPage)
+router.get('/', userController.homeRender)
+router.get(`/home`, userController.homeRender)
+router.get('/singleproduct/:id', productController.singleProductPage)
 
 //search 
-router.get('/collections', functions.validity_manager,searchController.collections);
+router.get('/collections',searchController.collections);
 
 //ADD TO CART
 router.post(`/addtocart/:id/:variationIndex`, SessionHandling.userIsLoggedIn, cartController.addToCart)
-router.get(`/cart`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.cartRender)
+router.get(`/cart`, SessionHandling.userIsLoggedIn, cartController.cartRender)
 router.delete('/cart/:productId/:variationIndex', SessionHandling.userIsLoggedIn, cartController.deleteCart)
 router.post('/cart/:productId/:variationIndex/quantity', SessionHandling.userIsLoggedIn, cartController.operation)
-router.get(`/addressInCart`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.getAddressInCart)
+router.get(`/addressInCart`, SessionHandling.userIsLoggedIn, cartController.getAddressInCart)
 
 router.get('/address/:id',SessionHandling.userIsLoggedIn, cartController.renderEditForm)
 router.post('/postAddressInCart',SessionHandling.userIsLoggedIn, cartController.addAddress);
@@ -77,8 +76,8 @@ router.put('/address/:id',SessionHandling.userIsLoggedIn, cartController.editAdd
 router.delete('/address/:id',SessionHandling.userIsLoggedIn, cartController.deleteAddress);
 router.put('/address/default/:id',SessionHandling.userIsLoggedIn, cartController.setDefaultAddress);
 
-router.get('/payment', SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.payment);
-router.get(`/placeorder`, SessionHandling.userIsLoggedIn,functions.validity_manager, cartController.placeOrder)
+router.get('/payment', SessionHandling.userIsLoggedIn, cartController.payment);
+router.get(`/placeorder`, SessionHandling.userIsLoggedIn, cartController.placeOrder)
 
 //coupon
 router.post(`/cart/apply-coupon` ,SessionHandling.userIsLoggedIn, couponController.applyCoupon)
@@ -86,13 +85,13 @@ router.delete(`/cart/remove-coupon` ,SessionHandling.userIsLoggedIn, couponContr
 
 
 //WIshlist
-router.get(`/wishlist` , SessionHandling.userIsLoggedIn ,functions.validity_manager, wishlistController.wishlistRender)
+router.get(`/wishlist` , SessionHandling.userIsLoggedIn , wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex` , SessionHandling.userIsLoggedIn, wishlistController.addToWishlist)
 router.delete(`/removeFromWishlist/:id` , SessionHandling.userIsLoggedIn , wishlistController.removeFromWishlist)
 
 
 //USER PROFILE
-router.get(`/profile`, SessionHandling.userIsLoggedIn,functions.validity_manager, userProfileController.profileRender)
+router.get(`/profile`, SessionHandling.userIsLoggedIn, userProfileController.profileRender)
 router.get(`/profileedit`, SessionHandling.userIsLoggedIn, userProfileController.profileEditRender)
 router.get(`/address`, SessionHandling.userIsLoggedIn, userProfileController.addressRender)
 router.get(`/setdefaultaddress/:id`, SessionHandling.userIsLoggedIn, userProfileController.setDefaultAddress)

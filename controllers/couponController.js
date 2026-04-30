@@ -1,28 +1,45 @@
 const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 
+//update offer & coupon & products
+const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.couponRender = async (req, res) => {
     try {
-        // Pagination parameters
+        const query = req.query.query || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 coupons per page
+        const limit = 5;
+        const skip = (page - 1) * limit;
 
-        // Get total count of coupons
-        const totalCoupons = await Coupon.countDocuments();
+        // 1. Restore the search filter
+        const filter = query 
+            ? {
+                $or: [
+                    { couponCode: { $regex: query, $options: 'i' } },
+                    { discountType: { $regex: query, $options: 'i' } },
+                ],
+              }
+            : {};
+
+        // 2. Database Operations (Run in parallel for performance)
+        const [totalCoupons, coupons] = await Promise.all([
+            Coupon.countDocuments(filter), // Dynamic count for correct pagination
+            Coupon.find(filter)
+                .sort({ createdAt: -1 })   // Keep your new sorting logic
+                .skip(skip)
+                .limit(limit)
+                .lean()
+        ]);
+
         const totalPages = Math.ceil(totalCoupons / limit);
-
-        // Get paginated coupons (newest first)
-        const coupons = await Coupon.find()
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
 
         return res.render('admin/coupon', {
             coupon: coupons,
             admin: true,
+            query, // Pass query back to the UI
             pagination: {
                 page,
                 limit,
@@ -39,6 +56,7 @@ exports.couponRender = async (req, res) => {
         return res.render('admin/coupon', {
             coupon: [],
             admin: true,
+            query: req.query.query || '',
             pagination: {
                 page: 1,
                 limit: 5,
@@ -50,7 +68,6 @@ exports.couponRender = async (req, res) => {
         });
     }
 };
-
 
 
 
@@ -108,6 +125,7 @@ exports.createCoupon = async (req, res) => {
         });
 
         const result = await coupon.save();
+        await pricingExpiryUpdate();
 
         if (result) {
 
@@ -186,6 +204,7 @@ exports.couponEdit = async (req, res) => {
         }
 
         const result = updatedCoupon.save()
+        await pricingExpiryUpdate();
 
         if (result) {
             return res.status(200).json({
@@ -219,6 +238,7 @@ exports.couponDelete = async (req, res) => {
         const { couponId } = req.params;
 
         const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
+        await pricingExpiryUpdate();
 
         if (deletedCoupon) {
             return res.status(200).json({ success: true, message: 'Coupon deleted successfully' });

@@ -28,13 +28,6 @@ router.get(`/activity-log`, SessionHandling.adminIsLoggedIn, adminController.act
 router.get(`/logout`, SessionHandling.adminIsLoggedIn, adminController.logout)
 
 
-//Search
-router.get(`/products/search` , SessionHandling.adminIsLoggedIn , searchController.products)
-router.get(`/orders/search` , SessionHandling.adminIsLoggedIn , searchController.orders)
-router.get(`/users/search` , SessionHandling.adminIsLoggedIn , searchController.users)
-router.get(`/coupons/search` , SessionHandling.adminIsLoggedIn , searchController.coupons)
-router.get(`/offer/search` , SessionHandling.adminIsLoggedIn , searchController.offers)
-
 ///SALES REPORT///
 router.get(`/salesReport`, SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
 router.post('/salesReport' ,SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
@@ -49,6 +42,7 @@ router.post("/updateproduct/:id",SessionHandling.adminIsLoggedIn, productControl
 //offer adding section
 router.get(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn ,productController.applyOfferJson)
 router.put(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn , productController.applyOffer)
+router.put(`/products/auto-pricing/:productId` , SessionHandling.adminIsLoggedIn , productController.autoPricing)
 
 ///ORDER MANAGEMENT///
 router.get(`/orders`, SessionHandling.adminIsLoggedIn, orderController.ordersRender)
@@ -68,6 +62,7 @@ router.delete("/category/:id", SessionHandling.adminIsLoggedIn, categoryControll
 //offer adding section
 router.get(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOfferJson)
 router.put(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOffer)
+router.put(`/category/auto-pricing/:id` , SessionHandling.adminIsLoggedIn , categoryController.autoPricing)
 
 ///COUPON MANAGEMENT///
 router.get(`/coupons`, SessionHandling.adminIsLoggedIn, couponController.couponRender)

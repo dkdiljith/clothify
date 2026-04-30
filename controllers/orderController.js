@@ -131,24 +131,32 @@ async function calculateRefund(orderId, itemId) {
 
 exports.ordersRender = async (req, res) => {
   try {
-    // Pagination parameters
+    const query = req.query.query || '';
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 5 orders per page
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-    // Get total count of orders
-    const totalOrders = await Order.countDocuments();
+    // 1. Build the filter
+    const filter = query 
+      ? { orderId: { $regex: query, $options: 'i' } } 
+      : {};
+
+    // 2. Fetch data (Run count and find in parallel for speed)
+    const [totalOrders, orders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .sort({ createdAt: -1 }) // Keep your new sorting!
+        .skip(skip)
+        .limit(limit)
+        .lean()
+    ]);
+
     const totalPages = Math.ceil(totalOrders / limit);
-
-    // Get paginated orders (newest first)
-    const orders = await Order.find()
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
 
     return res.render('admin/orders', {
       order: orders,
       admin: true,
+      query, // Restore query for the UI
       pagination: {
         page,
         limit,
@@ -165,6 +173,7 @@ exports.ordersRender = async (req, res) => {
     return res.render('admin/orders', {
       order: [],
       admin: true,
+      query: req.query.query || '',
       pagination: {
         page: 1,
         limit: 5,

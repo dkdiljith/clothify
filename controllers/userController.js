@@ -639,27 +639,40 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-
 exports.showUsers = async (req, res) => {
   try {
-    // Pagination parameters
+    const query = req.query.query || '';
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 5 users per page
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-    // Get total count of users
-    const totalUsers = await User.countDocuments();
+    // 1. Build the filter for Name, Email, or Phone
+    const filter = query 
+      ? {
+          $or: [
+            { name: { $regex: query, $options: 'i' } },
+            { email: { $regex: query, $options: 'i' } },
+            { phone: { $regex: query, $options: 'i' } }
+          ],
+        }
+      : {};
+
+    // 2. Database Operations (Running in parallel for speed)
+    const [totalUsers, users] = await Promise.all([
+      User.countDocuments(filter), // Corrected to User model
+      User.find(filter)
+        .sort({ createdAt: -1 }) 
+        .skip(skip)
+        .limit(limit)
+        .lean()
+    ]);
+
     const totalPages = Math.ceil(totalUsers / limit);
-
-    // Get paginated users (newest first)
-    const users = await User.find()
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
 
     return res.render('admin/usersList', {
       admin: true,
       user: users,
+      query, // Passed back to keep search input filled
       pagination: {
         page,
         limit,
@@ -676,6 +689,7 @@ exports.showUsers = async (req, res) => {
     return res.render('admin/usersList', {
       admin: true,
       user: [],
+      query: req.query.query || '',
       pagination: {
         page: 1,
         limit: 5,
@@ -687,7 +701,6 @@ exports.showUsers = async (req, res) => {
     });
   }
 };
-
 
 
 

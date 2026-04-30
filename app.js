@@ -66,8 +66,11 @@ db.connect((err) => {
     console.log("Connection Failed")
     process.exit(1)
   }
-  console.log("Successfully Running")
+  console.log("Database Successfully Running")
 })
+
+//Coupon and Offer Pricing and Expiry Engine
+require("./jobs/pricingExpiryEngine");
 
 // Routes
 app.use(`/admin`, adminRouter);

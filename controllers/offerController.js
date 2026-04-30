@@ -2,32 +2,48 @@ const Offer = require(`../models/offerSchema`)
 const Product = require(`../models/productSchema`)
 const Category = require(`../models/categorySchema`)
 
+//update offer & coupon & products
+const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
 exports.offerRender = async (req, res) => {
     try {
-        // Pagination parameters
+        const query = req.query.query || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 offers per page
+        const limit = 5;
+        const skip = (page - 1) * limit;
 
-        // Get total count of offers
-        const totalOffers = await Offer.countDocuments();
+        // 1. Restore the search filter
+        const filter = query 
+            ? {
+                $or: [
+                  { offerCode: { $regex: query, $options: 'i' } },
+                  { offerType: { $regex: query, $options: 'i' } },
+                  { discountType: { $regex: query, $options: 'i' } },
+                ],
+              }
+            : {};
+
+        // 2. Fetch data (Count and Find in parallel)
+        const [totalOffers, offer] = await Promise.all([
+            Offer.countDocuments(filter), // Dynamic count based on search
+            Offer.find(filter)
+                .sort({ createdAt: -1 })   // Newest first (DB level)
+                .skip(skip)
+                .limit(limit)
+                .lean()
+        ]);
+
         const totalPages = Math.ceil(totalOffers / limit);
-
-        // Get paginated offers (sorted by newest first)
-        let offer = await Offer.find()
-            .sort({ createdAt: -1 }) // newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
-
 
         return res.render(`admin/offer`, {
             offer,
             admin: true,
+            query, // Passes the search string back to the view
             pagination: {
                 page,
                 limit,
@@ -44,6 +60,7 @@ exports.offerRender = async (req, res) => {
         return res.render(`admin/offer`, {
             offer: [],
             admin: true,
+            query: req.query.query || '',
             pagination: {
                 page: 1,
                 limit: 5,
@@ -204,6 +221,7 @@ exports.createOffer = async (req, res) => {
         });
 
         const savedOffer = await offer.save();
+        await pricingExpiryUpdate();
 
         return res.status(201).json({
             success: true,
@@ -464,6 +482,7 @@ exports.editOffer = async (req, res) => {
         // 5. SAVE
         // ===============================
         await existingOffer.save();
+        await pricingExpiryUpdate();
 
         return res.status(200).json({
             success: true,
@@ -502,6 +521,9 @@ exports.offerDelete = async (req, res) => {
                 message: 'Offer not found'
             });
         }
+
+        await pricingExpiryUpdate();
+
 
         return res.status(200).json({
             success: true,

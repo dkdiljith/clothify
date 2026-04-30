@@ -6,10 +6,9 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs');
 
-
-
-
-
+//update offer & coupon & products
+const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,6 +126,7 @@ exports.addProducts = async (req, res) => {
             });
 
             await newProduct.save();
+            await pricingExpiryUpdate();
 
 
             const categories = await Category.find().lean();
@@ -231,6 +231,7 @@ exports.updateProduct = async (req, res) => {
             product.bestSeller = bestSeller;
 
             await product.save();
+            await pricingExpiryUpdate();
             return res.redirect('/admin/products');
         });
     } catch (err) {
@@ -243,29 +244,63 @@ exports.updateProduct = async (req, res) => {
 
 
 
+// Show Products
 exports.showProducts = async (req, res) => {
     try {
-        // Pagination parameters
+        // 1. Capture Query and Pagination Parameters
+        const query = req.query.query || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 products per page
+        const limit = 5;
+        const skip = (page - 1) * limit;
 
-        // Get total count of products
-        const totalProducts = await Product.countDocuments();
+        // 2. Build the Search Filter
+        let filter = {};
+        if (query) {
+            filter = {
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } },
+                    { gender: { $regex: query, $options: 'i' } }
+                ],
+            };
+        }
+
+        // 3. Database Operations 
+        const [totalProducts, products, categories, offers] = await Promise.all([
+            Product.countDocuments(filter), // Dynamic count based on search
+            Product.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Category.find({}, { _id: 1, name: 1 }).lean(),
+            Offer.find({}, { _id: 1, offerCode: 1 }).lean()
+        ]);
+
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Get paginated products (newest first)
-        const products = await Product.find()
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+        // 4. Offer Mapping Logic 
+        const offerMap = {};
+        offers.forEach(item => {
+            offerMap[item._id.toString()] = item.offerCode;
+        });
 
-        const categories = await Category.find().lean();
+        const updatedProducts = products.map(item => {
+            const firstDetail = item.details?.[0];
+            return {
+                ...item,
+                currentOfferCode: firstDetail?.offerId
+                    ? offerMap[firstDetail.offerId.toString()] || ""
+                    : ""
+            };
+        });
 
-        return res.render('admin/products', {
+        // 5. Render with all necessary variables
+        return res.render("admin/products", {
             admin: true,
-            products: products,
-            categories: categories,
+            products: updatedProducts,
+            categories,
+            query, 
             pagination: {
                 page,
                 limit,
@@ -279,10 +314,12 @@ exports.showProducts = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching products:", error);
-        return res.render('admin/products', {
+
+        return res.render("admin/products", {
             admin: true,
             products: [],
             categories: [],
+            query: req.query.query || '', 
             pagination: {
                 page: 1,
                 limit: 5,
@@ -342,86 +379,211 @@ exports.deleteProducts = async (req, res) => {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////APPLY OFFER FUNCTIONS/////////////////////
+//////////APPLY OFFER FUNCTIONS//////////////////////
 
-//Apply Offer Render Function
+//Manuel Apply Offer Render Function
+// Manual Apply Offer Render Function
 exports.applyOfferJson = async (req, res) => {
     try {
-        const offers = await Offer.find({ offerType: 'product' });
-        const product = await Product.findById(req.params.productId)
-        return res.json({ offers, product });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
-}
-
-//Apply Offer Function
-exports.applyOffer = async (req, res) => {
-    try {
         const { productId } = req.params;
-        const { offerId } = req.body;
+        const now = new Date();
 
-        const product = await Product.findById(productId);
-        const offer = await Offer.findById(offerId).lean();
+        const product = await Product.findById(productId).lean();
 
-        // validations
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found." });
-        }
-        if (!offer) {
-            return res.status(404).json({ success: false, message: "Offer not found." });
-        }
-        if (offer.offerType === 'subcategory') {
-            return res.status(400).json({ success: false, message: "This offer is for subcategories, not products." });
-        }
-        if (offer.discountType === 'percentage' && offer.discountValue >= 100) {
-            return res.status(400).json({ success: false, message: "Percentage discount must be less than 100." });
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
         }
 
-        //offerPrice calculating
-        product.details.forEach(detail => {
-            let calculatedOfferPrice = null;
-            const originalPrice = detail.price;
+        const offers = await Offer.find({
+            isActive: true,
+            startDate: { $lte: now },
+            endDate: { $gte: now },
 
-            if (offer.discountType === 'percentage') {
-                calculatedOfferPrice = originalPrice - ((originalPrice * offer.discountValue) / 100);
-            } else if (offer.discountType === 'price') {
-                calculatedOfferPrice = originalPrice - offer.discountValue;
-            }
+            $or: [
+                {
+                    offerType: "product",
+                    targetIds: productId
+                },
+                {
+                    offerType: "subcategory",
+                    targetIds: product.categoryId
+                }
+            ]
+        }).lean();
 
-            if (calculatedOfferPrice !== null && calculatedOfferPrice < originalPrice && calculatedOfferPrice > 0) {
-                //rounding price
-                detail.offerPrice = Math.round((calculatedOfferPrice * 100) / 100);
-                detail.offerId = offerId;
-            } else {
-                detail.offerPrice = null;
-                detail.offerId = null;
-                console.log(`Offer was not applicable for detail with price ${originalPrice}`);
-            }
-        });
-        await product.save();
-        return res.status(201).json({
+        return res.json({
             success: true,
-            type: "success",
-            message: "Offer applied successfully!"
+            offers,
+            product
         });
 
-    } catch (err) {
-        console.error("An Error Occurred while applying offer:", err);
+    } catch (error) {
         return res.status(500).json({
             success: false,
-            type: "error",
-            message: "An internal server error occurred."
+            message: error.message
         });
     }
 };
 
 
 
+// Manuel Apply Offer Function
+exports.applyOffer = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { offerId } = req.body;
+
+        const now = new Date();
+
+        const product = await Product.findById(productId);
+        const offer = await Offer.findById(offerId).lean();
+
+        // validations
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
+        }
+
+        if (!offer) {
+            return res.status(404).json({
+                success: false,
+                message: "Offer not found."
+            });
+        }
+
+        if (!offer.isActive || offer.startDate > now || offer.endDate < now) {
+            return res.status(400).json({
+                success: false,
+                message: "This offer is not active."
+            });
+        }
+
+        let targetMatch = false;
+
+        // product offer validation
+        if (offer.offerType === "product") {
+            targetMatch = offer.targetIds.some(
+                id => id.toString() === productId
+            );
+        }
+
+        // subcategory offer validation
+        if (offer.offerType === "subcategory") {
+            targetMatch = offer.targetIds.some(
+                id => id.toString() === product.categoryId.toString()
+            );
+        }
+
+        if (!targetMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "This offer is not applicable for this product."
+            });
+        }
+
+        let appliedCount = 0;
+
+        product.details.forEach(detail => {
+            const originalPrice = detail.price;
+
+            // clear old values first
+            detail.offerId = null;
+            detail.offerPrice = 0;
+            detail.offerLocked = false;
+
+            let newPrice = originalPrice;
+
+            if (offer.discountType === "percentage") {
+                newPrice =
+                    originalPrice -
+                    (originalPrice * offer.discountValue) / 100;
+            } else {
+                newPrice =
+                    originalPrice - offer.discountValue;
+            }
+
+            // invalid discount rules
+            if (newPrice <= 0) return;
+            if (newPrice < originalPrice * 0.20) return;
+
+            newPrice = Math.round(newPrice);
+
+            detail.offerId = offer._id;
+            detail.offerPrice = newPrice;
+            detail.offerLocked = true;
+
+            appliedCount++;
+        });
+
+        await product.save();
+        await pricingExpiryUpdate();
+
+        if (appliedCount === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Offer could not be applied to any product variant."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Offer applied successfully with manual override."
+        });
+
+    } catch (error) {
+        console.log("applyOffer failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
+};
 
 
 
+// Product Auto Pricing 
+exports.autoPricing = async (req, res) => {
+    try {
+        const { productId } = req.params;
 
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
+        }
+
+        product.details.forEach(detail => {
+            detail.offerId = null;
+            detail.offerPrice = 0;
+            detail.offerLocked = false;
+        });
+
+        await product.save();
+        await pricingExpiryUpdate();
+
+        return res.status(200).json({
+            success: true,
+            message: "Automatic pricing enabled successfully."
+        });
+
+    } catch (error) {
+        console.log("product autoPricing failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
+};
 
 
 

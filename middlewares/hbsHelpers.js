@@ -31,9 +31,9 @@ module.exports = {
       return "-";
     }
   },
-   ifEquals: function (arg1, arg2, options) {
-      return arg1 == arg2 ? options.fn(this) : options.inverse(this);
-    },
+  ifEquals: function (arg1, arg2, options) {
+    return arg1 == arg2 ? options.fn(this) : options.inverse(this);
+  },
   getSubcategories: function (subcategories) {
     return subcategories.length > 0 ? subcategories.map(sub => sub.name).join(", ") : "-";
   },
@@ -137,106 +137,106 @@ module.exports = {
   //productListing
   json: function (context) {
     return JSON.stringify(context);
-},
+  },
 
-//edit offer
-contains: function (array, value) {
-  if (!array || !Array.isArray(array)) return false;
-  return array.includes(value);
-},
+  //edit offer
+  contains: function (array, value) {
+    if (!array || !Array.isArray(array)) return false;
+    return array.includes(value);
+  },
 
-//wihlist
-isEmpty: function (array) {
-  return !array || array.length === 0;
-},
+  //wihlist
+  isEmpty: function (array) {
+    return !array || array.length === 0;
+  },
 
-//cart
-lte: function(a, b) {
-  return a <= b;
-},
-//user order
-toLowerCase: function (str) {
-  if (str && typeof str === 'string') {
+  //cart
+  lte: function (a, b) {
+    return a <= b;
+  },
+  //user order
+  toLowerCase: function (str) {
+    if (str && typeof str === 'string') {
       return str.toLowerCase();
-  }
-  return ''; // Or handle non-string values as needed
-},
-ifeq: function (a, b, options) {
-  if (a === b) {
+    }
+    return ''; // Or handle non-string values as needed
+  },
+  ifeq: function (a, b, options) {
+    if (a === b) {
       return options.fn(this);
-  }
-  return options.inverse(this);
-},
+    }
+    return options.inverse(this);
+  },
 
-//single product page
-stars: function(rating, options) {
-  // Calculate full and half stars
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-  
-  // Create stars array
-  const starsArray = [];
-  
-  // Add full stars
-  for (let i = 0; i < fullStars; i++) {
-    starsArray.push({ full: true, half: false, empty: false });
-  }
-  
-  // Add half star if needed
-  if (hasHalfStar) {
-    starsArray.push({ full: false, half: true, empty: false });
-  }
-  
-  // Add empty stars
-  for (let i = 0; i < emptyStars; i++) {
-    starsArray.push({ full: false, half: false, empty: true });
-  }
-  
-  // Process with the template block
-  let output = '';
-  starsArray.forEach((star) => {
-    output += options.fn(star);
-  });
-  
-  return output;
-},
-//product listing page
-max:(a, b) => Math.max(a, b),
-min: (a, b) => Math.min(a, b),
+  //single product page
+  stars: function (rating, options) {
+    // Calculate full and half stars
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    // Create stars array
+    const starsArray = [];
+
+    // Add full stars
+    for (let i = 0; i < fullStars; i++) {
+      starsArray.push({ full: true, half: false, empty: false });
+    }
+
+    // Add half star if needed
+    if (hasHalfStar) {
+      starsArray.push({ full: false, half: true, empty: false });
+    }
+
+    // Add empty stars
+    for (let i = 0; i < emptyStars; i++) {
+      starsArray.push({ full: false, half: false, empty: true });
+    }
+
+    // Process with the template block
+    let output = '';
+    starsArray.forEach((star) => {
+      output += options.fn(star);
+    });
+
+    return output;
+  },
+  //product listing page
+  max: (a, b) => Math.max(a, b),
+  min: (a, b) => Math.min(a, b),
 
 
-//Admin 
-subtract: function(a, b) {
-  return parseFloat(a) - parseFloat(b);
-},
-replaceSpaceWithHyphen: function(str) {
-  return str.replace(/\s+/g, '-');
-},
-hasReturnRequest: function(items) {
-  return items.some(item => item.status === 'Return Requested');
-},
+  //Admin 
+  subtract: function (a, b) {
+    return parseFloat(a) - parseFloat(b);
+  },
+  replaceSpaceWithHyphen: function (str) {
+    return str.replace(/\s+/g, '-');
+  },
+  hasReturnRequest: function (items) {
+    return items.some(item => item.status === 'Return Requested');
+  },
 
-//productCArd
-calculateDiscountPercentage: function(originalPrice, discountPrice) {
+  //productCArd
+  calculateDiscountPercentage: function (originalPrice, discountPrice) {
     return Math.round(((originalPrice - discountPrice) / originalPrice) * 100);
-},
-subtractDiscountPrice: function(price, discount) {
+  },
+  subtractDiscountPrice: function (price, discount) {
     return price - discount;
-},
-//sales report
- shortId: function(objectId) {
+  },
+  //sales report
+  shortId: function (objectId) {
     return objectId.toString().substring(18, 24);
   },
 
   //offer page helper
-  capitalize: function(str){
-  return str.charAt(0).toUpperCase() + str.slice(1);
-},
-and:function () {
+  capitalize: function (str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  },
+  and: function () {
     const args = Array.prototype.slice.call(arguments, 0, -1);
     return args.every(Boolean);
-}
+  }
 
 
 };

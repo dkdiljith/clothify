@@ -290,7 +290,7 @@
             {{else}}
             <div class="featured-products-grid">
                 {{#each product}}
-                <div <div style="margin-bottom:25px">
+                <div style="margin-bottom:25px">
                 <div class="product-card" data-product-id="{{this._id}}">
                     {{#if this.latestCollection}}
                     <div class="product-badge">New</div>
@@ -319,7 +319,7 @@
                         <div class="price-container">
                             {{#if this.details.[0].offerId}}
                             <span class="original-price">₹{{this.details.[0].price}}</span>
-                            <span class="product-price">₹{{this.details[0].offerPrice}}</span>
+                            <span class="product-price">₹{{this.details.[0].offerPrice}}</span>
                             {{else}}
                             <span class="product-price">₹{{this.details.[0].price}}</span>
                             {{/if}}

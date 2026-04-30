@@ -1,327 +1,349 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const deleteButtons = document.querySelectorAll('.btn-delete');
-
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const categoryId = button.getAttribute('data-id');
-
-            // ✅ Strong warning confirmation
-            const confirmed = confirm(
-                "⚠️ Are you sure you want to delete this sub category?\n\n" +
-                "🔸 It can affect all products that are using this sub category.\n\n" +
-                "🚫 This action cannot be undone!"
-            );
-            if (!confirmed) return;
-
-            // ✅ Optional: Alert while deleting
-            alert("⏳ Deleting the sub category... Please wait.");
-
-            try {
-                const response = await fetch(`/admin/category/${categoryId}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert("✅ Sub Categories deleted successfully!");
-                    location.reload();
-                } else {
-                    const errorData = await response.json();
-                    alert("❌ Failed to delete: " + errorData.message);
-                }
-            } catch (error) {
-                alert("🚫 Error occurred: " + error.message);
-            }
-        });
-    });
-
-
-    const form = document.querySelector('.form');
-    const categoryNameInput = document.getElementById('categoryName');
-    const subcategoryInput = document.getElementById('newSubcategory');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // prevent form submission
-
-        const name = categoryNameInput.value.trim();
-        const newSubcategory = subcategoryInput.value.trim();
-
-        // Extract category ID from the current URL (editCategory/:id)
-        const categoryId = window.location.pathname.split('/').pop();
-
-        try {
-            const response = (`/admin/category/${categoryId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, newSubcategory })
-            });
-
-            if (response.ok) {
-                alert("✅ Category updated successfully!");
-                location.reload();
-            } else {
-                const errorData = await response.json();
-                alert("❌ Failed to update: " + errorData.message);
-            }
-
-        } catch (error) {
-            console.error("🚫 Error updating category:", error);
-            alert("Something went wrong.");
-        }
-    });
-});
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///offerApplying section
-
 let filterOffers;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // --- ELEMENT SELECTORS ---
+    const deleteButtons = document.querySelectorAll(".btn-delete");
+    const form = document.querySelector(".form");
+    const categoryNameInput = document.getElementById("categoryName");
+    const subcategoryInput = document.getElementById("newSubcategory");
+
     const mainOverlay = document.getElementById("mainOverlay");
     const closeFormBtn = document.getElementById("closeFormBtn");
     const mainForm = document.getElementById("mainForm");
-    const offerListContainer = document.getElementById('offerListContainer');
-    const selectedOfferIdInput = document.getElementById('selectedOfferIdInput');
-    const selectedCategoryIdInput = document.getElementById('selectedCategoryIdInput');
-    const modalTitle = document.getElementById('formModalTitle');
-    const offerSearchInput = document.getElementById('offerSearch');
+    const offerListContainer = document.getElementById("offerListContainer");
+    const selectedOfferIdInput = document.getElementById("selectedOfferIdInput");
+    const selectedCategoryIdInput = document.getElementById("selectedCategoryIdInput");
+    const modalTitle = document.getElementById("formModalTitle");
+    const offerSearchInput = document.getElementById("offerSearch");
+    const autoPricingBtn = document.getElementById("autoPricingBtn");
 
-    // --- STATE VARIABLES ---
     let availableOffers = [];
     let selectedOfferId = null;
     let selectedCategoryId = null;
 
+    function showNotification(type, message) {
+        let container = document.getElementById("notification-container");
 
-    /////////////////////////////////////////////////////////////////////////////////
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "notification-container";
+            document.body.appendChild(container);
+        }
 
-    //  Notification function
-    const showNotification = (type, message) => {
-        const container = document.getElementById('notification-container') || createNotificationContainer();
-        const notification = document.createElement('div');
-        notification.classList.add('notification', type);
-        notification.innerHTML = `
-                <span>${message}</span>
-                <span class="close-btn">&times;</span>
-            `;
+        const box = document.createElement("div");
+        box.className = "notification " + type;
+        box.innerHTML =
+            "<span>" + message + "</span>" +
+            '<span class="close-btn">&times;</span>';
 
-        container.appendChild(notification);
+        container.appendChild(box);
 
-        // Remove notification after 4 seconds
         setTimeout(() => {
-            notification.remove();
+            box.remove();
         }, 4000);
 
-        // Close button functionality
-        notification.querySelector('.close-btn').addEventListener('click', () => {
-            notification.remove();
+        box.querySelector(".close-btn").addEventListener("click", () => {
+            box.remove();
         });
-    };
+    }
 
-    const createNotificationContainer = () => {
-        const container = document.createElement("div");
-        container.id = "notification-container";
-        document.body.appendChild(container);
-        return container;
-    };
+    // delete subcategory
+    deleteButtons.forEach(button => {
+        button.addEventListener("click", async function () {
+            const categoryId = this.dataset.id;
 
-    ///////////////////////////////////////////////////////////////////////////////////
+            const confirmed = confirm(
+                "Delete this subcategory?\n\nThis action cannot be undone."
+            );
 
-    // --- MODAL & DATA FETCHING ---
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch("/admin/category/" + categoryId, {
+                    method: "DELETE"
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Delete failed.");
+                }
+
+                showNotification("success", "Subcategory deleted.");
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+
+            } catch (error) {
+                showNotification("error", error.message);
+            }
+        });
+    });
+
+    // update category / add subcategory
+    if (form) {
+        form.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const name = categoryNameInput.value.trim();
+            const newSubcategory = subcategoryInput.value.trim();
+
+            const categoryId = window.location.pathname.split("/").pop();
+
+            try {
+                const response = await fetch("/admin/category/" + categoryId, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        newSubcategory
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Update failed.");
+                }
+
+                showNotification("success", result.message || "Saved successfully.");
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+
+            } catch (error) {
+                showNotification("error", error.message);
+            }
+        });
+    }
+
+    function resetModal() {
+        selectedOfferId = null;
+        selectedCategoryId = null;
+
+        selectedOfferIdInput.value = "";
+        selectedCategoryIdInput.value = "";
+
+        offerSearchInput.value = "";
+        offerListContainer.innerHTML = "";
+    }
+
+    function closeModal() {
+        mainOverlay.classList.remove("active");
+        resetModal();
+    }
+
     async function openModal(categoryId) {
         try {
-            modalTitle.textContent = 'Loading...';
+            resetModal();
+
+            modalTitle.textContent = "Loading...";
             mainOverlay.classList.add("active");
 
-            // Reset state from previous openings
-            selectedOfferId = null;
-            selectedOfferIdInput.value = "";
-            offerSearchInput.value = "";
+            const response = await fetch("/admin/category/apply-offer/" + categoryId);
 
-            const response = await fetch(`/admin/category/apply-offer/${categoryId}`);
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                throw new Error("Failed to load offers.");
+            }
 
-            const obj = await response.json();
+            const data = await response.json();
 
-            selectedCategoryId = obj.category._id
-            selectedCategoryIdInput.value = obj.category._id;
-            availableOffers = obj.offers || [];
+            if (!data.category) {
+                throw new Error("Category not found.");
+            }
+
+            selectedCategoryId = data.category._id;
+            selectedCategoryIdInput.value = data.category._id;
+
+            availableOffers = data.offers || [];
+
             displayOffers(availableOffers);
 
-            modalTitle.textContent = 'Select an Offer for "' + obj.category.name + '"';
+            modalTitle.textContent =
+                'Apply Offer for "' + data.category.name + '"';
 
         } catch (error) {
-            console.error('Error loading offer modal:', error);
-            showNotification('error', 'Failed to load offer information');
+            showNotification("error", error.message);
             closeModal();
         }
     }
 
-    const closeModal = () => {
-        mainOverlay.classList.remove("active");
-    };
+    function displayOffers(offers) {
+        offerListContainer.innerHTML = "";
 
-    // --- OFFER DISPLAY & FILTERING ---
-
-    // (MODIFIED) Function to generate and display the offer cards
-    function displayOffers(offersToDisplay) {
-        offerListContainer.innerHTML = ""; // Clear previous content
-
-        if (!offersToDisplay || offersToDisplay.length === 0) {
-            offerListContainer.innerHTML = '<p class="text-center text-muted">No offers found.</p>';
+        if (!offers.length) {
+            offerListContainer.innerHTML =
+                '<p class="text-center text-muted">No active offers available.</p>';
             return;
         }
 
-        offersToDisplay.forEach((offer) => {
+        offers.forEach(offer => {
             const startDate = new Date(offer.startDate).toLocaleDateString();
             const endDate = new Date(offer.endDate).toLocaleDateString();
 
-            const offerElement = document.createElement("div");
-            offerElement.className = "offer-item";
-            // If this offer is the currently selected one, add the 'selected' class on render
-            if (offer._id === selectedOfferId) {
-                offerElement.classList.add('selected');
+            const card = document.createElement("div");
+            card.className = "offer-item";
+            card.dataset.offerId = offer._id;
+
+            if (selectedOfferId === offer._id) {
+                card.classList.add("selected");
             }
-            offerElement.dataset.offerId = offer._id;
 
-            offerElement.innerHTML = `
-                <h5>${offer.offerCode}</h5>
-                <div class="offer-details">
-                    <div>
-                        <strong>Discount:</strong> ${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' (flat)'}
-                    </div>
-                    <div>
-                        <strong>Starts:</strong> ${startDate}<br>
-                        <strong>Ends:</strong> ${endDate}
-                    </div>
-                    <div>
-                        <strong>Status:</strong> 
-                        <span class="status-badge ${offer.isActive ? 'active' : 'inactive'}">
-                            ${offer.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                    </div>
-                </div>
-            `;
-            offerListContainer.appendChild(offerElement);
+            const discountText =
+                offer.discountType === "percentage"
+                    ? offer.discountValue + "%"
+                    : "₹" + offer.discountValue + " Off";
+
+            card.innerHTML =
+                "<h5>" + offer.offerCode + "</h5>" +
+                '<div class="offer-details">' +
+                    "<div><strong>Discount:</strong> " + discountText + "</div>" +
+                    "<div><strong>Starts:</strong> " + startDate + "<br><strong>Ends:</strong> " + endDate + "</div>" +
+                    '<div><strong>Status:</strong> <span class="status-badge active">Active</span></div>' +
+                "</div>";
+
+            offerListContainer.appendChild(card);
         });
     }
 
-    // This function is now exposed globally for the onkeyup attribute
-    filterOffers = () => {
-        const searchTerm = offerSearchInput.value.toLowerCase();
+    filterOffers = function () {
+        const term = offerSearchInput.value.toLowerCase().trim();
 
-        const filteredOffers = availableOffers.filter(offer => {
-            const searchableText = `${offer.offerCode} ${offer.offerType}`.toLowerCase();
-            return searchableText.includes(searchTerm);
+        const filtered = availableOffers.filter(offer => {
+            const text =
+                String(offer.offerCode || "") + " " +
+                String(offer.discountType || "") + " " +
+                String(offer.discountValue || "");
+
+            return text.toLowerCase().includes(term);
         });
 
-        displayOffers(filteredOffers);
-    }
+        displayOffers(filtered);
+    };
 
-    // --- EVENT LISTENERS ---
-
-    // Open modal when any edit button is clicked
-    document.querySelectorAll('.btn-edit').forEach(button => {
-        button.addEventListener('click', (e) => {
+    // open modal buttons
+    document.querySelectorAll(".btn-apply-offer").forEach(button => {
+        button.addEventListener("click", function (e) {
             e.preventDefault();
-            const categoryId = button.dataset.categoryId;
+
+            const categoryId = this.dataset.categoryId;
+
             if (categoryId) {
                 openModal(categoryId);
             }
         });
     });
 
-    // Close modal listeners
+    // close modal
     if (closeFormBtn) {
         closeFormBtn.addEventListener("click", closeModal);
     }
+
     if (mainOverlay) {
-        mainOverlay.addEventListener("click", (e) => {
+        mainOverlay.addEventListener("click", e => {
             if (e.target === mainOverlay) {
                 closeModal();
             }
         });
     }
 
-
+    // select offer
     if (offerListContainer) {
-        offerListContainer.addEventListener('click', (event) => {
-            const clickedOfferCard = event.target.closest('.offer-item');
-            if (!clickedOfferCard) return;
+        offerListContainer.addEventListener("click", e => {
+            const card = e.target.closest(".offer-item");
 
-            const offerId = clickedOfferCard.dataset.offerId;
+            if (!card) return;
 
-            // Clear selection from all visible cards first
-            offerListContainer.querySelectorAll('.offer-item').forEach(item => {
-                item.classList.remove('selected');
+            const offerId = card.dataset.offerId;
+
+            offerListContainer.querySelectorAll(".offer-item").forEach(item => {
+                item.classList.remove("selected");
             });
 
-            // If the user clicks the already selected card, deselect it
             if (selectedOfferId === offerId) {
                 selectedOfferId = null;
-                selectedOfferIdInput.value = '';
+                selectedOfferIdInput.value = "";
             } else {
-                // Otherwise, select the new card
-                clickedOfferCard.classList.add('selected');
                 selectedOfferId = offerId;
                 selectedOfferIdInput.value = offerId;
+                card.classList.add("selected");
             }
         });
     }
 
-
-    // Form submission
+    // apply Offer
     if (mainForm) {
-        mainForm.addEventListener('submit', async (e) => {
+        mainForm.addEventListener("submit", async e => {
             e.preventDefault();
+
             const offerId = selectedOfferIdInput.value;
-            const categoryId = selectedCategoryIdInput.value
+            const categoryId = selectedCategoryIdInput.value;
 
-            if (offerId) {
-                try {
-                    const url = `/admin/category/apply-offer/${categoryId}`;
-                    const method = 'PUT';
+            if (!offerId) {
+                showNotification("error", "Please select an offer.");
+                return;
+            }
 
-                    const response = await fetch(url, {
-                        method,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ offerId: offerId })
-                    });
+            try {
+                const response = await fetch("/admin/category/apply-offer/" + categoryId, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ offerId })
+                });
 
-                    //create error if responce is not came
-                    if (!response.ok) {
-                        const errorResult = await response.json().catch(() => ({ message: 'Failed to apply offer. Server returned an error.' }));
-                        throw new Error(errorResult.message);
-                    }
+                const result = await response.json();
 
-                    const result = await response.json();
-                    if (result.success) {
-                        closeModal();
-                        showNotification('success', result.message);
-                        mainForm.reset();
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showNotification('error', result.message);
-                        closeModal();
-                    }
-
-                } catch (error) {
-                    console.error('Error during offer application:', error);
-                    showNotification('error', error.message || 'Something went wrong!');
-                    closeModal();
+                if (!response.ok) {
+                    throw new Error(result.message || "Failed to apply offer.");
                 }
 
-            } else {
-                showNotification('error', "Please select an offer before submitting.");
+                showNotification("success", result.message || "Offer applied.");
+
+                closeModal();
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1200);
+
+            } catch (error) {
+                showNotification("error", error.message);
+            }
+        });
+    }
+
+    // restore automatic pricing
+    if (autoPricingBtn) {
+        autoPricingBtn.addEventListener("click", async () => {
+            const categoryId = selectedCategoryIdInput.value;
+
+            if (!categoryId) return;
+
+            try {
+                const response = await fetch("/admin/category/auto-pricing/" + categoryId, {
+                    method: "PUT"
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Failed to restore automatic pricing.");
+                }
+
+                showNotification("success", result.message || "Automatic pricing enabled.");
+
+                closeModal();
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1200);
+
+            } catch (error) {
+                showNotification("error", error.message);
             }
         });
     }
