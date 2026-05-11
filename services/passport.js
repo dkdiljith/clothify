@@ -6,36 +6,8 @@ const Wallet = require(`../models/walletSchema`)
 require('dotenv').config();
 
 
-
-
 //////////////wallet cretaion/////////////////////
-async function createWallet(userId) {
-  try {
-    const existingWallet = await Wallet.findOne({ userId });
-
-    if (existingWallet) {
-      return existingWallet;
-    }
-
-    const newWallet = new Wallet({
-      userId: userId,
-      balance: 0,
-      transactions: [],
-    });
-
-    const savedWallet = await newWallet.save();
-    return savedWallet;
-  } catch (error) {
-    if (error.code === 11000) {
-      // Duplicate key error
-      console.error("Wallet creation failed: Wallet already exists for this user.");
-      return null; // Or throw a specific error object
-    } else {
-      console.error("Error creating wallet:", error);
-      throw error; // Rethrow other errors
-    }
-  }
-}
+const createWallet = require(`../controllers/walletController`).createWallet
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,8 +68,22 @@ passport.deserializeUser(async (req,id, done) => {
 });
 
 
+const googleLogin = (req, res, next) => {
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'] 
+  })(req, res, next);
+};
+
+
+const googleCallback = (req, res, next) => {
+  passport.authenticate('google', { 
+    successRedirect: '/user/home',
+    failureRedirect: '/login' 
+  })(req, res, next);
+};
 
 
 
 
-module.exports = passport;
+
+module.exports = {passport , googleLogin , googleCallback}

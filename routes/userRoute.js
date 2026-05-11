@@ -2,6 +2,19 @@ const express = require('express');
 const router = express.Router();
 
 
+
+const passportFile = require(`../services/passport`)
+const passport = passportFile.passport
+
+///GOOGLE SIGN IN
+router.use(passport.initialize());
+router.use(passport.session());
+
+
+//RAZORPAY integration//
+const razorpay = require(`../services/razorpay`)
+
+
 const userController = require('../controllers/userController')
 const userProfileController = require(`../controllers/userProfileController`)
 const productController = require('../controllers/productController')
@@ -13,8 +26,14 @@ const couponController = require(`../controllers/couponController`)
 const searchController = require(`../controllers/searchController`)
 
 const SessionHandling = require(`../middlewares/SessionHandling`)
-const passport = require(`../services/passport`)
-const razorpay = require(`../services/razorpay`)
+
+
+
+// Route to initiate Google authentication
+router.get('/auth/google',passportFile.googleLogin);
+
+// Route to handle the callback from Google
+router.get('/auth/google/callback', passportFile.googleCallback);
 
 
 //for Header Icon
@@ -43,21 +62,6 @@ router.post(`/emailverification`, userController.emailVerification)
 router.post(`/resend-verification`, userController.resendEmailVerification)
 router.post(`/resend-reset-email`, userController.resendResetEmail)
 router.post(`/resetpassword`, userController.resetPassword)
-
-///GOOGLE SIGN IN
-router.use(passport.initialize());
-router.use(passport.session());
-
-// Route to initiate Google authentication
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// Route to handle the callback from Google
-router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
-    return res.redirect('/user/home');
-  }
-);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -117,8 +121,6 @@ router.post('/return-order', SessionHandling.userIsLoggedIn, orderController.ord
 router.post(`/profileedit`, SessionHandling.userIsLoggedIn, userProfileController.profileEdit)
 router.post(`/addaddress`, SessionHandling.userIsLoggedIn, userProfileController.addAddress)
 router.post(`/editaddress/:id`, SessionHandling.userIsLoggedIn, userProfileController.editAddress)
-
-
 
 
 //RAZORPAY

@@ -7,6 +7,39 @@ const razorpay = new Razorpay({
 });
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+exports.createWallet = async (userId)=> {
+  try {
+    const existingWallet = await Wallet.findOne({ userId });
+
+    if (existingWallet) {
+      return existingWallet;
+    }
+
+    const newWallet = new Wallet({
+      userId: userId,
+      balance: 0,
+      transactions: [],
+    });
+
+    const savedWallet = await newWallet.save();
+    return savedWallet;
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error
+      console.error("Wallet creation failed: Wallet already exists for this user.");
+      return null; // Or throw a specific error object
+    } else {
+      console.error("Error creating wallet:", error);
+      throw error; // Rethrow other errors
+    }
+  }
+}
+
+
+
 exports.walletRender = async (req, res) => {
     const userId = res.locals.user._id
     const wallet = await Wallet.findOne({ userId }).lean();
