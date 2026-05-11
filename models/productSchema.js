@@ -9,10 +9,10 @@ const productSchema = new mongoose.Schema({
     },
     details: [{
         size: { type: String, required: true },
-        quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
+        quantity: { type: Number, required: true, min: 0 },
+        price: { type: Number, required: true, min: 0 },
         offerId: { type: mongoose.Schema.Types.ObjectId, default: null },
-        offerPrice: { type: Number, default: null, message: 'Discount price cannot be greater than original price' },
+        offerPrice: { type: Number, default: null, min: 0, message: 'Discount price cannot be greater than original price' },
         offerLocked: { type: Boolean, default: false }
     }],
     gender: { type: String, required: true },

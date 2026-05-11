@@ -456,7 +456,7 @@
 						});
 						const data = await response.json();
 
-						showPopup(data.message, data.success ? "success" : "error");
+						showPopupMessage(data.message, data.success ? "success" : "error");
 
 						if (data.success) {
 							const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
@@ -469,19 +469,10 @@
 						}
 					} catch (error) {
 						console.error("Error adding to wishlist:", error);
-						showPopup("Something went wrong. Please try again.", "error");
+						showPopupMessage("Something went wrong. Please try again.", "error");
 					}
 				}
 
-				function showPopup(message, type = "success") {
-					const popup = document.createElement("div");
-					popup.className = `popup ${type}`;
-					popup.textContent = message;
-					document.body.appendChild(popup);
-					setTimeout(() => {
-						popup.remove();
-					}, 3000);
-				}
 
 				document.addEventListener('DOMContentLoaded', () => {
 					const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');

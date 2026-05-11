@@ -10,7 +10,8 @@ const walletSchema = new mongoose.Schema({
     balance: {
         type: Number,
         default: 0,
-        required: true
+        required: true,
+        min: 0
     },
     transactions: [{
         type: {
@@ -20,7 +21,8 @@ const walletSchema = new mongoose.Schema({
         },
         amount: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         },
         description: {
             type: String,

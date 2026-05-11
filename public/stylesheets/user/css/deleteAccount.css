@@ -1,0 +1,235 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.profile-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.profile-container {
+    display: flex;
+    gap: 30px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.profile-sidebar {
+    width: 250px;
+    background-color: #f8f9fa;
+    padding: 25px 0;
+}
+
+.profile-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-sidebar li {
+    padding: 12px 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 3px solid transparent;
+}
+
+.profile-sidebar li:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--secondary-color);
+}
+
+.profile-sidebar li.active {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-left: 3px solid var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.profile-sidebar li i {
+    width: 20px;
+    text-align: center;
+}
+
+.profile-content {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Delete Account Content Styles */
+.delete-section {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.delete-icon {
+    font-size: 60px;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+.delete-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+.delete-subtitle {
+    font-size: 16px;
+    color: var(--dark-gray);
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.delete-warning-card {
+    background-color: #fff9f9;
+    border-left: 4px solid var(--accent-color);
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.delete-warning-title {
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-warning-list {
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.delete-warning-list li {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.delete-confirm-checkbox {
+    display: flex;
+    align-items: flex-start;
+    margin: 25px 0;
+    padding: 15px;
+    border: 1px solid var(--medium-gray);
+    border-radius: 6px;
+    background-color: var(--light-gray);
+}
+
+.delete-confirm-checkbox input {
+    margin-right: 15px;
+    margin-top: 3px;
+}
+
+.delete-confirm-label {
+    color: var(--dark-gray);
+    font-size: 15px;
+}
+
+.delete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    gap: 8px;
+    font-size: 16px;
+}
+
+.btn-danger {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-secondary {
+    background-color: var(--medium-gray);
+    color: var(--dark-gray);
+}
+
+.btn-secondary:hover {
+    background-color: #bdc3c7;
+}
+
+.btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .profile-container {
+        flex-direction: column;
+    }
+
+    .profile-sidebar {
+        width: 100%;
+        padding: 15px 0;
+    }
+
+    .profile-sidebar ul {
+        display: flex;
+        overflow-x: auto;
+        padding: 0 15px;
+    }
+
+    .profile-sidebar li {
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 10px 15px;
+    }
+
+    .profile-sidebar li.active {
+        border-left: none;
+        border-bottom: 3px solid var(--accent-color);
+    }
+}
+
+@media (max-width: 768px) {
+    .delete-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

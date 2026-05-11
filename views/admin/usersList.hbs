@@ -11,7 +11,7 @@
         <div style="display:flex; justify-content:space-between;" class="users-header">
             <h1 class="page-title">User Management</h1>
 
-            <form method="GET" action='/admin/users/search' role="search">
+            <form method="GET" action='/admin/users' role="search">
                 <div class="search-container">
                     <input type="search" name="query" class="search-input" id="search-input"
                         placeholder="Search users..." {{#if query}} value={{query}} {{/if}}>

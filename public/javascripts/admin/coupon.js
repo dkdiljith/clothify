@@ -47,28 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         codeInput.value = codeInput.value.toUpperCase();
     });
 
-    // ✅ Notification function
-    const showNotification = (type, message) => {
-        const container = document.getElementById('notification-container') || createNotificationContainer();
-        const notification = document.createElement('div');
-        notification.classList.add('notification', type);
-        notification.innerHTML = `
-                <span>${message}</span>
-                <span class="close-btn">&times;</span>
-            `;
-
-        container.appendChild(notification);
-
-        // Remove notification after 4 seconds
-        setTimeout(() => {
-            notification.remove();
-        }, 4000);
-
-        // Close button functionality
-        notification.querySelector('.close-btn').addEventListener('click', () => {
-            notification.remove();
-        });
-    };
 
     const createNotificationContainer = () => {
         const container = document.createElement('div');
@@ -288,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error loading coupon:', error);
-            showNotification('error', 'Failed to load coupon data');
+            showPopupMessage('Failed to load coupon data', 'error')
             closeModal();
         }
     }
@@ -315,19 +293,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (result.success) {
-                showNotification('success', result.message);
+                showPopupMessage(result.message, 'success')
                 form.reset();
                 addCouponOverlay.classList.remove('active');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
             } else {
-                showNotification('error', result.message);
+                showPopupMessage(result.message, 'error')
             }
 
         } catch (error) {
             console.error('Error:', error);
-            showNotification('error', 'Something went wrong!');
+            showPopupMessage('Something went wrong!', 'error')
         }
     });
 
@@ -350,16 +328,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const result = await response.json();
 
                         if (result.success) {
-                            showNotification('success', result.message);
+                            showPopupMessage(result.message, 'success')
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1500);
                         } else {
-                            showNotification('error', result.message);
+                            showPopupMessage(result.message, 'error')
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        showNotification('error', 'Failed to delete the coupon.');
+                        showPopupMessage('Failed to delete the coupon.', 'error')
                     }
                 }
             });

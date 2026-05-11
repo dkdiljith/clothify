@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const type = offerTypeInput.value;
 
         if (!type) {
-            showNotification("error", "Please select Offer Type first");
+            showPopupMessage('Please select Offer Type first', 'error')
             return;
         }
 
@@ -338,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         selectionModal.classList.remove("active");
 
-        showNotification("success", `${idArray.length} items linked to offer`);
+        showPopupMessage(`${idArray.length} items linked to offer`, 'success')
     });
 
     // ===============================
@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
 
             if (result.success) {
-                showNotification("success", result.message);
+                showPopupMessage(result.message, 'success')
 
                 closeModal();
 
@@ -469,12 +469,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     window.location.reload();
                 }, 1500);
             } else {
-                showNotification("error", result.message);
+                showPopupMessage(result.message, 'error')
             }
         } catch (error) {
             console.error(error);
 
-            showNotification("error", "Something went wrong");
+            showPopupMessage('Something went wrong', 'error')
         }
     });
 
@@ -524,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error(error);
 
-            showNotification("error", "Failed to load offer data");
+            showPopupMessage('Failed to load offer data', 'error')
 
             closeModal();
         }
@@ -578,55 +578,20 @@ function setupDeleteButtons() {
                 const result = await response.json();
 
                 if (result.success) {
-                    showNotification("success", result.message);
+                    showPopupMessage(result.message, 'success')
 
                     setTimeout(() => {
                         window.location.reload();
                     }, 1200);
                 } else {
-                    showNotification("error", result.message);
+                    showPopupMessage(result.message, 'error')
                 }
             } catch (error) {
                 console.error(error);
 
-                showNotification("error", "Failed to delete offer");
+                showPopupMessage(`Failed to delete offer` , `error`)
             }
         });
     });
 }
 
-// ===============================
-// 20. GLOBAL NOTIFICATION SYSTEM
-// ===============================
-function showNotification(type, message) {
-    let container = document.getElementById("notification-container");
-
-    if (!container) {
-        container = document.createElement("div");
-
-        container.id = "notification-container";
-
-        document.body.appendChild(container);
-    }
-
-    const notification = document.createElement("div");
-
-    notification.className = `notification ${type}`;
-
-    notification.innerHTML = `
-        <span>${message}</span>
-        <span class="close-btn">&times;</span>
-    `;
-
-    container.appendChild(notification);
-
-    // auto remove
-    setTimeout(() => {
-        notification.remove();
-    }, 4000);
-
-    // manual close
-    notification.querySelector(".close-btn").addEventListener("click", () => {
-        notification.remove();
-    });
-}

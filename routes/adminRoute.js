@@ -17,9 +17,11 @@ const SessionHandling = require("../middlewares/SessionHandling")
 
 ///ADMIN CREDENTIAL SIDE///
 router.get(`/`, SessionHandling.adminIsLoggedOut, adminController.loginRender)
-router.get(`/register`, SessionHandling.adminIsLoggedIn, adminController.registerRender)
-router.post(`/register`, adminController.register)
 router.post(`/login`, adminController.login)
+
+router.route(`/register`)
+.get(SessionHandling.adminIsLoggedIn, adminController.registerRender)
+.post(adminController.register)
 
 
 ///DASHBOARD SIDE///
@@ -29,8 +31,9 @@ router.get(`/logout`, SessionHandling.adminIsLoggedIn, adminController.logout)
 
 
 ///SALES REPORT///
-router.get(`/salesReport`, SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
-router.post('/salesReport' ,SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
+router.route(`/salesReport`)
+.get(SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
+.post(SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
 
 //PRODUCT SIDE///
 router.get(`/products`, SessionHandling.adminIsLoggedIn, productController.showProducts)
@@ -54,22 +57,30 @@ router.get(`/users`, SessionHandling.adminIsLoggedIn, userController.showUsers)
 router.get('/blockUser/:id', SessionHandling.adminIsLoggedIn, userController.blockUser) ///BLOCK USER///
 
 ///CATEGORY MANAGEMENT///
-router.get(`/category`, SessionHandling.adminIsLoggedIn, categoryController.showCategories)
-router.post("/category", SessionHandling.adminIsLoggedIn, categoryController.addCategory)
-router.get("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategoryRender)
-router.put("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategory)
-router.delete("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.deleteCategory)
+router.route(`/category`)
+.get(SessionHandling.adminIsLoggedIn, categoryController.showCategories)
+.post(SessionHandling.adminIsLoggedIn, categoryController.addCategory)
+
+router.route(`/category/:id`)
+.get(SessionHandling.adminIsLoggedIn, categoryController.editCategoryRender)
+.put(SessionHandling.adminIsLoggedIn, categoryController.editCategory)
+.delete(SessionHandling.adminIsLoggedIn, categoryController.deleteCategory)
+
 //offer adding section
-router.get(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOfferJson)
-router.put(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOffer)
+router.route(`/category/apply-offer/:id`)
+.get(SessionHandling.adminIsLoggedIn , categoryController.applyOfferJson)
+.put(SessionHandling.adminIsLoggedIn , categoryController.applyOffer)
+
 router.put(`/category/auto-pricing/:id` , SessionHandling.adminIsLoggedIn , categoryController.autoPricing)
 
 ///COUPON MANAGEMENT///
 router.get(`/coupons`, SessionHandling.adminIsLoggedIn, couponController.couponRender)
 router.post("/coupon/addCoupon",SessionHandling.adminIsLoggedIn, couponController.createCoupon)
-router.get(`/coupon/:couponId` , SessionHandling.adminIsLoggedIn , couponController.couponEditJson)
-router.put('/coupon/:couponId', SessionHandling.adminIsLoggedIn,couponController.couponEdit)
-router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponController.couponDelete);
+
+router.route(`/coupon/:couponId`)
+.get(SessionHandling.adminIsLoggedIn , couponController.couponEditJson)
+.put(SessionHandling.adminIsLoggedIn,couponController.couponEdit)
+.delete(SessionHandling.adminIsLoggedIn, couponController.couponDelete);
 
 ///OFFER MANAGEMENT///
 router.get(`/offer`, SessionHandling.adminIsLoggedIn,offerController.offerRender )
@@ -78,9 +89,10 @@ router.post("/offer/addOffer" ,SessionHandling.adminIsLoggedIn,offerController.c
 router.get('/offer/totalProducts', SessionHandling.adminIsLoggedIn,offerController.totalListOfProducts);
 router.get('/offer/totalCategories', SessionHandling.adminIsLoggedIn,offerController.totalListOfCategories);
 
-router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
-router.put('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.editOffer)
-router.delete('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.offerDelete);
+router.route(`/offer/:offerId`)
+.get(SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
+.put(SessionHandling.adminIsLoggedIn, offerController.editOffer)
+.delete(SessionHandling.adminIsLoggedIn, offerController.offerDelete);
 
 
 

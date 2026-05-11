@@ -20,32 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedOfferId = null;
     let selectedCategoryId = null;
 
-    function showNotification(type, message) {
-        let container = document.getElementById("notification-container");
-
-        if (!container) {
-            container = document.createElement("div");
-            container.id = "notification-container";
-            document.body.appendChild(container);
-        }
-
-        const box = document.createElement("div");
-        box.className = "notification " + type;
-        box.innerHTML =
-            "<span>" + message + "</span>" +
-            '<span class="close-btn">&times;</span>';
-
-        container.appendChild(box);
-
-        setTimeout(() => {
-            box.remove();
-        }, 4000);
-
-        box.querySelector(".close-btn").addEventListener("click", () => {
-            box.remove();
-        });
-    }
-
     // delete subcategory
     deleteButtons.forEach(button => {
         button.addEventListener("click", async function () {
@@ -68,14 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Delete failed.");
                 }
 
-                showNotification("success", "Subcategory deleted.");
+                showPopupMessage('Subcategory deleted.', 'success')
 
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     });
@@ -108,14 +82,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Update failed.");
                 }
 
-                showNotification("success", result.message || "Saved successfully.");
+               showPopupMessage(result.message || 'Saved successfully.', 'success')
 
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     }
@@ -166,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 'Apply Offer for "' + data.category.name + '"';
 
         } catch (error) {
-            showNotification("error", error.message);
+            showPopupMessage(error.message, 'error')
             closeModal();
         }
     }
@@ -283,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const categoryId = selectedCategoryIdInput.value;
 
             if (!offerId) {
-                showNotification("error", "Please select an offer.");
+                showPopupMessage('Please select an offer.', 'error')
                 return;
             }
 
@@ -302,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Failed to apply offer.");
                 }
 
-                showNotification("success", result.message || "Offer applied.");
+                showPopupMessage(result.message || 'Offer applied.', 'success')
 
                 closeModal();
 
@@ -311,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 1200);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     }
@@ -334,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Failed to restore automatic pricing.");
                 }
 
-                showNotification("success", result.message || "Automatic pricing enabled.");
+               showPopupMessage(result.message || 'Automatic pricing enabled.', 'success')
 
                 closeModal();
 
@@ -343,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 1200);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     }

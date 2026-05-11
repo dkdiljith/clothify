@@ -15,34 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedOfferId = null;
     let selectedProductId = null;
 
-    // notification
-    function showNotification(type, message) {
-        let container = document.getElementById("notification-container");
-
-        if (!container) {
-            container = document.createElement("div");
-            container.id = "notification-container";
-            document.body.appendChild(container);
-        }
-
-        const notification = document.createElement("div");
-        notification.className = "notification " + type;
-
-        notification.innerHTML =
-            '<span>' + message + '</span>' +
-            '<span class="close-btn">&times;</span>';
-
-        container.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 4000);
-
-        notification.querySelector(".close-btn").addEventListener("click", () => {
-            notification.remove();
-        });
-    }
-
+   
     function resetModal() {
         selectedOfferId = null;
         selectedProductId = null;
@@ -88,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             modalTitle.textContent = 'Apply Offer for "' + data.product.name + '"';
 
         } catch (error) {
-            showNotification("error", error.message);
+            showPopupMessage(error.message, 'error')
             closeModal();
         }
     }
@@ -205,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const productId = selectedProductIdInput.value;
 
             if (!offerId) {
-                showNotification("error", "Please select an offer.");
+                showPopupMessage('Please select an offer.', 'error')
                 return;
             }
 
@@ -224,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Failed to apply offer.");
                 }
 
-                showNotification("success", result.message || "Offer applied successfully.");
+               showPopupMessage(result.message || 'Offer applied successfully.', 'success')
 
                 closeModal();
 
@@ -233,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 1200);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     }
@@ -256,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Failed to restore automatic pricing.");
                 }
 
-                showNotification("success", result.message || "Automatic pricing enabled.");
+                showPopupMessage(result.message || 'Automatic pricing enabled.', 'success')
 
                 closeModal();
 
@@ -265,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 1200);
 
             } catch (error) {
-                showNotification("error", error.message);
+                showPopupMessage(error.message, 'error')
             }
         });
     }

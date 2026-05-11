@@ -1,0 +1,50 @@
+:root {
+  /* Main Color Palette */
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  /* Majority value; snippet 16 used #e65540 */
+  --success-color: #2ecc71;
+
+  /* Grayscale & UI Colors */
+  --light-gray: #f8f9fa;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #333;
+  --white: #ffffff;
+  --light-color: #ecf0f1;
+  --dark-color: #2c3e50;
+
+  /* Semantic Variables (from Snippets 7 & 13) */
+  --primary: #2c3e50;
+  --primary-light: rgba(44, 62, 80, 0.05);
+  --secondary: #7f8c8d;
+  --success: #27ae60;
+  --warning: #e67e22;
+  --warning-color: #f39c12;
+  --danger: #e74c3c;
+  --danger-color: #e74c3c;
+  --light: #f8f9fa;
+  --dark: #343a40;
+  --border: #e1e1e1;
+
+  /* Effects & Spacing */
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+}
+
+body {
+  /* Combined Font Stacks */
+  font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Layout */
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+
+  /* Theming */
+  color: var(--dark-gray);
+  /* Snippet 13 used --dark-color */
+  background-color: var(--light-gray);
+}

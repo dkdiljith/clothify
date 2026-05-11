@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    orderId:{ type: String, required: true },
+    orderId: { type: String, required: true },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -21,7 +21,8 @@ const orderSchema = new mongoose.Schema({
 
         variationIndex: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         },
         quantity: {
             type: Number,
@@ -58,13 +59,13 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: { type: String, required: true },
     paymentStatus: { type: String, default: "Pending" },
 
-    subtotal: { type: Number, default: 0 },
-    shippingFee: { type: Number, default: 0 },
-    tax:{ type: Number, default: 0 },
-    couponId:{type:mongoose.Schema.Types.ObjectId, default:null},
-    couponDiscount:{type:Number,default:0},
-    offerDiscount:{type:Number,default:0},
-    totalAmount: { type: Number, default: 0 },
+    subtotal: { type: Number, default: 0, min: 0 },
+    shippingFee: { type: Number, default: 0, min: 0 },
+    tax: { type: Number, default: 0, min: 0 },
+    couponId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    couponDiscount: { type: Number, default: 0, min: 0 },
+    offerDiscount: { type: Number, default: 0, min: 0 },
+    totalAmount: { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);

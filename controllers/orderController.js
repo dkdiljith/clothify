@@ -3,6 +3,11 @@ const Product = require(`../models/productSchema`)
 const Wallet = require(`../models/walletSchema`)
 const Coupon = require(`../models/couponSchema`)
 
+//pagination
+const adminPaginationFactory = require(`../services/pagination`);
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -36,12 +41,12 @@ async function calculateRefund(orderId, itemId) {
     const offerPrice = item.productId.details[item.variationIndex].offerPrice * item.quantity;
 
     newSubtotal += productPrice;
-    if(offerPrice){
+    if (offerPrice) {
       newOfferAmount += (productPrice - offerPrice)
-    }else{
+    } else {
       newOfferAmount += 0
     }
-    
+
   });
 
   let newDiscountedPrice = newSubtotal - newOfferAmount;
@@ -130,60 +135,40 @@ async function calculateRefund(orderId, itemId) {
 
 
 exports.ordersRender = async (req, res) => {
-  try {
-    const query = req.query.query || '';
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    const skip = (page - 1) * limit;
+   try {
 
-    // 1. Build the filter
-    const filter = query 
-      ? { orderId: { $regex: query, $options: 'i' } } 
-      : {};
+        const page = parseInt(req.query.page) || 1;
+        const query = req.query.query || '';
+        
+        const result = await adminPaginationFactory({
+            page,
+            limit: 5,
+            query,
+            type: 'order'
+        });
+        return res.render('admin/orders', {
+            admin: true,
+            ...result
+        });
 
-    // 2. Fetch data (Run count and find in parallel for speed)
-    const [totalOrders, orders] = await Promise.all([
-      Order.countDocuments(filter),
-      Order.find(filter)
-        .sort({ createdAt: -1 }) // Keep your new sorting!
-        .skip(skip)
-        .limit(limit)
-        .lean()
-    ]);
+    } catch (error) {
 
-    const totalPages = Math.ceil(totalOrders / limit);
+        console.error("Error fetching orders:", error);
 
-    return res.render('admin/orders', {
-      order: orders,
-      admin: true,
-      query, // Restore query for the UI
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
-    });
-
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    return res.render('admin/orders', {
-      order: [],
-      admin: true,
-      query: req.query.query || '',
-      pagination: {
-        page: 1,
-        limit: 5,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      },
-      errorMessage: "Error fetching orders. Please try again later."
-    });
-  }
+        return res.render('admin/orders', {
+            admin: true,
+            order: [],
+            query: '',
+            pagination: {
+                page: 1,
+                limit: 5,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false
+            },
+            errorMessage: "Error fetching orders. Please try again later."
+        });
+    }
 };
 
 

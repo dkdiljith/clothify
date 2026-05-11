@@ -5,10 +5,13 @@ const Coupon = require(`../models/couponSchema`)
 const Offer = require(`../models/offerSchema`)
 
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
+//pagination
+const adminPaginationFactory = require(`../services/pagination`);
 
+//verification email
+const verificationEmailSend = require(`../services/VerificationEmail`).verificationEmailSend
 
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
@@ -56,33 +59,6 @@ const generateVerificationCode = () => {
   const verificationToken = crypto.randomBytes(3).toString("hex");
   const tokenExpiration = Date.now() + 900000; // 15 minutes in milliseconds
   return { verificationToken, tokenExpiration };
-};
-
-//email verification Email sending
-const verificationEmailSend = async (email, verificationToken) => {
-  try {
-    require("dotenv").config();
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "clothifyfashionshop@gmail.com",
-        pass: "tjyu mduy epba oyzk",
-      },
-    });
-
-    const mailOptions = {
-      from: "clothifyfashionshop@gmail.com",
-      to: email,
-      subject: "Email Verification Code",
-      text: `Your Email verification code is: ${verificationToken}`,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: ", info.response); // Log success
-  } catch (error) {
-    console.error("Error sending email:", error); // Log error
-    return { success: false, message: "Failed to send email", error };
-  }
 };
 
 
@@ -471,6 +447,7 @@ exports.resendEmailVerification = async (req, res) => {
     await user.save();
 
     await verificationEmailSend(userEmail, verificationToken);
+
     if (verificationEmailSend) {
       return res.json({ success: true, newTimer: user.verificationTimer }); // send new timer back
     }
@@ -640,66 +617,39 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.showUsers = async (req, res) => {
-  try {
-    const query = req.query.query || '';
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    const skip = (page - 1) * limit;
+   try {
 
-    // 1. Build the filter for Name, Email, or Phone
-    const filter = query 
-      ? {
-          $or: [
-            { name: { $regex: query, $options: 'i' } },
-            { email: { $regex: query, $options: 'i' } },
-            { phone: { $regex: query, $options: 'i' } }
-          ],
-        }
-      : {};
+        const page = parseInt(req.query.page) || 1;
+        const query = req.query.query || '';
+        const result = await adminPaginationFactory({
+            page,
+            limit: 5,
+            query,
+            type: 'user'
+        });
+        return res.render('admin/usersList', {
+            admin: true,
+            ...result
+        });
 
-    // 2. Database Operations (Running in parallel for speed)
-    const [totalUsers, users] = await Promise.all([
-      User.countDocuments(filter), // Corrected to User model
-      User.find(filter)
-        .sort({ createdAt: -1 }) 
-        .skip(skip)
-        .limit(limit)
-        .lean()
-    ]);
+    } catch (error) {
 
-    const totalPages = Math.ceil(totalUsers / limit);
+        console.error("Error fetching users:", error);
+        return res.render('admin/usersList', {
 
-    return res.render('admin/usersList', {
-      admin: true,
-      user: users,
-      query, // Passed back to keep search input filled
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
-    });
-
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return res.render('admin/usersList', {
-      admin: true,
-      user: [],
-      query: req.query.query || '',
-      pagination: {
-        page: 1,
-        limit: 5,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      },
-      errorMessage: "Error fetching users. Please try again later."
-    });
-  }
+            admin: true,
+            user: [],
+            query: '',
+            pagination: {
+                page: 1,
+                limit: 5,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false
+            },
+            errorMessage: "Error fetching users. Please try again later."
+        });
+    }
 };
 
 

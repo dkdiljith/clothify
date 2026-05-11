@@ -6,61 +6,36 @@ const Category = require(`../models/categorySchema`)
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
+//pagination
+const adminPaginationFactory = require(`../services/pagination`);
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 exports.offerRender = async (req, res) => {
-    try {
-        const query = req.query.query || '';
+   try {
+
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const skip = (page - 1) * limit;
-
-        // 1. Restore the search filter
-        const filter = query 
-            ? {
-                $or: [
-                  { offerCode: { $regex: query, $options: 'i' } },
-                  { offerType: { $regex: query, $options: 'i' } },
-                  { discountType: { $regex: query, $options: 'i' } },
-                ],
-              }
-            : {};
-
-        // 2. Fetch data (Count and Find in parallel)
-        const [totalOffers, offer] = await Promise.all([
-            Offer.countDocuments(filter), // Dynamic count based on search
-            Offer.find(filter)
-                .sort({ createdAt: -1 })   // Newest first (DB level)
-                .skip(skip)
-                .limit(limit)
-                .lean()
-        ]);
-
-        const totalPages = Math.ceil(totalOffers / limit);
-
-        return res.render(`admin/offer`, {
-            offer,
+        const query = req.query.query || '';
+        const result = await adminPaginationFactory({
+            page,
+            limit: 5,
+            query,
+            type: 'offer'
+        });
+        return res.render('admin/offer', {
             admin: true,
-            query, // Passes the search string back to the view
-            pagination: {
-                page,
-                limit,
-                totalPages,
-                nextPage: page + 1,
-                prevPage: page - 1,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
-            }
+            ...result
         });
 
     } catch (error) {
+
         console.error("Error fetching offers:", error);
-        return res.render(`admin/offer`, {
-            offer: [],
+        return res.render('admin/offer', {
             admin: true,
-            query: req.query.query || '',
+            offer: [],
+            query: '',
             pagination: {
                 page: 1,
                 limit: 5,

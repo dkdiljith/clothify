@@ -6,275 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Payment | Complete Your Order</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --light-gray: #f5f5f5;
-            --medium-gray: #e0e0e0;
-            --dark-gray: #333;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: var(--dark-gray);
-            background-color: var(--light-gray);
-            line-height: 1.6;
-        }
-
-        .payment-container {
-            display: flex;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        /* Payment Options Section */
-        .payment-options-section {
-            flex: 2;
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 25px;
-            color: var(--primary-color);
-            font-weight: 600;
-            border-bottom: 1px solid var(--medium-gray);
-            padding-bottom: 15px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .payment-methods {
-            margin-bottom: 30px;
-        }
-
-        .payment-method {
-            border: 1px solid var(--medium-gray);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .payment-method:hover {
-            border-color: var(--secondary-color);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .payment-method.selected {
-            border: 2px solid var(--success-color);
-            background-color: rgba(46, 204, 113, 0.05);
-        }
-
-        .payment-method.disabled {
-            opacity: 0.6;
-            pointer-events: none;
-            position: relative;
-        }
-
-        .payment-method.disabled::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: not-allowed;
-        }
-
-        .payment-method input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .payment-method-content {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-
-        .payment-method-icon {
-            margin-right: 15px;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--light-gray);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .payment-method-icon img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .payment-method-details {
-            flex: 1;
-        }
-
-        .payment-method-name {
-            font-weight: 600;
-            font-size: 18px;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .payment-method-description {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .insufficient-balance {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .payment-method-check {
-            margin-left: 15px;
-            color: var(--success-color);
-            font-size: 20px;
-            display: none;
-        }
-
-        .payment-method.selected .payment-method-check {
-            display: block;
-        }
-
-        /* Order Summary Section */
-        .order-summary-section {
-            flex: 1;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-        }
-
-        .price-summary {
-            padding: 25px;
-            background-color: var(--white);
-            border: 1px solid var(--medium-gray);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .price-summary h2 {
-            margin: 0 0 20px;
-            font-size: 22px;
-            color: var(--primary-color);
-            font-weight: 600;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-
-        .summary-item.total {
-            font-weight: bold;
-            font-size: 18px;
-            border-top: 1px solid var(--medium-gray);
-            padding-top: 15px;
-            margin-top: 15px;
-            color: var(--primary-color);
-        }
-
-        .btn-place-order {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: 500;
-            border: none;
-            border-radius: 5px;
-            background-color: var(--success-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-place-order:hover {
-            background-color: #27ae60;
-        }
-
-        .btn-place-order:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        .btn-place-order i {
-            font-size: 18px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .payment-container {
-                flex-direction: column;
-            }
-
-            .order-summary-section {
-                position: static;
-            }
-        }
-
-        /* Payment Security Info */
-        .payment-security {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .payment-security i {
-            color: var(--success-color);
-            font-size: 24px;
-        }
-
-        .payment-security-text {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .payment-security-text strong {
-            color: var(--primary-color);
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/paymentPage.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
 </head>
 
 <br><br>
@@ -399,183 +132,203 @@
     </div>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const paymentForm = document.getElementById('payment-form');
-            const placeOrderBtn = document.getElementById('placeOrderBtn');
             const paymentMethods = document.querySelectorAll('.payment-method');
-            let selectedPaymentMethod = null;
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
 
-            // Get total amount from the page
-            const amountSpan = document.getElementById('amount');
-            const amountText = amountSpan.textContent;
-            const amountString = amountText.replace('₹', '');
-            const totalAmount = parseFloat(amountString);
+            // Get Total Amount (Removing the ₹ symbol and parsing as float)
+            const totalAmountText = document.getElementById('amount').innerText;
+            const totalAmount = parseFloat(totalAmountText.replace(/[^\d.]/g, ''));
 
-            // Check wallet balance and disable if insufficient
+            let paymentMethod = 'razorpay';
+
+            // --- Wallet Validation Logic ---
             const walletMethod = document.querySelector('.payment-method[data-method="wallet"]');
             if (walletMethod) {
-                const walletBalance = parseFloat(walletMethod.getAttribute('data-wallet-balance'));
-                const insufficientBalanceMsg = walletMethod.querySelector('.insufficient-balance');
+                const walletBalance = parseFloat(walletMethod.dataset.walletBalance);
+                const insufficientLabel = walletMethod.querySelector('.insufficient-balance');
 
                 if (walletBalance < totalAmount) {
-                    walletMethod.classList.add('disabled');
-                    insufficientBalanceMsg.style.display = 'block';
-                    walletMethod.querySelector('input[type="radio"]').disabled = true;
+                    walletMethod.classList.add('disabled-method'); // Add a CSS class for styling
+                    walletMethod.style.opacity = '0.5';
+                    walletMethod.style.cursor = 'not-allowed';
+                    if (insufficientLabel) insufficientLabel.style.display = 'block';
+
+                    // If wallet was somehow the default, switch it to Razorpay
+                    if (paymentMethod === 'wallet') paymentMethod = 'razorpay';
                 }
+            }
+
+            // Initialize default selection UI
+            const defaultMethod = document.querySelector(`.payment-method[data-method="${paymentMethod}"]`);
+            if (defaultMethod && !defaultMethod.classList.contains('disabled-method')) {
+                defaultMethod.classList.add('selected');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.style.cursor = "pointer";
             }
 
             // Handle payment method selection
             paymentMethods.forEach(method => {
                 method.addEventListener('click', () => {
-                    // Skip if method is disabled
-                    if (method.classList.contains('disabled')) {
+                    // Prevent selection if method is disabled
+                    if (method.classList.contains('disabled-method')) {
                         return;
                     }
 
-                    // Remove selected class from all methods
-                    paymentMethods.forEach(m => m.classList.remove('selected'));
-
-                    // Add selected class to clicked method
+                    paymentMethods.forEach(item => item.classList.remove('selected'));
                     method.classList.add('selected');
+                    paymentMethod = method.dataset.method;
 
-                    // Get the selected payment method
-                    selectedPaymentMethod = method.getAttribute('data-method');
-                    localStorage.setItem('selectedPayment', selectedPaymentMethod);
-
-                    // Enable place order button
-                    placeOrderBtn.disabled = false;
-
-                    console.log(`Selected Payment Method: ${selectedPaymentMethod}`);
+                    if (paymentMethod != null) {
+                        placeOrderBtn.disabled = false;
+                        placeOrderBtn.style.cursor = "pointer";
+                    }
                 });
             });
 
-            // Handle form submission
+            // Razorpay Specific Logic
+            async function startRazorpayPayment(addressId) {
+                try {
+                    // 1. Create the order on your server
+                    const response = await fetch('/user/payment/razorpay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ addressId })
+                    });
+
+                    const order = await response.json();
+
+                    if (!order.success) {
+                        showPopupMessage(order.message || "Failed to initiate Razorpay", "error");
+                        return;
+                    }
+
+                    // 2. Configure Razorpay options
+                    const options = {
+                        key: "rzp_test_TVFPFUZdUa9wz4",
+                        amount: order.amount, // Amount in paise
+                        currency: "INR",
+                        name: "Clothify",
+                        description: "Order Payment",
+                        order_id: order.id, // The ID returned from your server
+                        handler: async function (response) {
+                            // This block runs ONLY on payment success
+                            try {
+                                const verifyRes = await fetch('/user/payment/verify', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        addressId: addressId
+                                    })
+                                });
+
+                                const result = await verifyRes.json();
+                                if (result.success) {
+                                    window.location.href = '/user/orderSuccess';
+                                } else {
+                                    showPopupMessage("Verification failed: " + result.message, "error");
+                                }
+                            } catch (verifyErr) {
+                                console.error("Verification Error:", verifyErr);
+                                showPopupMessage("Something went wrong during verification", "error");
+                            }
+                        },
+                        prefill: {
+                            name: "User Name",
+                            email: "user@example.com"
+                        },
+                        theme: {
+                            color: "#3399cc"
+                        }
+                    };
+
+                    // 3. Initialize Razorpay
+                    const rzp = new Razorpay(options);
+
+                    // 4. Handle Explicit Payment Failures (e.g., Bank decline, wrong OTP)
+                    rzp.on('payment.failed', async function (response) {
+                        console.log("Payment Failed Event Triggered");
+
+                        try {
+                            const failureRes = await fetch('/user/payment/failure', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    addressId: addressId,
+                                    orderId: order.id, // Razorpay order ID
+                                    reason: response.error.description,
+                                    errorCode: response.error.code,
+                                    paymentId: response.error.metadata.payment_id
+                                })
+                            });
+
+                            const result = await failureRes.json();
+
+                            if (result.success) {
+                                window.location.href = `/user/orderFailure`;
+                            } else {
+                                showPopupMessage("Could not save progress: " + result.message, "error");
+                            }
+
+                        } catch (err) {
+                            console.error("Error logging payment failure:", err);
+                            showPopupMessage("Connection error: " + err.message, "error");
+                        }
+                    });
+
+                    // 5. Open the Razorpay Modal
+                    rzp.open();
+
+                } catch (error) {
+                    console.error("Razorpay Error:", error);
+                    showPopupMessage("Payment failed to initialize", "error");
+                }
+            }
+
+            // Form Submission Logic
             paymentForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                if (!selectedPaymentMethod) {
-                    alert("Please select a payment method.");
-                    console.log("Please select a payment method.")
+                if (!paymentMethod) {
+                    showPopupMessage("Select any payment method", "error");
                     return;
                 }
 
-                // Handle different payment methods
-                switch (selectedPaymentMethod) {
-                    case 'razorpay':
-                        try {
-                            const response = await fetch('/user/payment/razorpay', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ amount: totalAmount })
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Failed to create Razorpay order');
-                            }
-
-                            const order = await response.json();
-
-                            const options = {
-                                key: 'rzp_test_TVFPFUZdUa9wz4',
-                                amount: order.amount,
-                                currency: order.currency,
-                                order_id: order.id,
-                                handler: async function (response) {
-                                    const verify = await fetch('/user/payment/verify', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(response)
-                                    });
-
-                                    if (verify.ok) {
-                                        console.log("Payment Success");
-                                        placeOrder();
-                                    }
-                                },
-                                modal: {
-                                    ondismiss: function () {
-                                        console.log("Payment Verification Failed");
-                                        alert("⚠️ Payment was not completed. If money was deducted, it will be refunded automatically.\n\nPlease try again or choose another payment method.");
-
-                                        const placeOrderBtn = document.getElementById("placeOrderBtn");
-                                        placeOrderBtn.innerHTML = `<i class="fas fa-redo"></i> RETRY PAYMENT & PLACE ORDER`;
-                                        placeOrderBtn.disabled = false;
-
-                                        placeOrderBtn.style.backgroundColor = "orange";
-                                        placeOrderBtn.style.border = "none"; 
-                                        placeOrderBtn.style.color = "#fff";  
-                                    }
-                                }
-
-
-
-                            };
-
-                            const rzp = new Razorpay(options);
-                            rzp.open();
-                        } catch (error) {
-                            console.error("Error processing Razorpay payment:", error);
-                            alert("An error occurred while processing your payment. Please try again.");
-                        }
-                        break;
-
-                    case 'wallet':
-                        try {
-                            const response = await fetch('/user/payment/wallet', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ amount: totalAmount })
-                            });
-
-                            if (response.ok) {
-                                console.log("Payment Success");
-                                placeOrder();
-                            } else {
-                                const errorData = await response.json();
-                                console.log("Payment Verification Failed");
-                                alert(errorData.message || "Payment verification failed. Please try again.");
-                            }
-
-                        } catch (error) {
-                            console.error("Error processing Wallet payment:", error);
-                            alert("An error occurred while processing your payment. Please try again.");
-                        }
-                        break;
-
-                    case 'cod':
-                        console.log("Cash on Delivery selected.");
-                        placeOrder();
-                        break;
-
-                    default:
-                        console.log("Invalid payment method.");
-                        break;
-                }
-            });
-
-            // Function to place the order
-            function placeOrder() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const addressId = urlParams.get('selectedAddressId');
-                const paymentMethod = localStorage.getItem('selectedPayment');
 
-                if (addressId && paymentMethod) {
-                    window.location.href = `/user/placeorder?selectedAddressId=${addressId}&selectedPayment=${paymentMethod}`;
+                if (!addressId) {
+                    showPopupMessage("Address not selected", "error");
+                    return;
+                }
+
+                if (paymentMethod === 'razorpay') {
+                    await startRazorpayPayment(addressId);
                 } else {
-                    console.error("Address ID or payment method not found.");
-                    alert("Missing required information. Please try again.");
-                }
-            }
+                    try {
+                        const response = await fetch('/user/placeorder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentMethod, addressId })
+                        });
 
-            // Check for previously selected payment method
-            const savedPaymentMethod = localStorage.getItem('selectedPayment');
-            if (savedPaymentMethod) {
-                const methodElement = document.querySelector(`.payment-method[data-method="${savedPaymentMethod}"]`);
-                if (methodElement && !methodElement.classList.contains('disabled')) {
-                    methodElement.click(); // Simulate click to select the method
+                        const result = await response.json();
+                        if (result.success) {
+                            window.location.href = '/user/orderSuccess';
+                        } else {
+                            showPopupMessage(result.message, 'error');
+                        }
+                    } catch (error) {
+                        showPopupMessage("Something went wrong. Please try again.", "error");
+                    }
                 }
-            }
+            });
         });
     </script>
 

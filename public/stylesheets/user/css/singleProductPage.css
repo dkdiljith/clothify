@@ -12,17 +12,17 @@
   --transition: all 0.3s ease;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
   font-family: 'Montserrat', sans-serif;
   color: var(--dark-color);
   line-height: 1.6;
   background-color: #f9f9f9;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .container {
@@ -129,7 +129,8 @@ body {
   transition: var(--transition);
 }
 
-.thumbnail:hover, .thumbnail.active {
+.thumbnail:hover,
+.thumbnail.active {
   border-color: var(--secondary-color);
   transform: scale(1.05);
 }
@@ -269,7 +270,8 @@ body {
   color: var(--success-color);
 }
 
-.out-of-stock, .sold-out {
+.out-of-stock,
+.sold-out {
   background-color: rgba(231, 76, 60, 0.1);
   color: var(--danger-color);
 }
@@ -497,7 +499,7 @@ body {
   padding: 10px;
   background: white;
   border-radius: var(--border-radius);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .coupon-icon {
@@ -712,45 +714,24 @@ body {
   background-color: #2980b9;
 }
 
-/* Pop-up Message */
-.popup {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: var(--success-color);
-  color: white;
-  padding: 15px 25px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  font-size: 1rem;
-  font-weight: 500;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease-in-out;
-}
-
-.popup.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.popup.error {
-  background: var(--danger-color);
-}
-
-.popup i {
-  margin-right: 10px;
-  font-size: 1.2rem;
-}
 
 /* Shake Animation */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 /* Responsive Design */
@@ -759,7 +740,7 @@ body {
     flex-direction: column;
     gap: 30px;
   }
-  
+
   .main-image-container {
     height: 400px;
   }
@@ -769,19 +750,19 @@ body {
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .action-btn {
     width: 100%;
   }
-  
+
   .product-title {
     font-size: 1.8rem;
   }
-  
+
   .discounted-price {
     font-size: 1.5rem;
   }
-  
+
   .original-price {
     font-size: 1rem;
   }
@@ -791,17 +772,120 @@ body {
   .main-image-container {
     height: 300px;
   }
-  
+
   .thumbnail {
     width: 60px;
     height: 60px;
   }
-  
+
   .size-options {
     justify-content: center;
   }
-  
+
   .related-products-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
+}
+
+.stock-info {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #777;
+}
+
+.stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.stock-status.in-stock {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.stock-status.low-stock {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.stock-status.critical-stock {
+  background: #fef2f2;
+  color: #dc2626;
+  animation: pulseStock 1.2s infinite;
+}
+
+.stock-status.out-of-stock {
+  background: #f4f4f5;
+  color: #71717a;
+}
+
+.size-option.disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.size-out-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #dc2626;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+@keyframes pulseStock {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Stock Status Styling */
+.stock-status {
+  display: block;
+  font-size: 1.25rem;
+  /* Makes it significantly bigger */
+  font-weight: 800;
+  /* Extra bold */
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.stock-out {
+  color: #dc3545;
+  /* Bootstrap Danger Red */
+}
+
+.stock-low {
+  color: #fd7e14;
+  /* Warning Orange */
+  background-color: #fff3cd;
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+/* Quantity Selector Disabled Look */
+.quantity-control {
+  transition: opacity 0.3s ease;
+}
+
+.quantity-input:disabled {
+  background-color: #eee;
+  cursor: not-allowed;
 }

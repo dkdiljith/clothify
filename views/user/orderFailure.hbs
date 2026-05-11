@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Failed</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #fff5f5; /* Light red background */
+            font-family: sans-serif;
+        }
+        .container {
+            text-align: center;
+        }
+        .message {
+            font-size: 2em;
+            font-weight: bold;
+            color: #dc3545; /* Error red */
+            margin-bottom: 10px;
+        }
+        .subtext {
+            color: #666;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="message">Order Failed</div>
+        <div class="subtext">Something went wrong with your payment.</div>
+    </div>
+
+    <script>
+        // Redirect back to the checkout or cart page after 4 seconds
+         setTimeout(function() {
+            window.location.href = '/user/cart'; 
+        }, 3000);
+    </script>
+</body>
+</html>

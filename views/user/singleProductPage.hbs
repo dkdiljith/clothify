@@ -65,119 +65,97 @@
       <!-- Product Details -->
       <div class="product-details">
         <h1 class="product-title">{{product.name}}</h1>
-        <p class="product-subtitle">{{product.shortDescription}}</p>
+        <p class="product-subtitle">
+          {{product.description}}
+        </p>
 
-        <div class="ratings">
-          <div class="rating-stars">
-            {{#stars product.averageRating}}
-            {{#if this.full}}<i class="fas fa-star"></i>{{/if}}
-            {{#if this.half}}<i class="fas fa-star-half-alt"></i>{{/if}}
-            {{#if this.empty}}<i class="far fa-star"></i>{{/if}}
-            {{/stars}}
-          </div>
-          <span class="rating-count">({{product.reviews.length}} reviews)</span>
-          <span class="write-review">Write a review</span>
-        </div>
-
-        <!-- Price Display -->
+        <!-- Price Section -->
         <div class="price-section">
-          <div class="price-display">
+          <div class="price-display" id="price-container">
             {{#if product.details.[0].offerId}}
             <span class="discounted-price" id="selected-price">₹{{product.details.[0].offerPrice}}</span>
-            <span class="original-price">₹{{product.details.[0].price}}</span>
-            <span class="discount-percentage">{{calculateDiscountPercentage product.details.[0].price product.details.[0].offerPrice}}% OFF</span>
+            <span class="original-price" id="original-price">₹{{product.details.[0].price}}</span>
+            <span class="discount-percentage" id="discount-val">
+              {{calculateDiscountPercentage product.details.[0].price product.details.[0].offerPrice}}% OFF
+            </span>
             {{else}}
             <span class="discounted-price" id="selected-price">₹{{product.details.[0].price}}</span>
+            <span class="original-price" id="original-price" style="display: none;"></span>
+            <span class="discount-percentage" id="discount-val" style="display: none;"></span>
             {{/if}}
           </div>
-          <p class="tax-info">Inclusive of all taxes</p>
         </div>
 
-        <!-- Stock Status -->
-        <div
-          class="stock-status {{#if product.isOutOfStock}}out-of-stock{{else if product.isSoldOut}}sold-out{{else}}in-stock{{/if}}">
-          <i
-            class="fas fa-{{#if product.isOutOfStock}}times-circle{{else if product.isSoldOut}}times-circle{{else}}check-circle{{/if}}"></i>
-          {{#if product.isOutOfStock}}
-          Out of Stock
-          {{else if product.isSoldOut}}
-          Sold Out
-          {{else}}
-          In Stock
-          {{/if}}
-        </div>
+        <!-- Dynamic Stock Info -->
+        <div id="stock-info" class="stock-info"></div>
 
         <!-- Size Selection -->
         <div class="size-selection">
           <div class="size-title">
             Select Size
-            <span>Size Guide</span>
           </div>
+
           <div class="size-options">
             {{#each product.details}}
-            <div class="size-option{{#if @first}} active{{/if}}" data-product-id="{{../product._id}}"
+            <div class="size-option
+                   {{#if @first}}active{{/if}}
+                   {{#ifCond this.quantity '<=' 0}}disabled{{/ifCond}}" data-product-id="{{../product._id}}"
               data-size="{{this.size}}" data-quantity="{{this.quantity}}" data-price="{{this.price}}"
-              data-details-id="{{this._id}}" onclick="updatePriceAndStock(this)">
+              data-offer-price="{{this.offerPrice}}" data-offer-id="{{this.offerId}}" data-details-id="{{this._id}}"
+              onclick="updatePriceAndStock(this)">
+
               {{this.size}}
+              {{#ifCond this.quantity '<=' 0}} <span class="size-out-badge">Out</span>
+                {{/ifCond}}
             </div>
             {{/each}}
           </div>
         </div>
 
-        <!-- Quantity Selector -->
+        <!-- Quantity -->
         <div class="quantity-selector">
-          <div class="quantity-title">Quantity</div>
+
+          <div class="quantity-title">
+            Quantity
+          </div>
+
           <div class="quantity-control">
-            <button class="quantity-btn" onclick="adjustQuantity(-1)">-</button>
+            <button class="quantity-btn" onclick="adjustQuantity(-1)">
+              -
+            </button>
             <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity">
-            <button class="quantity-btn" onclick="adjustQuantity(1)">+</button>
+            <button class="quantity-btn" onclick="adjustQuantity(1)">
+              +
+            </button>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <button onclick="addToCart()" class="action-btn btn-add-to-cart" {{#if product.isOutOfStock}}disabled{{/if}}>
+
+          <!-- Add To Cart -->
+          <button id="add-to-cart-btn" onclick="addToCart()" class="action-btn btn-add-to-cart" {{#ifCond
+            product.details.[0].quantity '<=' 0}} disabled {{/ifCond}}>
             <i class="fas fa-shopping-cart"></i> Add to Cart
           </button>
-          <button onclick="addToCart(); setTimeout(() => { window.location.href = '/user/cart'; }, 200);"
-            class="action-btn btn-buy-now" {{#if product.isOutOfStock}}disabled{{/if}}>
+
+          <!-- Buy Now -->
+          <button id="buy-now-btn"
+            onclick="addToCart(); setTimeout(() => { window.location.href = '/user/cart'; }, 200);"
+            class="action-btn btn-buy-now" {{#ifCond product.details.[0].quantity '<=' 0}} disabled {{/ifCond}}>
             <i class="fas fa-bolt"></i> Buy Now
           </button>
 
+          <!-- Wishlist -->
           <button class="add-to-wishlist action-btn btn-wishlist" data-product-id="{{product._id}}"
             data-variation-index="0">
-            <i class="far fa-heart"></i> Wishlist
+
+            <i class="far fa-heart"></i>
+            Wishlist
+
           </button>
-        </div>
 
-        <!-- Highlights / Specs -->
-        <div class="highlights">
-          <h3 class="section-title">Product Highlights</h3>
-          <ul class="highlights-list">
-            {{#each product.highlights}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
         </div>
-
-        <!-- Coupons -->
-        {{#if product.coupons.length}}
-        <div class="coupons-section">
-          <h3 class="section-title">Available Offers</h3>
-          {{#each product.coupons}}
-          <div class="coupon-item">
-            <div class="coupon-icon">
-              <i class="fas fa-tag"></i>
-            </div>
-            <div class="coupon-details">
-              <div class="coupon-code">{{this.code}}</div>
-              <div class="coupon-description">{{this.description}}</div>
-            </div>
-            <button class="apply-coupon">Apply</button>
-          </div>
-          {{/each}}
-        </div>
-        {{/if}}
       </div>
     </div>
 
@@ -185,8 +163,6 @@
     <div class="product-tabs">
       <div class="tabs-header">
         <button class="tab-btn active" onclick="openTab(event, 'description')">Description</button>
-        <button class="tab-btn" onclick="openTab(event, 'specifications')">Specifications</button>
-        <button class="tab-btn" onclick="openTab(event, 'reviews')">Reviews</button>
         <button class="tab-btn" onclick="openTab(event, 'shipping')">Shipping & Returns</button>
       </div>
 
@@ -289,51 +265,95 @@
     }
 
     // Update Price and Stock when a size option is clicked
+    // Update Price and Stock when a size option is clicked
     function updatePriceAndStock(element) {
-      console.log('Size button clicked');
-
-      // Remove active class from all size options
+      // 1. SELECTOR LOGIC: Remove 'active' class from all and add to clicked
       document.querySelectorAll('.size-option').forEach(option => {
         option.classList.remove('active');
       });
-
-      // Add active class to selected option
       element.classList.add('active');
 
-      // Get all necessary data from the clicked element
+      // 2. DATA EXTRACTION
       const productId = element.getAttribute('data-product-id');
       const detailsId = element.getAttribute('data-details-id');
-      const price = element.getAttribute('data-price');
       const size = element.getAttribute('data-size');
+      const price = parseFloat(element.getAttribute('data-price'));
+      const offerPrice = parseFloat(element.getAttribute('data-offer-price'));
+      const stock = parseInt(element.getAttribute('data-quantity'));
 
-      // Find the variation index (position in the details array)
+      // 3. VARIATION INDEX CALCULATION (Restoring Old Feature)
       const sizeOptions = document.querySelectorAll('.size-option');
       let variationIndex = -1;
       sizeOptions.forEach((option, index) => {
         if (option === element) variationIndex = index;
       });
 
-      // Update selected size and quantity
-      selectedSize = size;
-      selectedQuantity = 1; // Reset to 1 when size changes
-      quantityInput.value = 1;
+      // 4. PRICE UPDATE LOGIC
+      const selectedPriceEl = document.getElementById('selected-price');
+      const originalPriceEl = document.getElementById('original-price');
+      const discountEl = document.getElementById('discount-val');
 
-      // Update displayed price
-      selectedPriceEl.textContent = `₹${price}`;
+      if (offerPrice && offerPrice < price) {
+        selectedPriceEl.textContent = `₹${offerPrice}`;
+        originalPriceEl.textContent = `₹${price}`;
+        originalPriceEl.style.display = 'inline';
 
-      // Update Add to Cart button with ALL necessary data
-      addToCartButton.setAttribute('data-product-id', productId);
-      addToCartButton.setAttribute('data-details-id', detailsId);
-      addToCartButton.setAttribute('data-price', price);
-      addToCartButton.setAttribute('data-variation-index', variationIndex);
+        const discountPercent = Math.round(((price - offerPrice) / price) * 100);
+        discountEl.textContent = `${discountPercent}% OFF`;
+        discountEl.style.display = 'inline';
+      } else {
+        selectedPriceEl.textContent = `₹${price}`;
+        originalPriceEl.style.display = 'none';
+        discountEl.style.display = 'none';
+      }
 
-      console.log('Updated Add to Cart button with:', {
-        productId,
-        detailsId,
-        price,
-        variationIndex
-      });
+      // 5. STOCK & QUANTITY LOGIC
+      const stockInfo = document.getElementById('stock-info');
+      const quantityContainer = document.querySelector('.quantity-control');
+      const quantityInputEl = document.getElementById('quantity');
+
+      if (stock <= 0) {
+        stockInfo.innerHTML = `<span class="stock-status stock-out">This product is currently unavailable</span>`;
+        quantityContainer.style.opacity = "0.5";
+        quantityContainer.style.pointerEvents = "none";
+        quantityInputEl.disabled = true;
+      } else {
+        quantityContainer.style.opacity = "1";
+        quantityContainer.style.pointerEvents = "auto";
+        quantityInputEl.disabled = false;
+
+        if (stock < 5) {
+          stockInfo.innerHTML = `<span class="stock-status stock-low">⚠️ Only ${stock} units left! Hurry up!</span>`;
+        } else {
+          stockInfo.innerHTML = `<span class="stock-status stock-in">In Stock</span>`;
+        }
+      }
+
+      // 6. UPDATE ADD TO CART DATA (Preserving data for addToCart function)
+      const addToCartBtn = document.querySelector('.btn-add-to-cart');
+      const buyNowBtn = document.querySelector('.btn-buy-now');
+      const isOut = stock <= 0;
+
+      // Enable/Disable buttons based on stock
+      addToCartBtn.disabled = isOut;
+      buyNowBtn.disabled = isOut;
+
+      // Sync data to the main button variable (addToCartButton)
+      addToCartBtn.setAttribute('data-product-id', productId);
+      addToCartBtn.setAttribute('data-details-id', detailsId);
+      addToCartBtn.setAttribute('data-price', offerPrice || price);
+      addToCartBtn.setAttribute('data-variation-index', variationIndex);
+
+      // Update global state variables if your script uses them
+      if (typeof selectedSize !== 'undefined') selectedSize = size;
+      if (typeof quantityInput !== 'undefined') quantityInput.value = 1;
+
+      console.log('Size Selected. Index:', variationIndex, 'Stock:', stock);
     }
+
+
+
+
 
     // Adjust quantity
     function adjustQuantity(change) {
@@ -362,12 +382,12 @@
 
       if (!productId || !variationIndex) {
         showValidationError();
-        showPopup('Please select a size first', 'error');
+        showPopupMessage('Please select a size first', 'error');
         return;
       }
 
       try {
-        const response = await fetch(`/user/addtocart/${productId}/${variationIndex}?quantity=${quantity}`, {
+        const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantity}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -375,14 +395,14 @@
         });
 
         const data = await response.json();
-        showPopup(data.message, data.success ? "success" : "error");
+        showPopupMessage(data.message, data.success ? "success" : "error");
 
         if (data.cartCount) {
           updateCartCount(data.cartCount);
         }
       } catch (error) {
         console.error("Error adding to cart:", error);
-        showPopup("Login First :)", "error");
+        showPopupMessage("Login First :)", "error");
       }
     }
     //Add to wishlist
@@ -396,7 +416,7 @@
         });
         const data = await response.json();
 
-        showPopup(data.message, data.success ? "success" : "error");
+        showPopupMessage(data.message, data.success ? "success" : "error");
 
         if (data.success) {
           const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
@@ -409,25 +429,8 @@
         }
       } catch (error) {
         console.error("Error adding to wishlist:", error);
-        showPopup("Login First :)", "error");
+        showPopupMessage("Login First :)", "error");
       }
-    }
-
-    // Show popup
-    function showPopup(message, type = "success") {
-      const popup = document.createElement("div");
-      popup.className = `popup ${type}`;
-
-      popup.innerHTML = type === "success"
-        ? `<i class="fas fa-check-circle"></i> ${message}`
-        : `<i class="fas fa-exclamation-circle"></i> ${message}`;
-
-      document.body.appendChild(popup);
-      setTimeout(() => popup.classList.add("show"), 10);
-      setTimeout(() => {
-        popup.classList.remove("show");
-        setTimeout(() => popup.remove(), 300);
-      }, 3000);
     }
 
     // Update cart count

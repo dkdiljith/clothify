@@ -191,3 +191,53 @@ th {
     margin-bottom: 1.5rem;
     max-width: 400px;
 }
+
+
+
+/* Highlight row for failed payments */
+.payment-failed-row {
+    background-color: #fffafa; /* Very light red tint */
+}
+
+/* Payment Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-failed {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-completed, .status-paid {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.status-pending {
+    background-color: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+}
+
+/* Alert icon for payment failed next to Order ID */
+.payment-alert {
+    color: #dc2626;
+    margin-left: 5px;
+    font-size: 0.9rem;
+}
+
+/* Keep your existing return-alert style and add this for consistency */
+.return-alert {
+    background: #f59e0b;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-size: 10px;
+}

@@ -8,7 +8,7 @@ const recentActivitySchema = new mongoose.Schema({
     activityType: {
         type: "String",
         required: true,
-        enum: [ 
+        enum: [
             'product_added',
             'product_edited',
             'product_deleted',

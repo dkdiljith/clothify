@@ -1,74 +1,46 @@
 const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 
+//update cart
+const recalculateCartSummary = require(`../services/recalculateCartSummary`)
+
 //update offer & coupon & products
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
+
+//pagination
+const adminPaginationFactory = require(`../services/pagination`);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.couponRender = async (req, res) => {
     try {
-        const query = req.query.query || '';
+
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const skip = (page - 1) * limit;
-
-        // 1. Restore the search filter
-        const filter = query 
-            ? {
-                $or: [
-                    { couponCode: { $regex: query, $options: 'i' } },
-                    { discountType: { $regex: query, $options: 'i' } },
-                ],
-              }
-            : {};
-
-        // 2. Database Operations (Run in parallel for performance)
-        const [totalCoupons, coupons] = await Promise.all([
-            Coupon.countDocuments(filter), // Dynamic count for correct pagination
-            Coupon.find(filter)
-                .sort({ createdAt: -1 })   // Keep your new sorting logic
-                .skip(skip)
-                .limit(limit)
-                .lean()
-        ]);
-
-        const totalPages = Math.ceil(totalCoupons / limit);
-
+        const query = req.query.query || '';
+        const result = await adminPaginationFactory({
+            page,
+            limit: 5,
+            query,
+            type: 'coupon'
+        });
         return res.render('admin/coupon', {
-            coupon: coupons,
             admin: true,
-            query, // Pass query back to the UI
-            pagination: {
-                page,
-                limit,
-                totalPages,
-                nextPage: page + 1,
-                prevPage: page - 1,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
-            }
+            ...result
         });
 
     } catch (error) {
-        console.error("Error fetching coupons:", error);
+        
+        console.error(error);
         return res.render('admin/coupon', {
             coupon: [],
             admin: true,
-            query: req.query.query || '',
-            pagination: {
-                page: 1,
-                limit: 5,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            },
-            errorMessage: "Error fetching coupons. Please try again later."
+            query: '',
+            pagination: {},
+            errorMessage: "Error fetching coupons"
         });
     }
 };
-
 
 
 exports.couponEditJson = async (req, res) => {
@@ -98,7 +70,7 @@ exports.couponEditJson = async (req, res) => {
 
 exports.createCoupon = async (req, res) => {
     try {
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount,startDate, endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate, endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -158,7 +130,7 @@ exports.createCoupon = async (req, res) => {
 exports.couponEdit = async (req, res) => {
     try {
         const couponId = req.params.couponId;
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate,endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate, endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -260,33 +232,25 @@ exports.couponDelete = async (req, res) => {
 exports.applyCoupon = async (req, res) => {
     try {
         const { couponId } = req.body;
-        const userId = res.locals.user._id
+        const userId = res.locals.user._id;
 
-        // Find the coupon
         const coupon = await Coupon.findById(couponId);
         if (!coupon || !coupon.isActive || coupon.endDate < new Date()) {
             return res.json({ success: false, message: 'Coupon is not valid' });
         }
 
-        // Check minimum purchase
         const cart = await Cart.findOne({ userId });
-        if (cart.subtotal < coupon.minimumPurchaseAmount) {
+        
+        // Use offerAmount or subtotal depending on your business logic
+        if (cart.totalAmount < coupon.minimumPurchaseAmount) {
             return res.json({ success: false, message: `Minimum purchase of ₹${coupon.minimumPurchaseAmount} required` });
         }
 
-        // Calculate discount
-        let discount = 0;
-        if (coupon.discountType === 'percentage') {
-            discount = (cart.subtotal * coupon.discountValue) / 100;
-        } else {
-            discount = coupon.discountValue
-        }
-
-        // Update cart
         cart.couponId = coupon._id;
-        cart.couponDiscount = discount;
-
         await cart.save();
+
+        // Immediately recalculate so the user sees the change
+        await recalculateCartSummary(userId);
 
         return res.json({ success: true });
     } catch (error) {
@@ -294,6 +258,7 @@ exports.applyCoupon = async (req, res) => {
         return res.json({ success: false, message: 'Error applying coupon' });
     }
 }
+
 
 // Remove coupon route
 exports.removeCoupon = async (req, res) => {

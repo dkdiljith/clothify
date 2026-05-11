@@ -10,6 +10,8 @@ const fs = require('fs');
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
+//pagination
+const adminPaginationFactory = require(`../services/pagination`);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -246,80 +248,98 @@ exports.updateProduct = async (req, res) => {
 
 // Show Products
 exports.showProducts = async (req, res) => {
-    try {
-        // 1. Capture Query and Pagination Parameters
-        const query = req.query.query || '';
+   try {
+
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const skip = (page - 1) * limit;
 
-        // 2. Build the Search Filter
-        let filter = {};
-        if (query) {
-            filter = {
-                $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { description: { $regex: query, $options: 'i' } },
-                    { gender: { $regex: query, $options: 'i' } }
-                ],
-            };
-        }
+        const query = req.query.query || '';
 
-        // 3. Database Operations 
-        const [totalProducts, products, categories, offers] = await Promise.all([
-            Product.countDocuments(filter), // Dynamic count based on search
-            Product.find(filter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            Category.find({}, { _id: 1, name: 1 }).lean(),
-            Offer.find({}, { _id: 1, offerCode: 1 }).lean()
+
+
+        // Pagination + Search handled by factory
+        const result = await adminPaginationFactory({
+            page,
+            limit: 5,
+            query,
+            type: 'product'
+        });
+
+
+
+        // Extra Product Business Logic
+        const [categories, offers] = await Promise.all([
+
+            Category.find({}, {
+                _id: 1,
+                name: 1
+            }).lean(),
+
+            Offer.find({}, {
+                _id: 1,
+                offerCode: 1
+            }).lean()
         ]);
 
-        const totalPages = Math.ceil(totalProducts / limit);
 
-        // 4. Offer Mapping Logic 
+
+        // Offer Mapping
         const offerMap = {};
+
         offers.forEach(item => {
+
             offerMap[item._id.toString()] = item.offerCode;
         });
 
-        const updatedProducts = products.map(item => {
+
+
+        // Product Transformation
+        const updatedProducts = result.products.map(item => {
+
             const firstDetail = item.details?.[0];
+
             return {
+
                 ...item,
+
                 currentOfferCode: firstDetail?.offerId
-                    ? offerMap[firstDetail.offerId.toString()] || ""
-                    : ""
+                    ? offerMap[firstDetail.offerId.toString()] || ''
+                    : ''
             };
         });
 
-        // 5. Render with all necessary variables
-        return res.render("admin/products", {
+
+
+        return res.render('admin/products', {
+
             admin: true,
+
             products: updatedProducts,
+
             categories,
-            query, 
-            pagination: {
-                page,
-                limit,
-                totalPages,
-                nextPage: page + 1,
-                prevPage: page - 1,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
-            }
+
+            query: result.query,
+
+            pagination: result.pagination
         });
 
+
+
     } catch (error) {
+
         console.error("Error fetching products:", error);
 
-        return res.render("admin/products", {
+
+
+        return res.render('admin/products', {
+
             admin: true,
+
             products: [],
+
             categories: [],
-            query: req.query.query || '', 
+
+            query: '',
+
             pagination: {
                 page: 1,
                 limit: 5,

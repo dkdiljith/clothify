@@ -1,0 +1,234 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Wishlist Header Styles */
+.wishlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.wishlist-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.wishlist-count {
+    color: #666;
+    font-size: 16px;
+}
+
+
+.add-to-cart {
+    width: 100%;
+    background-color: #e65540;
+    color: white;
+    padding: 10px 0;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.add-to-cart:hover {
+    background: #d04a36;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(230, 85, 64, 0.3);
+}
+
+/* Empty Wishlist Styles */
+.empty-wishlist {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.empty-wishlist-icon {
+    font-size: 60px;
+    color: var(--medium-gray);
+    margin-bottom: 20px;
+}
+
+.empty-wishlist-title {
+    font-size: 22px;
+    color: var(--dark-gray);
+    margin-bottom: 15px;
+}
+
+.empty-wishlist-text {
+    color: #666;
+    margin-bottom: 25px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-shop {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #e65540;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-shop:hover {
+    background: #d04a36;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(230, 85, 64, 0.3);
+}
+
+/* Popup Styles */
+.popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.popup.success {
+    background-color: var(--success-color);
+}
+
+.popup.error {
+    background-color: var(--accent-color);
+}
+
+.popup i {
+    font-size: 18px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .featured-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .featured-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+
+    .wishlist-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .featured-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .product-card {
+        box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-shop,
+    .add-to-cart {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+}
+
+/*fixed height */
+/* Updated Product Card Styles with Fixed Height */
+.product-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure product details take remaining space */
+.product-details {
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* pagination*/
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    gap: 15px;
+    align-items: center;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background-color: #e65540;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-button:hover {
+    background-color: #d04a36;
+    transform: translateY(-2px);
+}
+
+.pagination-info {
+    padding: 8px 16px;
+    color: #666;
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

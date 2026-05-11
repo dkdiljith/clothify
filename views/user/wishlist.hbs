@@ -7,262 +7,8 @@
     <title>My Wishlist | Your Favorite Products</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e65540;
-            --success-color: #2ecc71;
-            --light-gray: #f8f9fa;
-            --medium-gray: #e0e0e0;
-            --dark-gray: #333;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: var(--dark-gray);
-            background-color: var(--light-gray);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Wishlist Header Styles */
-        .wishlist-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .wishlist-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .wishlist-count {
-            color: #666;
-            font-size: 16px;
-        }
-
-
-        .add-to-cart {
-            width: 100%;
-            background-color: #e65540;
-            color: white;
-            padding: 10px 0;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .add-to-cart:hover {
-            background: #d04a36;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(230, 85, 64, 0.3);
-        }
-
-        /* Empty Wishlist Styles */
-        .empty-wishlist {
-            text-align: center;
-            padding: 60px 20px;
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-        }
-
-        .empty-wishlist-icon {
-            font-size: 60px;
-            color: var(--medium-gray);
-            margin-bottom: 20px;
-        }
-
-        .empty-wishlist-title {
-            font-size: 22px;
-            color: var(--dark-gray);
-            margin-bottom: 15px;
-        }
-
-        .empty-wishlist-text {
-            color: #666;
-            margin-bottom: 25px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .btn-shop {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #e65540;
-            color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-shop:hover {
-            background: #d04a36;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(230, 85, 64, 0.3);
-        }
-
-        /* Popup Styles */
-        .popup {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            color: white;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .popup.success {
-            background-color: var(--success-color);
-        }
-
-        .popup.error {
-            background-color: var(--accent-color);
-        }
-
-        .popup i {
-            font-size: 18px;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 1200px) {
-            .featured-products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .featured-products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 15px;
-            }
-            
-            .wishlist-title {
-                font-size: 1.8rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .featured-products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .product-card {
-                box-shadow: 0 1px 10px rgba(0,0,0,0.05);
-            }
-            
-            .btn-shop, .add-to-cart {
-                padding: 10px 25px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /*fixed height */
-        /* Updated Product Card Styles with Fixed Height */
-.product-card {
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    
-    display: flex;
-    flex-direction: column;
-}
-
-/* Ensure product details take remaining space */
-.product-details {
-    padding: 15px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-
-/* pagination*/
-/* Pagination Styles */
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 40px;
-    gap: 15px;
-    align-items: center;
-}
-
-.pagination-button {
-    padding: 8px 16px;
-    background-color: #e65540;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.pagination-button:hover {
-    background-color: #d04a36;
-    transform: translateY(-2px);
-}
-
-.pagination-info {
-    padding: 8px 16px;
-    color: #666;
-}
-
-@media (max-width: 576px) {
-    .pagination {
-        flex-direction: column;
-        gap: 10px;
-    }
-}
-
-    </style>
+     <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/wishlist.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
 </head>
 
 <body>
@@ -329,7 +75,7 @@
                         {{/if}}
                     </div>
                     <div class="product-actions">
-                        <button onclick="addToCart('{{this._id}}', '0')" class="add-to-cart">
+                        <button onclick="addToCart('{{this._id}}', '0' , '1')" class="add-to-cart">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
                     </div>
@@ -374,7 +120,7 @@
                 });
                 const data = await response.json();
 
-                showPopup(data.message, data.success ? "success" : "error");
+                showPopupMessage(data.message, data.success ? "success" : "error");
 
                 if (data.success) {
                     const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
@@ -385,7 +131,7 @@
                 }
             } catch (error) {
                 console.error("Error removing from wishlist:", error);
-                showPopup("Something went wrong. Please try again.", "error");
+                showPopupMessage("Something went wrong. Please try again.", "error");
             }
         }
 
@@ -413,20 +159,6 @@
             }
         }
 
-        function showPopup(message, type = "success") {
-            const popup = document.createElement("div");
-            popup.className = `popup ${type}`;
-            popup.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-            `;
-            document.body.appendChild(popup);
-            setTimeout(() => {
-                popup.style.animation = 'slideIn 0.3s reverse forwards';
-                setTimeout(() => popup.remove(), 300);
-            }, 3000);
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const removeFromWishlistButtons = document.querySelectorAll('.remove-from-wishlist');
 
@@ -438,10 +170,10 @@
             });
         });
 
-        async function addToCart(productId, productDetailsId) {
-            if (productId && productDetailsId) {
+        async function addToCart(productId, productDetailsId, quantity) {
+            if (productId && productDetailsId && quantity) {
                 try {
-                    const response = await fetch(`/user/addtocart/${productId}/${productDetailsId}`, {
+                    const response = await fetch(`/user/cart/${productId}/${productDetailsId}/${quantity}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -453,7 +185,7 @@
                     }
                     
                     const data = await response.json();
-                    showPopup(data.message, data.success ? "success" : "error");
+                    showPopupMessage(data.message, data.success ? "success" : "error");
 
                     if (data.success) {
                         removeFromWishlist(productId);
@@ -464,10 +196,10 @@
                     }
                 } catch (error) {
                     console.error("Error adding to cart:", error);
-                    showPopup("Something went wrong. Please try again.", "error");
+                    showPopupMessage("Something went wrong. Please try again.", "error");
                 }
             } else {
-                showPopup("Please select a valid product", "error");
+                showPopupMessage("Please select a valid product", "error");
             }
         }
 
