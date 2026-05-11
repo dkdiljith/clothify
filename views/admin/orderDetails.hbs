@@ -30,6 +30,10 @@
                     </div>
                 </div>
                 <div>
+                    <button id="download-invoice-button" class="btn btn-secondary">
+                        Download Invoice
+                    </button>
+
                     <a href="/admin/orders" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i> Back to Orders
                     </a>
@@ -328,6 +332,70 @@
                 });
         }
 
+        // Download Invoice
+        document.getElementById("download-invoice-button")
+            ?.addEventListener("click", async function () {
+
+                try {
+
+                    const response = await fetch(
+                        "/admin/download-invoice",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                orderId: "{{order._id}}"
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+
+                        showPopupMessage(
+                            "Invoice generation failedddddddddddddddd",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    const blob =
+                        await response.blob();
+
+                    const url =
+                        window.URL.createObjectURL(blob);
+
+                    const a =
+                        document.createElement("a");
+
+                    a.href = url;
+
+                    a.download =
+                        "invoice.pdf";
+
+                    document.body.appendChild(a);
+
+                    a.click();
+
+                    a.remove();
+
+                    window.URL.revokeObjectURL(url);
+
+                } catch (error) {
+
+                    console.log(error);
+
+                    showPopupMessage(
+                        "Invoice could not be generated",
+                        "error"
+                    );
+                }
+            });
     </script>
 </body>
 

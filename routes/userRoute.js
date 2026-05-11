@@ -27,6 +27,8 @@ const searchController = require(`../controllers/searchController`)
 
 const SessionHandling = require(`../middlewares/SessionHandling`)
 
+//invoice generator
+const downloadInvoice = require(`../services/downloadInvoice`)
 
 
 // Route to initiate Google authentication
@@ -113,7 +115,7 @@ router.get(`/deleteuser`, SessionHandling.userIsLoggedIn, userProfileController.
 router.delete(`/deleteuseraccount`, SessionHandling.userIsLoggedIn, userProfileController.deleteUser)
 router.get(`/orders`, SessionHandling.userIsLoggedIn, userProfileController.userOrders)
 router.get(`/orderDetails/:orderId/:itemId`, SessionHandling.userIsLoggedIn, userProfileController.userOrderDetails)
-router.get(`/order-invoice/:orderId`, SessionHandling.userIsLoggedIn, userProfileController.invoice_render)
+router.post(`/download-invoice`, SessionHandling.userIsLoggedIn, downloadInvoice)
 router.get(`/security`, SessionHandling.userIsLoggedIn, userProfileController.securityRender)
 
 router.post('/cancel-order', SessionHandling.userIsLoggedIn, orderController.orderCancel)

@@ -20,7 +20,8 @@
                     <li onclick="location.href='/user/profile'"><i class="fas fa-user"></i> Profile</li>
                     <li onclick="location.href='/user/security'"><i class="fas fa-lock"></i> Security & Password</li>
                     <li onclick="location.href='/user/wallet'"><i class="fas fa-wallet"></i> Wallet</li>
-                    <li class="active" onclick="location.href='/user/orders'"><i class="fas fa-shopping-bag"></i> Orders</li>
+                    <li class="active" onclick="location.href='/user/orders'"><i class="fas fa-shopping-bag"></i> Orders
+                    </li>
                     <li onclick="location.href='/user/address'"><i class="fas fa-map-marker-alt"></i> Addresses</li>
                     <li onclick="location.href='/user/deleteuser'"><i class="fas fa-trash-alt"></i> Delete Account</li>
                 </ul>
@@ -38,14 +39,14 @@
 
                     <div>
                         {{#ifeq order.paymentStatus 'Failed'}}
-                            
+
                         {{else}}
-                            <a class="btn btn-secondary" href="/user/order-invoice/{{order._id}}">
-                                Order-Invoice
-                            </a>
+                        <button id="download-invoice-button" class="btn btn-secondary">
+                            Download Invoice
+                        </button>
                         {{/ifeq}}
                     </div>
-                    
+
                     <div>
                         <h15><i class="fas fa-money-bill-wave"></i> Payment Status</h15>
                         <div style="display:flex; justify-content:center;"
@@ -69,10 +70,10 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     {{#ifeq order.paymentStatus 'Failed'}}
                     <div class="retry-notice" style="padding: 0 20px;">
-                        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed. 
+                        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed.
                     </div>
                     {{/ifeq}}
 
@@ -138,20 +139,23 @@
                         {{#if order.couponId}}
                         <div class="price-row">
                             <span class="price-label">Coupon Discount</span>
-                            <span class="price-value" style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
+                            <span class="price-value"
+                                style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
                         </div>
                         {{/if}}
 
                         {{#if order.offerDiscount}}
                         <div class="price-row">
                             <span class="price-label">Discount</span>
-                            <span class="price-value" style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
+                            <span class="price-value"
+                                style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
                         </div>
                         {{/if}}
 
                         <div class="price-row total-price">
                             <span class="price-label">
-                                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To Pay{{else}}Paid{{/ifeq}}</strong>
+                                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To
+                                    Pay{{else}}Paid{{/ifeq}}</strong>
                             </span>
                             <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
                         </div>
@@ -167,15 +171,15 @@
                 <div class="action-buttons">
                     {{!-- Hide Return/Cancel if payment failed --}}
                     {{#if (neq order.paymentStatus 'Failed')}}
-                        <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
-                            data-completion-date="{{order.completionDate}}">
-                            <i class="fas fa-undo"></i> Return Item
-                        </button>
-                        <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}">
-                            <i class="fas fa-times"></i> Cancel Item
-                        </button>
+                    <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
+                        data-completion-date="{{order.completionDate}}">
+                        <i class="fas fa-undo"></i> Return Item
+                    </button>
+                    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}">
+                        <i class="fas fa-times"></i> Cancel Item
+                    </button>
                     {{/if}}
-                    
+
                     <button class="btn btn-primary" onclick="location.href='/user/orders'">
                         <i class="fas fa-arrow-left"></i> Back to Orders
                     </button>
@@ -325,6 +329,73 @@
                     alert("An error occurred. Please try again.");
                 }
             });
+
+
+
+            // Download Invoice
+            document.getElementById("download-invoice-button")
+                ?.addEventListener("click", async function () {
+
+                    try {
+
+                        const response = await fetch(
+                            "/user/download-invoice",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    orderId: "{{order._id}}"
+                                })
+                            }
+                        );
+
+                        if (!response.ok) {
+
+                            showPopupMessage(
+                                "Invoice generation failedddddddddddddddd",
+                                "error"
+                            );
+
+                            return;
+                        }
+
+                        const blob =
+                            await response.blob();
+
+                        const url =
+                            window.URL.createObjectURL(blob);
+
+                        const a =
+                            document.createElement("a");
+
+                        a.href = url;
+
+                        a.download =
+                            "invoice.pdf";
+
+                        document.body.appendChild(a);
+
+                        a.click();
+
+                        a.remove();
+
+                        window.URL.revokeObjectURL(url);
+
+                    } catch (error) {
+
+                        console.log(error);
+
+                        showPopupMessage(
+                            "Invoice could not be generated",
+                            "error"
+                        );
+                    }
+                });
 
             // Return Button Logic
             if (orderStatus === "Completed") {

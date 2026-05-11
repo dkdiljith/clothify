@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+//controllers
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
 const productController = require(`../controllers/productController`)
@@ -8,9 +9,12 @@ const orderController = require(`../controllers/orderController`)
 const categoryController = require('../controllers/categoryController')
 const couponController = require(`../controllers/couponController`)
 const offerController = require(`../controllers/offerController`)
-const searchController = require(`../controllers/searchController`)
+const salesController = require(`../controllers/salesController`)
 
+//middlewares
 const SessionHandling = require("../middlewares/SessionHandling")
+//invoice generator
+const downloadInvoice = require(`../services/downloadInvoice`)
 
 
 
@@ -32,8 +36,11 @@ router.get(`/logout`, SessionHandling.adminIsLoggedIn, adminController.logout)
 
 ///SALES REPORT///
 router.route(`/salesReport`)
-.get(SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
-.post(SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
+.get(SessionHandling.adminIsLoggedIn, salesController.salesReportRender)
+.post(SessionHandling.adminIsLoggedIn, salesController.salesReportRender)
+
+router.get('/salesReport/pdf',SessionHandling.adminIsLoggedIn, salesController.downloadSalesReportPdf)
+router.get('/salesReport/excel',SessionHandling.adminIsLoggedIn , salesController. downloadSalesReportExcel);
 
 //PRODUCT SIDE///
 router.get(`/products`, SessionHandling.adminIsLoggedIn, productController.showProducts)
@@ -51,6 +58,8 @@ router.put(`/products/auto-pricing/:productId` , SessionHandling.adminIsLoggedIn
 router.get(`/orders`, SessionHandling.adminIsLoggedIn, orderController.ordersRender)
 router.get(`/orderDetails/:orderId`, SessionHandling.adminIsLoggedIn, orderController.orderDetails)
 router.post('/orderDetails/:orderId/item/:itemId/status',SessionHandling.adminIsLoggedIn, orderController.orderStatusChange)
+//Invloice download
+router.post(`/download-invoice` , SessionHandling.adminIsLoggedIn , downloadInvoice)
 
 ///USER MANAGEMENT///
 router.get(`/users`, SessionHandling.adminIsLoggedIn, userController.showUsers)

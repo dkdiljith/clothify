@@ -168,39 +168,6 @@ module.exports = {
     return options.inverse(this);
   },
 
-  //single product page
-  stars: function (rating, options) {
-    // Calculate full and half stars
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-    // Create stars array
-    const starsArray = [];
-
-    // Add full stars
-    for (let i = 0; i < fullStars; i++) {
-      starsArray.push({ full: true, half: false, empty: false });
-    }
-
-    // Add half star if needed
-    if (hasHalfStar) {
-      starsArray.push({ full: false, half: true, empty: false });
-    }
-
-    // Add empty stars
-    for (let i = 0; i < emptyStars; i++) {
-      starsArray.push({ full: false, half: false, empty: true });
-    }
-
-    // Process with the template block
-    let output = '';
-    starsArray.forEach((star) => {
-      output += options.fn(star);
-    });
-
-    return output;
-  },
   //product listing page
   max: (a, b) => Math.max(a, b),
   min: (a, b) => Math.min(a, b),
@@ -228,6 +195,9 @@ module.exports = {
   shortId: function (objectId) {
     return objectId.toString().substring(18, 24);
   },
+  serialNumber: function (a, b) {
+    return Number(a) + Number(b) + 1;
+  },
 
   //offer page helper
   capitalize: function (str) {
@@ -237,6 +207,7 @@ module.exports = {
     const args = Array.prototype.slice.call(arguments, 0, -1);
     return args.every(Boolean);
   }
+
 
 
 };
