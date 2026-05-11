@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: null },
     blocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
 
     verificationToken: { type: String, default: null },
     verificationTokenExpires: { type: Date, default: null },

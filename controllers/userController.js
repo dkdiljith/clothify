@@ -659,7 +659,6 @@ exports.blockUser = async (req, res) => {
 
 
     const userId = req.params.id; // Should get the ID here
-
     const user = await User.findById(userId); // Use the received userId
 
     if (!user) {

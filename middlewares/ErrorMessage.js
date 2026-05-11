@@ -166,3 +166,78 @@ exports.userBlockedError = async (req, res) => {
   `;
   return res.status(403).send(htmlContent);
 };
+
+
+
+
+
+
+exports.userDisabledError = async (req, res) => {
+   const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Account Deleted | Clothify</title>
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background: #f8f9fa;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0;
+                color: #444;
+            }
+            .container {
+                background: white;
+                padding: 3.5rem 2rem;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+                text-align: center;
+                max-width: 400px;
+                border: 1px solid #eee;
+            }
+            .icon {
+                font-size: 3.5rem;
+                margin-bottom: 1.5rem;
+                filter: grayscale(100%);
+            }
+            h1 {
+                color: #2d3436;
+                font-size: 1.6rem;
+                margin-bottom: 1rem;
+            }
+            .message {
+                font-size: 1rem;
+                color: #7f8c8d;
+                line-height: 1.6;
+                margin-bottom: 0;
+            }
+            .divider {
+                width: 40px;
+                height: 2px;
+                background: #dfe6e9;
+                margin: 1.5rem auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">🕊️</div>
+            <h1>Account Deleted</h1>
+            <p class="message">
+                Your account and personal data have been successfully removed from Clothify.
+            </p>
+            <div class="divider"></div>
+            <p class="message" style="font-size: 0.9rem;">
+                Thank you for being a part of our community.
+            </p>
+        </div>
+    </body>
+    </html>
+  `;
+  return res.status(200).send(htmlContent);
+};

@@ -19,6 +19,9 @@ exports.userIsLoggedIn = async (req, res, next) => {
         //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
       }
+      if(!user.isActive){
+        return ErrorMessage.userDisabledError(req, res);
+      }
 
       res.locals.user = {
         _id: user._id,
@@ -48,6 +51,9 @@ exports.userIsLoggedOut = async (req, res, next) => {
       if (user.blocked) {
         //  Check user.blocked correctly
         return ErrorMessage.userBlockedError(req, res);
+      }
+       if(!user.isActive){
+        return ErrorMessage.userDisabledError(req, res);
       }
 
       res.locals.user = {

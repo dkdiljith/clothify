@@ -108,13 +108,15 @@
                 deleteButton.disabled = true;
 
                 // Submit deletion request
+                // Change method to POST
                 fetch('/user/deleteuseraccount', {
-                    method: 'delete',
+                    method: 'POST', // Changed from GET
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ confirm: true })
                 })
+
                     .then(response => {
                         if (response.ok) {
                             return response.json();

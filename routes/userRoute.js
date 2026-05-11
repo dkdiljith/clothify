@@ -112,7 +112,7 @@ router.get(`/deleteaddress/:id`, SessionHandling.userIsLoggedIn, userProfileCont
 router.get(`/addaddress`, SessionHandling.userIsLoggedIn, userProfileController.addAddressRender)
 router.get(`/editaddress/:id`, SessionHandling.userIsLoggedIn, userProfileController.editAddressRender)
 router.get(`/deleteuser`, SessionHandling.userIsLoggedIn, userProfileController.deleteUserRender)
-router.delete(`/deleteuseraccount`, SessionHandling.userIsLoggedIn, userProfileController.deleteUser)
+router.post(`/deleteuseraccount`, SessionHandling.userIsLoggedIn, userProfileController.deleteUser)
 router.get(`/orders`, SessionHandling.userIsLoggedIn, userProfileController.userOrders)
 router.get(`/orderDetails/:orderId/:itemId`, SessionHandling.userIsLoggedIn, userProfileController.userOrderDetails)
 router.post(`/download-invoice`, SessionHandling.userIsLoggedIn, downloadInvoice)
