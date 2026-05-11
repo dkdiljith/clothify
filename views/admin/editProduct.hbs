@@ -10,132 +10,215 @@
       <div class="col-md-8">
         <div class="card shadow">
           <div class="card-header">
-            <h4 class="mb-0">Edit Product</h4>
+
+            <h4 class="mb-0">
+              Edit Product
+            </h4>
+
           </div>
           <div class="card-body">
+
             <form action="/admin/updateproduct/{{product._id}}" method="post" enctype="multipart/form-data"
               id="add-product-form" novalidate>
+
+              <!-- Product Name + Category -->
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="name" class="form-label">Product Name</label>
-                  <input type="text" name="name" id="name" class="form-control" placeholder="Product Name"
-                    value="{{product.name}}" />
-                  <div class="error-message"></div>
-                </div>
-                <div class="col-md-6">
-                  <label for="category" class="form-label">Category</label>
-                  <select name="categoryId" id="category" class="form-control" required>
-                    <option value="" disabled>Select Category</option>
 
+                  <label for="name" class="form-label">
+                    Product Name
+                  </label>
+
+                  <input type="text" name="name" id="name" class="form-control" placeholder="Product Name"
+                    value="{{product.name}}" maxlength="100" />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="category" class="form-label">
+                    Category
+                  </label>
+
+                  <select name="categoryId" id="category" class="form-control" required>
+                    <option value="" disabled>
+                      Select Category
+                    </option>
 
                     {{#each categories}}
+
                     <optgroup label="{{this.name}}">
+
                       {{#each this.subcategories}}
-                      <option value="{{this._id}}" {{#if (eq this._id ../../product.categoryId)}}selected{{/if}}>
-                        {{this.name}}</option>
+
+                      <option value="{{this._id}}" {{#if (eq this._id ../../product.categoryId)}} selected {{/if}}>
+                        {{this.name}}
+                      </option>
+
                       {{/each}}
+
                     </optgroup>
                     {{/each}}
 
-
                   </select>
-                  <div class="error-message"></div>
                 </div>
               </div>
+
+              <!-- Sizes -->
               <div class="mb-3">
-                <label class="form-label">Available Sizes, Quantities and Prices</label>
-                <div class="error-message text-danger" id="size-error"></div>
+
+                <label class="form-label">
+                  Available Sizes, Quantities and Prices
+                </label>
+
+                <div id="size-error" class="text-danger mb-2" style="display:none;"></div>
 
                 <div id="details-container">
                   {{#each product.details}}
+
                   <div class="row mb-2 size-group">
                     <div class="col-md-3">
                       <select name="sizeName[]" class="form-control">
-                        <option value="XS" {{#if (eq this.size "XS" )}}selected{{/if}}>XS</option>
-                        <option value="S" {{#if (eq this.size "S" )}}selected{{/if}}>S</option>
-                        <option value="M" {{#if (eq this.size "M" )}}selected{{/if}}>M</option>
-                        <option value="L" {{#if (eq this.size "L" )}}selected{{/if}}>L</option>
-                        <option value="XL" {{#if (eq this.size "XL" )}}selected{{/if}}>XL</option>
-                        <option value="XXL" {{#if (eq this.size "XXL" )}}selected{{/if}}>XXL</option>
-                        <option value="XXXL" {{#if (eq this.size "XXXL" )}}selected{{/if}}>XXXL</option>
-                        <option value="one size" {{#if (eq this.size "one size" )}}selected{{/if}}>one size</option>
+
+                        <option value="XS" {{#if (eq this.size "XS" )}} selected {{/if}}>XS</option>
+                        <option value="S" {{#if (eq this.size "S" )}} selected {{/if}}>S</option>
+                        <option value="M" {{#if (eq this.size "M" )}} selected {{/if}}>M</option>
+                        <option value="L" {{#if (eq this.size "L" )}} selected {{/if}}>L</option>
+                        <option value="XL" {{#if (eq this.size "XL" )}} selected {{/if}}>XL</option>
+                        <option value="XXL" {{#if (eq this.size "XXL" )}} selected {{/if}}>XXL</option>
+                        <option value="XXXL" {{#if (eq this.size "XXXL" )}} selected {{/if}}>XXXL</option>
+                        <option value="one size" {{#if (eq this.size "one size" )}} selected {{/if}}>one size</option>
+
                       </select>
                     </div>
+
                     <div class="col-md-3">
-                      <input type="text" name="sizeQuantity[]" class="form-control" value="{{this.quantity}}" />
+                      <input type="number" name="sizeQuantity[]" class="form-control" value="{{this.quantity}}"
+                        min="1" />
                     </div>
+
                     <div class="col-md-3">
                       <input type="number" name="sizePrice[]" class="form-control" value="{{this.price}}" min="200" />
                     </div>
+
                     <div class="col-md-3">
-                      <button type="button" class="btn btn-danger remove-size">Remove</button>
+                      <button type="button" class="btn btn-danger remove-size">
+                        Remove
+                      </button>
                     </div>
                   </div>
+
                   {{/each}}
                 </div>
 
-                <button type="button" id="add-size" class="btn"
-                  style="background-color: rgb(228, 178, 117); color: white;">
+                <button type="button" id="add-size" class="btn" style="
+                    background-color: rgb(228, 178, 117);
+                    color: white;
+                  ">
                   Add Size
                 </button>
               </div>
 
+              <!-- Gender -->
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="gender" class="form-label">Gender</label>
+                  <label for="gender" class="form-label">
+                    Gender
+                  </label>
+
                   <select name="gender" id="gender" class="form-control">
-                    <option value="Men" {{#if (eq product.gender "Men" )}}selected{{/if}}>Men</option>
-                    <option value="Women" {{#if (eq product.gender "Women" )}}selected{{/if}}>Women</option>
-                    <option value="Unisex" {{#if (eq product.gender "Unisex" )}}selected{{/if}}>Unisex</option>
+                    <option value="Men" {{#if (eq product.gender "Men" )}} selected {{/if}}>
+                      Men
+                    </option>
+
+                    <option value="Women" {{#if (eq product.gender "Women" )}} selected {{/if}}>
+                      Women
+                    </option>
+
+                    <option value="Unisex" {{#if (eq product.gender "Unisex" )}} selected {{/if}}>
+                      Unisex
+                    </option>
                   </select>
-                  <div class="error-message"></div>
                 </div>
               </div>
 
+              <!-- Description -->
               <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="description" id="description" class="form-control" rows="3"
+                <label for="description" class="form-label">
+                  Description
+                </label>
+
+                <textarea name="description" id="description" class="form-control" rows="3" maxlength="1000"
                   placeholder="Enter product description">{{product.description}}</textarea>
               </div>
 
+              <!-- Images -->
               <div class="mb-3">
-                <label for="image" class="form-label">Images</label>
-                <input type="file" name="images" id="image" class="form-control" multiple />
-                <div class="error-message" id="image-error"></div>
+                <label for="image" class="form-label">
+                  Images
+                </label>
 
-                <div id="existing-image-preview" class="d-flex flex-wrap gap-2 mb-3">
+                <input type="file" name="images" id="image" class="form-control" multiple
+                  accept=".jpg,.jpeg,.png,.webp" />
+                <div id="image-error" class="text-danger mt-1" style="display:none;"></div>
+
+                <!-- Existing Images -->
+                <div id="existing-image-preview" class="d-flex flex-wrap gap-2 mb-3 mt-3">
                   {{#each product.images}}
+
                   <div class="position-relative border p-1 existing-image" data-image-id="{{this._id}}">
-                    <img src="{{this.path}}" alt="{{this.altText}}" width="100" height="100" style="object-fit:cover;">
+                    <img src="{{this.path}}" alt="{{this.altText}}" width="100" height="100"
+                      style="object-fit:cover;" />
+
                     <button type="button"
-                      class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-existing-image"
-                      style="font-size:12px; padding:2px 6px;">✖️</button>
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-existing-image" style="
+                          font-size:12px;
+                          padding:2px 6px;
+                        ">
+                      ✖️
+                    </button>
                   </div>
+
                   {{/each}}
                 </div>
-                <input type="hidden" name="deletedImages" id="deletedImages" value="[]" />
 
+                <input type="hidden" name="deletedImages" id="deletedImages" value="[]" />
               </div>
 
+              <!-- Additional Categories -->
               <div class="mb-3">
-                <label class="form-label">Additional Categories</label>
+                <label class="form-label">
+                  Additional Categories
+                </label>
+
                 <div class="d-flex">
                   <div class="form-check me-3">
                     <input class="form-check-input" type="checkbox" name="latestCollection" id="latestCollection"
-                      value="true" {{#if product.latestCollection}}checked{{/if}} />
-                    <label class="form-check-label" for="latestCollection">Latest Collection</label>
+                      value="true" {{#if product.latestCollection}} checked {{/if}} />
 
+                    <label class="form-check-label" for="latestCollection">
+                      Latest Collection
+                    </label>
+                  </div>
+
+                  <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="bestSeller" id="bestSeller" value="true" {{#if
-                      product.bestSeller}}checked{{/if}} />
-                    <label class="form-check-label" for="bestSeller">Best Seller</label>
+                      product.bestSeller}} checked {{/if}} />
 
+                    <label class="form-check-label" for="bestSeller">
+                      Best Seller
+                    </label>
                   </div>
                 </div>
               </div>
 
+              <!-- Buttons -->
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary-custom">Submit</button>
-                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary-custom">
+                  Submit
+                </button>
+
+                <a href="/admin/products" class="btn btn-secondary">
+                  Cancel
+                </a>
               </div>
             </form>
           </div>
@@ -143,7 +226,8 @@
       </div>
     </div>
   </div>
-   <input type="hidden" name="removedImageIndexes" value="0" /> <!-- dynamic values -->
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" defer></script>
   <script src="/javascripts/admin/editProducts.js" defer></script>
+
 </body>

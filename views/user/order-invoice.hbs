@@ -95,11 +95,11 @@
                             </td>
                             <td data-label="Price">₹{{this.productPrice}}.00</td>
                             <td data-label="Qty">{{this.quantity}}</td>
-                            <td data-label="Total">₹{{multiply this.productPrice this.quantity}}.00</td> {{!-- Assuming
-                            you have a HBS helper for multiplication --}}
+                            <td data-label="Total">₹{{multiply this.productPrice this.quantity}}.00</td> {{!--
+                            HBS helper for multiplication --}}
                             <td data-label="Status">
                                 <span class="status status-{{toLowerCase this.status}}">{{this.status}}</span> {{!--
-                                Assuming a HBS helper for toLowerCase --}}
+                                 HBS helper for toLowerCase --}}
                             </td>
                         </tr>
                         {{/each}}

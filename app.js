@@ -37,7 +37,7 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
-const MongoStore = require('connect-mongo')
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -53,10 +53,9 @@ app.use(session({
 
 
 // Logger and Middleware
-const bodyparser = require(`body-parser`)
 app.use(logger('dev'));
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 

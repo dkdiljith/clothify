@@ -82,165 +82,877 @@ exports.editProductsRender = async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.addProducts = async (req, res) => {
+
     try {
+
         upload(req, res, async (err) => {
             if (err) {
-                console.error("Multer error:", err);
-                return res.status(500).json({ success: false, error: err.message });
+                console.error("Multer Error:", err);
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
+                });
             }
 
-            const { name, categoryId, description, gender } = req.body;
-            let sizeNames = req.body.sizeName || [];
-            let sizeQuantities = req.body.sizeQuantity || [];
-            let sizePrices = req.body.sizePrice || [];
+            try {
+                let { name, categoryId, description, gender } = req.body;
 
-            if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
-            if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
-            if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
+                let sizeNames =
+                    req.body.sizeName || [];
 
-            const details = sizeNames.map((size, index) => ({
-                size,
-                quantity: parseInt(sizeQuantities[index]) || 0,
-                price: parseInt(sizePrices[index]) || 299
-            }));
+                let sizeQuantities =
+                    req.body.sizeQuantity || [];
 
-            const latestCollection = req.body.latestCollection === 'on';
-            const bestSeller = req.body.bestSeller === 'on';
+                let sizePrices =
+                    req.body.sizePrice || [];
 
-            let images = [];
-            if (req.files && req.files.length > 0) {
-                images = req.files.map((file, index) => ({
-                    path: '/uploads/' + file.filename,
-                    altText: `${name}-image(${index + 1})`
-                }));
+
+                // Convert to arrays 
+                if (!Array.isArray(sizeNames)) {
+                    sizeNames = [sizeNames];
+                }
+                if (!Array.isArray(sizeQuantities)) {
+                    sizeQuantities = [sizeQuantities];
+                }
+                if (!Array.isArray(sizePrices)) {
+                    sizePrices = [sizePrices];
+                }
+
+                // Trim values
+                name = name?.trim();
+                description = description?.trim();
+
+                // Basic Validation
+                const validNameRegex = /^[a-zA-Z0-9\s\-&()]+$/;
+                const categoryExists = await Category.findById(categoryId);
+                const validGenders = ["Men", "Women", "Unisex"];
+
+
+                if (!name) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name is required."
+                    });
+                }
+                if (name.length < 3 || name.length > 100) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name must be between 3 and 100 characters."
+                    });
+                }
+                if (!validNameRegex.test(name)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid product name."
+                    });
+                }
+                if (!categoryId) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Category is required."
+                    });
+                }
+                if (!categoryExists) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid category selected."
+                    });
+                }
+                if (!validGenders.includes(gender)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid gender selected."
+                    });
+                }
+                if (!description) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description is required."
+                    });
+                }
+                if (description.length < 20) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description should contain at least 20 characters."
+                    });
+                }
+                if (description.length > 1000) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description is too long."
+                    });
+                }
+
+                // Duplicate Product Check
+                const existingProduct = await Product.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
+                if (existingProduct) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product already exists."
+                    });
+                }
+
+                // Validate Sizes
+                const uniqueSizes = new Set(sizeNames);
+                const details = [];
+
+                if (
+                    !sizeNames.length ||
+                    !sizeQuantities.length ||
+                    !sizePrices.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Size details are required."
+                    });
+                }
+
+
+                if (
+                    uniqueSizes.size !==
+                    sizeNames.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Duplicate sizes are not allowed."
+                    });
+                }
+
+
+                for (let i = 0; i < sizeNames.length; i++) {
+
+                    const size = sizeNames[i]?.trim();
+                    const quantity = Number(sizeQuantities[i]);
+                    const price = Number(sizePrices[i]);
+
+                    if (!size) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Invalid size."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(quantity) ||
+                        quantity < 1
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Quantity must be at least 1."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(price) ||
+                        price < 200
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Price must be at least ₹200."
+                        });
+                    }
+
+                    details.push({ size, quantity, price });
+                }
+
+
+                // Image Validation
+                const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+                if (
+                    !req.files ||
+                    !req.files.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "At least one image is required."
+                    });
+                }
+
+                if (req.files.length > 5) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Maximum 5 images allowed."
+                    });
+                }
+
+
+                for (const file of req.files) {
+
+                    if (
+                        !allowedMimeTypes.includes(
+                            file.mimetype
+                        )
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Invalid image format."
+                        });
+                    }
+
+                    if (
+                        file.size >
+                        10 * 1024 * 1024
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Each image must be below 10MB."
+                        });
+                    }
+                }
+
+
+                // Checkbox Values
+                const latestCollection = req.body.latestCollection === "true";
+                const bestSeller = req.body.bestSeller === "true";
+
+                // Image Mapping
+                const images = req.files.map(
+                    (file, index) => ({
+                        path:
+                            "/uploads/" +
+                            file.filename,
+
+                        altText:
+                            `${name}-image(${index + 1})`
+                    })
+                );
+
+
+                // Create Product
+
+                const newProduct =
+                    new Product({
+                        name,
+                        categoryId,
+                        details,
+                        gender,
+                        description,
+                        images,
+                        latestCollection,
+                        bestSeller,
+                    });
+
+                await newProduct.save();
+                await pricingExpiryUpdate();
+
+                // Reload Categories
+                const categories = await Category.find().lean();
+                const groupedCategories =
+                    categories
+                        .filter(
+                            (cat) =>
+                                !cat.parentCategory
+                        )
+                        .map((parent) => ({
+                            ...parent,
+                            subcategories:
+                                categories.filter(
+                                    (sub) =>
+                                        sub.parentCategory &&
+                                        sub.parentCategory.toString() ===
+                                        parent._id.toString()
+                                )
+                        }));
+
+                return res.render("admin/addProducts", {
+                    admin: true,
+                    categories: groupedCategories
+                }
+                );
+
+            } catch (error) {
+                console.error("Add Product Error:", error);
+                return res.status(500).json({
+                    success: false,
+                    error: "Something went wrong while adding the product."
+                });
             }
-
-
-            const newProduct = new Product({
-                name,
-                categoryId,
-                details,
-                gender,
-                description,
-                images,
-                latestCollection,
-                bestSeller,
-            });
-
-            await newProduct.save();
-            await pricingExpiryUpdate();
-
-
-            const categories = await Category.find().lean();
-
-
-            const groupedCategories = categories
-                .filter(cat => !cat.parentCategory)
-                .map(parent => ({
-                    ...parent,
-                    subcategories: categories.filter(sub =>
-                        sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-                    )
-                }));
-            return res.render('admin/addProducts', {
-                admin: true,
-                categories: groupedCategories
-            });
-
-
         });
+
     } catch (err) {
-        console.error('Error adding product:', err);
-        return res.status(500).json({ success: false, error: err.message });
+        console.error("Outer Add Product Error:", err);
+        return res.status(500).json({
+            success: false,
+            error: err.message
+        });
     }
 };
+
+
+
+
 
 
 
 exports.updateProduct = async (req, res) => {
+
     try {
+
         const productId = req.params.id;
 
         upload(req, res, async (err) => {
+
             if (err) {
-                console.error("Multer error:", err);
-                return res.status(500).json({ success: false, error: err.message });
-            }
 
-            const { name, categoryId, description, gender } = req.body;
-            let sizeNames = req.body.sizeName || [];
-            let sizeQuantities = req.body.sizeQuantity || [];
-            let sizePrices = req.body.sizePrice || [];
+                console.error(
+                    "Multer Error:",
+                    err
+                );
 
-            if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
-            if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
-            if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
-
-            const details = sizeNames.map((size, index) => ({
-                size,
-                quantity: parseInt(sizeQuantities[index]) || 0,
-                price: parseInt(sizePrices[index]) || 299
-            }));
-
-            const latestCollection = req.body.latestCollection === 'on';
-            const bestSeller = req.body.bestSeller === 'on';
-
-            let newImages = [];
-            if (req.files && req.files.length > 0) {
-                newImages = req.files.map((file, index) => ({
-                    path: '/uploads/' + file.filename,
-                    altText: `${name}-image(${index + 1})`
-                }));
-            }
-
-            const removedImageIndexes = req.body.removedImageIndexes || [];
-            const indexesToRemove = Array.isArray(removedImageIndexes)
-                ? removedImageIndexes.map(Number)
-                : [Number(removedImageIndexes)];
-
-            let product = await Product.findById(productId);
-            if (!product) {
-                return res.status(404).json({ success: false, message: "Product not found" });
-            }
-
-            // Remove selected images from DB and disk
-            const imagesToRemove = product.images.filter((_, index) =>
-                indexesToRemove.includes(index)
-            );
-
-            imagesToRemove.forEach((img) => {
-                const filePath = path.join(__dirname, '..', 'public', img.path);
-                fs.unlink(filePath, (err) => {
-                    if (err) console.error("Error deleting file:", err);
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
                 });
-            });
-
-            // Filter out deleted images
-            product.images = product.images.filter((_, index) => !indexesToRemove.includes(index));
-
-            // Append new images (if any)
-            if (newImages.length > 0) {
-                product.images.push(...newImages);
             }
 
-            // Update all other fields
-            product.name = name;
-            product.categoryId = categoryId;
-            product.description = description;
-            product.gender = gender;
-            product.details = details;
-            product.latestCollection = latestCollection;
-            product.bestSeller = bestSeller;
+            try {
 
-            await product.save();
-            await pricingExpiryUpdate();
-            return res.redirect('/admin/products');
+                let {
+                    name,
+                    categoryId,
+                    description,
+                    gender
+                } = req.body;
+
+                let sizeNames =
+                    req.body.sizeName || [];
+
+                let sizeQuantities =
+                    req.body.sizeQuantity || [];
+
+                let sizePrices =
+                    req.body.sizePrice || [];
+
+                // ================================
+                // Convert arrays safely
+                // ================================
+
+                if (!Array.isArray(sizeNames)) {
+                    sizeNames = [sizeNames];
+                }
+
+                if (!Array.isArray(sizeQuantities)) {
+                    sizeQuantities = [sizeQuantities];
+                }
+
+                if (!Array.isArray(sizePrices)) {
+                    sizePrices = [sizePrices];
+                }
+
+                // ================================
+                // Find Product
+                // ================================
+
+                const product =
+                    await Product.findById(productId);
+
+                if (!product) {
+
+                    return res.status(404).json({
+                        success: false,
+                        error: "Product not found."
+                    });
+                }
+
+                // ================================
+                // Trim Values
+                // ================================
+
+                name = name?.trim();
+
+                description =
+                    description?.trim();
+
+                // ================================
+                // Product Name Validation
+                // ================================
+
+                if (!name) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name is required."
+                    });
+                }
+
+                if (
+                    name.length < 3 ||
+                    name.length > 100
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Product name must be between 3 and 100 characters."
+                    });
+                }
+
+                const validNameRegex =
+                    /^[a-zA-Z0-9\s\-&()']+$/;
+
+                if (
+                    !validNameRegex.test(name)
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid product name."
+                    });
+                }
+
+                // ================================
+                // Duplicate Product Validation
+                // ================================
+
+                const existingProduct =
+                    await Product.findOne({
+                        _id: {
+                            $ne: productId
+                        },
+
+                        name: {
+                            $regex:
+                                new RegExp(
+                                    `^${name}$`,
+                                    "i"
+                                )
+                        }
+                    });
+
+                if (existingProduct) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Another product with this name already exists."
+                    });
+                }
+
+                // ================================
+                // Category Validation
+                // ================================
+
+                if (!categoryId) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Category is required."
+                    });
+                }
+
+                const categoryExists =
+                    await Category.findById(
+                        categoryId
+                    );
+
+                if (!categoryExists) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Invalid category selected."
+                    });
+                }
+
+                // ================================
+                // Gender Validation
+                // ================================
+
+                const validGenders = [
+                    "Men",
+                    "Women",
+                    "Unisex"
+                ];
+
+                if (
+                    !validGenders.includes(
+                        gender
+                    )
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Invalid gender selected."
+                    });
+                }
+
+                // ================================
+                // Description Validation
+                // ================================
+
+                if (!description) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description is required."
+                    });
+                }
+
+                if (
+                    description.length < 20
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description should contain at least 20 characters."
+                    });
+                }
+
+                if (
+                    description.length > 1000
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description is too long."
+                    });
+                }
+
+                // ================================
+                // Size Validation
+                // ================================
+
+                if (
+                    !sizeNames.length ||
+                    !sizeQuantities.length ||
+                    !sizePrices.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Size details are required."
+                    });
+                }
+
+                const uniqueSizes =
+                    new Set(sizeNames);
+
+                if (
+                    uniqueSizes.size !==
+                    sizeNames.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Duplicate sizes are not allowed."
+                    });
+                }
+
+                const details = [];
+
+                for (
+                    let i = 0;
+                    i < sizeNames.length;
+                    i++
+                ) {
+
+                    const size =
+                        sizeNames[i]?.trim();
+
+                    const quantity =
+                        Number(
+                            sizeQuantities[i]
+                        );
+
+                    const price =
+                        Number(
+                            sizePrices[i]
+                        );
+
+                    if (!size) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Invalid size."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(
+                            quantity
+                        ) ||
+                        quantity < 1
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Quantity must be at least 1."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(
+                            price
+                        ) ||
+                        price < 200
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Price must be at least ₹200."
+                        });
+                    }
+
+                    details.push({
+                        size,
+                        quantity,
+                        price
+                    });
+                }
+
+                // ================================
+                // Existing Image Removal
+                // ================================
+
+                let deletedImages = [];
+
+                try {
+
+                    deletedImages =
+                        JSON.parse(
+                            req.body.deletedImages || "[]"
+                        );
+
+                    if (
+                        !Array.isArray(
+                            deletedImages
+                        )
+                    ) {
+                        deletedImages = [];
+                    }
+
+                } catch {
+
+                    deletedImages = [];
+                }
+
+                const imagesToDelete =
+                    product.images.filter(
+                        (image) =>
+                            deletedImages.includes(
+                                image._id.toString()
+                            )
+                    );
+
+                for (
+                    const image of imagesToDelete
+                ) {
+
+                    const filePath =
+                        path.join(
+                            __dirname,
+                            "..",
+                            "public",
+                            image.path
+                        );
+
+                    fs.unlink(
+                        filePath,
+                        (err) => {
+
+                            if (err) {
+
+                                console.error(
+                                    "Image Delete Error:",
+                                    err
+                                );
+                            }
+                        }
+                    );
+                }
+
+                product.images =
+                    product.images.filter(
+                        (image) =>
+                            !deletedImages.includes(
+                                image._id.toString()
+                            )
+                    );
+
+                // ================================
+                // New Image Validation
+                // ================================
+
+                const allowedMimeTypes = [
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+                if (
+                    req.files &&
+                    req.files.length
+                ) {
+
+                    for (
+                        const file of req.files
+                    ) {
+
+                        if (
+                            !allowedMimeTypes.includes(
+                                file.mimetype
+                            )
+                        ) {
+
+                            return res.status(400).json({
+                                success: false,
+                                error:
+                                    "Invalid image format."
+                            });
+                        }
+
+                        if (
+                            file.size >
+                            10 * 1024 * 1024
+                        ) {
+
+                            return res.status(400).json({
+                                success: false,
+                                error:
+                                    "Each image must be below 10MB."
+                            });
+                        }
+                    }
+
+                    const totalImages =
+                        product.images.length +
+                        req.files.length;
+
+                    if (
+                        totalImages > 5
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Maximum 5 images allowed."
+                        });
+                    }
+
+                    const newImages =
+                        req.files.map(
+                            (
+                                file,
+                                index
+                            ) => ({
+
+                                path:
+                                    "/uploads/" +
+                                    file.filename,
+
+                                altText:
+                                    `${name}-image(${index + 1})`
+                            })
+                        );
+
+                    product.images.push(
+                        ...newImages
+                    );
+                }
+
+                // ================================
+                // Ensure At Least One Image
+                // ================================
+
+                if (
+                    !product.images.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "At least one image is required."
+                    });
+                }
+
+                // ================================
+                // Checkbox Values
+                // ================================
+
+                const latestCollection =
+                    req.body.latestCollection === "true";
+
+                const bestSeller =
+                    req.body.bestSeller === "true";
+
+                // ================================
+                // Update Product
+                // ================================
+
+                product.name = name;
+
+                product.categoryId =
+                    categoryId;
+
+                product.description =
+                    description;
+
+                product.gender =
+                    gender;
+
+                product.details =
+                    details;
+
+                product.latestCollection =
+                    latestCollection;
+
+                product.bestSeller =
+                    bestSeller;
+
+                await product.save();
+
+                await pricingExpiryUpdate();
+
+                return res.redirect(
+                    "/admin/products"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Update Product Error:",
+                    error
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "Something went wrong while updating the product."
+                });
+            }
         });
+
     } catch (err) {
-        console.error('Error updating product:', err);
-        return res.status(500).json({ success: false, error: err.message });
+
+        console.error(
+            "Outer Update Product Error:",
+            err
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: err.message
+        });
     }
 };
+
+
+
+
+
+
 
 
 
@@ -248,13 +960,10 @@ exports.updateProduct = async (req, res) => {
 
 // Show Products
 exports.showProducts = async (req, res) => {
-   try {
+    try {
 
         const page = parseInt(req.query.page) || 1;
-
         const query = req.query.query || '';
-
-
 
         // Pagination + Search handled by factory
         const result = await adminPaginationFactory({
@@ -263,8 +972,6 @@ exports.showProducts = async (req, res) => {
             query,
             type: 'product'
         });
-
-
 
         // Extra Product Business Logic
         const [categories, offers] = await Promise.all([
@@ -280,27 +987,18 @@ exports.showProducts = async (req, res) => {
             }).lean()
         ]);
 
-
-
         // Offer Mapping
         const offerMap = {};
-
         offers.forEach(item => {
-
             offerMap[item._id.toString()] = item.offerCode;
         });
 
 
-
         // Product Transformation
         const updatedProducts = result.products.map(item => {
-
             const firstDetail = item.details?.[0];
-
             return {
-
                 ...item,
-
                 currentOfferCode: firstDetail?.offerId
                     ? offerMap[firstDetail.offerId.toString()] || ''
                     : ''
@@ -310,36 +1008,22 @@ exports.showProducts = async (req, res) => {
 
 
         return res.render('admin/products', {
-
             admin: true,
-
             products: updatedProducts,
-
             categories,
-
             query: result.query,
-
             pagination: result.pagination
         });
 
 
 
     } catch (error) {
-
         console.error("Error fetching products:", error);
-
-
-
         return res.render('admin/products', {
-
             admin: true,
-
             products: [],
-
             categories: [],
-
             query: '',
-
             pagination: {
                 page: 1,
                 limit: 5,
@@ -351,6 +1035,10 @@ exports.showProducts = async (req, res) => {
         });
     }
 };
+
+
+
+
 
 
 exports.singleProductPage = async (req, res) => {
