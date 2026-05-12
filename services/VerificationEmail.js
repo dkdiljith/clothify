@@ -1,6 +1,9 @@
  var nodemailer = require(`nodemailer`)
 
+ //MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  exports.verificationEmailSend = async (email, verificationToken) => {
     try {

@@ -1,5 +1,5 @@
 var mongoose = require("mongoose")
-const url = "mongodb://localhost:27017/Clothify"
+const url = process.env.DB_URL;
 
 
 module.exports.connect = function (done){

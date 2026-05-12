@@ -13,6 +13,9 @@ const adminPaginationFactory = require(`../services/pagination`);
 //verification email
 const verificationEmailSend = require(`../services/VerificationEmail`).verificationEmailSend
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
+
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 

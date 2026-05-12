@@ -13,6 +13,9 @@ const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 //pagination
 const adminPaginationFactory = require(`../services/pagination`);
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const storage = multer.diskStorage({

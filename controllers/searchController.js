@@ -1,6 +1,8 @@
 const mongoose = require(`mongoose`)
-
 const Product = require("../models/productSchema");
+
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////

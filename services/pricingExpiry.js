@@ -3,6 +3,9 @@ const Coupon = require("../models/couponSchema");
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.pricingExpiryUpdate = async () => {

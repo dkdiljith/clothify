@@ -110,9 +110,7 @@
                                                         onchange="updateItemStatus('{{this._id}}', this.value)" {{#if
                                                         (or (eq this.status "Returned" ) (eq this.status "Cancelled"
                                                         ))}}disabled{{/if}}>
-                                                        <option value="Return Accepted" {{#ifEquals
-                                                            this.status "Return Accepted" }}selected{{/ifEquals}}>Return
-                                                            Accepted</option>
+                                                        <option value="" disabled selected>Accept or Reject Return</option>
                                                         <option value="Return Rejected" {{#ifEquals
                                                             this.status "Return Rejected" }}selected{{/ifEquals}}>Reject
                                                             Return</option>

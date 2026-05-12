@@ -30,7 +30,7 @@ const orderSchema = new mongoose.Schema({
             min: 1,
             default: 1
         },
-        status: { type: String, default: 'Pending' },
+        status: { type: String, default: 'Pending', enum: [`Pending`, `Failed`, `Shipped`, `Completed`, `Cancelled`, `Return Requested`, `Return Rejected`, `Returned`] },
         completionDate: { type: Date },
         cancellationReason: [
             {
@@ -56,8 +56,8 @@ const orderSchema = new mongoose.Schema({
     }],
 
     deliveryAddress: { type: Object },
-    paymentMethod: { type: String, required: true },
-    paymentStatus: { type: String, default: "Pending" },
+    paymentMethod: { type: String, required: true, enum: [`razorpay`, `wallet`, `cod`] },
+    paymentStatus: { type: String, default: "Pending", enum: [`Failed`, `Completed`, `Pending`, `Refunded`] },
 
     subtotal: { type: Number, default: 0, min: 0 },
     shippingFee: { type: Number, default: 0, min: 0 },

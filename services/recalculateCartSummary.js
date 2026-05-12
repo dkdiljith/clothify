@@ -71,7 +71,7 @@ async function recalculateCartSummary(userId) {
   }
 
 
-  const TAX_RATE = 0.06;
+  const TAX_RATE = 0.06;  //6% tax
   const SHIPPING_THRESHOLD = 2000;
   const FLAT_SHIPPING_FEE = 80;
 

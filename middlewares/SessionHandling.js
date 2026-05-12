@@ -3,6 +3,9 @@ const Product = require('../models/productSchema')
 const User = require("../models/userSchema");
 const Admin = require(`../models/adminSchema`)
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../services/constants`)
+
 //=======================================================================================================
 //USER SESSION MANAGEMENT
 
