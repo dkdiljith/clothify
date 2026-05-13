@@ -41,12 +41,14 @@ router.route(`/salesReport`)
 
 router.get('/salesReport/pdf',SessionHandling.adminIsLoggedIn, salesController.downloadSalesReportPdf)
 router.get('/salesReport/excel',SessionHandling.adminIsLoggedIn , salesController. downloadSalesReportExcel);
+router.get(`/salesReport/csv` ,SessionHandling.adminIsLoggedIn , salesController.downloadSalesReportCsv)
 
 //PRODUCT SIDE///
 router.get(`/products`, SessionHandling.adminIsLoggedIn, productController.showProducts)
 router.get(`/addproducts`, SessionHandling.adminIsLoggedIn, productController.addProductsRender)
 router.get(`/editproducts/:id`, SessionHandling.adminIsLoggedIn, productController.editProductsRender)
 router.get('/delete-product/:id',SessionHandling.adminIsLoggedIn, productController.deleteProducts)
+router.get(`/blockProduct/:productId` , SessionHandling.adminIsLoggedIn , productController.blockProduct)
 router.post(`/addproducts`,SessionHandling.adminIsLoggedIn, productController.addProducts)
 router.post("/updateproduct/:id",SessionHandling.adminIsLoggedIn, productController.updateProduct);
 //offer adding section

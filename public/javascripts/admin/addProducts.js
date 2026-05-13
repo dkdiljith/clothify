@@ -377,9 +377,13 @@ document.addEventListener("DOMContentLoaded", () => {
       createPreview(fileObject);
     });
 
-    syncFileInput();
+    setTimeout(() => {
 
-    validateImages();
+      syncFileInput();
+
+      validateImages();
+
+    }, 0);
 
     imageInput.value = "";
   });

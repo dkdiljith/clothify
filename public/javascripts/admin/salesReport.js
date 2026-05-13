@@ -49,10 +49,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Export Excel
     document.getElementById('exportExcel').addEventListener('click', () => {
 
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
 
-    window.location.href =
-        `/admin/salesReport/excel?startDate=${startDate}&endDate=${endDate}`;
-});
+        window.location.href =
+            `/admin/salesReport/excel?startDate=${startDate}&endDate=${endDate}`;
+    });
+
+     // Export CSV
+    document.getElementById('exportCsv').addEventListener('click', () => {
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        window.location.href =
+            `/admin/salesReport/csv?startDate=${startDate}&endDate=${endDate}`;
+    });
 });

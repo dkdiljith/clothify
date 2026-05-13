@@ -49,7 +49,8 @@ exports.showCategories = async (req, res) => {
         nextPage: page + 1,
         prevPage: page - 1,
         hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
+        hasPrevPage: page > 1,
+        serialNumberStart: (page - 1) * limit 
       }
     });
 
@@ -63,7 +64,8 @@ exports.showCategories = async (req, res) => {
         limit: 3,
         totalPages: 1,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
+        serialNumberStart: 0 
       },
       errorMessage: "Error fetching categories. Please try again later."
     });

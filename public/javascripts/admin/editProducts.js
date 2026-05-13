@@ -623,9 +623,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       });
 
-      syncFileInput();
+      setTimeout(() => {
 
-      validateImages();
+        syncFileInput();
+
+        validateImages();
+
+      }, 0);
 
       imageInput.value = "";
     });

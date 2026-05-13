@@ -36,7 +36,7 @@
                 <tbody>
                     {{#each user}}
                     <tr>
-                        <td>{{incrementedIndex @index}}</td>
+                        <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                         <td style="display: flex; align-items: center; gap: 0.75rem;">
                             <img src="https://i.postimg.cc/TwCBBcvg/0684456b-aa2b-4631-86f7-93ceaf33303c.jpg"
                                 class="user-avatar" alt="Avatar">

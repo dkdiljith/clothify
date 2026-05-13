@@ -648,7 +648,8 @@ exports.showUsers = async (req, res) => {
                 limit: 5,
                 totalPages: 1,
                 hasNextPage: false,
-                hasPrevPage: false
+                hasPrevPage: false,
+                serialNumberStart: 0 
             },
             errorMessage: "Error fetching users. Please try again later."
         });

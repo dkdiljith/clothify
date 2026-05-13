@@ -72,7 +72,8 @@ const adminPaginationFactory = async ({
             nextPage: page + 1,
             prevPage: page - 1,
             hasNextPage: page < totalPages,
-            hasPrevPage: page > 1
+            hasPrevPage: page > 1,
+            serialNumberStart: (page - 1) * limit 
         }
     };
 };

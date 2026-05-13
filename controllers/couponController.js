@@ -36,11 +36,19 @@ exports.couponRender = async (req, res) => {
         
         console.error(error);
         return res.render('admin/coupon', {
-            coupon: [],
+
             admin: true,
+            coupon: [],
             query: '',
-            pagination: {},
-            errorMessage: "Error fetching coupons"
+            pagination: {
+                page: 1,
+                limit: 5,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPrevPage: false,
+                serialNumberStart: 0 
+            },
+            errorMessage: "Error fetching coupons. Please try again later."
         });
     }
 };

@@ -15,7 +15,7 @@ const MESSAGES = require(`../services/constants`)
 
 
 
-async function calculateRefund(orderId, itemId, isCancellation = false) {
+async function calculateRefund(orderId, itemId, isCancellation) {
 
   const order = await Order.findById(orderId);
   if (!order) {
@@ -150,7 +150,8 @@ exports.ordersRender = async (req, res) => {
         limit: 5,
         totalPages: 1,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
+        serialNumberStart: 0
       },
       errorMessage: "Error fetching orders. Please try again later."
     });
@@ -390,10 +391,11 @@ exports.orderCancel = async (req, res) => {
     //////////////////////////////////////////////////////
     // refund calculation
 
+    const isCancellation = true
     const refundDetails = await calculateRefund(
       orderId,
       itemId,
-      true // cancellation
+      isCancellation
     );
 
     const refundAmount =

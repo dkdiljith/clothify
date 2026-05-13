@@ -30,7 +30,7 @@
                 <table class="coupons-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th></th>
                             <th>Offer Code</th>
                             <th>Offer Type</th>
                             <th>Discount</th>
@@ -43,7 +43,7 @@
                     <tbody>
                         {{#each offer}}
                         <tr>
-                            <td>{{incrementedIndex @index}}</td>
+                            <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                             <td>
                                 <div class="coupon-code">
                                     <span class="coupon-icon">🎟️</span>

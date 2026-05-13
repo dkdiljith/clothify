@@ -21,13 +21,27 @@ const productSchema = new mongoose.Schema({
         path: String,
         altText: String
     }],
+    isActive:{ type: Boolean, default: true },
     latestCollection: { type: Boolean, default: false },
     bestSeller: { type: Boolean, default: false },
-    active: { type: Boolean, required: true, default: false }
 }, { timestamps: true });
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Automatically filter out blocked products for any 'find' operation
+productSchema.pre(/^find/, function (next) {
+  // If 'showInactive' is true, don't filter anything
+  if (this.getOptions().showInactive) {
+    return next();
+  }
+  
+  // Default: Only show active products to users
+  this.find({ isActive: true });
+  next();
+});
+
+
 
 
 //Search Indexes

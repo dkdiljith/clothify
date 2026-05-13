@@ -961,83 +961,59 @@ exports.updateProduct = async (req, res) => {
 
 
 
-// Show Products
 exports.showProducts = async (req, res) => {
     try {
-
+        // 1. Get params from URL (e.g., /admin/products?page=1&query=shirt)
         const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
         const query = req.query.query || '';
 
-        // Pagination + Search handled by factory
-        const result = await adminPaginationFactory({
-            page,
-            limit: 5,
-            query,
-            type: 'product'
-        });
+        // 2. Build the search filter
+        let filter = {};
+        if (query) {
+            filter = {
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } }
+                ]
+            };
+        }
 
-        // Extra Product Business Logic
-        const [categories, offers] = await Promise.all([
-
-            Category.find({}, {
-                _id: 1,
-                name: 1
-            }).lean(),
-
-            Offer.find({}, {
-                _id: 1,
-                offerCode: 1
-            }).lean()
+        // 3. Execute queries with 'showInactive' flag so admin sees everything
+        const [totalDocuments, products] = await Promise.all([
+            Product.countDocuments(filter),
+            Product.find(filter)
+                .setOptions({ showInactive: true })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean()
         ]);
 
-        // Offer Mapping
-        const offerMap = {};
-        offers.forEach(item => {
-            offerMap[item._id.toString()] = item.offerCode;
-        });
+        const totalPages = Math.ceil(totalDocuments / limit);
 
-
-        // Product Transformation
-        const updatedProducts = result.products.map(item => {
-            const firstDetail = item.details?.[0];
-            return {
-                ...item,
-                currentOfferCode: firstDetail?.offerId
-                    ? offerMap[firstDetail.offerId.toString()] || ''
-                    : ''
-            };
-        });
-
-
-
+        // 4. Render the page with data and pagination helpers
         return res.render('admin/products', {
-            admin: true,
-            products: updatedProducts,
-            categories,
-            query: result.query,
-            pagination: result.pagination
+            products,
+            query,
+            pagination: {
+                page,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                serialNumberStart: skip
+            }
         });
-
-
 
     } catch (error) {
-        console.error("Error fetching products:", error);
-        return res.render('admin/products', {
-            admin: true,
-            products: [],
-            categories: [],
-            query: '',
-            pagination: {
-                page: 1,
-                limit: 5,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            },
-            errorMessage: "Error fetching products. Please try again later."
-        });
+        console.error('Error in showProducts:', error);
+        return res.status(500).render('error', { message: 'Failed to load products' });
     }
 };
+
 
 
 
@@ -1072,6 +1048,50 @@ exports.singleProductPage = async (req, res) => {
         return res.status(500).render('error', { message: 'Server error' });
     }
 }
+
+
+
+
+
+
+
+exports.blockProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.productId).setOptions({ showInactive: true });
+
+        if (!product) {
+            return res.json({
+                success: true,
+                message: 'Product not found',
+            });
+        }
+
+        const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean()
+
+        if (!product.isActive && existingActive) {
+            return res.json({
+                success: false,
+                message: "Cannot activate. An active product with this name already exists.",
+            });
+        }
+
+        product.isActive = !product.isActive;
+        await product.save();
+
+        return res.json({
+            success: true,
+            message: 'success',
+        });
+
+    } catch (error) {
+        res.redirect('back');
+    }
+};
+
+
+
+
+
 
 
 exports.deleteProducts = async (req, res) => {

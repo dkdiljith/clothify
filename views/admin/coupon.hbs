@@ -35,7 +35,7 @@
 
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th></th>
                             <th>Coupon Code</th>
                             <th>Discount</th>
                             <th>Coupon Starts From</th>
@@ -48,7 +48,7 @@
                     <tbody>
                         {{#each coupon}}
                         <tr>
-                            <td>{{incrementedIndex @index}}</td>
+                            <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                             <td>
                                 <div class="coupon-code">
                                     <span class="coupon-icon">🎟️</span>
