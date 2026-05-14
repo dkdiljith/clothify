@@ -4,7 +4,7 @@ const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

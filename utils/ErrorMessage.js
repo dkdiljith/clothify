@@ -82,104 +82,14 @@ exports.ErrorContent = async (req, res) => {
 
 
 
-exports.userBlockedError = async (req, res) => {
-  const htmlContent = `
+exports.userUnavailableError = async (req, res) => {
+ const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Access Temporarily Restricted | Clothify</title>
-        <style>
-            body {
-                font-family: 'Inter', sans-serif;
-                background: #f9f9f9;
-                height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin: 0;
-                color: #2d2a32;
-            }
-            .container {
-                background: white;
-                padding: 2.5rem;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-                text-align: center;
-                max-width: 500px;
-            }
-            h1 {
-                color: #d9534f;
-                font-size: 1.8rem;
-                margin-bottom: 1rem;
-            }
-            .message {
-                font-size: 1rem;
-                color: #555;
-                margin-bottom: 1.5rem;
-            }
-            .cta-buttons a {
-                display: block;
-                margin: 8px auto;
-                padding: 12px;
-                width: 100%;
-                max-width: 280px;
-                background: #d9534f;
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-                transition: 0.2s;
-                font-weight: 500;
-            }
-            .cta-buttons a:hover {
-                background: #c9302c;
-                transform: scale(1.05);
-            }
-            .small-text {
-                margin-top: 1rem;
-                font-size: 0.85rem;
-                color: #777;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🚫 Account Restricted</h1>
-            <p class="message">
-                Your account has been temporarily restricted due to unusual activity. <br> 
-                If this is a mistake, we’re here to help!
-            </p>
-            <div class="cta-buttons">
-                 <a href="mailto:clothifyfashionshop@gmail.com" 
-     onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=clothifyfashionshop@gmail.com&su=Clothify%20Support%20Request&body=Hello%20Clothify%20Team,%0A%0AI%20need%20assistance%20with...', '_blank'); return false;">
-    support@clothify.com
-  </a>
-                <a href="/user/logout">🏠 Return Home</a>
-            </div>
-            <p class="small-text">
-                Need assistance? Our team is available 24/7.
-            </p>
-        </div>
-    </body>
-    </html>
-  `;
-  return res.status(403).send(htmlContent);
-};
-
-
-
-
-
-
-exports.userDisabledError = async (req, res) => {
-   const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Account Deleted | Clothify</title>
+        <title>Account Status | Clothify</title>
         <style>
             body {
                 font-family: 'Inter', sans-serif;
@@ -189,21 +99,20 @@ exports.userDisabledError = async (req, res) => {
                 justify-content: center;
                 align-items: center;
                 margin: 0;
-                color: #444;
+                color: #2d3436;
             }
             .container {
                 background: white;
-                padding: 3.5rem 2rem;
-                border-radius: 20px;
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+                padding: 3rem 2.5rem;
+                border-radius: 16px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
                 text-align: center;
-                max-width: 400px;
-                border: 1px solid #eee;
+                max-width: 450px;
+                border: 1px solid #eaeaea;
             }
             .icon {
-                font-size: 3.5rem;
-                margin-bottom: 1.5rem;
-                filter: grayscale(100%);
+                font-size: 3rem;
+                margin-bottom: 1.2rem;
             }
             h1 {
                 color: #2d3436;
@@ -212,9 +121,35 @@ exports.userDisabledError = async (req, res) => {
             }
             .message {
                 font-size: 1rem;
-                color: #7f8c8d;
+                color: #636e72;
                 line-height: 1.6;
-                margin-bottom: 0;
+                margin-bottom: 2rem;
+            }
+            .cta-buttons a {
+                display: block;
+                margin: 10px auto;
+                padding: 12px;
+                width: 100%;
+                max-width: 280px;
+                background: #2d3436;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                transition: 0.2s;
+                font-weight: 500;
+                font-size: 0.95rem;
+            }
+            .cta-buttons a:hover {
+                background: #000000;
+            }
+            .cta-buttons .secondary-btn {
+                background: transparent;
+                color: #636e72;
+                border: 1px solid #dfe6e9;
+            }
+            .cta-buttons .secondary-btn:hover {
+                background: #f8f9fa;
+                color: #2d3436;
             }
             .divider {
                 width: 40px;
@@ -226,18 +161,29 @@ exports.userDisabledError = async (req, res) => {
     </head>
     <body>
         <div class="container">
-            <div class="icon">🕊️</div>
-            <h1>Account Deleted</h1>
+            <div class="icon">✨</div>
+            <h1>Account Notice</h1>
             <p class="message">
-                Your account and personal data have been successfully removed from Clothify.
+                Your profile is no longer active on Clothify. If this update is unexpected 
+                or if you require further details regarding your data, please contact our support team.
             </p>
+            <div class="cta-buttons">
+                <a href="mailto:clothifyfashionshop@gmail.com" 
+                   onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=clothifyfashionshop@gmail.com&su=Clothify%20Support%20Request&body=Hello%20Clothify%20Team,%0A%0AI%20need%20assistance%20with...', '_blank'); return false;">
+                   ✉️ Contact Support
+                </a>
+                <a href="/user/logout" class="secondary-btn">🏠 Return Home</a>
+            </div>
             <div class="divider"></div>
-            <p class="message" style="font-size: 0.9rem;">
+            <p class="message" style="font-size: 0.85rem; margin-bottom: 0;">
                 Thank you for being a part of our community.
             </p>
         </div>
     </body>
     </html>
   `;
-  return res.status(200).send(htmlContent);
+  return res.status(403).send(htmlContent);
 };
+
+
+

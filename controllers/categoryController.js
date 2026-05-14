@@ -7,7 +7,7 @@ const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

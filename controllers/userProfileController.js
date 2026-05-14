@@ -6,7 +6,7 @@ const Wallet = require(`../models/walletSchema`)
 const crypto = require("crypto");
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,15 +142,25 @@ exports.deleteUser = async (req, res) => {
         );
 
         if (result.modifiedCount > 0) {
-            
-            req.session.destroy((err) => {
-                if (err) throw new Error("Session destruction failed");
-                
+
+
+            delete req.session.user;
+
+            req.session.save((err) => {
+                if (err) {
+                    console.error(" Failed to save session after removing user:", err);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Internal Server Error during deactivation"
+                    });
+                }
+
                 return res.status(200).json({
                     success: true,
-                    message: "Account deactivated successfully"
+                    message: "User account session cleared successfully"
                 });
             });
+
         } else {
             res.status(404).json({ success: false, message: "User not found" });
         }

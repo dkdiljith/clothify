@@ -7,10 +7,10 @@ const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //pagination
-const adminPaginationFactory = require(`../services/pagination`);
+const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

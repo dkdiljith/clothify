@@ -11,10 +11,10 @@ const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //pagination
-const adminPaginationFactory = require(`../services/pagination`);
+const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1089,30 +1089,11 @@ exports.blockProduct = async (req, res) => {
 };
 
 
-
-
-
-
-
-exports.deleteProducts = async (req, res) => {
-    try {
-        const productId = req.params.id;
-        await Product.findByIdAndDelete(productId);
-        return res.redirect('/admin/products');
-    } catch (error) {
-        console.error("Error deleting product:", error);
-        return res.status(500).send("Error deleting product.");
-    }
-}
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////APPLY OFFER FUNCTIONS//////////////////////
 
-//Manuel Apply Offer Render Function
+
 // Manual Apply Offer Render Function
 exports.applyOfferJson = async (req, res) => {
     try {

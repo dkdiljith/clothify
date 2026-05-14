@@ -4,10 +4,10 @@ const Wallet = require(`../models/walletSchema`)
 const Coupon = require(`../models/couponSchema`)
 
 //pagination
-const adminPaginationFactory = require(`../services/pagination`);
+const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 /////////////////////////////////////////////////////////////////////////////////////
 

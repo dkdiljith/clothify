@@ -9,7 +9,7 @@ const Coupon = require(`../models/couponSchema`)
 const recalculateCartSummary = require(`../services/recalculateCartSummary`)
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../services/constants`)
+const MESSAGES = require(`../utils/constants`)
 
 
 

@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedOfferId = null;
     let selectedProductId = null;
 
-   
+
     function resetModal() {
         selectedOfferId = null;
         selectedProductId = null;
@@ -32,77 +32,104 @@ document.addEventListener("DOMContentLoaded", () => {
         resetModal();
     }
 
-    async function openModal(productId) {
-        try {
-            resetModal();
+   async function openModal(productId) {
+    try {
+        resetModal();
 
-            modalTitle.textContent = "Loading...";
-            mainOverlay.classList.add("active");
+        // 1. Target the Title using your real HTML ID
+        const formModalTitle = document.getElementById("formModalTitle");
+        if (formModalTitle) formModalTitle.textContent = "Loading...";
+        
+        mainOverlay.classList.add("active");
 
-            const response = await fetch("/admin/products/apply-offer/" + productId);
+        const response = await fetch("/admin/products/apply-offer/" + productId);
 
-            if (!response.ok) {
-                throw new Error("Failed to load offer details.");
-            }
-
-            const data = await response.json();
-
-            if (!data.product) {
-                throw new Error("Product not found.");
-            }
-
-            selectedProductId = data.product._id;
-            selectedProductIdInput.value = data.product._id;
-
-            availableOffers = data.offers || [];
-
-            displayOffers(availableOffers);
-
-            modalTitle.textContent = 'Apply Offer for "' + data.product.name + '"';
-
-        } catch (error) {
-            showPopupMessage(error.message, 'error')
-            closeModal();
-        }
-    }
-
-    function displayOffers(offers) {
-        offerListContainer.innerHTML = "";
-
-        if (!offers || offers.length === 0) {
-            offerListContainer.innerHTML =
-                '<p class="text-center text-muted">No active offers available.</p>';
-            return;
+        if (!response.ok) {
+            throw new Error("Product not find or Product maybe blocked");
         }
 
-        offers.forEach(offer => {
-            const startDate = new Date(offer.startDate).toLocaleDateString();
-            const endDate = new Date(offer.endDate).toLocaleDateString();
+        const data = await response.json();
 
-            const card = document.createElement("div");
-            card.className = "offer-item";
-            card.dataset.offerId = offer._id;
+        if (!data.product) {
+            throw new Error("Product not found.");
+        }
 
-            if (selectedOfferId === offer._id) {
-                card.classList.add("selected");
-            }
+        selectedProductId = data.product._id;
+        selectedProductIdInput.value = data.product._id;
 
-            const discountText =
-                offer.discountType === "percentage"
-                    ? offer.discountValue + "%"
-                    : "₹" + offer.discountValue + " Off";
+        availableOffers = data.offers || [];
 
-            card.innerHTML =
-                "<h5>" + offer.offerCode + "</h5>" +
-                '<div class="offer-details">' +
-                    "<div><strong>Discount:</strong> " + discountText + "</div>" +
-                    "<div><strong>Starts:</strong> " + startDate + "<br><strong>Ends:</strong> " + endDate + "</div>" +
-                    '<div><strong>Status:</strong> <span class="status-badge active">Active</span></div>' +
-                "</div>";
+        // 2. Set your custom title header safely
+        if (formModalTitle) {
+            formModalTitle.textContent = 'Apply Offer for "' + data.product.name + '"';
+        }
 
-            offerListContainer.appendChild(card);
-        });
+        displayOffers(availableOffers);
+
+    } catch (error) {
+        showPopupMessage(error.message, 'error');
+        closeModal();
     }
+}
+
+function displayOffers(offers) {
+    // 3. TARGET THE EXACT ELEMENTS FROM YOUR HTML SNIPPET
+    const searchBar = document.getElementById("offerSearch");
+    const descriptionText = searchBar ? searchBar.previousElementSibling : null; // Selects the div directly above search bar
+    const formActionsBlock = document.querySelector(".form-actions");
+    
+    offerListContainer.innerHTML = "";
+
+    if (!offers || offers.length === 0) {
+        // 4. Hide search bar, description, and the bottom actions panel
+        if (searchBar) searchBar.style.display = "none";
+        if (descriptionText) descriptionText.style.display = "none";
+        if (formActionsBlock) formActionsBlock.style.display = "none";
+
+        // 5. Inject the large, clear clean screen notice
+        offerListContainer.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; background-color: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;">
+                <h2 style="font-size: 2.2rem; font-weight: 800; color: #dc3545; margin-bottom: 12px;">No Offers Available</h2>
+                <p style="font-size: 1.2rem; color: #6c757d; margin: 0; line-height: 1.5;">There are currently no active promotional deals or coupon codes available for this product.</p>
+            </div>`;
+        return;
+    }
+
+    // 6. Restore the layout structure instantly if offers do exist
+    if (searchBar) searchBar.style.display = "block";
+    if (descriptionText) descriptionText.style.display = "block";
+    if (formActionsBlock) formActionsBlock.style.display = "flex"; // Restores the default flex behavior of form-actions
+
+    offers.forEach(offer => {
+        const startDate = new Date(offer.startDate).toLocaleDateString();
+        const endDate = new Date(offer.endDate).toLocaleDateString();
+
+        const card = document.createElement("div");
+        card.className = "offer-item";
+        card.dataset.offerId = offer._id;
+
+        if (selectedOfferId === offer._id) {
+            card.classList.add("selected");
+        }
+
+        const discountText =
+            offer.discountType === "percentage"
+                ? offer.discountValue + "%"
+                : "₹" + offer.discountValue + " Off";
+
+        card.innerHTML =
+            "<h5>" + offer.offerCode + "</h5>" +
+            '<div class="offer-details">' +
+                "<div><strong>Discount:</strong> " + discountText + "</div>" +
+                "<div><strong>Starts:</strong> " + startDate + "<br><strong>Ends:</strong> " + endDate + "</div>" +
+                '<div><strong>Status:</strong> <span class="status-badge active">Active</span></div>' +
+            "</div>";
+
+        offerListContainer.appendChild(card);
+    });
+}
+
+
 
     filterOffers = function () {
         const term = offerSearchInput.value.toLowerCase().trim();
@@ -197,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(result.message || "Failed to apply offer.");
                 }
 
-               showPopupMessage(result.message || 'Offer applied successfully.', 'success')
+                showPopupMessage(result.message || 'Offer applied successfully.', 'success')
 
                 closeModal();
 

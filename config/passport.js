@@ -1,7 +1,7 @@
 // middlewares/passport.js
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userSchema'); 
+const User = require('../models/userSchema');
 const Wallet = require(`../models/walletSchema`)
 require('dotenv').config();
 
@@ -16,7 +16,7 @@ passport.use(new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID.trim(),
     clientSecret: process.env.GOOGLE_CLIENT_SECRET.trim(),
-    callbackURL: 'http://localhost:3000/user/auth/google/callback', 
+    callbackURL: 'http://localhost:3000/user/auth/google/callback',
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -40,6 +40,7 @@ passport.use(new GoogleStrategy(
         isVerified: true,
       });
       await newUser.save();
+      await createWallet(newUser._id)
 
       return done(null, newUser);
     } catch (error) {
@@ -52,14 +53,13 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser(async (req,id, done) => {
+passport.deserializeUser(async (req, id, done) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).lean()
 
-    if(user){
-       req.session.user = { _id: user._id };
+    if (user) {
+      req.session.user = { _id: user._id };
     }
-    createWallet(user._id)
 
     done(null, user);
   } catch (error) {
@@ -69,16 +69,22 @@ passport.deserializeUser(async (req,id, done) => {
 
 
 const googleLogin = (req, res, next) => {
-  passport.authenticate('google', { 
-    scope: ['profile', 'email'] 
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
   })(req, res, next);
 };
 
 
 const googleCallback = (req, res, next) => {
-  passport.authenticate('google', { 
-    successRedirect: '/user/home',
-    failureRedirect: '/login' 
+  passport.authenticate('google', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.redirect('/login');
+
+    req.login(user, { keepSessionInfo: true }, (err) => {
+      if (err) return next(err);
+
+      return res.redirect('/user/home');
+    });
   })(req, res, next);
 };
 
@@ -86,4 +92,4 @@ const googleCallback = (req, res, next) => {
 
 
 
-module.exports = {passport , googleLogin , googleCallback}
+module.exports = { passport, googleLogin, googleCallback }

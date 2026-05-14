@@ -76,7 +76,7 @@ app.use(`/admin`, adminRouter);
 app.use('/user', userRouter);
 
 // Handling Unhandled Requests
-const ErrorMessage = require(`./middlewares/ErrorMessage`)
+const ErrorMessage = require(`./utils/ErrorMessage`)
 app.use('*', ErrorMessage.ErrorContent)
 
 module.exports = app;
