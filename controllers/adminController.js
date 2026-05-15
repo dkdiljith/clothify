@@ -1,5 +1,5 @@
 const Admin = require("../models/adminSchema")
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)

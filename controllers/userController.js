@@ -4,7 +4,7 @@ const Wallet = require(`../models/walletSchema`)
 const Coupon = require(`../models/couponSchema`)
 const Offer = require(`../models/offerSchema`)
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 //pagination
