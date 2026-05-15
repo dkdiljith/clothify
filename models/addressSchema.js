@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const addressSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", require: true },
-    name:{type:String , required:false},
+    name: { type: String, required: false },
     streetAddress: {
         type: String,
         required: true,
@@ -29,7 +29,7 @@ const addressSchema = new mongoose.Schema({
     phone: {
         type: String,
     },
-    isDefault:{type:Boolean , default:false}
+    isDefault: { type: Boolean, default: false }
 }, { timestamps: true });
 
 

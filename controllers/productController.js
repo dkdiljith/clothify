@@ -6,11 +6,15 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs');
 
+//update offer & coupon & products
+const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
+//pagination
+const adminPaginationFactory = require(`../utils/pagination`);
 
-
-
-
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -81,163 +85,877 @@ exports.editProductsRender = async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.addProducts = async (req, res) => {
+
     try {
+
         upload(req, res, async (err) => {
             if (err) {
-                console.error("Multer error:", err);
-                return res.status(500).json({ success: false, error: err.message });
+                console.error("Multer Error:", err);
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
+                });
             }
 
-            const { name, categoryId, description, gender } = req.body;
-            let sizeNames = req.body.sizeName || [];
-            let sizeQuantities = req.body.sizeQuantity || [];
-            let sizePrices = req.body.sizePrice || [];
+            try {
+                let { name, categoryId, description, gender } = req.body;
 
-            if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
-            if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
-            if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
+                let sizeNames =
+                    req.body.sizeName || [];
 
-            const details = sizeNames.map((size, index) => ({
-                size,
-                quantity: parseInt(sizeQuantities[index]) || 0,
-                price: parseInt(sizePrices[index]) || 299
-            }));
+                let sizeQuantities =
+                    req.body.sizeQuantity || [];
 
-            const latestCollection = req.body.latestCollection === 'on';
-            const bestSeller = req.body.bestSeller === 'on';
+                let sizePrices =
+                    req.body.sizePrice || [];
 
-            let images = [];
-            if (req.files && req.files.length > 0) {
-                images = req.files.map((file, index) => ({
-                    path: '/uploads/' + file.filename,
-                    altText: `${name}-image(${index + 1})`
-                }));
+
+                // Convert to arrays 
+                if (!Array.isArray(sizeNames)) {
+                    sizeNames = [sizeNames];
+                }
+                if (!Array.isArray(sizeQuantities)) {
+                    sizeQuantities = [sizeQuantities];
+                }
+                if (!Array.isArray(sizePrices)) {
+                    sizePrices = [sizePrices];
+                }
+
+                // Trim values
+                name = name?.trim();
+                description = description?.trim();
+
+                // Basic Validation
+                const validNameRegex = /^[a-zA-Z0-9\s\-&()]+$/;
+                const categoryExists = await Category.findById(categoryId);
+                const validGenders = ["Men", "Women", "Unisex"];
+
+
+                if (!name) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name is required."
+                    });
+                }
+                if (name.length < 3 || name.length > 100) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name must be between 3 and 100 characters."
+                    });
+                }
+                if (!validNameRegex.test(name)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid product name."
+                    });
+                }
+                if (!categoryId) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Category is required."
+                    });
+                }
+                if (!categoryExists) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid category selected."
+                    });
+                }
+                if (!validGenders.includes(gender)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid gender selected."
+                    });
+                }
+                if (!description) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description is required."
+                    });
+                }
+                if (description.length < 20) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description should contain at least 20 characters."
+                    });
+                }
+                if (description.length > 1000) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Description is too long."
+                    });
+                }
+
+                // Duplicate Product Check
+                const existingProduct = await Product.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
+                if (existingProduct) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product already exists."
+                    });
+                }
+
+                // Validate Sizes
+                const uniqueSizes = new Set(sizeNames);
+                const details = [];
+
+                if (
+                    !sizeNames.length ||
+                    !sizeQuantities.length ||
+                    !sizePrices.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Size details are required."
+                    });
+                }
+
+
+                if (
+                    uniqueSizes.size !==
+                    sizeNames.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Duplicate sizes are not allowed."
+                    });
+                }
+
+
+                for (let i = 0; i < sizeNames.length; i++) {
+
+                    const size = sizeNames[i]?.trim();
+                    const quantity = Number(sizeQuantities[i]);
+                    const price = Number(sizePrices[i]);
+
+                    if (!size) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Invalid size."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(quantity) ||
+                        quantity < 1
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Quantity must be at least 1."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(price) ||
+                        price < 200
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Price must be at least ₹200."
+                        });
+                    }
+
+                    details.push({ size, quantity, price });
+                }
+
+
+                // Image Validation
+                const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+                if (
+                    !req.files ||
+                    !req.files.length
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "At least one image is required."
+                    });
+                }
+
+                if (req.files.length > 5) {
+                    return res.status(400).json({
+                        success: false,
+                        error: "Maximum 5 images allowed."
+                    });
+                }
+
+
+                for (const file of req.files) {
+
+                    if (
+                        !allowedMimeTypes.includes(
+                            file.mimetype
+                        )
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Invalid image format."
+                        });
+                    }
+
+                    if (
+                        file.size >
+                        10 * 1024 * 1024
+                    ) {
+                        return res.status(400).json({
+                            success: false,
+                            error: "Each image must be below 10MB."
+                        });
+                    }
+                }
+
+
+                // Checkbox Values
+                const latestCollection = req.body.latestCollection === "true";
+                const bestSeller = req.body.bestSeller === "true";
+
+                // Image Mapping
+                const images = req.files.map(
+                    (file, index) => ({
+                        path:
+                            "/uploads/" +
+                            file.filename,
+
+                        altText:
+                            `${name}-image(${index + 1})`
+                    })
+                );
+
+
+                // Create Product
+
+                const newProduct =
+                    new Product({
+                        name,
+                        categoryId,
+                        details,
+                        gender,
+                        description,
+                        images,
+                        latestCollection,
+                        bestSeller,
+                    });
+
+                await newProduct.save();
+                await pricingExpiryUpdate();
+
+                // Reload Categories
+                const categories = await Category.find().lean();
+                const groupedCategories =
+                    categories
+                        .filter(
+                            (cat) =>
+                                !cat.parentCategory
+                        )
+                        .map((parent) => ({
+                            ...parent,
+                            subcategories:
+                                categories.filter(
+                                    (sub) =>
+                                        sub.parentCategory &&
+                                        sub.parentCategory.toString() ===
+                                        parent._id.toString()
+                                )
+                        }));
+
+                return res.render("admin/addProducts", {
+                    admin: true,
+                    categories: groupedCategories
+                }
+                );
+
+            } catch (error) {
+                console.error("Add Product Error:", error);
+                return res.status(500).json({
+                    success: false,
+                    error: "Something went wrong while adding the product."
+                });
             }
-
-
-            const newProduct = new Product({
-                name,
-                categoryId,
-                details,
-                gender,
-                description,
-                images,
-                latestCollection,
-                bestSeller,
-            });
-
-            await newProduct.save();
-
-
-            const categories = await Category.find().lean();
-
-
-            const groupedCategories = categories
-                .filter(cat => !cat.parentCategory)
-                .map(parent => ({
-                    ...parent,
-                    subcategories: categories.filter(sub =>
-                        sub.parentCategory && sub.parentCategory.toString() === parent._id.toString()
-                    )
-                }));
-            return res.render('admin/addProducts', {
-                admin: true,
-                categories: groupedCategories
-            });
-
-
         });
+
     } catch (err) {
-        console.error('Error adding product:', err);
-        return res.status(500).json({ success: false, error: err.message });
+        console.error("Outer Add Product Error:", err);
+        return res.status(500).json({
+            success: false,
+            error: err.message
+        });
     }
 };
+
+
+
+
 
 
 
 exports.updateProduct = async (req, res) => {
+
     try {
+
         const productId = req.params.id;
 
         upload(req, res, async (err) => {
+
             if (err) {
-                console.error("Multer error:", err);
-                return res.status(500).json({ success: false, error: err.message });
-            }
 
-            const { name, categoryId, description, gender } = req.body;
-            let sizeNames = req.body.sizeName || [];
-            let sizeQuantities = req.body.sizeQuantity || [];
-            let sizePrices = req.body.sizePrice || [];
+                console.error(
+                    "Multer Error:",
+                    err
+                );
 
-            if (!Array.isArray(sizeNames)) sizeNames = [sizeNames];
-            if (!Array.isArray(sizeQuantities)) sizeQuantities = [sizeQuantities];
-            if (!Array.isArray(sizePrices)) sizePrices = [sizePrices];
-
-            const details = sizeNames.map((size, index) => ({
-                size,
-                quantity: parseInt(sizeQuantities[index]) || 0,
-                price: parseInt(sizePrices[index]) || 299
-            }));
-
-            const latestCollection = req.body.latestCollection === 'on';
-            const bestSeller = req.body.bestSeller === 'on';
-
-            let newImages = [];
-            if (req.files && req.files.length > 0) {
-                newImages = req.files.map((file, index) => ({
-                    path: '/uploads/' + file.filename,
-                    altText: `${name}-image(${index + 1})`
-                }));
-            }
-
-            const removedImageIndexes = req.body.removedImageIndexes || [];
-            const indexesToRemove = Array.isArray(removedImageIndexes)
-                ? removedImageIndexes.map(Number)
-                : [Number(removedImageIndexes)];
-
-            let product = await Product.findById(productId);
-            if (!product) {
-                return res.status(404).json({ success: false, message: "Product not found" });
-            }
-
-            // Remove selected images from DB and disk
-            const imagesToRemove = product.images.filter((_, index) =>
-                indexesToRemove.includes(index)
-            );
-
-            imagesToRemove.forEach((img) => {
-                const filePath = path.join(__dirname, '..', 'public', img.path);
-                fs.unlink(filePath, (err) => {
-                    if (err) console.error("Error deleting file:", err);
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
                 });
-            });
-
-            // Filter out deleted images
-            product.images = product.images.filter((_, index) => !indexesToRemove.includes(index));
-
-            // Append new images (if any)
-            if (newImages.length > 0) {
-                product.images.push(...newImages);
             }
 
-            // Update all other fields
-            product.name = name;
-            product.categoryId = categoryId;
-            product.description = description;
-            product.gender = gender;
-            product.details = details;
-            product.latestCollection = latestCollection;
-            product.bestSeller = bestSeller;
+            try {
 
-            await product.save();
-            return res.redirect('/admin/products');
+                let {
+                    name,
+                    categoryId,
+                    description,
+                    gender
+                } = req.body;
+
+                let sizeNames =
+                    req.body.sizeName || [];
+
+                let sizeQuantities =
+                    req.body.sizeQuantity || [];
+
+                let sizePrices =
+                    req.body.sizePrice || [];
+
+                // ================================
+                // Convert arrays safely
+                // ================================
+
+                if (!Array.isArray(sizeNames)) {
+                    sizeNames = [sizeNames];
+                }
+
+                if (!Array.isArray(sizeQuantities)) {
+                    sizeQuantities = [sizeQuantities];
+                }
+
+                if (!Array.isArray(sizePrices)) {
+                    sizePrices = [sizePrices];
+                }
+
+                // ================================
+                // Find Product
+                // ================================
+
+                const product =
+                    await Product.findById(productId);
+
+                if (!product) {
+
+                    return res.status(404).json({
+                        success: false,
+                        error: "Product not found."
+                    });
+                }
+
+                // ================================
+                // Trim Values
+                // ================================
+
+                name = name?.trim();
+
+                description =
+                    description?.trim();
+
+                // ================================
+                // Product Name Validation
+                // ================================
+
+                if (!name) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error: "Product name is required."
+                    });
+                }
+
+                if (
+                    name.length < 3 ||
+                    name.length > 100
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Product name must be between 3 and 100 characters."
+                    });
+                }
+
+                const validNameRegex =
+                    /^[a-zA-Z0-9\s\-&()']+$/;
+
+                if (
+                    !validNameRegex.test(name)
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error: "Invalid product name."
+                    });
+                }
+
+                // ================================
+                // Duplicate Product Validation
+                // ================================
+
+                const existingProduct =
+                    await Product.findOne({
+                        _id: {
+                            $ne: productId
+                        },
+
+                        name: {
+                            $regex:
+                                new RegExp(
+                                    `^${name}$`,
+                                    "i"
+                                )
+                        }
+                    });
+
+                if (existingProduct) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Another product with this name already exists."
+                    });
+                }
+
+                // ================================
+                // Category Validation
+                // ================================
+
+                if (!categoryId) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Category is required."
+                    });
+                }
+
+                const categoryExists =
+                    await Category.findById(
+                        categoryId
+                    );
+
+                if (!categoryExists) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Invalid category selected."
+                    });
+                }
+
+                // ================================
+                // Gender Validation
+                // ================================
+
+                const validGenders = [
+                    "Men",
+                    "Women",
+                    "Unisex"
+                ];
+
+                if (
+                    !validGenders.includes(
+                        gender
+                    )
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Invalid gender selected."
+                    });
+                }
+
+                // ================================
+                // Description Validation
+                // ================================
+
+                if (!description) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description is required."
+                    });
+                }
+
+                if (
+                    description.length < 20
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description should contain at least 20 characters."
+                    });
+                }
+
+                if (
+                    description.length > 1000
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Description is too long."
+                    });
+                }
+
+                // ================================
+                // Size Validation
+                // ================================
+
+                if (
+                    !sizeNames.length ||
+                    !sizeQuantities.length ||
+                    !sizePrices.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Size details are required."
+                    });
+                }
+
+                const uniqueSizes =
+                    new Set(sizeNames);
+
+                if (
+                    uniqueSizes.size !==
+                    sizeNames.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Duplicate sizes are not allowed."
+                    });
+                }
+
+                const details = [];
+
+                for (
+                    let i = 0;
+                    i < sizeNames.length;
+                    i++
+                ) {
+
+                    const size =
+                        sizeNames[i]?.trim();
+
+                    const quantity =
+                        Number(
+                            sizeQuantities[i]
+                        );
+
+                    const price =
+                        Number(
+                            sizePrices[i]
+                        );
+
+                    if (!size) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Invalid size."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(
+                            quantity
+                        ) ||
+                        quantity < 1
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Quantity must be at least 1."
+                        });
+                    }
+
+                    if (
+                        !Number.isInteger(
+                            price
+                        ) ||
+                        price < 200
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Price must be at least ₹200."
+                        });
+                    }
+
+                    details.push({
+                        size,
+                        quantity,
+                        price
+                    });
+                }
+
+                // ================================
+                // Existing Image Removal
+                // ================================
+
+                let deletedImages = [];
+
+                try {
+
+                    deletedImages =
+                        JSON.parse(
+                            req.body.deletedImages || "[]"
+                        );
+
+                    if (
+                        !Array.isArray(
+                            deletedImages
+                        )
+                    ) {
+                        deletedImages = [];
+                    }
+
+                } catch {
+
+                    deletedImages = [];
+                }
+
+                const imagesToDelete =
+                    product.images.filter(
+                        (image) =>
+                            deletedImages.includes(
+                                image._id.toString()
+                            )
+                    );
+
+                for (
+                    const image of imagesToDelete
+                ) {
+
+                    const filePath =
+                        path.join(
+                            __dirname,
+                            "..",
+                            "public",
+                            image.path
+                        );
+
+                    fs.unlink(
+                        filePath,
+                        (err) => {
+
+                            if (err) {
+
+                                console.error(
+                                    "Image Delete Error:",
+                                    err
+                                );
+                            }
+                        }
+                    );
+                }
+
+                product.images =
+                    product.images.filter(
+                        (image) =>
+                            !deletedImages.includes(
+                                image._id.toString()
+                            )
+                    );
+
+                // ================================
+                // New Image Validation
+                // ================================
+
+                const allowedMimeTypes = [
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+                if (
+                    req.files &&
+                    req.files.length
+                ) {
+
+                    for (
+                        const file of req.files
+                    ) {
+
+                        if (
+                            !allowedMimeTypes.includes(
+                                file.mimetype
+                            )
+                        ) {
+
+                            return res.status(400).json({
+                                success: false,
+                                error:
+                                    "Invalid image format."
+                            });
+                        }
+
+                        if (
+                            file.size >
+                            10 * 1024 * 1024
+                        ) {
+
+                            return res.status(400).json({
+                                success: false,
+                                error:
+                                    "Each image must be below 10MB."
+                            });
+                        }
+                    }
+
+                    const totalImages =
+                        product.images.length +
+                        req.files.length;
+
+                    if (
+                        totalImages > 5
+                    ) {
+
+                        return res.status(400).json({
+                            success: false,
+                            error:
+                                "Maximum 5 images allowed."
+                        });
+                    }
+
+                    const newImages =
+                        req.files.map(
+                            (
+                                file,
+                                index
+                            ) => ({
+
+                                path:
+                                    "/uploads/" +
+                                    file.filename,
+
+                                altText:
+                                    `${name}-image(${index + 1})`
+                            })
+                        );
+
+                    product.images.push(
+                        ...newImages
+                    );
+                }
+
+                // ================================
+                // Ensure At Least One Image
+                // ================================
+
+                if (
+                    !product.images.length
+                ) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "At least one image is required."
+                    });
+                }
+
+                // ================================
+                // Checkbox Values
+                // ================================
+
+                const latestCollection =
+                    req.body.latestCollection === "true";
+
+                const bestSeller =
+                    req.body.bestSeller === "true";
+
+                // ================================
+                // Update Product
+                // ================================
+
+                product.name = name;
+
+                product.categoryId =
+                    categoryId;
+
+                product.description =
+                    description;
+
+                product.gender =
+                    gender;
+
+                product.details =
+                    details;
+
+                product.latestCollection =
+                    latestCollection;
+
+                product.bestSeller =
+                    bestSeller;
+
+                await product.save();
+
+                await pricingExpiryUpdate();
+
+                return res.redirect(
+                    "/admin/products"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Update Product Error:",
+                    error
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "Something went wrong while updating the product."
+                });
+            }
         });
+
     } catch (err) {
-        console.error('Error updating product:', err);
-        return res.status(500).json({ success: false, error: err.message });
+
+        console.error(
+            "Outer Update Product Error:",
+            err
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: err.message
+        });
     }
 };
+
+
+
+
+
+
 
 
 
@@ -245,55 +963,61 @@ exports.updateProduct = async (req, res) => {
 
 exports.showProducts = async (req, res) => {
     try {
-        // Pagination parameters
+        // 1. Get params from URL (e.g., /admin/products?page=1&query=shirt)
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 products per page
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const query = req.query.query || '';
 
-        // Get total count of products
-        const totalProducts = await Product.countDocuments();
-        const totalPages = Math.ceil(totalProducts / limit);
+        // 2. Build the search filter
+        let filter = {};
+        if (query) {
+            filter = {
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } }
+                ]
+            };
+        }
 
-        // Get paginated products (newest first)
-        const products = await Product.find()
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+        // 3. Execute queries with 'showInactive' flag so admin sees everything
+        const [totalDocuments, products] = await Promise.all([
+            Product.countDocuments(filter),
+            Product.find(filter)
+                .setOptions({ showInactive: true })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean()
+        ]);
 
-        const categories = await Category.find().lean();
+        const totalPages = Math.ceil(totalDocuments / limit);
 
+        // 4. Render the page with data and pagination helpers
         return res.render('admin/products', {
-            admin: true,
-            products: products,
-            categories: categories,
+            products,
+            query,
             pagination: {
                 page,
-                limit,
                 totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
                 nextPage: page + 1,
                 prevPage: page - 1,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
+                serialNumberStart: skip
             }
         });
 
     } catch (error) {
-        console.error("Error fetching products:", error);
-        return res.render('admin/products', {
-            admin: true,
-            products: [],
-            categories: [],
-            pagination: {
-                page: 1,
-                limit: 5,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            },
-            errorMessage: "Error fetching products. Please try again later."
-        });
+        console.error('Error in showProducts:', error);
+        return res.status(500).render('error', { message: 'Failed to load products' });
     }
 };
+
+
+
+
+
 
 
 exports.singleProductPage = async (req, res) => {
@@ -326,102 +1050,252 @@ exports.singleProductPage = async (req, res) => {
 }
 
 
-exports.deleteProducts = async (req, res) => {
+
+
+
+
+
+exports.blockProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
-        await Product.findByIdAndDelete(productId);
-        return res.redirect('/admin/products');
+        const product = await Product.findById(req.params.productId).setOptions({ showInactive: true });
+
+        if (!product) {
+            return res.json({
+                success: true,
+                message: 'Product not found',
+            });
+        }
+
+        const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean()
+
+        if (!product.isActive && existingActive) {
+            return res.json({
+                success: false,
+                message: "Cannot activate. An active product with this name already exists.",
+            });
+        }
+
+        product.isActive = !product.isActive;
+        await product.save();
+
+        return res.json({
+            success: true,
+            message: 'success',
+        });
+
     } catch (error) {
-        console.error("Error deleting product:", error);
-        return res.status(500).send("Error deleting product.");
+        res.redirect('back');
     }
-}
-
-
+};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////APPLY OFFER FUNCTIONS/////////////////////
+//////////APPLY OFFER FUNCTIONS//////////////////////
 
-//Apply Offer Render Function
+
+// Manual Apply Offer Render Function
 exports.applyOfferJson = async (req, res) => {
     try {
-        const offers = await Offer.find({ offerType: 'product' });
-        const product = await Product.findById(req.params.productId)
-        return res.json({ offers, product });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
-}
-
-//Apply Offer Function
-exports.applyOffer = async (req, res) => {
-    try {
         const { productId } = req.params;
-        const { offerId } = req.body;
+        const now = new Date();
 
-        const product = await Product.findById(productId);
-        const offer = await Offer.findById(offerId).lean();
+        const product = await Product.findById(productId).lean();
 
-        // validations
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found." });
-        }
-        if (!offer) {
-            return res.status(404).json({ success: false, message: "Offer not found." });
-        }
-        if (offer.offerType === 'subcategory') {
-            return res.status(400).json({ success: false, message: "This offer is for subcategories, not products." });
-        }
-        if (offer.discountType === 'percentage' && offer.discountValue >= 100) {
-            return res.status(400).json({ success: false, message: "Percentage discount must be less than 100." });
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
         }
 
-        //offerPrice calculating
-        product.details.forEach(detail => {
-            let calculatedOfferPrice = null;
-            const originalPrice = detail.price;
+        const offers = await Offer.find({
+            isActive: true,
+            startDate: { $lte: now },
+            endDate: { $gte: now },
 
-            if (offer.discountType === 'percentage') {
-                calculatedOfferPrice = originalPrice - ((originalPrice * offer.discountValue) / 100);
-            } else if (offer.discountType === 'price') {
-                calculatedOfferPrice = originalPrice - offer.discountValue;
-            }
+            $or: [
+                {
+                    offerType: "product",
+                    targetIds: productId
+                },
+                {
+                    offerType: "subcategory",
+                    targetIds: product.categoryId
+                }
+            ]
+        }).lean();
 
-            if (calculatedOfferPrice !== null && calculatedOfferPrice < originalPrice && calculatedOfferPrice > 0) {
-                //rounding price
-                detail.offerPrice = Math.round((calculatedOfferPrice * 100) / 100);
-                detail.offerId = offerId;
-            } else {
-                detail.offerPrice = null;
-                detail.offerId = null;
-                console.log(`Offer was not applicable for detail with price ${originalPrice}`);
-            }
-        });
-        await product.save();
-        return res.status(201).json({
+        return res.json({
             success: true,
-            type: "success",
-            message: "Offer applied successfully!"
+            offers,
+            product
         });
 
-    } catch (err) {
-        console.error("An Error Occurred while applying offer:", err);
+    } catch (error) {
         return res.status(500).json({
             success: false,
-            type: "error",
-            message: "An internal server error occurred."
+            message: error.message
         });
     }
 };
 
 
 
+// Manuel Apply Offer Function
+exports.applyOffer = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { offerId } = req.body;
+
+        const now = new Date();
+
+        const product = await Product.findById(productId);
+        const offer = await Offer.findById(offerId).lean();
+
+        // validations
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
+        }
+
+        if (!offer) {
+            return res.status(404).json({
+                success: false,
+                message: "Offer not found."
+            });
+        }
+
+        if (!offer.isActive || offer.startDate > now || offer.endDate < now) {
+            return res.status(400).json({
+                success: false,
+                message: "This offer is not active."
+            });
+        }
+
+        let targetMatch = false;
+
+        // product offer validation
+        if (offer.offerType === "product") {
+            targetMatch = offer.targetIds.some(
+                id => id.toString() === productId
+            );
+        }
+
+        // subcategory offer validation
+        if (offer.offerType === "subcategory") {
+            targetMatch = offer.targetIds.some(
+                id => id.toString() === product.categoryId.toString()
+            );
+        }
+
+        if (!targetMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "This offer is not applicable for this product."
+            });
+        }
+
+        let appliedCount = 0;
+
+        product.details.forEach(detail => {
+            const originalPrice = detail.price;
+
+            // clear old values first
+            detail.offerId = null;
+            detail.offerPrice = 0;
+            detail.offerLocked = false;
+
+            let newPrice = originalPrice;
+
+            if (offer.discountType === "percentage") {
+                newPrice =
+                    originalPrice -
+                    (originalPrice * offer.discountValue) / 100;
+            } else {
+                newPrice =
+                    originalPrice - offer.discountValue;
+            }
+
+            // invalid discount rules
+            if (newPrice <= 0) return;
+            if (newPrice < originalPrice * 0.20) return;
+
+            newPrice = Math.round(newPrice);
+
+            detail.offerId = offer._id;
+            detail.offerPrice = newPrice;
+            detail.offerLocked = true;
+
+            appliedCount++;
+        });
+
+        await product.save();
+        await pricingExpiryUpdate();
+
+        if (appliedCount === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Offer could not be applied to any product variant."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Offer applied successfully with manual override."
+        });
+
+    } catch (error) {
+        console.log("applyOffer failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
+};
 
 
 
+// Product Auto Pricing 
+exports.autoPricing = async (req, res) => {
+    try {
+        const { productId } = req.params;
 
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
+        }
+
+        product.details.forEach(detail => {
+            detail.offerId = null;
+            detail.offerPrice = 0;
+            detail.offerLocked = false;
+        });
+
+        await product.save();
+        await pricingExpiryUpdate();
+
+        return res.status(200).json({
+            success: true,
+            message: "Automatic pricing enabled successfully."
+        });
+
+    } catch (error) {
+        console.log("product autoPricing failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
+};
 
 
 

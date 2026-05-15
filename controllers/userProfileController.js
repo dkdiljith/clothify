@@ -5,6 +5,11 @@ const Wallet = require(`../models/walletSchema`)
 
 const crypto = require("crypto");
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -127,15 +132,44 @@ exports.deleteUserRender = async (req, res) => {
 }
 
 exports.deleteUser = async (req, res) => {
-    req.session.destroy()
-    const userId = res.locals.user._id
-    const deleted = await User.findByIdAndDelete(userId)
-    if (deleted) {
-        return res.status(200).json({
-            success: true,
-        });
+    try {
+        const userId = res.locals.user._id;
+
+        // Use updateOne to flip the isActive flag
+        const result = await User.updateOne(
+            { _id: userId },
+            { $set: { isActive: false } }
+        );
+
+        if (result.modifiedCount > 0) {
+
+
+            delete req.session.user;
+
+            req.session.save((err) => {
+                if (err) {
+                    console.error(" Failed to save session after removing user:", err);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Internal Server Error during deactivation"
+                    });
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    message: "User account session cleared successfully"
+                });
+            });
+
+        } else {
+            res.status(404).json({ success: false, message: "User not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server Error" });
     }
-}
+};
+
 
 exports.userOrders = async (req, res) => {
     const userId = res.locals.user._id

@@ -29,7 +29,7 @@ const hbs = exphbs.create({
 });
 
 //REGISTERING HBS HELPERS
-const hbsHelpers = require('./middlewares/hbsHelpers')
+const hbsHelpers = require('./services/hbsHelpers')
 for (const helperName in hbsHelpers) {
   hbs.handlebars.registerHelper(helperName, hbsHelpers[helperName]);
 }
@@ -40,13 +40,14 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
-const MongoStore = require('connect-mongo')
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  rolling:true,
   cookie: {
-    maxAge: 900000, // 15 minutes in millisecond
+    maxAge: 900000, // 15 min // 300000 is 5min
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'lax',
@@ -55,10 +56,9 @@ app.use(session({
 
 
 // Logger and Middleware
-const bodyparser = require(`body-parser`)
 app.use(logger('dev'));
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -68,15 +68,18 @@ db.connect((err) => {
     console.log("Database Connection Failed")
     process.exit(1)
   }
-  console.log("Database Connected Successfully")
+  console.log("Database Successfully Running")
 })
+
+//Coupon and Offer Pricing and Expiry Engine
+require("./jobs/pricingExpiryEngine");
 
 // Routes
 app.use(`/admin`, adminRouter);
 app.use('/user', userRouter);
 
 // Handling Unhandled Requests
-const ErrorMessage = require(`./middlewares/ErrorMessage`)
+const ErrorMessage = require(`./utils/ErrorMessage`)
 app.use('*', ErrorMessage.ErrorContent)
 
 module.exports = app;

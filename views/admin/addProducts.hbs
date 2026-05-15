@@ -3,46 +3,72 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
   <script src="/javascripts/admin/admin-sidebar.js" defer></script>
 </head>
+
 <body>
   <div class="container mt-4">
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="card shadow">
           <div class="card-header">
-            <h4 class="mb-0">Add Product</h4>
+            <h4 class="mb-0">
+              Add Product
+            </h4>
           </div>
+
           <div class="card-body">
-            <form action="/admin/addproducts" method="post" enctype="multipart/form-data" id="add-product-form" novalidate>
+            <form action="/admin/addproducts" method="post" enctype="multipart/form-data" id="add-product-form"
+              novalidate>
+              <!-- Product Name + Category -->
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="name" class="form-label">Product Name</label>
-                  <input type="text" name="name" id="name" class="form-control" placeholder="Product Name" />
-                  <div class="error-message"></div>
+                  <label for="name" class="form-label">
+                    Product Name
+                  </label>
+                  <input type="text" name="name" id="name" class="form-control" placeholder="Product Name"
+                    maxlength="100" />
+
                 </div>
                 <div class="col-md-6">
-                  <label for="category" class="form-label">Category</label>
+                  <label for="category" class="form-label">
+                    Category
+                  </label>
+
                   <select name="categoryId" id="category" class="form-control" required>
-                    <option value="" disabled selected>Select Category</option>
+
+                    <option value="" disabled selected>
+                      Select Category
+                    </option>
+
                     {{#each categories}}
-                      <optgroup label="{{this.name}}">
-                        {{#each this.subcategories}}
-                          <option value="{{this._id}}">{{this.name}}</option>
-                        {{/each}}
-                      </optgroup>
+                    <optgroup label="{{this.name}}">
+
+                      {{#each this.subcategories}}
+                      <option value="{{this._id}}">
+                        {{this.name}}
+                      </option>
+                      {{/each}}
+
+                    </optgroup>
                     {{/each}}
                   </select>
-                  <div class="error-message"></div>
+
                 </div>
               </div>
 
-              <!-- Sizes, Quantities and Prices -->
+              <!-- Sizes -->
               <div class="mb-3">
-                <label class="form-label">Available Sizes, Quantities and Prices</label>
-                <div class="error-message text-danger" id="size-error"></div>
+
+                <label class="form-label">
+                  Available Sizes, Quantities and Prices
+                </label>
+
+                <div id="size-error" class="text-danger mb-2" style="display:none;"></div>
                 <div id="details-container">
                   <div class="row mb-2 size-group">
                     <div class="col-md-3">
+
                       <select name="sizeName[]" class="form-control">
+
                         <option value="XS">XS</option>
                         <option value="S">S</option>
                         <option value="M">M</option>
@@ -51,73 +77,134 @@
                         <option value="XXL">XXL</option>
                         <option value="XXXL">XXXL</option>
                         <option value="one size">one size</option>
+
                       </select>
                     </div>
+
                     <div class="col-md-3">
-                      <!-- Input type updated to "number" for numeric entry -->
                       <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="1" />
                     </div>
+
                     <div class="col-md-3">
-                      <!-- Input type updated to "number" for numeric entry -->
                       <input type="number" name="sizePrice[]" class="form-control" placeholder="Price" min="200" />
                     </div>
+
                     <div class="col-md-3">
-                      <button type="button" class="btn btn-danger remove-size">Remove</button>
+
+                      <button type="button" class="btn btn-danger remove-size">
+                        Remove
+                      </button>
+
                     </div>
                   </div>
                 </div>
-                <button type="button" id="add-size" class="btn" style="background-color: rgb(228, 178, 117); color: white;">Add Size</button>
+
+                <button type="button" id="add-size" class="btn" style="
+                    background-color: rgb(228, 178, 117);
+                    color: white;
+                  ">
+                  Add Size
+                </button>
+
               </div>
 
+              <!-- Gender -->
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="gender" class="form-label">Gender</label>
+
+                  <label for="gender" class="form-label">
+                    Gender
+                  </label>
+
                   <select name="gender" id="gender" class="form-control">
-                    <option value="" disabled selected>Select Gender</option>
-                    <option value="Men">Men</option>
-                    <option value="Women">Women</option>
-                    <option value="Unisex">Unisex</option>
+
+                    <option value="" disabled selected>
+                      Select Gender
+                    </option>
+
+                    <option value="Men">
+                      Men
+                    </option>
+
+                    <option value="Women">
+                      Women
+                    </option>
+
+                    <option value="Unisex">
+                      Unisex
+                    </option>
+
                   </select>
-                  <div class="error-message"></div>
                 </div>
               </div>
 
+              <!-- Description -->
               <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="description" id="description" class="form-control" rows="3" placeholder="Enter product description"></textarea>
+                <label for="description" class="form-label">
+                  Description
+                </label>
+
+                <textarea name="description" id="description" class="form-control" rows="3" maxlength="1000"
+                  placeholder="Enter product description"></textarea>
               </div>
 
+              <!-- Images -->
               <div class="mb-3">
-                <label for="image" class="form-label">Images</label>
-                <input type="file" name="images" id="image" class="form-control" multiple />
-                <div class="error-message" id="image-error"></div>
-                <div id="image-preview"></div>
+                <label for="image" class="form-label">
+                  Images
+                </label>
+
+                <input type="file" name="images" id="image" class="form-control" multiple
+                  accept=".jpg,.jpeg,.png,.webp" />
+                <div id="image-error" class="text-danger mt-1" style="display:none;"></div>
               </div>
 
+              <!-- Additional Categories -->
               <div class="mb-3">
-                <label class="form-label">Additional Categories</label>
+
+                <label class="form-label">
+                  Additional Categories
+                </label>
+
                 <div class="d-flex">
+
                   <div class="form-check me-3">
-                    <input class="form-check-input" type="checkbox" name="latestCollection" value="true" id="latestCollection" />
-                    <label class="form-check-label" for="latestCollection">Latest Collection</label>
+                    <input class="form-check-input" type="checkbox" name="latestCollection" value="true"
+                      id="latestCollection" />
+                    <label class="form-check-label" for="latestCollection">
+                      Latest Collection
+                    </label>
                   </div>
+
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="bestSeller" value="true" id="bestSeller" />
-                    <label class="form-check-label" for="bestSeller">Best Seller</label>
+                    <label class="form-check-label" for="bestSeller">
+                      Best Seller
+                    </label>
                   </div>
+
                 </div>
               </div>
 
+              <!-- Buttons -->
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary-custom">Submit</button>
-                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary-custom">
+                  Submit
+                </button>
+
+                <a href="/admin/products" class="btn btn-secondary">
+                  Cancel
+                </a>
               </div>
+
             </form>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" defer></script>
   <script src="/javascripts/admin/addProducts.js" defer></script>
 </body>

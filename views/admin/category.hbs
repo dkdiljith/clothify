@@ -6,19 +6,6 @@
     <title>Category Management</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/category.css" />
     <script src="/javascripts/admin/admin-sidebar.js" defer></script>
-
-     <style>
-        /* Add these styles for validation messages */
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            display: none;
-        }
-        .form-control.error {
-            border-color: #dc3545;
-        }
-    </style>
     
 </head>
 
@@ -38,7 +25,7 @@
                 <table class="categories-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th></th>
                             <th>Category</th>
                             <th>Subcategories</th>
                             <th>Actions</th>
@@ -47,7 +34,7 @@
                     <tbody>
                         {{#each categories}}
                         <tr>
-                            <td>{{incrementedIndex @index}}</td>
+                            <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                             <td>
                                 <div class="category-name">
                                     <span class="category-icon">📁</span>

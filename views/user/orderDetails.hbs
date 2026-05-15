@@ -6,580 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details | Clothify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --light-gray: #f8f9fa;
-            --medium-gray: #e0e0e0;
-            --dark-gray: #333;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: var(--dark-gray);
-            background-color: var(--light-gray);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .profile-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .profile-container {
-            display: flex;
-            gap: 30px;
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .profile-sidebar {
-            width: 250px;
-            background-color: #f8f9fa;
-            padding: 25px 0;
-        }
-
-        .profile-sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .profile-sidebar li {
-            padding: 12px 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 3px solid transparent;
-        }
-
-        .profile-sidebar li:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-            color: var(--secondary-color);
-        }
-
-        .profile-sidebar li.active {
-            background-color: rgba(52, 152, 219, 0.1);
-            border-left: 3px solid var(--secondary-color);
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-
-        .profile-sidebar li i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .profile-content {
-            flex: 1;
-            padding: 30px;
-        }
-
-        /* Order Details Styles */
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .order-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .order-number {
-            font-size: 16px;
-            color: #666;
-        }
-
-        .order-status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .status-completed {
-            background-color: rgba(46, 204, 113, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-pending {
-            background-color: rgba(241, 196, 15, 0.1);
-            color: #f1c40f;
-        }
-
-        .status-cancelled {
-            background-color: rgba(231, 76, 60, 0.1);
-            color: var(--accent-color);
-        }
-
-        .status-returned {
-            background-color: rgba(155, 89, 182, 0.1);
-            color: #9b59b6;
-        }
-
-        .status-shipped {
-            background-color: rgba(52, 152, 219, 0.1);
-            color: var(--secondary-color);
-        }
-
-        .order-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .order-card-header {
-            padding: 15px 20px;
-            background-color: var(--light-gray);
-            border-bottom: 1px solid var(--medium-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-card-title {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .order-item {
-            display: flex;
-            padding: 20px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .order-item-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-right: 20px;
-            flex-shrink: 0;
-        }
-
-        .order-item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .order-item-details {
-            flex: 1;
-        }
-
-        .order-item-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--primary-color);
-        }
-
-        .order-item-attributes {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .order-item-price {
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
-
-        .order-item-status {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .status-text {
-            font-weight: 500;
-        }
-
-        .delivery-address-card {
-            margin-top: 20px;
-        }
-
-        .address-details {
-            padding: 20px;
-        }
-
-        .address-details p {
-            margin: 5px 0;
-            line-height: 1.6;
-        }
-
-        .price-details-card {
-            margin-top: 20px;
-        }
-
-        .price-summary {
-            padding: 20px;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .price-label {
-            color: #666;
-        }
-
-        .price-value {
-            font-weight: 500;
-        }
-
-        .total-price {
-            border-top: 1px solid var(--medium-gray);
-            padding-top: 15px;
-            margin-top: 15px;
-            font-weight: 600;
-        }
-
-        .payment-method {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--medium-gray);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            gap: 8px;
-            font-size: 15px;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-danger {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-
-        .btn-secondary {
-            background-color: var(--medium-gray);
-            color: var(--dark-gray);
-        }
-
-        .btn-secondary:hover {
-            background-color: #bdc3c7;
-        }
-
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .other-items-card {
-            margin-top: 20px;
-        }
-
-        .other-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--light-gray);
-            text-decoration: none;
-            color: inherit;
-            transition: background-color 0.2s;
-        }
-
-        .other-item:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-        }
-
-        .other-item:last-child {
-            border-bottom: none;
-        }
-
-        .other-item-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .other-item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .other-item-name {
-            flex: 1;
-            font-size: 15px;
-        }
-
-        .other-item-arrow {
-            color: var(--secondary-color);
-            font-size: 18px;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 500px;
-            padding: 25px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .modal-body {
-            margin-bottom: 20px;
-        }
-
-        .modal-textarea {
-            width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid var(--medium-gray);
-            border-radius: 6px;
-            resize: none;
-            font-family: inherit;
-            font-size: 14px;
-        }
-
-        .modal-textarea:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* Success Message */
-        .success-message {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            text-align: center;
-            max-width: 400px;
-        }
-
-        .success-icon {
-            color: var(--success-color);
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .success-text {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .profile-container {
-                flex-direction: column;
-            }
-
-            .profile-sidebar {
-                width: 100%;
-                padding: 15px 0;
-            }
-
-            .profile-sidebar ul {
-                display: flex;
-                overflow-x: auto;
-                padding: 0 15px;
-            }
-
-            .profile-sidebar li {
-                white-space: nowrap;
-                border-left: none;
-                border-bottom: 3px solid transparent;
-                padding: 10px 15px;
-            }
-
-            .profile-sidebar li.active {
-                border-left: none;
-                border-bottom: 3px solid var(--secondary-color);
-            }
-
-            .order-item {
-                flex-direction: column;
-            }
-
-            .order-item-image {
-                margin-bottom: 15px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .order-item-attributes {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .modal-content {
-                margin: 0 15px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/orderDetails.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
 </head>
 
 <body class="body">
     <div class="container" style="margin-top:20px;">
-        <div class="profile-header">
-        </div>
+        <div class="profile-header"></div>
 
         <div class="profile-container">
             <div class="profile-sidebar">
                 <ul>
-                    <li onclick="location.href='/user/profile'">
-                        <i class="fas fa-user"></i> Profile
+                    <li onclick="location.href='/user/profile'"><i class="fas fa-user"></i> Profile</li>
+                    <li onclick="location.href='/user/security'"><i class="fas fa-lock"></i> Security & Password</li>
+                    <li onclick="location.href='/user/wallet'"><i class="fas fa-wallet"></i> Wallet</li>
+                    <li class="active" onclick="location.href='/user/orders'"><i class="fas fa-shopping-bag"></i> Orders
                     </li>
-                    <li onclick="location.href='/user/security'">
-                        <i class="fas fa-lock"></i> Security & Password
-                    </li>
-                    <li onclick="location.href='/user/wallet'">
-                        <i class="fas fa-wallet"></i> Wallet
-                    </li>
-                    <li class="active" onclick="location.href='/user/orders'">
-                        <i class="fas fa-shopping-bag"></i> Orders
-                    </li>
-                    <li onclick="location.href='/user/address'">
-                        <i class="fas fa-map-marker-alt"></i> Addresses
-                    </li>
-                    <li onclick="location.href='/user/deleteuser'">
-                        <i class="fas fa-trash-alt"></i> Delete Account
-                    </li>
+                    <li onclick="location.href='/user/address'"><i class="fas fa-map-marker-alt"></i> Addresses</li>
+                    <li onclick="location.href='/user/deleteuser'"><i class="fas fa-trash-alt"></i> Delete Account</li>
                 </ul>
             </div>
 
             <div class="profile-content">
-                <div class="order-header">
+                {{!-- Header changes color if payment failed --}}
+                <div class="order-header {{#ifeq order.paymentStatus 'Failed'}}payment-failed{{/ifeq}}">
                     <div>
                         <h2 class="order-title">
                             <i class="fas fa-clipboard-list"></i> Order Details
@@ -588,14 +38,17 @@
                     </div>
 
                     <div>
-                        <a class="btn btn-secondary" href="/user/order-invoice/{{order._id}}">
-                            Order-Invoice
-                        </a>
+                        {{#ifeq order.paymentStatus 'Failed'}}
+
+                        {{else}}
+                        <button id="download-invoice-button" class="btn btn-secondary">
+                            Download Invoice
+                        </button>
+                        {{/ifeq}}
                     </div>
+
                     <div>
-                        <h15>
-                            <i class="fas fa-money-bill-wave"></i> Payment Status
-                        </h15>
+                        <h15><i class="fas fa-money-bill-wave"></i> Payment Status</h15>
                         <div style="display:flex; justify-content:center;"
                             class="order-status-badge status-{{toLowerCase order.paymentStatus}}">
                             {{order.paymentStatus}}
@@ -604,22 +57,26 @@
                 </div>
 
                 <!-- Order Item Card -->
-                <div class="order-card">
+                <div class="order-card {{#ifeq order.paymentStatus 'Failed'}}failed-border{{/ifeq}}">
                     <div class="order-card-header">
                         <div class="order-card-title">Item Details</div>
                         <div class="order-item-status">
                             <div>
-                                <h10>
-                                    <i class="fas fa-box"></i> Shipment Status
-                                </h10>
+                                <h10><i class="fas fa-box"></i> Shipment Status</h10>
                                 <span class="status-text"
                                     style="color: {{#if (eq item.status 'Completed')}}var(--success-color){{else if (eq item.status 'Cancelled')}}var(--accent-color){{else if (eq item.status 'Returned')}}var(--accent-color){{else}}var(--secondary-color){{/if}};">
                                     {{item.status}}
                                 </span>
                             </div>
-
                         </div>
                     </div>
+
+                    {{#ifeq order.paymentStatus 'Failed'}}
+                    <div class="retry-notice" style="padding: 0 20px;">
+                        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed.
+                    </div>
+                    {{/ifeq}}
+
                     <div class="order-item">
                         <div class="order-item-image">
                             <img src="{{item.productImg}}" alt="{{item.productName}}">
@@ -654,14 +111,12 @@
                     </div>
                 </div>
 
-
                 <!-- Price Details Card -->
                 <div class="order-card price-details-card">
                     <div class="order-card-header">
                         <div class="order-card-title">Payment Details</div>
                     </div>
                     <div class="price-summary">
-
                         <div class="price-row">
                             <span class="price-label">Subtotal ({{order.totalItems}} items)</span>
                             <span class="price-value">₹{{order.subtotal}}</span>
@@ -697,30 +152,25 @@
                         </div>
                         {{/if}}
 
-                        {{#if (eq order.paymentMethod "Wallet")}}
-                        <div class="price-row">
-                            <span class="price-label">Wallet Amount Used</span>
-                            <span class="price-value"
-                                style="color: var(--success-color);">-₹{{order.walletAmountUsed}}</span>
-                        </div>
-                        {{/if}}
-
                         <div class="price-row total-price">
-                            <span class="price-label"><strong>Amount {{#if (or (eq order.paymentMethod "razorpay") (eq
-                                    order.paymentMethod "Wallet"))}}Paid{{else}}To Pay{{/if}}</strong></span>
+                            <span class="price-label">
+                                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To
+                                    Pay{{else}}Paid{{/ifeq}}</strong>
+                            </span>
                             <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
                         </div>
 
                         <div class="payment-method">
                             <span class="price-label">Payment Method:</span>
-                            <span class="price-value">{{order.paymentMethod}}</span>
+                            <span class="price-value" style="text-transform: uppercase;">{{order.paymentMethod}}</span>
                         </div>
                     </div>
                 </div>
 
-
                 <!-- Action Buttons -->
                 <div class="action-buttons">
+                    {{!-- Hide Return/Cancel if payment failed --}}
+                    {{#if (neq order.paymentStatus 'Failed')}}
                     <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
                         data-completion-date="{{order.completionDate}}">
                         <i class="fas fa-undo"></i> Return Item
@@ -728,11 +178,12 @@
                     <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}">
                         <i class="fas fa-times"></i> Cancel Item
                     </button>
+                    {{/if}}
+
                     <button class="btn btn-primary" onclick="location.href='/user/orders'">
                         <i class="fas fa-arrow-left"></i> Back to Orders
                     </button>
                 </div>
-
 
                 {{#if (gt order.items.length 1)}}
                 <!-- Other Items in Order -->
@@ -756,7 +207,6 @@
                     {{/if}}
                     {{/each}}
                 </div>
-
                 {{/if}}
             </div>
         </div>
@@ -879,6 +329,73 @@
                     alert("An error occurred. Please try again.");
                 }
             });
+
+
+
+            // Download Invoice
+            document.getElementById("download-invoice-button")
+                ?.addEventListener("click", async function () {
+
+                    try {
+
+                        const response = await fetch(
+                            "/user/download-invoice",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    orderId: "{{order._id}}"
+                                })
+                            }
+                        );
+
+                        if (!response.ok) {
+
+                            showPopupMessage(
+                                "Invoice generation failedddddddddddddddd",
+                                "error"
+                            );
+
+                            return;
+                        }
+
+                        const blob =
+                            await response.blob();
+
+                        const url =
+                            window.URL.createObjectURL(blob);
+
+                        const a =
+                            document.createElement("a");
+
+                        a.href = url;
+
+                        a.download =
+                            "invoice.pdf";
+
+                        document.body.appendChild(a);
+
+                        a.click();
+
+                        a.remove();
+
+                        window.URL.revokeObjectURL(url);
+
+                    } catch (error) {
+
+                        console.log(error);
+
+                        showPopupMessage(
+                            "Invoice could not be generated",
+                            "error"
+                        );
+                    }
+                });
 
             // Return Button Logic
             if (orderStatus === "Completed") {

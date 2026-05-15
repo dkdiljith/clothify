@@ -1,0 +1,33 @@
+.popup-message {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--success-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 1000;
+      transition: opacity 0.5s ease-in-out;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .popup-message i {
+      font-size: 18px;
+    }
+
+    .popup-message.error {
+      background: var(--accent-color);
+    }
+
+    .popup-message.fade-out {
+      opacity: 0;
+    }
+
+.popup-message.success { background-color: #2ecc71; }
+.popup-message.error { background-color: #e74c3c; }
+.popup-message.warning { background-color: #f1c40f; }
+.popup-message.info { background-color: #349adb; }

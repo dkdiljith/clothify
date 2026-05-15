@@ -105,9 +105,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Google Sign In
   function onSignIn(googleUser) {
-    var id_token = googleUser.getAuthResponse().id_token;
+    const id_token = googleUser.getAuthResponse().id_token;
 
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open('POST', '/google-sign-in');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function () {

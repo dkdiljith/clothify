@@ -16,7 +16,7 @@
 
                 <div style="display:flex;">
 
-                    <form method="GET" action='/admin/coupons/search' role="search">
+                    <form method="GET" action='/admin/coupons' role="search">
                         <div class="search-container">
                             <input type="search" name="query" class="search-input" id="search-input"
                                 placeholder="Search by name or discount" {{#if query}} value={{query}} {{/if}}>
@@ -35,7 +35,7 @@
 
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th></th>
                             <th>Coupon Code</th>
                             <th>Discount</th>
                             <th>Coupon Starts From</th>
@@ -48,7 +48,7 @@
                     <tbody>
                         {{#each coupon}}
                         <tr>
-                            <td>{{incrementedIndex @index}}</td>
+                            <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                             <td>
                                 <div class="coupon-code">
                                     <span class="coupon-icon">🎟️</span>
@@ -96,7 +96,7 @@
             {{#if (gt pagination.totalPages 1)}}
             <div class="pagination">
                 {{#if pagination.hasPrevPage}}
-                <a href="/admin/coupons/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+                <a href="/admin/coupons?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
                     class="pagination-button">
                     <i class="fas fa-chevron-left"></i> Previous
                 </a>
@@ -107,7 +107,7 @@
                 </span>
 
                 {{#if pagination.hasNextPage}}
-                <a href="/admin/coupons/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+                <a href="/admin/coupons?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
                     class="pagination-button">
                     Next <i class="fas fa-chevron-right"></i>
                 </a>

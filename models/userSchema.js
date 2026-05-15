@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     },
     profileImg: {
         path: String,
-        altText:String, 
+        altText: String,
     },
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -22,20 +22,21 @@ const userSchema = new mongoose.Schema({
             message: 'Password is required for manual sign-up'
         }
     },
-    dateOfBirth: {type: Date,default: null},
-    gender: {type: String,default: null},
-    phone: {type: String,default: null},
+    dateOfBirth: { type: Date, default: null },
+    gender: { type: String, default: null },
+    phone: { type: String, default: null },
     blocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
 
-    verificationToken: { type: String, default: null  },
-    verificationTokenExpires: { type: Date, default: null  },
-    verificationAttempts:{type:Number , default:0},
+    verificationToken: { type: String, default: null },
+    verificationTokenExpires: { type: Date, default: null },
+    verificationAttempts: { type: Number, default: 0, min: 0 },
     verificationTimer: { type: Date, default: null },
 
     resetToken: { type: String, default: null },
     resetTokenExpires: { type: Date, default: null },
-    resetAttempts:{type:Number , default:0},
+    resetAttempts: { type: Number, default: 0, min: 0 },
     resetTimer: { type: Date, default: null },
 
 }, { timestamps: true });

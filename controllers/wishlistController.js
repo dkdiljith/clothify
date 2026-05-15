@@ -2,6 +2,8 @@ const Wishlist = require(`../models/wishListSchema`)
 const Product = require(`../models/productSchema`)
 
 
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 

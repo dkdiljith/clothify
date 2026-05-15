@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const wishListSchema = new mongoose.Schema({
@@ -6,7 +7,7 @@ const wishListSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    items: [{ 
+    items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
@@ -14,9 +15,10 @@ const wishListSchema = new mongoose.Schema({
         },
         variationIndex: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         }
-    }], 
+    }],
 }, { timestamps: true });
 
 

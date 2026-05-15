@@ -1,155 +1,158 @@
+.website-logo {
+  position: absolute;
+  top: -60px;
+  left: 40px;
+  width: 250px;
+  height: auto;
+  z-index: 10;
+}
 
+.login-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
 
-  .website-logo {
-    position: absolute;
-    top: -60px;
-    left: 40px;
-    width: 250px;
-    height: auto;
-    z-index: 10;
+.login-card:focus-within {
+  box-shadow: 0 6px 30px rgba(0, 123, 255, 0.2);
+}
+
+.form-control {
+  border: 1px solid #ced4da;
+  border-radius: 50px;
+  padding: 12px 45px;
+  transition: all 0.3s ease-in-out;
+  font-size: 1rem;
+  line-height: 1.5;
+  height: 48px;
+  position: relative;
+}
+
+.form-control:focus {
+  border-color: #fdd49e;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 2rem;
+  /* Adjusted for validation message spacing */
+}
+
+.form-group i.fas:not(.password-toggle) {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  z-index: 1;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: #f48c06 !important;
+  border: none !important;
+  padding: 0.75rem 2.5rem;
+  font-size: 1.2rem;
+  color: white !important;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+  background: #c76000 !important;
+  box-shadow: 0 6px 20px rgba(146, 82, 4, 0.3);
+  transform: scale(1.05);
+}
+
+.btn-primary:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background: #f48c06 !important;
+}
+
+.btn-disabled {
+  background: #d1d1d1;
+  color: #aaa;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.error-message {
+  position: absolute;
+  bottom: -25px;
+  left: 0;
+  color: #e74c3c;
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+  margin-top: 0.5rem;
+  padding: 0 5px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  visibility: hidden;
+}
+
+.error-message.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.custom-links {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.custom-links a {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin: 0 10px;
+  text-decoration: none;
+  color: #007bff;
+  transition: color 0.3s ease;
+}
+
+.custom-links a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 4px;
+  color: white;
+  z-index: 1000;
+  animation: fadeIn 0.3s;
+}
+
+.toast.success {
+  background-color: #28a745;
+}
+
+.toast.error {
+  background-color: #dc3545;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
 
-  .login-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    padding: 3rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .login-card:focus-within {
-    box-shadow: 0 6px 30px rgba(0, 123, 255, 0.2);
-  }
-
-  .form-control {
-    border: 1px solid #ced4da;
-    border-radius: 50px;
-    padding: 12px 45px;
-    transition: all 0.3s ease-in-out;
-    font-size: 1rem;
-    line-height: 1.5;
-    height: 48px;
-    position: relative;
-  }
-
-  .form-control:focus {
-    border-color: #fdd49e;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-  }
-
-  .form-group {
-    position: relative;
-    margin-bottom: 2rem; /* Adjusted for validation message spacing */
-  }
-
-  .form-group i.fas:not(.password-toggle) {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #aaa;
-    z-index: 1;
-    font-size: 16px;
-    pointer-events: none;
-  }
-
-  .btn-primary {
-    background: #f48c06 !important;
-    border: none !important;
-    padding: 0.75rem 2.5rem;
-    font-size: 1.2rem;
-    color: white !important;
-    border-radius: 5px;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .btn-primary:hover {
-    background: #c76000 !important;
-    box-shadow: 0 6px 20px rgba(146, 82, 4, 0.3);
-    transform: scale(1.05);
-  }
-
-  .btn-primary:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    background: #f48c06 !important;
-  }
-
-  .btn-disabled {
-    background: #d1d1d1;
-    color: #aaa;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .error-message {
-    position: absolute;
-    bottom: -25px;
-    left: 0;
-    color: #e74c3c;
-    font-size: 0.875rem;
-    font-weight: 500;
-    width: 100%;
-    text-align: left;
-    margin-top: 0.5rem;
-    padding: 0 5px;
-    background-color: #f8d7da;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    visibility: hidden;
-  }
-
-  .error-message.visible {
-    visibility: visible;
+  to {
     opacity: 1;
   }
+}
 
-  .custom-links {
-    margin-top: 1.5rem;
-    text-align: center;
-  }
-
-  .custom-links a {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin: 0 10px;
-    text-decoration: none;
-    color: #007bff;
-    transition: color 0.3s ease;
-  }
-
-  .custom-links a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-  }
-
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px;
-    border-radius: 4px;
-    color: white;
-    z-index: 1000;
-    animation: fadeIn 0.3s;
-  }
-  
-  .toast.success {
-    background-color: #28a745;
-  }
-  
-  .toast.error {
-    background-color: #dc3545;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  #resendTimer {
-    font-weight: bold;
-    color: #ff5722;
-  }
-  
+#resendTimer {
+  font-weight: bold;
+  color: #ff5722;
+}

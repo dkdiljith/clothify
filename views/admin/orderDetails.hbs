@@ -9,160 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/javascripts/admin/admin-sidebar.js" defer></script>
-    <style>
-        body {
-            background-color: var(--background);
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        .order-header {
-            background: var(--surface);
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card {
-            border: none;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            background-color: var(--background);
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-            padding: 1rem 1.35rem;
-        }
-
-        .status-badge {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 0.35rem 0.75rem;
-            border-radius: 0.25rem;
-            text-transform: uppercase;
-        }
-
-        /* Custom toned status backgrounds, mapped semantically */
-        .status-pending {
-            background-color: #fef3c7;
-            color: #854d0e;
-        }
-
-        .status-shipped {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-completed {
-            background-color: #d1fae5;
-            color: #14532d;
-        }
-
-        .status-return-requested {
-            background-color: #fef3c7;
-            color: #854d0e;
-        }
-
-        .status-return-accepted {
-            background-color: #d1fae5;
-            color: #14532d;
-        }
-
-        .status-return-rejected {
-            background-color: #fecaca;
-            color: #7f1d1d;
-        }
-
-        .status-returned {
-            background-color: var(--background);
-            color: var(--text);
-        }
-
-        .product-img-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            border-radius: 0.25rem;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .product-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .attention-required {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            box-shadow: 0 0 0 2px var(--surface);
-        }
-
-        .return-reason-box {
-            background-color: #fff3f3;
-            border-radius: 0.25rem;
-            padding: 0.75rem;
-            margin-top: 0.75rem;
-            border-left: 3px solid var(--danger);
-        }
-
-        .alert-row {
-            background-color: #fffaf0;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px dashed var(--border);
-        }
-
-        .summary-total {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary);
-        }
-
-        .address-container {
-            background-color: var(--background);
-            border-radius: 0.25rem;
-            padding: 1rem;
-            border-left: 3px solid var(--primary);
-        }
-
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .payment-icon {
-            font-size: 1.25rem;
-            color: var(--primary);
-        }
-
-        @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/orderDetails.css">
 </head>
 
 <body>
@@ -183,6 +30,10 @@
                     </div>
                 </div>
                 <div>
+                    <button id="download-invoice-button" class="btn btn-secondary">
+                        Download Invoice
+                    </button>
+
                     <a href="/admin/orders" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i> Back to Orders
                     </a>
@@ -202,7 +53,8 @@
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0">
                                     <thead class="bg-light">
-                                        <tr>
+                                        <tr
+                                            class="{{#if (eq order.paymentStatus 'Failed')}}bg-danger text-white{{/if}}">
                                             <th style="width: 100px;">Item</th>
                                             <th>Product Details</th>
                                             <th style="width: 200px;">Status</th>
@@ -242,17 +94,23 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column">
+                                                    {{#if (eq ../order.paymentStatus "Failed")}}
+                                                    <!-- State: Payment Failed - Lock the UI -->
+                                                    <select class="form-select form-select-sm mb-2" disabled>
+                                                        <option selected>Cancelled</option>
+                                                    </select>
+                                                    <span class="status-badge bg-danger text-white align-self-start">
+                                                        Payment Failed
+                                                    </span>
+                                                    {{else}}
+                                                    <!-- State: Payment Success/Pending - Allow Status Changes -->
                                                     {{#if (or (eq this.status "Return Requested") (eq this.status
-                                                    "Return
-                                                    Accepted") (eq this.status "Return Rejected"))}}
+                                                    "Return Accepted") (eq this.status "Return Rejected"))}}
                                                     <select class="form-select form-select-sm mb-2"
                                                         onchange="updateItemStatus('{{this._id}}', this.value)" {{#if
                                                         (or (eq this.status "Returned" ) (eq this.status "Cancelled"
                                                         ))}}disabled{{/if}}>
-                                                        <option value="Return Accepted" {{#ifEquals
-                                                            this.status "Return Accepted" }}selected{{/ifEquals}}>
-                                                            Enum
-                                                        </option>
+                                                        <option value="" disabled selected>Accept or Reject Return</option>
                                                         <option value="Return Rejected" {{#ifEquals
                                                             this.status "Return Rejected" }}selected{{/ifEquals}}>Reject
                                                             Return</option>
@@ -270,12 +128,17 @@
                                                             }}selected{{/ifEquals}}>Shipped</option>
                                                         <option value="Completed" {{#ifEquals this.status "Completed"
                                                             }}selected{{/ifEquals}}>Completed</option>
+                                                        <option value="Cancelled" {{#ifEquals this.status "Cancelled"
+                                                            }}selected{{/ifEquals}}>Cancelled</option>
                                                     </select>
                                                     {{/if}}
+
+                                                    <!-- Dynamic Badge for normal statuses -->
                                                     <span
                                                         class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
                                                         {{this.status}}
                                                     </span>
+                                                    {{/if}}
                                                 </div>
                                             </td>
                                         </tr>
@@ -458,41 +321,79 @@
                     return response.json();
                 })
                 .then(data => {
-                    showAlert(`Status updated to ${newStatus}`, 'success');
+                    showPopupMessage(`Status updated to ${newStatus}`, 'success');
                     setTimeout(() => window.location.reload(), 1500);
                 })
                 .catch(error => {
                     console.error('Error updating status:', error);
-                    showAlert('Failed to update status', 'danger');
+                    showPopupMessage('Failed to update status', 'error');
                 });
         }
 
-        function showAlert(message, type) {
-            // Remove any existing alerts first
-            const existingAlert = document.querySelector('.alert-position-fixed');
-            if (existingAlert) existingAlert.remove();
+        // Download Invoice
+        document.getElementById("download-invoice-button")
+            ?.addEventListener("click", async function () {
 
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show alert-position-fixed shadow`;
-            alert.style.position = 'fixed';
-            alert.style.top = '20px';
-            alert.style.right = '20px';
-            alert.style.zIndex = '9999';
-            alert.style.minWidth = '300px';
-            alert.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
-                <div>${message}</div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-            document.body.appendChild(alert);
+                try {
 
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 150);
-            }, 3000);
-        }
+                    const response = await fetch(
+                        "/admin/download-invoice",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                orderId: "{{order._id}}"
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+
+                        showPopupMessage(
+                            "Invoice generation failedddddddddddddddd",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    const blob =
+                        await response.blob();
+
+                    const url =
+                        window.URL.createObjectURL(blob);
+
+                    const a =
+                        document.createElement("a");
+
+                    a.href = url;
+
+                    a.download =
+                        "invoice.pdf";
+
+                    document.body.appendChild(a);
+
+                    a.click();
+
+                    a.remove();
+
+                    window.URL.revokeObjectURL(url);
+
+                } catch (error) {
+
+                    console.log(error);
+
+                    showPopupMessage(
+                        "Invoice could not be generated",
+                        "error"
+                    );
+                }
+            });
     </script>
 </body>
 

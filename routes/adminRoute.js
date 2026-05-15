@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+//controllers
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
 const productController = require(`../controllers/productController`)
@@ -8,80 +9,103 @@ const orderController = require(`../controllers/orderController`)
 const categoryController = require('../controllers/categoryController')
 const couponController = require(`../controllers/couponController`)
 const offerController = require(`../controllers/offerController`)
-const searchController = require(`../controllers/searchController`)
+const salesController = require(`../controllers/salesController`)
 
-const SessionHandling = require("../middlewares/SessionHandling")
+//adminAuth (session)
+const adminAuth = require("../middlewares/auth").adminAuth
+//invoice generator
+const downloadInvoice = require(`../services/downloadInvoice`)
 
 
 
 
-///ADMIN CREDENTIAL SIDE///
-router.get(`/`, SessionHandling.adminIsLoggedOut, adminController.loginRender)
-router.get(`/register`, SessionHandling.adminIsLoggedIn, adminController.registerRender)
-router.post(`/register`, adminController.register)
+///ADMIN AUTHENTICATIONS
+router.get(`/`, adminController.loginRender)
 router.post(`/login`, adminController.login)
+
+router.route(`/register`)
+    .get(adminAuth, adminController.registerRender)
+    .post(adminAuth, adminController.register)
+
+router.get(`/logout`, adminController.logout)
 
 
 ///DASHBOARD SIDE///
-router.get(`/dashboard`, SessionHandling.adminIsLoggedIn, adminController.dashboardRender)
-router.get(`/activity-log`, SessionHandling.adminIsLoggedIn, adminController.activityLogRender)
-router.get(`/logout`, SessionHandling.adminIsLoggedIn, adminController.logout)
+router.get(`/dashboard`, adminAuth, adminController.dashboardRender)
+router.get(`/activity-log`, adminAuth, adminController.activityLogRender)
 
-
-//Search
-router.get(`/products/search` , SessionHandling.adminIsLoggedIn , searchController.products)
-router.get(`/orders/search` , SessionHandling.adminIsLoggedIn , searchController.orders)
-router.get(`/users/search` , SessionHandling.adminIsLoggedIn , searchController.users)
-router.get(`/coupons/search` , SessionHandling.adminIsLoggedIn , searchController.coupons)
-router.get(`/offer/search` , SessionHandling.adminIsLoggedIn , searchController.offers)
 
 ///SALES REPORT///
-router.get(`/salesReport`, SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
-router.post('/salesReport' ,SessionHandling.adminIsLoggedIn, adminController.salesReportRender)
+router.route(`/salesReport`)
+    .get(adminAuth, salesController.salesReportRender)
+    .post(adminAuth, salesController.salesReportRender)
+
+router.get('/salesReport/pdf', adminAuth, salesController.downloadSalesReportPdf)
+router.get('/salesReport/excel', adminAuth, salesController.downloadSalesReportExcel);
+router.get(`/salesReport/csv`, adminAuth, salesController.downloadSalesReportCsv)
 
 //PRODUCT SIDE///
-router.get(`/products`, SessionHandling.adminIsLoggedIn, productController.showProducts)
-router.get(`/addproducts`, SessionHandling.adminIsLoggedIn, productController.addProductsRender)
-router.get(`/editproducts/:id`, SessionHandling.adminIsLoggedIn, productController.editProductsRender)
-router.get('/delete-product/:id',SessionHandling.adminIsLoggedIn, productController.deleteProducts)
-router.post(`/addproducts`,SessionHandling.adminIsLoggedIn, productController.addProducts)
-router.post("/updateproduct/:id",SessionHandling.adminIsLoggedIn, productController.updateProduct);
+router.get(`/products`, adminAuth, productController.showProducts)
+router.get(`/addproducts`, adminAuth, productController.addProductsRender)
+router.get(`/editproducts/:id`, adminAuth, productController.editProductsRender)
+// router.get('/delete-product/:id', adminAuth, productController.deleteProducts)
+router.get(`/blockProduct/:productId`, adminAuth, productController.blockProduct)
+router.post(`/addproducts`, adminAuth, productController.addProducts)
+router.post("/updateproduct/:id", adminAuth, productController.updateProduct);
 //offer adding section
-router.get(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn ,productController.applyOfferJson)
-router.put(`/products/apply-offer/:productId` , SessionHandling.adminIsLoggedIn , productController.applyOffer)
+router.get(`/products/apply-offer/:productId`, adminAuth, productController.applyOfferJson)
+router.put(`/products/apply-offer/:productId`, adminAuth, productController.applyOffer)
+router.put(`/products/auto-pricing/:productId`, adminAuth, productController.autoPricing)
 
 ///ORDER MANAGEMENT///
-router.get(`/orders`, SessionHandling.adminIsLoggedIn, orderController.ordersRender)
-router.get(`/orderDetails/:orderId`, SessionHandling.adminIsLoggedIn, orderController.orderDetails)
-router.post('/orderDetails/:orderId/item/:itemId/status',SessionHandling.adminIsLoggedIn, orderController.orderStatusChange)
+router.get(`/orders`, adminAuth, orderController.ordersRender)
+router.get(`/orderDetails/:orderId`, adminAuth, orderController.orderDetails)
+router.post('/orderDetails/:orderId/item/:itemId/status', adminAuth, orderController.orderStatusChange)
+//Invloice download
+router.post(`/download-invoice`, adminAuth, downloadInvoice)
 
 ///USER MANAGEMENT///
-router.get(`/users`, SessionHandling.adminIsLoggedIn, userController.showUsers)
-router.get('/blockUser/:id', SessionHandling.adminIsLoggedIn, userController.blockUser) ///BLOCK USER///
+router.get(`/users`, adminAuth, userController.showUsers)
+router.get('/blockUser/:id', adminAuth, userController.blockUser) ///BLOCK USER///
 
 ///CATEGORY MANAGEMENT///
-router.get(`/category`, SessionHandling.adminIsLoggedIn, categoryController.showCategories)
-router.post("/category", SessionHandling.adminIsLoggedIn, categoryController.addCategory)
-router.get("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategoryRender)
-router.put("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.editCategory)
-router.delete("/category/:id", SessionHandling.adminIsLoggedIn, categoryController.deleteCategory)
+router.route(`/category`)
+    .get(adminAuth, categoryController.showCategories)
+    .post(adminAuth, categoryController.addCategory)
+
+router.route(`/category/:id`)
+    .get(adminAuth, categoryController.editCategoryRender)
+    .put(adminAuth, categoryController.editCategory)
+    .delete(adminAuth, categoryController.deleteCategory)
+
 //offer adding section
-router.get(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOfferJson)
-router.put(`/category/apply-offer/:id` , SessionHandling.adminIsLoggedIn , categoryController.applyOffer)
+router.route(`/category/apply-offer/:id`)
+    .get(adminAuth, categoryController.applyOfferJson)
+    .put(adminAuth, categoryController.applyOffer)
+
+router.put(`/category/auto-pricing/:id`, adminAuth, categoryController.autoPricing)
 
 ///COUPON MANAGEMENT///
-router.get(`/coupons`, SessionHandling.adminIsLoggedIn, couponController.couponRender)
-router.post("/coupon/addCoupon",SessionHandling.adminIsLoggedIn, couponController.createCoupon)
-router.get(`/coupon/:couponId` , SessionHandling.adminIsLoggedIn , couponController.couponEditJson)
-router.put('/coupon/:couponId', SessionHandling.adminIsLoggedIn,couponController.couponEdit)
-router.delete('/coupon/:couponId',SessionHandling.adminIsLoggedIn, couponController.couponDelete);
+router.get(`/coupons`, adminAuth, couponController.couponRender)
+router.post("/coupon/addCoupon", adminAuth, couponController.createCoupon)
+
+router.route(`/coupon/:couponId`)
+    .get(adminAuth, couponController.couponEditJson)
+    .put(adminAuth, couponController.couponEdit)
+    .delete(adminAuth, couponController.couponDelete);
 
 ///OFFER MANAGEMENT///
-router.get(`/offer`, SessionHandling.adminIsLoggedIn,offerController.offerRender )
-router.post("/offer/addOffer" ,SessionHandling.adminIsLoggedIn,offerController.createOffer )
-router.get(`/offer/:offerId`, SessionHandling.adminIsLoggedIn, offerController.offerEditJson)
-router.put('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.editOffer)
-router.delete('/offer/:offerId',SessionHandling.adminIsLoggedIn, offerController.offerDelete);
+router.get(`/offer`, adminAuth, offerController.offerRender)
+router.post("/offer/addOffer", adminAuth, offerController.createOffer)
+
+router.get('/offer/totalProducts', adminAuth, offerController.totalListOfProducts);
+router.get('/offer/totalCategories', adminAuth, offerController.totalListOfCategories);
+
+router.route(`/offer/:offerId`)
+    .get(adminAuth, offerController.offerEditJson)
+    .put(adminAuth, offerController.editOffer)
+    .delete(adminAuth, offerController.offerDelete);
+
 
 
 module.exports = router

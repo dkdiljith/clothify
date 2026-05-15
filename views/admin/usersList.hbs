@@ -11,7 +11,7 @@
         <div style="display:flex; justify-content:space-between;" class="users-header">
             <h1 class="page-title">User Management</h1>
 
-            <form method="GET" action='/admin/users/search' role="search">
+            <form method="GET" action='/admin/users' role="search">
                 <div class="search-container">
                     <input type="search" name="query" class="search-input" id="search-input"
                         placeholder="Search users..." {{#if query}} value={{query}} {{/if}}>
@@ -36,7 +36,7 @@
                 <tbody>
                     {{#each user}}
                     <tr>
-                        <td>{{incrementedIndex @index}}</td>
+                        <td>{{serialNumber ../pagination.serialNumberStart @index}}</td>
                         <td style="display: flex; align-items: center; gap: 0.75rem;">
                             <img src="https://i.postimg.cc/TwCBBcvg/0684456b-aa2b-4631-86f7-93ceaf33303c.jpg"
                                 class="user-avatar" alt="Avatar">
@@ -82,7 +82,7 @@
         {{#if (gt pagination.totalPages 1)}}
         <div class="pagination">
             {{#if pagination.hasPrevPage}}
-            <a href="/admin/users/search?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/users?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
                 class="pagination-button">
                 <i class="fas fa-chevron-left"></i> Previous
             </a>
@@ -93,7 +93,7 @@
             </span>
 
             {{#if pagination.hasNextPage}}
-            <a href="/admin/users/search?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/users?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
                 class="pagination-button">
                 Next <i class="fas fa-chevron-right"></i>
             </a>

@@ -9,10 +9,11 @@ const productSchema = new mongoose.Schema({
     },
     details: [{
         size: { type: String, required: true },
-        quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
+        quantity: { type: Number, required: true, min: 0 },
+        price: { type: Number, required: true, min: 0 },
         offerId: { type: mongoose.Schema.Types.ObjectId, default: null },
-        offerPrice: { type: Number, default: null, message: 'Discount price cannot be greater than original price' }
+        offerPrice: { type: Number, default: null, min: 0, message: 'Discount price cannot be greater than original price' },
+        offerLocked: { type: Boolean, default: false }
     }],
     gender: { type: String, required: true },
     description: { type: String },
@@ -20,13 +21,27 @@ const productSchema = new mongoose.Schema({
         path: String,
         altText: String
     }],
+    isActive:{ type: Boolean, default: true },
     latestCollection: { type: Boolean, default: false },
     bestSeller: { type: Boolean, default: false },
-    active:{ type: Boolean, required: true , default:false}
 }, { timestamps: true });
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Automatically filter out blocked products for any 'find' operation
+productSchema.pre(/^find/, function (next) {
+  // If 'showInactive' is true, don't filter anything
+  if (this.getOptions().showInactive) {
+    return next();
+  }
+  
+  // Default: Only show active products to users
+  this.find({ isActive: true });
+  next();
+});
+
+
 
 
 //Search Indexes

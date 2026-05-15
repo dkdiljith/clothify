@@ -5,10 +5,17 @@ const Coupon = require(`../models/couponSchema`)
 const Offer = require(`../models/offerSchema`)
 
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
+//pagination
+const adminPaginationFactory = require(`../utils/pagination`);
 
+//nodemailer
+const verificationEmailSend = require(`../services/nodemailer`).verificationEmailSend
+const sendResetEmail = require(`../services/nodemailer`).passwordResetEmailSend
+
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
 
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
@@ -58,132 +65,15 @@ const generateVerificationCode = () => {
   return { verificationToken, tokenExpiration };
 };
 
-//email verification Email sending
-const verificationEmailSend = async (email, verificationToken) => {
-  try {
-    require("dotenv").config();
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "clothifyfashionshop@gmail.com",
-        pass: "tjyu mduy epba oyzk",
-      },
-    });
-
-    const mailOptions = {
-      from: "clothifyfashionshop@gmail.com",
-      to: email,
-      subject: "Email Verification Code",
-      text: `Your Email verification code is: ${verificationToken}`,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: ", info.response); // Log success
-  } catch (error) {
-    console.error("Error sending email:", error); // Log error
-    return { success: false, message: "Failed to send email", error };
-  }
-};
 
 
-
-const sendResetEmail = async (email, resetToken) => {
-  try {
-    require("dotenv").config();
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "clothifyfashionshop@gmail.com",
-        pass: "tjyu mduy epba oyzk",
-      },
-    });
-
-    // Updated reset link with /user/resetPassword path
-    const resetLink = `${process.env.BASE_URL || 'http://localhost:3000'}/user/resetpassword/${resetToken}`;
-
-    const mailOptions = {
-      from: "Clothify Fashion <clothifyfashionshop@gmail.com>",
-      to: email,
-      subject: "Password Reset Request - Clothify",
-      text: `You requested a password reset for your Clothify account.\n\n`
-        + `Please click the following link to reset your password:\n${resetLink}\n\n`
-        + `This link will expire in 1 hour.\n\n`
-        + `If you didn't request this, please ignore this email.`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://i.postimg.cc/bJGbH05N/Clothify-logo.png" alt="Clothify Logo" style="height: 50px;">
-          </div>
-          <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
-          <p>Hello,</p>
-          <p>You requested a password reset for your Clothify account.</p>
-          <p>Please click the button below to reset your password:</p>
-          
-          <div style="text-align: center; margin: 25px 0;">
-            <a href="${resetLink}" 
-               style="display: inline-block; padding: 12px 24px; background-color: #007bff; 
-                      color: white; text-decoration: none; border-radius: 4px; font-weight: bold;
-                      font-size: 16px;">
-              Reset Password
-            </a>
-          </div>
-          
-          <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            Or copy and paste this URL into your browser:<br>
-            <a href="${resetLink}" style="color: #007bff; word-break: break-all;">${resetLink}</a>
-          </p>
-          
-          <p style="font-size: 14px; color: #ff5252;">
-            <strong>Note:</strong> This link will expire in 1 hour.
-          </p>
-          
-          <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
-          
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777; text-align: center;">
-            <p>© ${new Date().getFullYear()} Clothify. All rights reserved.</p>
-            <p>Clothify Fashion Shop, 123 Fashion Street, Style City</p>
-          </div>
-        </div>
-      `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Password reset email sent: ", info.response);
-    return { success: true, message: "Password reset email sent successfully" };
-  } catch (error) {
-    console.error("Error sending password reset email:", error);
-    return { success: false, message: "Failed to send password reset email", error };
-  }
-};
-
-// utils/emailSender.js
-const sendPasswordChangedEmail = async (email) => {
-
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "clothifyfashionshop@gmail.com",
-      pass: "tjyu mduy epba oyzk",
-    },
-  });
-
-  const mailOptions = {
-    to: email,
-    subject: 'Your Clothify Password Was Changed',
-    html: `
-          <p>Your password was successfully updated.</p>
-          <p>If you didn't make this change, please contact support.</p>
-      `
-  };
-  await transporter.sendMail(mailOptions);
-};
 
 
 
 //wallet creation
 async function createWallet(userId) {
   try {
-    const existingWallet = await Wallet.findOne({ userId });
+    const existingWallet = await Wallet.findOne({ userId }).lean()
 
     if (existingWallet) {
       return existingWallet;
@@ -220,21 +110,10 @@ exports.indexRender = async (req, res) => {
 
 
 exports.homeRender = async (req, res) => {
-  const product = await Product.find().lean()
+  const product = await Product.find().limit(8).lean()
 
-
-  //checking coupon expiration
-
-
-
-
-
-  let product8 = []
-  if (product) {
-    product8 = product.reverse().slice(0, 8);
-  }
   return res.render(`user/home`, {
-    product: product8
+    product: product
   })
 }
 
@@ -251,6 +130,7 @@ exports.resetPasswordRender = async (req, res) => {
     // Verify token exists and isn't expired
     const user = await User.findOne({
       resetToken: token,
+      resetTokenExpires: { $gt: Date.now() }
     });
 
     if (!user) {
@@ -292,10 +172,14 @@ exports.forgetPasswordRender = async (req, res) => {
   return res.render("user/forgetPassword", { isAdminLogin: true });
 };
 
-exports.userLogout = async (req, res) => {
-  req.session.destroy()
-  return res.redirect(`/user/login`)
-}
+exports.userLogout = (req, res) => {
+  delete req.session.user;
+
+  req.session.save((err) => {
+    if (err) return res.status(500).send("Error");
+    res.redirect("/user/login");
+  });
+};
 
 //========================================================================================================
 //POST METHODS
@@ -319,6 +203,7 @@ exports.register = async (req, res) => {
       );
 
       if (checkPassword) {
+        
         req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
         await verificationEmailSend(req.body.email, verificationToken);
         return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
@@ -408,9 +293,10 @@ exports.emailVerification = async (req, res) => {
     const userId = req.session.unknown_user._id
     const user = await User.findById(userId);
 
-    if (!userId) {
+    if (!userId || !user) {
       return res.status(404).json({ success: false, error: "An Error Occured" });
     }
+
 
 
     if (user.verificationAttempts > 5) {
@@ -457,7 +343,7 @@ exports.resendEmailVerification = async (req, res) => {
   const userEmail = req.session.unknown_user.email
   const user = await User.findById(userId);
 
-  if (!userId) {
+  if (!userId || !userEmail || !user) {
     return res.status(404).json({ success: false, error: "An Error Occured" });
   }
 
@@ -471,6 +357,7 @@ exports.resendEmailVerification = async (req, res) => {
     await user.save();
 
     await verificationEmailSend(userEmail, verificationToken);
+
     if (verificationEmailSend) {
       return res.json({ success: true, newTimer: user.verificationTimer }); // send new timer back
     }
@@ -640,48 +527,40 @@ exports.resetPassword = async (req, res) => {
 };
 
 
+
+
+
 exports.showUsers = async (req, res) => {
   try {
-    // Pagination parameters
+
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 5 users per page
-
-    // Get total count of users
-    const totalUsers = await User.countDocuments();
-    const totalPages = Math.ceil(totalUsers / limit);
-
-    // Get paginated users (newest first)
-    const users = await User.find()
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-
+    const query = req.query.query || '';
+    const result = await adminPaginationFactory({
+      page,
+      limit: 5,
+      query,
+      type: 'user'
+    });
     return res.render('admin/usersList', {
       admin: true,
-      user: users,
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
+      ...result
     });
 
   } catch (error) {
+
     console.error("Error fetching users:", error);
     return res.render('admin/usersList', {
+
       admin: true,
       user: [],
+      query: '',
       pagination: {
         page: 1,
         limit: 5,
         totalPages: 1,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
+        serialNumberStart: 0
       },
       errorMessage: "Error fetching users. Please try again later."
     });
@@ -690,13 +569,11 @@ exports.showUsers = async (req, res) => {
 
 
 
-
 exports.blockUser = async (req, res) => {
   try {
 
 
     const userId = req.params.id; // Should get the ID here
-
     const user = await User.findById(userId); // Use the received userId
 
     if (!user) {

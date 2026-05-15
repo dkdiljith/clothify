@@ -1,6 +1,8 @@
 const Admin = require("../models/adminSchema")
 const bcrypt = require("bcrypt");
-const Order = require(`../models/orderSchema`)
+
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 
@@ -42,18 +44,11 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-//GET REQUESTS
 exports.loginRender = async (req, res) => {
   return res.render(`admin/login`, { isAdminLogin: true })
 }
 exports.registerRender = async (req, res) => {
   return res.render(`admin/register`, { isAdminLogin: true })
-}
-exports.logout = async (req, res) => {
-  req.session.destroy()
-  return res.redirect(`/admin`)
 }
 exports.dashboardRender = async (req, res) => {
   return res.render(`admin/dashboard`, { admin: true })
@@ -64,154 +59,79 @@ exports.activityLogRender = async (req, res) => {
 
 
 
-exports.salesReportRender = async (req, res) => {
-  try {
-    const { startDate, endDate } = req.body;
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    
-    // Build query based on whether dates were provided
-    let query = { paymentStatus: 'Completed' };
-    
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      
-      query.createdAt = {
-        $gte: start,
-        $lte: end
-      };
-    }
-
-    // Get total count for pagination
-    const totalOrders = await Order.countDocuments(query);
-    const totalPages = Math.ceil(totalOrders / limit);
-
-    // Get paginated results
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-
-    // Return JSON for AJAX requests
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-      return res.json({
-        success: true,
-        orders,
-        pagination: {
-          page,
-          limit,
-          totalPages,
-          startDate,
-          endDate,
-          nextPage: page + 1,
-          prevPage: page - 1,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
-        }
-      });
-    }
-
-    // Return HTML for normal requests
-    return res.render('admin/salesReport', {
-      admin: true,
-      orders,
-      pagination: {
-        page,
-        limit,
-        totalPages,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      },
-      startDate: startDate || '',
-      endDate: endDate || ''
-    });
-
-  } catch (error) {
-    console.error('Sales report error:', error);
-    
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-      return res.status(500).json({
-        success: false,
-        message: 'Error filtering orders',
-        error: error.message
-      });
-    }
-    
-    return res.render('admin/salesReport', {
-      admin: true,
-      orders: [],
-      pagination: {
-        page: 1,
-        limit: 5,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      },
-      errorMessage: "Error fetching sales report. Please try again later."
-    });
-  }
-};
-
-
-
-//POST methods
-exports.register = async (req, res) => {
-  const passwordHash = await securePassword(req.body.password);
-  const validatePhone = await validatePhoneStartsWithPlus91(req.body.phone);
-
-  const admin = new Admin({
-    name: req.body.name,
-    phone: validatePhone,
-    email: req.body.email,
-    password: passwordHash,
-  });
-
-  const existingUser = await Admin.findOne({ email: req.body.email })
-  if (existingUser) {
-
-    return res.render(`admin/register`, { message: "Email is already registered", isAdminLogin: true });
-
-  } else {
-    let result = await admin.save();
-    if (result) {
-      return res.render("admin/dashboard", { admin: true });
-    }
-
-  }
-
-};
-
-
-
 exports.login = async (req, res) => {
   try {
-    const admin = await Admin.findOne({ email: req.body.email });
+    const { email, password } = req.body;
+    const admin = await Admin.findOne({ email }).lean();
 
     if (!admin) {
-      return res.render("admin/login", { message: "Invalid Email or Password", isAdminLogin: true });
+      return res.render("admin/login", { message: "Invalid credentials", isAdminLogin: true });
     }
 
-    const checkPassword = admin.password
-      ? await bcrypt.compare(req.body.password, admin.password)
-      : false;
+    const isMatch = await bcrypt.compare(password, admin.password);
 
-    if (checkPassword) {
+    if (isMatch) {
+      req.session.admin = { _id: admin._id };
 
-      req.session.admin = { _id: admin._id }
-
-      return res.render("admin/dashboard", { admin: true });
-    } else {
-      return res.render("admin/login", { message: "Invalid Email or Password", isAdminLogin: true });
+      return req.session.save((err) => {
+        if (err) return next(err);
+        res.redirect("/admin/dashboard");
+      });
     }
 
+    res.render("admin/login", { message: "Invalid credentials", isAdminLogin: true });
   } catch (error) {
     console.error("Login Error:", error);
-    return res.status(500).send("Internal Server Error");
+    res.status(500).render("error", { message: "Internal Server Error" });
   }
 };
 
+
+
+exports.register = async (req, res) => {
+  try {
+    const { email, password, name, phone } = req.body;
+
+    // 1. Check existence FIRST (Save CPU)
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.render("admin/register", { message: "Email already exists", isAdminLogin: true });
+    }
+
+    // 2. Process data only if valid
+    const passwordHash = await securePassword(password);
+    const validatedPhone = await validatePhoneStartsWithPlus91(phone);
+
+    const newAdmin = new Admin({
+      name,
+      email,
+      phone: validatedPhone,
+      password: passwordHash
+    });
+
+    await newAdmin.save();
+
+    // 3. Log them in automatically or redirect to login
+    res.redirect("/admin/login");
+  } catch (error) {
+    console.error("Registration Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+
+exports.logout = (req, res) => {
+  delete req.session.admin;
+
+  req.session.save((err) => {
+    if (err) {
+      return res.json({
+        success: true,
+        message: "Error logging out"
+      });
+    }
+    res.redirect("/admin");
+  });
+
+};

@@ -6,383 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security & Password | Clothify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #2ecc71;
-            --light-gray: #f8f9fa;
-            --medium-gray: #e0e0e0;
-            --dark-gray: #333;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: var(--dark-gray);
-            background-color: var(--light-gray);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .profile-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .profile-container {
-            display: flex;
-            gap: 30px;
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .profile-sidebar {
-            width: 250px;
-            background-color: #f8f9fa;
-            padding: 25px 0;
-        }
-
-        .profile-sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .profile-sidebar li {
-            padding: 12px 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 3px solid transparent;
-        }
-
-        .profile-sidebar li:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-            color: var(--secondary-color);
-        }
-
-        .profile-sidebar li.active {
-            background-color: rgba(52, 152, 219, 0.1);
-            border-left: 3px solid var(--secondary-color);
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-
-        .profile-sidebar li i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .profile-content {
-            flex: 1;
-            padding: 30px;
-        }
-
-        /* Security Content Styles */
-        .security-section-title {
-            color: var(--primary-color);
-            font-size: 22px;
-            margin-bottom: 25px;
-            font-weight: 600;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .security-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--medium-gray);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--secondary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-
-        .password-strength {
-            margin-top: 5px;
-            height: 5px;
-            background-color: var(--medium-gray);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .password-strength-bar {
-            height: 100%;
-            width: 0%;
-            background-color: var(--accent-color);
-            transition: width 0.3s, background-color 0.3s;
-        }
-
-        .password-requirements {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .password-requirements ul {
-            padding-left: 20px;
-            margin: 5px 0;
-        }
-
-        .password-requirements li {
-            margin-bottom: 5px;
-            position: relative;
-            list-style-type: none;
-        }
-
-        .password-requirements li:before {
-            content: "•";
-            color: var(--accent-color);
-            font-weight: bold;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-        }
-
-        .password-requirements li.valid:before {
-            content: "✓";
-            color: var(--success-color);
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--dark-gray);
-        }
-
-        .input-group {
-            position: relative;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-block {
-            display: block;
-            width: 100%;
-        }
-
-        .error-message {
-            color: var(--accent-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .success-message {
-            color: var(--success-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .security-status {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 15px;
-            border-radius: 6px;
-            background-color: rgba(46, 204, 113, 0.1);
-            border-left: 4px solid var(--success-color);
-        }
-
-        .security-status i {
-            margin-right: 15px;
-            color: var(--success-color);
-            font-size: 24px;
-        }
-
-        .security-status.warning {
-            background-color: rgba(231, 76, 60, 0.1);
-            border-left-color: var(--accent-color);
-        }
-
-        .security-status.warning i {
-            color: var(--accent-color);
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .toast {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            border-radius: 6px;
-            box-shadow: var(--shadow);
-            margin-bottom: 10px;
-            color: white;
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-            max-width: 350px;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .toast-success {
-            background-color: var(--success-color);
-        }
-
-        .toast-error {
-            background-color: var(--accent-color);
-        }
-
-        .toast-icon {
-            margin-right: 12px;
-            font-size: 20px;
-        }
-
-        .toast-message {
-            flex: 1;
-        }
-
-        .toast-close {
-            margin-left: 12px;
-            cursor: pointer;
-            opacity: 0.8;
-        }
-
-        .toast-close:hover {
-            opacity: 1;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            display: none;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .profile-container {
-                flex-direction: column;
-            }
-
-            .profile-sidebar {
-                width: 100%;
-                padding: 15px 0;
-            }
-
-            .profile-sidebar ul {
-                display: flex;
-                overflow-x: auto;
-                padding: 0 15px;
-            }
-
-            .profile-sidebar li {
-                white-space: nowrap;
-                border-left: none;
-                border-bottom: 3px solid transparent;
-                padding: 10px 15px;
-            }
-
-            .profile-sidebar li.active {
-                border-left: none;
-                border-bottom: 3px solid var(--secondary-color);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .security-status {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .security-status i {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/security.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
 </head>
 
 <body>
@@ -512,27 +137,6 @@
             const reqNumber = document.getElementById('req-number');
             const reqSpecial = document.getElementById('req-special');
 
-            // Show toast notification
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                toast.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} toast-icon"></i>
-                    <div class="toast-message">${message}</div>
-                    <i class="fas fa-times toast-close" onclick="this.parentElement.remove()"></i>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Show toast
-                setTimeout(() => toast.classList.add('show'), 10);
-                
-                // Auto-remove after 5 seconds
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 5000);
-            }
 
             // Toggle password visibility
             function togglePassword(id, icon) {
@@ -593,7 +197,7 @@
                 let isValid = true;
                 
                 if (!password) {
-                    showToast('Current password is required', 'error');
+                    showPopupMessage('Current password is required', 'error');
                     isValid = false;
                 }
                 
@@ -606,19 +210,19 @@
                 let isValid = true;
                 
                 if (!password) {
-                    showToast('New password is required', 'error');
+                   showPopupMessage('New password is required', 'error');
                     isValid = false;
                 } else if (password.length < 8) {
-                    showToast('Password must be at least 8 characters', 'error');
+                   showPopupMessage('Password must be at least 8 characters', 'error');
                     isValid = false;
                 } else if (!/[A-Z]/.test(password)) {
-                    showToast('Password must contain at least one uppercase letter', 'error');
+                    showPopupMessage('Password must contain at least one uppercase letter', 'error');
                     isValid = false;
                 } else if (!/[0-9]/.test(password)) {
-                    showToast('Password must contain at least one number', 'error');
+                    showPopupMessage('Password must contain at least one number', 'error');
                     isValid = false;
                 } else if (!/[^A-Za-z0-9]/.test(password)) {
-                    showToast('Password must contain at least one special character', 'error');
+                    showPopupMessage('Password must contain at least one special character', 'error');
                     isValid = false;
                 }
                 
@@ -632,10 +236,10 @@
                 let isValid = true;
                 
                 if (!confirmPassword) {
-                    showToast('Please confirm your password', 'error');
+                    showPopupMessage('Please confirm your password', 'error');
                     isValid = false;
                 } else if (password !== confirmPassword) {
-                    showToast('Passwords do not match', 'error');
+                    showPopupMessage('Passwords do not match', 'error');
                     isValid = false;
                 }
                 
@@ -680,7 +284,7 @@
                     }
                     
                     // Show success message
-                    showToast('Password updated successfully!', 'success');
+                    showPopupMessage('Password updated successfully!', 'success');
                     
                     // Reset form
                     form.reset();
@@ -693,7 +297,7 @@
                     });
                     
                 } catch (error) {
-                    showToast(error.message, 'error');
+                    showPopupMessage(error.message, 'error');
                     console.error('Password reset error:', error);
                 } finally {
                     // Reset loading state

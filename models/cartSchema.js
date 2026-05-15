@@ -6,7 +6,7 @@ const cartSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    items: [{ 
+    items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
@@ -14,7 +14,8 @@ const cartSchema = new mongoose.Schema({
         },
         variationIndex: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         },
         quantity: {
             type: Number,
@@ -23,13 +24,13 @@ const cartSchema = new mongoose.Schema({
             default: 1
         }
     }], // Close the array definition here
-    subtotal: { type: Number, default: 0 },
-    shippingFee: { type: Number, default: 0 },
-    tax:{ type: Number, default: 0 },
-    couponId:{type:mongoose.Schema.Types.ObjectId, default:null},
-    couponDiscount:{type:Number,default:0},
-    offerDiscount:{type:Number,default:0},
-    totalAmount: { type: Number, default: 0 }
+    subtotal: { type: Number, default: 0, min: 0 },
+    shippingFee: { type: Number, default: 0, min: 0 },
+    tax: { type: Number, default: 0, min: 0 },
+    couponId: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon', default: null },
+    couponDiscount: { type: Number, default: 0, min: 0 },
+    offerDiscount: { type: Number, default: 0, min: 0 },
+    totalAmount: { type: Number, default: 0, min: 0 }
 }, { timestamps: true });
 
 // Middleware to update updatedAt on every save

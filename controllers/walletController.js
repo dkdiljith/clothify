@@ -1,9 +1,46 @@
 const Wallet = require(`../models/walletSchema`)
 const Razorpay = require(`razorpay`)
+
 const razorpay = new Razorpay({
-    key_id: 'rzp_test_TVFPFUZdUa9wz4',
-    key_secret: 'JDjqv22uAP27Xw7LkFRelTkH'
+    key_id: process.env.RAZORPAY_KEY_ID.trim(),
+    key_secret: process.env.RAZORPAY_KEY_SECRET.trim()
 });
+
+
+//MESSAGE_CONSTANTS
+const MESSAGES = require(`../utils/constants`)
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+exports.createWallet = async (userId)=> {
+  try {
+    const existingWallet = await Wallet.findOne({ userId });
+
+    if (existingWallet) {
+      return existingWallet;
+    }
+
+    const newWallet = new Wallet({
+      userId: userId,
+      balance: 0,
+      transactions: [],
+    });
+
+    const savedWallet = await newWallet.save();
+    return savedWallet;
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error
+      console.error("Wallet creation failed: Wallet already exists for this user.");
+      return null; // Or throw a specific error object
+    } else {
+      console.error("Error creating wallet:", error);
+      throw error; // Rethrow other errors
+    }
+  }
+}
+
 
 
 exports.walletRender = async (req, res) => {
@@ -94,7 +131,7 @@ exports.walletPaymentVerification = async (req, res) => {
     const IntegerAmount = parseInt(amount)
 
     // Verify payment signature
-    const hmac = crypto.createHmac('sha256', 'JDjqv22uAP27Xw7LkFRelTkH');
+    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET.trim() );
     hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
     const generatedSignature = hmac.digest('hex');
 
@@ -134,6 +171,16 @@ exports.walletPayment = async (req, res) => {
     const IntegerAmount = parseInt(amount)
 
     try {
+
+        // 25,000 limit 
+        const ORDER_LIMIT = 25000;
+        if (amount > ORDER_LIMIT) {
+            return res.json({
+                success: false,
+                message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`
+            });
+        }
+
         const userId = res.locals.user._id
         if (!userId) {
             return res.status(500).json({ error: `User not found` })

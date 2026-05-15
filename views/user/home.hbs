@@ -1,269 +1,264 @@
 <head>
-	{{!-- ============================================================================================= --}}
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!--===============================================================================================-->
-	<link rel="icon" type="image/png" href="/images/user/images/icons/favicon.png" />
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/stylesheets/user/fonts/linearicons-v1.0.0/icon-font.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/animate/animate.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/animsition/css/animsition.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/select2/select2.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/daterangepicker/daterangepicker.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/slick/slick.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/MagnificPopup/magnific-popup.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/javascripts/user/vendor/perfect-scrollbar/perfect-scrollbar.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/util.css">
-	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/main.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
 
 
+	<!-- Integrated Stylesheet -->
+	<style>
+		.custom-slider-section {
+			width: 100%;
+			position: relative;
+			overflow: hidden;
+		}
 
+		.custom-slider-wrapper {
+			width: 100%;
+			height: 100vh;
+			min-height: 500px;
+			position: relative;
+			background-color: #000;
+		}
 
+		.custom-slide {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			display: flex;
+			align-items: center;
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+			z-index: 1;
+		}
 
+		.custom-slide.active {
+			opacity: 1;
+			visibility: visible;
+			z-index: 2;
+		}
+
+		.custom-slide-container {
+			width: 100%;
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 30px;
+			box-sizing: border-box;
+		}
+
+		.slide-sub {
+			font-family: sans-serif;
+			font-size: 24px;
+			color: #333;
+			display: block;
+			margin-bottom: 15px;
+			opacity: 0;
+			transform: translateY(-40px);
+		}
+
+		.slide-title {
+			font-family: sans-serif;
+			font-size: 60px;
+			font-weight: 700;
+			color: #333;
+			margin: 0 0 35px 0;
+			line-height: 1.1;
+			opacity: 0;
+			transform: translateY(40px);
+		}
+
+		.slide-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 14px 40px;
+			background-color: #717fe0;
+			color: #fff;
+			border-radius: 25px;
+			text-decoration: none;
+			font-weight: 500;
+			text-transform: uppercase;
+			font-size: 14px;
+			letter-spacing: 1px;
+			transition: background-color 0.3s ease, transform 0.3s ease;
+			opacity: 0;
+			transform: scale(0.8);
+		}
+
+		.slide-btn:hover {
+			background-color: #333;
+		}
+
+		/* CSS Text Animation Triggers */
+		.custom-slide.active .anim-text-down {
+			opacity: 1;
+			transform: translateY(0);
+			transition: transform 0.8s ease out, opacity 0.8s ease-out;
+			transition-delay: 0.3s;
+		}
+
+		.custom-slide.active .anim-text-up {
+			opacity: 1;
+			transform: translateY(0);
+			transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+			transition-delay: 0.6s;
+		}
+
+		.custom-slide.active .anim-text-zoom .slide-btn {
+			opacity: 1;
+			transform: scale(1);
+			transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s ease-out;
+			transition-delay: 1.1s;
+		}
+
+		/* Interface Arrow Overlays */
+		.slider-arrow {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			background: rgba(255, 255, 255, 0.2);
+			color: #fff;
+			border: none;
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			font-size: 20px;
+			cursor: pointer;
+			z-index: 10;
+			transition: background 0.3s, color 0.3s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.slider-arrow:hover {
+			background: #717fe0;
+			color: #fff;
+		}
+
+		.prev-arrow {
+			left: 30px;
+		}
+
+		.next-arrow {
+			right: 30px;
+		}
+
+		/* Navigation Dots */
+		.slider-dots {
+			position: absolute;
+			bottom: 30px;
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex;
+			gap: 12px;
+			z-index: 10;
+		}
+
+		.slider-dot {
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			background: rgba(0, 0, 0, 0.2);
+			border: 2px solid #717fe0;
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+
+		.slider-dot.active {
+			background: #717fe0;
+		}
+
+		/* Responsive Mobile Layout Scaling */
+		@media (max-width: 768px) {
+			.custom-slider-wrapper {
+				height: 60vh;
+			}
+
+			.slide-title {
+				font-size: 38px;
+				margin-bottom: 20px;
+			}
+
+			.slide-sub {
+				font-size: 18px;
+			}
+
+			.slider-arrow {
+				width: 40px;
+				height: 40px;
+				font-size: 16px;
+			}
+
+			.prev-arrow {
+				left: 15px;
+			}
+
+			.next-arrow {
+				right: 15px;
+			}
+		}
+	</style>
 </head>
 
 <body style="margin-top:80px;">
 	<div class="animsition">
-		<!-- Cart -->
-		<div class="wrap-header-cart js-panel-cart">
-			<div class="s-full js-hide-cart"></div>
 
-			<div class="header-cart flex-col-l p-l-65 p-r-25">
-				<div class="header-cart-title flex-w flex-sb-m p-b-8">
-					<span class="mtext-103 cl2">
-						Your Cart
-					</span>
 
-					<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
-						<i class="zmdi zmdi-close"></i>
-					</div>
-				</div>
 
-				<div class="header-cart-content flex-w js-pscroll">
-					<ul class="header-cart-wrapitem w-full">
-						<li class="header-cart-item flex-w flex-t m-b-12">
-							<div class="header-cart-item-img">
-								<img src="/images/user/images/item-cart-01.jpg" alt="IMG">
-							</div>
 
-							<div class="header-cart-item-txt p-t-8">
-								<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-									White Shirt Pleat
-								</a>
+		<!-- Modern CSS-Driven Slider -->
+		<section class="custom-slider-section">
+			<div class="custom-slider-wrapper">
 
-								<span class="header-cart-item-info">
-									1 x $19.00
-								</span>
-							</div>
-						</li>
-
-						<li class="header-cart-item flex-w flex-t m-b-12">
-							<div class="header-cart-item-img">
-								<img src="/images/user/images/item-cart-02.jpg" alt="IMG">
-							</div>
-
-							<div class="header-cart-item-txt p-t-8">
-								<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-									Converse All Star
-								</a>
-
-								<span class="header-cart-item-info">
-									1 x $39.00
-								</span>
-							</div>
-						</li>
-
-						<li class="header-cart-item flex-w flex-t m-b-12">
-							<div class="header-cart-item-img">
-								<img src="/images/user/images/item-cart-03.jpg" alt="IMG">
-							</div>
-
-							<div class="header-cart-item-txt p-t-8">
-								<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-									Nixon Porter Leather
-								</a>
-
-								<span class="header-cart-item-info">
-									1 x $17.00
-								</span>
-							</div>
-						</li>
-					</ul>
-
-					<div class="w-full">
-						<div class="header-cart-total w-full p-tb-40">
-							Total: $75.00
-						</div>
-
-						<div class="header-cart-buttons flex-w w-full">
-							<a href="shoping-cart.html"
-								class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
-								View Cart
-							</a>
-
-							<a href="shoping-cart.html"
-								class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
-								Check Out
-							</a>
+				<!-- Slide 1 -->
+				<div class="custom-slide active"
+					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/ryBXLphh/slide-07.jpg');">
+					<div class="custom-slide-container">
+						<span class="anim-text-down slide-sub">Women Collection 2018</span>
+						<h2 class="anim-text-up slide-title">NEW SEASON</h2>
+						<div class="anim-text-zoom">
+							<a href="product.html" class="slide-btn">Shop Now</a>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
 
-
-
-
-
-		<!-- Slider -->
-		<section class="section-slide">
-
-			<div class="wrap-slick1">
-				<div class="slick1">
-					<div class="item-slick1" style="background-image: url(https://i.postimg.cc/5yhmd4K8/slide-01.jpg);">
-						<div class="container h-full">
-							<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-								<div class="layer-slick1 animated visible-false" data-appear="fadeInDown"
-									data-delay="0">
-									<span class="ltext-101 cl2 respon2">
-										Women Collection 2018
-									</span>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="fadeInUp"
-									data-delay="800">
-									<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-										NEW SEASON
-									</h2>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="zoomIn" data-delay="1600">
-									<a href="product.html"
-										class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-										Shop Now
-									</a>
-								</div>
-							</div>
+				<!-- Slide 2 -->
+				<div class="custom-slide"
+					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/kgPjT6jG/slide-05.jpg');">
+					<div class="custom-slide-container">
+						<span class="anim-text-down slide-sub">Men New-Season</span>
+						<h2 class="anim-text-up slide-title">Jackets & Coats</h2>
+						<div class="anim-text-zoom">
+							<a href="product.html" class="slide-btn">Shop Now</a>
 						</div>
 					</div>
+				</div>
 
-
-					<div class="item-slick1" style="background-image: url(https://i.postimg.cc/7LJ0D87V/slide-04.jpg);">
-						<div class="container h-full">
-							<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-								<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
-									<span class="ltext-101 cl2 respon2">
-										Men New-Season
-									</span>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn"
-									data-delay="800">
-									<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-										Jackets & Coats
-									</h2>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="slideInUp"
-									data-delay="1600">
-									<a href="product.html"
-										class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-										Shop Now
-									</a>
-								</div>
-							</div>
+				<!-- Slide 3 -->
+				<div class="custom-slide"
+					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/QMyYk6vZ/slide-04.jpg');">
+					<div class="custom-slide-container">
+						<span class="anim-text-down slide-sub">Men New-Season</span>
+						<h2 class="anim-text-up slide-title">Jackets & Coats</h2>
+						<div class="anim-text-zoom">
+							<a href="product.html" class="slide-btn">Shop Now</a>
 						</div>
 					</div>
+				</div>
 
-					<div class="item-slick1" style="background-image: url(https://i.postimg.cc/q71SfKsn/slide-02.jpg);">
-						<div class="container h-full">
-							<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-								<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
-									<span class="ltext-101 cl2 respon2">
-										Men New-Season
-									</span>
-								</div>
+				<!-- Navigation Controls -->
+				<button class="slider-arrow prev-arrow" aria-label="Previous Slide">&#10094;</button>
+				<button class="slider-arrow next-arrow" aria-label="Next Slide">&#10095;</button>
 
-								<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn"
-									data-delay="800">
-									<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-										Jackets & Coats
-									</h2>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="slideInUp"
-									data-delay="1600">
-									<a href="product.html"
-										class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-										Shop Now
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="item-slick1" style="background-image: url(https://i.postimg.cc/y6DdbXmm/slide-06.jpg);">
-						<div class="container h-full">
-							<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-								<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
-									<span class="ltext-101 cl2 respon2">
-										Men New-Season
-									</span>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn"
-									data-delay="800">
-									<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-										Jackets & Coats
-									</h2>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="slideInUp"
-									data-delay="1600">
-									<a href="product.html"
-										class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-										Shop Now
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="item-slick1" style="background-image: url(https://i.postimg.cc/T3RtRwYc/slide-03.jpg);">
-						<div class="container h-full">
-							<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-								<div class="layer-slick1 animated visible-false" data-appear="rotateInDownLeft"
-									data-delay="0">
-									<span class="ltext-101 cl2 respon2">
-										Men Collection 2018
-									</span>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="rotateInUpRight"
-									data-delay="800">
-									<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-										New arrivals
-									</h2>
-								</div>
-
-								<div class="layer-slick1 animated visible-false" data-appear="rotateIn"
-									data-delay="1600">
-									<a href="product.html"
-										class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-										Shop Now
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
+				<!-- Bullet Indicators -->
+				<div class="slider-dots">
+					<span class="slider-dot active" data-index="0"></span>
+					<span class="slider-dot" data-index="1"></span>
+					<span class="slider-dot" data-index="2"></span>
 				</div>
 			</div>
 		</section>
@@ -271,90 +266,7 @@
 
 
 
-		<!-- Banner -->
-		<div class="sec-banner bg0 p-t-80 p-b-50">
-			<div class="container">
-				<div class="row">
-					<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-						<!-- Block1 -->
-						<div class="block1 wrap-pic-w">
-							<img src="/images/user/images/banner-01.jpg" alt="IMG-BANNER">
 
-							<a href="product.html"
-								class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-								<div class="block1-txt-child1 flex-col-l">
-									<span class="block1-name ltext-102 trans-04 p-b-8">
-										Women
-									</span>
-
-									<span class="block1-info stext-102 trans-04">
-										Spring 2018
-									</span>
-								</div>
-
-								<div class="block1-txt-child2 p-b-4 trans-05">
-									<div class="block1-link stext-101 cl0 trans-09">
-										Shop Now
-									</div>
-								</div>
-							</a>
-						</div>
-					</div>
-
-					<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-						<!-- Block1 -->
-						<div class="block1 wrap-pic-w">
-							<img src="/images/user/images/banner-02.jpg" alt="IMG-BANNER">
-
-							<a href="product.html"
-								class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-								<div class="block1-txt-child1 flex-col-l">
-									<span class="block1-name ltext-102 trans-04 p-b-8">
-										Men
-									</span>
-
-									<span class="block1-info stext-102 trans-04">
-										Spring 2018
-									</span>
-								</div>
-
-								<div class="block1-txt-child2 p-b-4 trans-05">
-									<div class="block1-link stext-101 cl0 trans-09">
-										Shop Now
-									</div>
-								</div>
-							</a>
-						</div>
-					</div>
-
-					<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-						<!-- Block1 -->
-						<div class="block1 wrap-pic-w">
-							<img src="/images/user/images/banner-03.jpg" alt="IMG-BANNER">
-
-							<a href="product.html"
-								class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-								<div class="block1-txt-child1 flex-col-l">
-									<span class="block1-name ltext-102 trans-04 p-b-8">
-										Accessories
-									</span>
-
-									<span class="block1-info stext-102 trans-04">
-										New Trend
-									</span>
-								</div>
-
-								<div class="block1-txt-child2 p-b-4 trans-05">
-									<div class="block1-link stext-101 cl0 trans-09">
-										Shop Now
-									</div>
-								</div>
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 
 
 		<!-- Product -->
@@ -375,7 +287,8 @@
 									{{#if this.details.[0].offerId}}
 									<div class="product-badge sale">Sale</div>
 									<div class="discount-badge">
-										{{calculateDiscountPercentage this.details.[0].price this.details.[0].offerPrice}}% OFF
+										{{calculateDiscountPercentage this.details.[0].price
+										this.details.[0].offerPrice}}% OFF
 									</div>
 									{{/if}}
 
@@ -422,29 +335,7 @@
 				</section>
 
 			</div>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/bootstrap/js/popper.js"></script>
-			<script src="/javascripts/user/vendor/bootstrap/js/bootstrap.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/select2/select2.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/daterangepicker/moment.min.js"></script>
-			<script src="/javascripts/user/vendor/daterangepicker/daterangepicker.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/slick/slick.min.js"></script>
-			<script src="/javascripts/user/js/slick-custom.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/parallax100/parallax100.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/isotope/isotope.pkgd.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/sweetalert/sweetalert.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
-			<!--===============================================================================================-->
-			<script src="/javascripts/user/js/main.js"></script>
+
 			<script>
 				async function addToWishlist(productId, variationIndex) {
 					try {
@@ -456,7 +347,7 @@
 						});
 						const data = await response.json();
 
-						showPopup(data.message, data.success ? "success" : "error");
+						showPopupMessage(data.message, data.success ? "success" : "error");
 
 						if (data.success) {
 							const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
@@ -469,19 +360,10 @@
 						}
 					} catch (error) {
 						console.error("Error adding to wishlist:", error);
-						showPopup("Something went wrong. Please try again.", "error");
+						showPopupMessage("Something went wrong. Please try again.", "error");
 					}
 				}
 
-				function showPopup(message, type = "success") {
-					const popup = document.createElement("div");
-					popup.className = `popup ${type}`;
-					popup.textContent = message;
-					document.body.appendChild(popup);
-					setTimeout(() => {
-						popup.remove();
-					}, 3000);
-				}
 
 				document.addEventListener('DOMContentLoaded', () => {
 					const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
@@ -495,5 +377,70 @@
 					});
 				});
 			</script>
+
+
+
+			<!-- Lightweight Control Script (Vanilla JS) -->
+			<script>
+				document.addEventListener("DOMContentLoaded", function () {
+					const slides = document.querySelectorAll('.custom-slide');
+					const dots = document.querySelectorAll('.slider-dot');
+					const prevBtn = document.querySelector('.prev-arrow');
+					const nextBtn = document.querySelector('.next-arrow');
+					let currentSlide = 0;
+					let slideInterval;
+
+					function showSlide(index) {
+						// Remove active classes
+						slides[currentSlide].classList.remove('active');
+						dots[currentSlide].classList.remove('active');
+
+						// Set new index bounding limits
+						currentSlide = (index + slides.length) % slides.length;
+
+						// Add active classes
+						slides[currentSlide].classList.add('active');
+						dots[currentSlide].classList.add('active');
+					}
+
+					function nextSlide() {
+						showSlide(currentSlide + 1);
+					}
+
+					function prevSlide() {
+						showSlide(currentSlide - 1);
+					}
+
+					function startAutoplay() {
+						clearInterval(slideInterval);
+						slideInterval = setInterval(nextSlide, 6000); // Transitions every 6 seconds
+					}
+
+					// Click event listeners
+					nextBtn.addEventListener('click', () => {
+						nextSlide();
+						startAutoplay();
+					});
+
+					prevBtn.addEventListener('click', () => {
+						prevSlide();
+						startAutoplay();
+					});
+
+					dots.forEach(dot => {
+						dot.addEventListener('click', (e) => {
+							const index = parseInt(e.target.getAttribute('data-index'));
+							showSlide(index);
+							startAutoplay();
+						});
+					});
+
+					// Initialize Slider Runtime Loop
+					startAutoplay();
+				});
+			</script>
+
+
+
 
 </body>

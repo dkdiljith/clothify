@@ -2,18 +2,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Report</title>
-    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/sales-report.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
+
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/salesReport.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
+
     <main class="dashboard-container">
         <div class="users-header">
-            <h1 class="page-title">Sales Report</h1>
+            <h1 class="page-title">
+                Sales Report
+            </h1>
             <div class="export-buttons">
+
                 <button class="export-btn pdf-btn" id="exportPdf">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -25,6 +31,7 @@
                     </svg>
                     Export as PDF
                 </button>
+
                 <button class="export-btn excel-btn" id="exportExcel">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -35,98 +42,181 @@
                     </svg>
                     Export as Excel
                 </button>
+
+                <button class="export-btn csv-btn" id="exportCsv">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zM3 2v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z" />
+                    </svg>
+
+                    Export as CSV
+                </button>
+
             </div>
+
             <div class="filter-container">
+
                 <input type="date" id="startDate" class="date-filter" value="{{startDate}}">
+
                 <span>to</span>
+
                 <input type="date" id="endDate" class="date-filter" value="{{endDate}}">
-                <button id="applyFilter" class="btn-filter">Apply Filter</button>
+
+                <button id="applyFilter" class="btn-filter">
+                    Apply Filter
+                </button>
+
             </div>
+
         </div>
 
         {{#if orders.length}}
+
         <div class="users-table">
+
             <table id="salesTable">
+
                 <thead>
+
                     <tr>
                         <th></th>
                         <th>Order ID</th>
                         <th>Date</th>
-                        <th>Coustomer</th>
-                        <th>Products</th>
+                        <th>Customer</th>
                         <th>Payment</th>
                         <th>Total Amount</th>
                     </tr>
+
                 </thead>
+
                 <tbody id="ordersTableBody">
+
                     {{#each orders}}
+
                     <tr>
-                        <td>{{incrementedIndex @index}}</td>
-                        <td>#{{this.orderId}}</td>
-                        <td>{{formatDate this.createdAt}}</td>
-                        <td>{{this.deliveryAddress.name}}</td>
+
                         <td>
-                            {{#each this.items}}
-                            <div class="product-item">
-                                {{this.productName}} ({{this.productSize}}) × {{this.quantity}}<br>
+                            {{serialNumber ../pagination.serialNumberStart @index}}
+                        </td>
+
+
+
+                        <td>
+                            <img src="https://i.postimg.cc/KvXw8MSK/2660420.png" class="user-avatar" alt="Avatar"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            <div class="order-number-container">
+                                #{{this.orderId}}
                             </div>
-                            {{/each}}
                         </td>
+
                         <td>
-                            {{this.paymentMethod}}<br>
+                            {{formatDate this.createdAt}}
                         </td>
+
                         <td>
-                            ₹{{this.totalAmount}}<br>
+                            {{this.deliveryAddress.name}}
                         </td>
+
+                        <td>
+                            {{this.paymentMethod}}
+                        </td>
+
+                        <td>
+                            ₹{{this.totalAmount}}
+                        </td>
+
                     </tr>
+
                     {{/each}}
+
                 </tbody>
+
             </table>
 
             {{#if (gt pagination.totalPages 1)}}
 
             <div class="pagination">
+
                 {{#if pagination.hasPrevPage}}
+
                 <a href="/admin/salesReport?page={{pagination.prevPage}}{{#if startDate}}&startDate={{startDate}}&endDate={{endDate}}{{/if}}"
                     class="pagination-button">
-                    <i class="fas fa-chevron-left"></i> Previous
+
+                    <i class="fas fa-chevron-left"></i>
+
+                    Previous
+
                 </a>
+
                 {{/if}}
 
                 <span class="pagination-info">
-                    Page {{pagination.page}} of {{pagination.totalPages}}
+
+                    Page
+                    {{pagination.page}}
+                    of
+                    {{pagination.totalPages}}
+
                 </span>
 
                 {{#if pagination.hasNextPage}}
+
                 <a href="/admin/salesReport?page={{pagination.nextPage}}{{#if startDate}}&startDate={{startDate}}&endDate={{endDate}}{{/if}}"
                     class="pagination-button">
-                    Next <i class="fas fa-chevron-right"></i>
+
+                    Next
+
+                    <i class="fas fa-chevron-right"></i>
+
                 </a>
+
                 {{/if}}
+
             </div>
 
-            {{/if}}
-            {{else}}
-            <div class="empty-state">
-                <!-- Sales/analytics icon as SVG - consistent with your other pages -->
-                <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <h2>No Sales Data Available</h2>
-                <p>There are currently no sales records for the selected period.</p>
-                <div class="empty-state-actions">
-                    <a href="/admin/salesReport" class="btn btn-primary">Refresh</a>
-                </div>
-            </div>
             {{/if}}
 
         </div>
+
+        {{else}}
+
+        <div class="empty-state">
+
+            <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+
+            </svg>
+
+            <h2>
+                No Sales Data Available
+            </h2>
+
+            <p>
+                There are currently no sales records for the selected period.
+            </p>
+
+            <div class="empty-state-actions">
+
+                <a href="/admin/salesReport" class="btn btn-primary">
+
+                    Refresh
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {{/if}}
+
     </main>
+
     <script src="/javascripts/admin/usersList.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
-    <script src="/javascripts/admin/sales-report.js"></script>
+
+    <script src="/javascripts/admin/salesReport.js"></script>
+
 </body>
