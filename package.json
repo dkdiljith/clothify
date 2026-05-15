@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^2.0.3",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "~1.4.4",
     "cropper": "^4.1.0",
     "debug": "~2.6.9",
