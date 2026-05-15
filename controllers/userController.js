@@ -203,9 +203,7 @@ exports.register = async (req, res) => {
       );
 
       if (checkPassword) {
-        if (!req.session.unknown_user) {
-          return res.render('user/register', { message: "user not found", isAdminLogin: true });
-        }
+        
         req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
         await verificationEmailSend(req.body.email, verificationToken);
         return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
@@ -228,9 +226,6 @@ exports.register = async (req, res) => {
       let result = await user.save();
 
       if (result) {
-        if (!req.session.unknown_user) {
-          return res.render('user/register', { message: "user not found", isAdminLogin: true });
-        }
         req.session.unknown_user = { _id: user._id, email: user.email }
         await verificationEmailSend(req.body.email, verificationToken);
         user.verificationAttempts += 1

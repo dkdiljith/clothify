@@ -7,105 +7,108 @@
     <title>My Wishlist | Your Favorite Products</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
-     <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/wishlist.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/wishlist.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
 </head>
 
 <body>
 
     <br><br>
     <br><br>
-    <div class="container">
-        <div class="wishlist-header">
-            <h1 class="wishlist-title">My Wishlist</h1>
-            <div class="wishlist-count">{{product.length}} items</div>
-        </div>
-
-        <div class="wishlist-content">
-            {{#if (isEmpty product)}}
-            <div class="empty-wishlist">
-                <div class="empty-wishlist-icon">
-                    <i class="far fa-heart"></i>
-                </div>
-                <h3 class="empty-wishlist-title">Your Wishlist is Empty</h3>
-                <p class="empty-wishlist-text">You haven't added any products to your wishlist yet. Start shopping to add your favorite items!</p>
-                <a href="/user/home" class="btn-shop">
-                    <i class="fas fa-arrow-left"></i> Continue Shopping
-                </a>
+    <div class="wishlist-page">
+        <div class="wishlist-container">
+            <div class="wishlist-header">
+                <h1 class="wishlist-title">My Wishlist</h1>
+                <div class="wishlist-count">{{product.length}} items</div>
             </div>
-            {{else}}
-            <div class="featured-products-grid">
-                {{#each product}}
-                <div style="margin-bottom:25px">
-                <div class="product-card" data-product-id="{{this._id}}">
-                    {{#if this.latestCollection}}
-                    <div class="product-badge">New</div>
-                    {{/if}}
-                    {{#if this.details.[0].offerId}}
-                    <div class="product-badge sale">Sale</div>
-                    <div class="discount-badge">
-                        {{calculateDiscountPercentage this.details.[0].price this.details.[0].offerPrice}}% OFF
-                    </div>
-                    {{/if}}
 
-                    <div class="product-image">
-                        <a href="/user/singleproduct/{{this._id}}">
-                            <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
-                        </a>
-                        <div class="product-wishlist-container">
-                            <button class="remove-from-wishlist" data-product-id="{{this._id}}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+            <div class="wishlist-content">
+                {{#if (isEmpty product)}}
+                <div class="empty-wishlist">
+                    <div class="empty-wishlist-icon">
+                        <i class="far fa-heart"></i>
                     </div>
-                    <div class="product-details">
-                        <h3 class="product-title">
-                            <a href="/user/singleproduct/{{this._id}}">{{this.name}}</a>
-                        </h3>
-                        <div class="price-container">
-                            {{#if this.details.[0].offerId}}
-                            <span class="original-price">₹{{this.details.[0].price}}</span>
-                            <span class="product-price">₹{{this.details.[0].offerPrice}}</span>
-                            {{else}}
-                            <span class="product-price">₹{{this.details.[0].price}}</span>
+                    <h3 class="empty-wishlist-title">Your Wishlist is Empty</h3>
+                    <p class="empty-wishlist-text">You haven't added any products to your wishlist yet. Start shopping
+                        to add your favorite items!</p>
+                    <a href="/user/home" class="btn-shop">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+                {{else}}
+                <div class="featured-products-grid">
+                    {{#each product}}
+                    <div style="margin-bottom:25px">
+                        <div class="product-card" data-product-id="{{this._id}}">
+                            {{#if this.latestCollection}}
+                            <div class="product-badge">New</div>
                             {{/if}}
+                            {{#if this.details.[0].offerId}}
+                            <div class="product-badge sale">Sale</div>
+                            <div class="discount-badge">
+                                {{calculateDiscountPercentage this.details.[0].price this.details.[0].offerPrice}}% OFF
+                            </div>
+                            {{/if}}
+
+                            <div class="product-image">
+                                <a href="/user/singleproduct/{{this._id}}">
+                                    <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
+                                </a>
+                                <div class="product-wishlist-container">
+                                    <button class="remove-from-wishlist" data-product-id="{{this._id}}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="product-details">
+                                <h3 class="product-title">
+                                    <a href="/user/singleproduct/{{this._id}}">{{this.name}}</a>
+                                </h3>
+                                <div class="price-container">
+                                    {{#if this.details.[0].offerId}}
+                                    <span class="original-price">₹{{this.details.[0].price}}</span>
+                                    <span class="product-price">₹{{this.details.[0].offerPrice}}</span>
+                                    {{else}}
+                                    <span class="product-price">₹{{this.details.[0].price}}</span>
+                                    {{/if}}
+                                </div>
+                                {{#if this.bestSeller}}
+                                <div class="best-seller-badge">Bestseller</div>
+                                {{/if}}
+                            </div>
+                            <div class="product-actions">
+                                <button onclick="addToCart('{{this._id}}', '0' , '1')" class="add-to-cart">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </div>
                         </div>
-                        {{#if this.bestSeller}}
-                        <div class="best-seller-badge">Bestseller</div>
-                        {{/if}}
                     </div>
-                    <div class="product-actions">
-                        <button onclick="addToCart('{{this._id}}', '0' , '1')" class="add-to-cart">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                    </div>
+                    {{/each}}
                 </div>
+                {{/if}}
+
+                {{#if (gt pagination.totalPages 1)}}
+                <div class="pagination">
+                    {{#if pagination.hasPrevPage}}
+                    <a href="/user/wishlist?page={{pagination.prevPage}}" class="pagination-button">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    {{/if}}
+
+                    <span class="pagination-info">
+                        Page {{pagination.page}} of {{pagination.totalPages}}
+                    </span>
+
+                    {{#if pagination.hasNextPage}}
+                    <a href="/user/wishlist?page={{pagination.nextPage}}" class="pagination-button">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {{/if}}
                 </div>
-                {{/each}}
+                {{/if}}
+
+
             </div>
-            {{/if}}
-
-            {{#if (gt pagination.totalPages 1)}}
-<div class="pagination">
-    {{#if pagination.hasPrevPage}}
-    <a href="/user/wishlist?page={{pagination.prevPage}}" class="pagination-button">
-        <i class="fas fa-chevron-left"></i> Previous
-    </a>
-    {{/if}}
-
-    <span class="pagination-info">
-        Page {{pagination.page}} of {{pagination.totalPages}}
-    </span>
-
-    {{#if pagination.hasNextPage}}
-    <a href="/user/wishlist?page={{pagination.nextPage}}" class="pagination-button">
-        Next <i class="fas fa-chevron-right"></i>
-    </a>
-    {{/if}}
-</div>
-{{/if}}
-
-
         </div>
     </div>
 
@@ -141,7 +144,7 @@
             if (countElement) {
                 countElement.textContent = `${productCards.length} items`;
             }
-            
+
             if (productCards.length === 0) {
                 const wishlistContent = document.querySelector('.wishlist-content');
                 wishlistContent.innerHTML = `
@@ -183,13 +186,13 @@
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     const data = await response.json();
                     showPopupMessage(data.message, data.success ? "success" : "error");
 
                     if (data.success) {
                         removeFromWishlist(productId);
-                        
+
                         if (data.cartCount) {
                             updateCartCount(data.cartCount);
                         }
@@ -211,4 +214,5 @@
         }
     </script>
 </body>
+
 </html>

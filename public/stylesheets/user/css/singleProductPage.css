@@ -25,12 +25,6 @@ body {
   box-sizing: border-box;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
 /* Breadcrumbs */
 .breadcrumb-nav {
   background-color: var(--light-color);
