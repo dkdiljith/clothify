@@ -269,7 +269,12 @@ exports.login = async (req, res) => {
     }
 
     // Save session
-    req.session.user = { _id: user._id };
+    req.session.user = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || null
+    };
 
     // Create wallet if needed
     await createWallet(user._id);
@@ -311,7 +316,12 @@ exports.emailVerification = async (req, res) => {
         user.verificationTimer = null
         await user.save();
 
-        req.session.user = { _id: user._id };
+        req.session.user = {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone || null
+        };
         createWallet(user._id);
 
 

@@ -237,9 +237,10 @@
                                 showPopupMessage("Something went wrong during verification", "error");
                             }
                         },
-                        prefill: {
-                            name: "User Name",
-                            email: "user@example.com"
+                        "prefill": {
+                            "name": "{{user.name}}",
+                            "email": "{{user.email}}",
+                            "contact": "{{user.phone}}"
                         },
                         theme: {
                             color: "#3399cc"

@@ -23,7 +23,6 @@ exports.userAuth = async (req, res, next) => {
             });
         }
 
-        res.locals.user = user;
         next();
     } catch (error) {
         console.error("User Auth Error:", error);

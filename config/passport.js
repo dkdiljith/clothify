@@ -17,7 +17,7 @@ passport.use(new GoogleStrategy(
     clientID: process.env.GOOGLE_CLIENT_ID.trim(),
     clientSecret: process.env.GOOGLE_CLIENT_SECRET.trim(),
     callbackURL: '/user/auth/google/callback',
-    proxy: true 
+    proxy: true
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -80,7 +80,12 @@ const googleCallback = (req, res, next) => {
     req.login(user, { keepSessionInfo: true }, (err) => {
       if (err) return next(err);
 
-      req.session.user = { _id: user._id };
+      req.session.user = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || null
+      };
 
       return res.redirect('/user/home');
     });

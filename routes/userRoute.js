@@ -8,6 +8,12 @@ const passport = passportFile.passport
 router.use(passport.initialize());
 router.use(passport.session());
 
+//session for user
+router.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
 //RAZORPAY integration//
 const razorpay = require(`../services/razorpay`)
 
