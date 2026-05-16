@@ -1,6 +1,5 @@
 <head>
     <link rel="stylesheet" type="text/css" href="/stylesheets/admin/products.css" />
-    <script src="/javascripts/admin/admin-sidebar.js" defer></script>
 </head>
 
 <body>
@@ -258,7 +257,6 @@
         </div>
     </div>
 
-    <script src="/javascripts/admin/product.js" defer></script>
     <script>
         async function handleBlock(productId) {
             const response = await fetch(`/admin/blockProduct/${productId}`);
@@ -271,4 +269,6 @@
             }
         }
     </script>
+
+    <script src="/javascripts/admin/product.js" defer></script>
 </body>

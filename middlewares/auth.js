@@ -17,8 +17,6 @@ exports.userAuth = async (req, res, next) => {
         const user = await User.findById(req.session.user._id).lean();
 
         if (!user || user.blocked || !user.isActive) {
-            delete req.session.user;
-
             return req.session.save(() => {
                 if (user?.blocked || !user.isActive) return ErrorMessage.userUnavailableError(req, res);
                 return res.redirect('/user/login');
@@ -32,6 +30,10 @@ exports.userAuth = async (req, res, next) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+
+
 
 // --- ADMIN MIDDLEWARE ---
 exports.adminAuth = async (req, res, next) => {

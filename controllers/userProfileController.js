@@ -192,7 +192,6 @@ exports.userOrders = async (req, res) => {
 
         return res.render('user/userOrders', {
             orders,
-            no_user_header: true,
             pagination: {
                 currentPage: page,
                 limit,
@@ -205,7 +204,6 @@ exports.userOrders = async (req, res) => {
         console.error('Error fetching orders:', error);
         return res.render('user/userOrders', {
             orders: [],
-            no_user_header: true,
             pagination: {
                 currentPage: 1,
                 limit,
@@ -263,15 +261,6 @@ exports.userOrderDetails = async (req, res) => {
 
 
     return res.render(`user/orderDetails`, { order: order, item: item })
-}
-
-
-
-exports.invoice_render = async (req, res) => {
-    const orderId = req.params.orderId;
-    const order = await Order.findById(orderId).lean();
-
-    return res.render('user/order-invoice', { order, no_user_header: true })
 }
 
 

@@ -287,6 +287,7 @@ exports.renderEditForm = async (req, res) => {
 
   } catch (error) {
     console.error("Error rendering edit form:", error);
+    console.log("error....................................................")
     return res.status(500).render('error', { message: 'Failed to load edit form' });
   }
 };
@@ -816,7 +817,7 @@ exports.placeOrderFailed = async (req, res) => {
   console.log("Razopray faile order is working...................................")
   try {
     const userId = res.locals.user._id;
-    const { addressId, reason} = req.body;
+    const { addressId, reason } = req.body;
     const paymentMethod = 'razorpay'
 
 
@@ -957,9 +958,9 @@ exports.placeOrderFailed = async (req, res) => {
 
 
 exports.orderSuccess = (req, res) => {
-  res.render('user/orderSuccess', { isAdminLogin: true });
+  res.render('user/orderSuccess', { plain_body: true });
 }
 
 exports.orderFailed = (req, res) => {
-  res.render('user/orderFailure', { isAdminLogin: true })
+  res.render('user/orderFailure', { plain_body: true })
 }

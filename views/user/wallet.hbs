@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallet | Clothify</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/wallet.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/wallet.css">
 </head>
 
 <body>
@@ -225,7 +218,7 @@
         <span id="notification-message"></span>
     </div>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script>
         // Show add funds modal
         function showAddFundsModal() {
@@ -322,7 +315,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                 showPopupMessage(error.message, 'error');
+                showPopupMessage(error.message, 'error');
             }
         }
 
@@ -334,6 +327,5 @@
             }
         }
     </script>
+    
 </body>
-
-</html>

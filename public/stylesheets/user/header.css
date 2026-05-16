@@ -4,9 +4,11 @@
 
 .user-header {
     width: 100%;
+
     position: fixed;
     top: 0;
     left: 0;
+
     z-index: 1200;
 
     background: rgba(255, 255, 255, 0.92);
@@ -17,6 +19,10 @@
     border-bottom: 1px solid rgba(230, 230, 230, 0.7);
 }
 
+body {
+    padding-top: 84px;
+}
+
 
 /* =========================================================
    DESKTOP WRAPPER
@@ -25,6 +31,7 @@
 .user-header-desktop {
     width: 100%;
     height: 84px;
+
     transition: all 0.3s ease;
 }
 
@@ -46,6 +53,7 @@
 .user-header-logo {
     display: flex;
     align-items: center;
+
     flex-shrink: 0;
 }
 
@@ -274,6 +282,7 @@
 
 .user-header-icon:hover {
     background: #f5f5f5;
+
     transform: translateY(-1px);
 }
 
@@ -345,7 +354,6 @@
     display: none;
 
     opacity: 0;
-
     visibility: hidden;
 
     transform: translateY(-10px);
@@ -395,6 +403,7 @@
 
 .user-header-dropdown-link i {
     width: 18px;
+
     text-align: center;
 }
 
@@ -403,6 +412,236 @@
 }
 
 .user-header-logout {
+    color: #d11a2a !important;
+}
+
+
+/* =========================================================
+   MOBILE TOGGLE
+========================================================= */
+
+.user-header-mobile-toggle {
+    display: none;
+
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    padding: 0;
+
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.user-header-mobile-toggle span {
+    width: 22px;
+    height: 2px;
+
+    background: #111;
+
+    border-radius: 20px;
+
+    transition: all 0.3s ease;
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+.user-mobile-menu {
+    position: fixed;
+
+    top: 0;
+    left: -100%;
+
+    width: 290px;
+    max-width: 85%;
+
+    height: 100vh;
+
+    background: #fff;
+
+    z-index: 1400;
+
+    padding: 24px 20px;
+
+    transition: left 0.35s ease;
+
+    box-shadow:
+        4px 0 30px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.show-mobile-menu {
+    left: 0;
+}
+
+
+/* =========================================================
+   MOBILE OVERLAY
+========================================================= */
+
+.user-mobile-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    opacity: 0;
+    visibility: hidden;
+
+    z-index: 1300;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.show-mobile-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* =========================================================
+   MOBILE MENU HEADER
+========================================================= */
+
+.user-mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 40px;
+}
+
+.user-mobile-menu-header img {
+    width: 130px;
+}
+
+.user-mobile-close {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f5f5f5;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =========================================================
+   MOBILE LINKS
+========================================================= */
+
+/* =========================================================
+   MOBILE SEARCH
+========================================================= */
+
+.user-mobile-search-form {
+    margin-bottom: 18px;
+}
+
+.user-mobile-search {
+    position: relative;
+}
+
+.user-mobile-search input {
+
+    box-sizing: border-box;
+    width: 100%;
+    height: 46px;
+
+    border: 1px solid #e4e4e4;
+    border-radius: 999px;
+
+    padding: 0 46px 0 16px;
+
+    font-size: 14px;
+
+    background: #fafafa;
+
+    outline: none;
+}
+
+.user-mobile-search input:focus {
+
+    box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.06);
+    border-color: #111;
+
+    background: #fff;
+}
+
+.user-mobile-search button {
+    position: absolute;
+
+    top: 50%;
+    right: 14px;
+
+    transform: translateY(-50%);
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    color: #666;
+
+    font-size: 14px;
+}
+
+
+.user-mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.user-mobile-menu-links a {
+    text-decoration: none;
+
+    color: #111;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    padding: 14px 16px;
+
+    border-radius: 14px;
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease;
+}
+
+.user-mobile-menu-links a:hover {
+    background: #f7f7f7;
+
+    transform: translateX(3px);
+}
+
+.mobile-logout {
     color: #d11a2a !important;
 }
 
@@ -418,23 +657,6 @@
 
     box-shadow:
         0 4px 18px rgba(0, 0, 0, 0.04);
-}
-
-
-/* =========================================================
-   MOBILE HEADER
-========================================================= */
-
-.user-header-mobile {
-    height: 70px;
-
-    background: rgba(255, 255, 255, 0.96);
-
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    box-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 
@@ -461,8 +683,45 @@
 
 @media (max-width: 991px) {
 
+    body {
+    padding-top: 72px;
+}
+
     .user-header {
+        display: block;
+    }
+
+    .user-header-desktop {
+        height: 72px;
+    }
+
+    .user-header-container {
+        gap: 12px;
+    }
+
+    .user-header-menu-wrapper {
         display: none;
+    }
+
+    .user-header-search-form {
+        display: none;
+    }
+
+    .user-header-mobile-toggle {
+        display: flex;
+    }
+
+    .user-header-logo img {
+        width: 120px;
+    }
+
+    .user-header-icons {
+        gap: 2px;
+    }
+
+    .user-header-icon {
+        width: 40px;
+        height: 40px;
     }
 
 }
@@ -474,8 +733,46 @@
         width: 200px;
     }
 
+    .user-mobile-menu {
+        width: 260px;
+    }
+
 }
 
+
+@media (max-width: 480px) {
+
+    body {
+    padding-top: 68px;
+}
+
+    .user-header-desktop {
+        height: 68px;
+    }
+
+    .user-header-logo img {
+        width: 105px;
+    }
+
+    .user-header-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .user-header-icon i {
+        font-size: 17px;
+    }
+
+    .user-mobile-menu {
+        width: 240px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 

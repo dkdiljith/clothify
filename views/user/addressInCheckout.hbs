@@ -1,17 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Delivery Address</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/addressInCheckout.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/addressInCheckout.css">
 </head>
-
-<br><br>
-<br><br>
 
 <body>
 
@@ -20,10 +10,32 @@
         <div class="address-container">
             <div class="address-section">
                 <div class="section-header">
-                    <h1>Select Delivery Address</h1>
-                    <button class="btn-add-address" id="addAddressBtn">
-                        <i class="fas fa-plus"></i> Add New Address
-                    </button>
+                    <div class="checkout-page-header">
+
+                        <h1 class="checkout-page-title">
+                            Select Delivery Address
+                        </h1>
+
+                        <p class="checkout-page-subtitle">
+                            Choose where you’d like your order delivered.
+                        </p>
+
+                    </div>
+                    <div style="margin-right: 50px;"></div>
+
+
+                    <div class="section-header">
+
+                        <button style="margin-top: 10px;" class="btn-add-address" id="addAddressBtn">
+
+                            <i class="fas fa-plus"></i>
+
+                            Add New Address
+
+                        </button>
+
+                    </div>
+
                 </div>
 
                 {{#if address.length}}
@@ -484,8 +496,4 @@
         });
     </script>
 
-    <br><br>
-
 </body>
-
-</html>

@@ -1,0 +1,803 @@
+/* =========================================================
+   CHECKOUT ADDRESS PAGE
+========================================================= */
+
+body {
+    background: #f8f8f8;
+
+    color: #222;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.address-container {
+    display: flex;
+
+    gap: 28px;
+
+    padding: 40px 0 70px;
+}
+
+
+/* =========================================================
+   LEFT SECTION
+========================================================= */
+
+.address-section {
+    flex: 2;
+
+    background: #fff;
+
+    border-radius: 24px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.checkout-page-header {
+    text-align: center;
+
+    margin-bottom: 34px;
+}
+
+.checkout-page-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+
+    color: #222;
+
+    letter-spacing: -1px;
+
+    margin-bottom: 14px;
+}
+
+.checkout-page-subtitle {
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    color: #666;
+
+    line-height: 1.7;
+
+    font-size: 0.96rem;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-header {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   ADD ADDRESS BUTTON
+========================================================= */
+
+.btn-add-address {
+    height: 48px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: #e65540;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+}
+
+.btn-add-address:hover {
+    background: #d94c37;
+
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   ADDRESS LIST
+========================================================= */
+
+.address-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   ADDRESS CARD
+========================================================= */
+
+.address-card {
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding: 22px;
+
+    border-radius: 20px;
+
+    background: #fff;
+
+    border: 1px solid #ececec;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.address-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.address-card.selected {
+    border-color: #e65540;
+
+    background: #fffaf8;
+}
+
+
+/* =========================================================
+   RADIO
+========================================================= */
+
+.address-radio {
+    position: absolute;
+
+    top: 20px;
+    right: 20px;
+
+    width: 18px;
+    height: 18px;
+
+    accent-color: #e65540;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   ADDRESS DETAILS
+========================================================= */
+
+.address-details {
+    flex: 1;
+}
+
+.address-name {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #222;
+}
+
+.address-type {
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    background: #fff1ef;
+
+    color: #e65540;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+}
+
+.address-text {
+    color: #666;
+
+    line-height: 1.7;
+
+    margin-bottom: 4px;
+
+    font-size: 14px;
+}
+
+.address-phone,
+.address-pod {
+    margin-top: 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.address-phone {
+    color: #222;
+}
+
+.address-pod {
+    color: #27ae60;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.address-actions {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    min-width: 110px;
+}
+
+.btn-edit,
+.btn-remove {
+    height: 42px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.btn-edit {
+    background: #fff4df;
+
+    color: #e67e22;
+}
+
+.btn-edit:hover {
+    background: #ffeed2;
+
+    transform: translateY(-1px);
+}
+
+.btn-remove {
+    background: #fff1ef;
+
+    color: #e65540;
+}
+
+.btn-remove:hover {
+    background: #ffe6e1;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-address {
+    text-align: center;
+
+    padding: 70px 20px;
+
+    border: 2px dashed #ececec;
+
+    border-radius: 24px;
+}
+
+.empty-address i {
+    font-size: 56px;
+
+    color: #d0d0d0;
+
+    margin-bottom: 20px;
+}
+
+.empty-address h3 {
+    font-size: 1.7rem;
+    font-weight: 700;
+
+    color: #222;
+
+    margin-bottom: 12px;
+}
+
+.empty-address p {
+    color: #666;
+
+    max-width: 500px;
+
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   SUMMARY SECTION
+========================================================= */
+
+.order-summary-section {
+    flex: 1;
+
+    position: sticky;
+
+    top: 100px;
+
+    height: fit-content;
+}
+
+.price-summary {
+    background: #fff;
+
+    border-radius: 24px;
+
+    padding: 28px;
+
+    margin-bottom: 18px;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.price-summary h2 {
+    font-size: 22px;
+    font-weight: 700;
+
+    color: #222;
+
+    margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   SUMMARY ITEMS
+========================================================= */
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    margin-bottom: 16px;
+
+    color: #555;
+
+    font-size: 15px;
+}
+
+.summary-item.total {
+    border-top: 1px solid #ececec;
+
+    padding-top: 18px;
+
+    margin-top: 18px;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #222;
+}
+
+
+/* =========================================================
+   CONTINUE BUTTON
+========================================================= */
+
+.btn-continue {
+    width: 100%;
+    height: 52px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    background: #e65540;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+}
+
+.btn-continue:hover {
+    background: #d94c37;
+
+    transform: translateY(-2px);
+}
+
+.btn-continue:disabled {
+    background: #d2d2d2;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    width: 92%;
+    max-width: 620px;
+
+    margin: 50px auto;
+
+    background: #fff;
+
+    border-radius: 24px;
+
+    padding: 30px;
+
+    position: relative;
+
+    animation: modalSlide 0.3s ease;
+}
+
+@keyframes modalSlide {
+
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+}
+
+.close {
+    position: absolute;
+
+    top: 18px;
+    right: 20px;
+
+    font-size: 22px;
+
+    color: #999;
+
+    cursor: pointer;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+
+    color: #222;
+
+    margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.address-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    height: 48px;
+
+    border: 1px solid #e6e6e6;
+
+    border-radius: 14px;
+
+    padding: 0 16px;
+
+    font-size: 14px;
+
+    background: #fff;
+
+    outline: none;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #e65540;
+
+    box-shadow:
+        0 4px 14px rgba(230, 85, 64, 0.12);
+}
+
+.error-message {
+    color: #e65540;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 12px;
+}
+
+.btn-save,
+.btn-cancel {
+    height: 48px;
+
+    padding: 0 22px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.btn-save {
+    background: #e65540;
+
+    color: #fff;
+}
+
+.btn-save:hover {
+    background: #d94c37;
+
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: #f2f2f2;
+
+    color: #444;
+}
+
+.btn-cancel:hover {
+    background: #e8e8e8;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 992px) {
+
+    .address-container {
+        flex-direction: column;
+    }
+
+    .order-summary-section {
+        position: static;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .address-container {
+        padding: 24px 0 50px;
+    }
+
+    .address-section,
+    .price-summary {
+        padding: 20px;
+
+        border-radius: 20px;
+    }
+
+    .address-card {
+        flex-direction: column;
+    }
+
+    .address-actions {
+        flex-direction: row;
+
+        width: 100%;
+    }
+
+    .btn-edit,
+    .btn-remove {
+        flex: 1;
+    }
+
+    .modal-content {
+        padding: 22px;
+
+        border-radius: 20px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 576px) {
+
+    .address-section,
+    .price-summary {
+        padding: 16px;
+
+        border-radius: 18px;
+    }
+
+    .checkout-page-title {
+        font-size: 1.9rem;
+    }
+
+    .address-card {
+        padding: 18px;
+
+        border-radius: 18px;
+    }
+
+    .address-name {
+        font-size: 16px;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-save,
+    .btn-cancel {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   EXTRA SMALL
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .checkout-page-title {
+        font-size: 1.7rem;
+    }
+
+    .summary-item {
+        font-size: 14px;
+    }
+
+    .summary-item.total {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+
+}

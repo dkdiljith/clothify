@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security & Password | Clothify</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/security.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/security.css">
 </head>
 
 <body>
@@ -55,15 +48,17 @@
                     <h2 class="security-section-title">
                         <i class="fas fa-key" style="margin-right: 10px;"></i>Change Password
                     </h2>
-                    
+
                     <form id="resetPasswordForm" novalidate>
                         <input type="hidden" id="token" name="token" value="{{token}}">
 
                         <div class="form-group">
                             <label for="currentPassword" class="form-label">Current Password</label>
                             <div class="input-group">
-                                <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
-                                <i class="fas fa-eye password-toggle" onclick="togglePassword('currentPassword', this)"></i>
+                                <input type="password" id="currentPassword" name="currentPassword" class="form-control"
+                                    required>
+                                <i class="fas fa-eye password-toggle"
+                                    onclick="togglePassword('currentPassword', this)"></i>
                             </div>
                             <div id="currentPasswordError" class="error-message"></div>
                         </div>
@@ -71,7 +66,8 @@
                         <div class="form-group">
                             <label for="newPassword" class="form-label">New Password</label>
                             <div class="input-group">
-                                <input type="password" id="newPassword" name="newPassword" class="form-control" required>
+                                <input type="password" id="newPassword" name="newPassword" class="form-control"
+                                    required>
                                 <i class="fas fa-eye password-toggle" onclick="togglePassword('newPassword', this)"></i>
                             </div>
                             <div class="password-strength">
@@ -93,8 +89,10 @@
                         <div class="form-group">
                             <label for="confirmPassword" class="form-label">Confirm New Password</label>
                             <div class="input-group">
-                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
-                                <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                                    required>
+                                <i class="fas fa-eye password-toggle"
+                                    onclick="togglePassword('confirmPassword', this)"></i>
                             </div>
                             <div id="confirmPasswordError" class="error-message"></div>
                         </div>
@@ -115,7 +113,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('resetPasswordForm');
             const currentPasswordInput = document.getElementById('currentPassword');
             const newPasswordInput = document.getElementById('newPassword');
@@ -154,30 +152,30 @@
             function calculatePasswordStrength(password) {
                 let strength = 0;
                 let messages = [];
-                
+
                 // Length
                 if (password.length >= 8) strength += 25;
                 if (password.length >= 12) strength += 15;
-                
+
                 // Complexity
                 if (/[A-Z]/.test(password)) strength += 20;
                 if (/[0-9]/.test(password)) strength += 20;
                 if (/[^A-Za-z0-9]/.test(password)) strength += 20;
-                
+
                 // Update requirement indicators
                 reqLength.classList.toggle('valid', password.length >= 8);
                 reqUppercase.classList.toggle('valid', /[A-Z]/.test(password));
                 reqNumber.classList.toggle('valid', /[0-9]/.test(password));
                 reqSpecial.classList.toggle('valid', /[^A-Za-z0-9]/.test(password));
-                
+
                 return Math.min(strength, 100);
             }
 
             // Update password strength meter
-            newPasswordInput.addEventListener('input', function() {
+            newPasswordInput.addEventListener('input', function () {
                 const strength = calculatePasswordStrength(this.value);
                 passwordStrengthBar.style.width = `${strength}%`;
-                
+
                 // Update color and text based on strength
                 if (strength < 40) {
                     passwordStrengthBar.style.backgroundColor = 'var(--accent-color)';
@@ -195,12 +193,12 @@
             function validateCurrentPassword() {
                 const password = currentPasswordInput.value;
                 let isValid = true;
-                
+
                 if (!password) {
                     showPopupMessage('Current password is required', 'error');
                     isValid = false;
                 }
-                
+
                 return isValid;
             }
 
@@ -208,12 +206,12 @@
             function validateNewPassword() {
                 const password = newPasswordInput.value;
                 let isValid = true;
-                
+
                 if (!password) {
-                   showPopupMessage('New password is required', 'error');
+                    showPopupMessage('New password is required', 'error');
                     isValid = false;
                 } else if (password.length < 8) {
-                   showPopupMessage('Password must be at least 8 characters', 'error');
+                    showPopupMessage('Password must be at least 8 characters', 'error');
                     isValid = false;
                 } else if (!/[A-Z]/.test(password)) {
                     showPopupMessage('Password must contain at least one uppercase letter', 'error');
@@ -225,7 +223,7 @@
                     showPopupMessage('Password must contain at least one special character', 'error');
                     isValid = false;
                 }
-                
+
                 return isValid;
             }
 
@@ -234,7 +232,7 @@
                 const password = newPasswordInput.value;
                 const confirmPassword = confirmPasswordInput.value;
                 let isValid = true;
-                
+
                 if (!confirmPassword) {
                     showPopupMessage('Please confirm your password', 'error');
                     isValid = false;
@@ -242,27 +240,27 @@
                     showPopupMessage('Passwords do not match', 'error');
                     isValid = false;
                 }
-                
+
                 return isValid;
             }
 
             // Form submission handler
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
+
                 const isCurrentValid = validateCurrentPassword();
                 const isNewValid = validateNewPassword();
                 const isConfirmValid = validateConfirmPassword();
-                
+
                 if (!isCurrentValid || !isNewValid || !isConfirmValid) {
                     return;
                 }
-                
+
                 // Show loading state
                 submitBtn.disabled = true;
                 submitSpinner.style.display = 'inline-block';
                 submitIcon.style.display = 'none';
-                
+
                 try {
                     const response = await fetch('/user/resetpassword', {
                         method: 'POST',
@@ -276,26 +274,26 @@
                             token: tokenInput.value
                         })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (!response.ok) {
                         throw new Error(data.error || 'Failed to reset password');
                     }
-                    
+
                     // Show success message
                     showPopupMessage('Password updated successfully!', 'success');
-                    
+
                     // Reset form
                     form.reset();
                     passwordStrengthBar.style.width = '0';
                     passwordStrengthText.textContent = '';
-                    
+
                     // Reset requirement indicators
                     [reqLength, reqUppercase, reqNumber, reqSpecial].forEach(el => {
                         el.classList.remove('valid');
                     });
-                    
+
                 } catch (error) {
                     showPopupMessage(error.message, 'error');
                     console.error('Password reset error:', error);
@@ -311,6 +309,5 @@
             window.togglePassword = togglePassword;
         });
     </script>
-    
+
 </body>
-</html>

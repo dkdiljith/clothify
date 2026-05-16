@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
+router.use((req, res, next) => {
+    res.locals.layout = 'admin-layout';
+    next();
+});
+
 //controllers
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
