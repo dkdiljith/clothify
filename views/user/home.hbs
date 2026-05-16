@@ -1,446 +1,560 @@
 <head>
-	<link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
-
-
-	<!-- Integrated Stylesheet -->
-	<style>
-		.custom-slider-section {
-			width: 100%;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.custom-slider-wrapper {
-			width: 100%;
-			height: 100vh;
-			min-height: 500px;
-			position: relative;
-			background-color: #000;
-		}
-
-		.custom-slide {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background-size: cover;
-			background-position: center;
-			background-repeat: no-repeat;
-			display: flex;
-			align-items: center;
-			opacity: 0;
-			visibility: hidden;
-			transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
-			z-index: 1;
-		}
-
-		.custom-slide.active {
-			opacity: 1;
-			visibility: visible;
-			z-index: 2;
-		}
-
-		.custom-slide-container {
-			width: 100%;
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 0 30px;
-			box-sizing: border-box;
-		}
-
-		.slide-sub {
-			font-family: sans-serif;
-			font-size: 24px;
-			color: #333;
-			display: block;
-			margin-bottom: 15px;
-			opacity: 0;
-			transform: translateY(-40px);
-		}
-
-		.slide-title {
-			font-family: sans-serif;
-			font-size: 60px;
-			font-weight: 700;
-			color: #333;
-			margin: 0 0 35px 0;
-			line-height: 1.1;
-			opacity: 0;
-			transform: translateY(40px);
-		}
-
-		.slide-btn {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			padding: 14px 40px;
-			background-color: #717fe0;
-			color: #fff;
-			border-radius: 25px;
-			text-decoration: none;
-			font-weight: 500;
-			text-transform: uppercase;
-			font-size: 14px;
-			letter-spacing: 1px;
-			transition: background-color 0.3s ease, transform 0.3s ease;
-			opacity: 0;
-			transform: scale(0.8);
-		}
-
-		.slide-btn:hover {
-			background-color: #333;
-		}
-
-		/* CSS Text Animation Triggers */
-		.custom-slide.active .anim-text-down {
-			opacity: 1;
-			transform: translateY(0);
-			transition: transform 0.8s ease out, opacity 0.8s ease-out;
-			transition-delay: 0.3s;
-		}
-
-		.custom-slide.active .anim-text-up {
-			opacity: 1;
-			transform: translateY(0);
-			transition: transform 0.8s ease-out, opacity 0.8s ease-out;
-			transition-delay: 0.6s;
-		}
-
-		.custom-slide.active .anim-text-zoom .slide-btn {
-			opacity: 1;
-			transform: scale(1);
-			transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s ease-out;
-			transition-delay: 1.1s;
-		}
-
-		/* Interface Arrow Overlays */
-		.slider-arrow {
-			position: absolute;
-			top: 50%;
-			transform: translateY(-50%);
-			background: rgba(255, 255, 255, 0.2);
-			color: #fff;
-			border: none;
-			width: 50px;
-			height: 50px;
-			border-radius: 50%;
-			font-size: 20px;
-			cursor: pointer;
-			z-index: 10;
-			transition: background 0.3s, color 0.3s;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.slider-arrow:hover {
-			background: #717fe0;
-			color: #fff;
-		}
-
-		.prev-arrow {
-			left: 30px;
-		}
-
-		.next-arrow {
-			right: 30px;
-		}
-
-		/* Navigation Dots */
-		.slider-dots {
-			position: absolute;
-			bottom: 30px;
-			left: 50%;
-			transform: translateX(-50%);
-			display: flex;
-			gap: 12px;
-			z-index: 10;
-		}
-
-		.slider-dot {
-			width: 12px;
-			height: 12px;
-			border-radius: 50%;
-			background: rgba(0, 0, 0, 0.2);
-			border: 2px solid #717fe0;
-			cursor: pointer;
-			transition: background 0.3s;
-		}
-
-		.slider-dot.active {
-			background: #717fe0;
-		}
-
-		/* Responsive Mobile Layout Scaling */
-		@media (max-width: 768px) {
-			.custom-slider-wrapper {
-				height: 60vh;
-			}
-
-			.slide-title {
-				font-size: 38px;
-				margin-bottom: 20px;
-			}
-
-			.slide-sub {
-				font-size: 18px;
-			}
-
-			.slider-arrow {
-				width: 40px;
-				height: 40px;
-				font-size: 16px;
-			}
-
-			.prev-arrow {
-				left: 15px;
-			}
-
-			.next-arrow {
-				right: 15px;
-			}
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/user/home.css">
 </head>
 
-<body style="margin-top:80px;">
+
+<body class="user-body">
+
 	<div class="animsition">
 
 
+		<!-- =========================================================
+             HERO SLIDER
+        ========================================================= -->
 
-
-		<!-- Modern CSS-Driven Slider -->
 		<section class="custom-slider-section">
+
 			<div class="custom-slider-wrapper">
 
-				<!-- Slide 1 -->
-				<div class="custom-slide active"
-					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/ryBXLphh/slide-07.jpg');">
+
+				<!-- SLIDE 1 -->
+				<div class="custom-slide active" style="background-image:
+                        linear-gradient(
+                            rgba(0,0,0,0.1),
+                            rgba(0,0,0,0.1)
+                        ),
+                        url('https://i.postimg.cc/ryBXLphh/slide-07.jpg');">
+
 					<div class="custom-slide-container">
-						<span class="anim-text-down slide-sub">Women Collection 2018</span>
-						<h2 class="anim-text-up slide-title">NEW SEASON</h2>
+
+						<span class="anim-text-down slide-sub">
+							Women Collection 2018
+						</span>
+
+						<h2 class="anim-text-up slide-title">
+							NEW SEASON
+						</h2>
+
 						<div class="anim-text-zoom">
-							<a href="product.html" class="slide-btn">Shop Now</a>
+
+							<a href="/user/collections" class="slide-btn">
+								Shop Now
+							</a>
+
 						</div>
+
 					</div>
+
 				</div>
 
-				<!-- Slide 2 -->
-				<div class="custom-slide"
-					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/kgPjT6jG/slide-05.jpg');">
+
+				<!-- SLIDE 2 -->
+				<div class="custom-slide" style="background-image:
+                        linear-gradient(
+                            rgba(0,0,0,0.1),
+                            rgba(0,0,0,0.1)
+                        ),
+                        url('https://i.postimg.cc/kgPjT6jG/slide-05.jpg');">
+
 					<div class="custom-slide-container">
-						<span class="anim-text-down slide-sub">Men New-Season</span>
-						<h2 class="anim-text-up slide-title">Jackets & Coats</h2>
+
+						<span class="anim-text-down slide-sub">
+							Men New-Season
+						</span>
+
+						<h2 class="anim-text-up slide-title">
+							Jackets & Coats
+						</h2>
+
 						<div class="anim-text-zoom">
-							<a href="product.html" class="slide-btn">Shop Now</a>
+
+							<a href="/user/collections" class="slide-btn">
+								Shop Now
+							</a>
+
 						</div>
+
 					</div>
+
 				</div>
 
-				<!-- Slide 3 -->
-				<div class="custom-slide"
-					style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://i.postimg.cc/QMyYk6vZ/slide-04.jpg');">
+
+				<!-- SLIDE 3 -->
+				<div class="custom-slide" style="background-image:
+                        linear-gradient(
+                            rgba(0,0,0,0.1),
+                            rgba(0,0,0,0.1)
+                        ),
+                        url('https://i.postimg.cc/QMyYk6vZ/slide-04.jpg');">
+
 					<div class="custom-slide-container">
-						<span class="anim-text-down slide-sub">Men New-Season</span>
-						<h2 class="anim-text-up slide-title">Jackets & Coats</h2>
+
+						<span class="anim-text-down slide-sub">
+							Men New-Season
+						</span>
+
+						<h2 class="anim-text-up slide-title">
+							Jackets & Coats
+						</h2>
+
 						<div class="anim-text-zoom">
-							<a href="product.html" class="slide-btn">Shop Now</a>
+
+							<a href="/user/collections" class="slide-btn">
+								Shop Now
+							</a>
+
 						</div>
+
 					</div>
+
 				</div>
 
-				<!-- Navigation Controls -->
-				<button class="slider-arrow prev-arrow" aria-label="Previous Slide">&#10094;</button>
-				<button class="slider-arrow next-arrow" aria-label="Next Slide">&#10095;</button>
 
-				<!-- Bullet Indicators -->
+				<!-- NAVIGATION -->
+				<button class="slider-arrow prev-arrow" aria-label="Previous Slide">
+					&#10094;
+				</button>
+
+				<button class="slider-arrow next-arrow" aria-label="Next Slide">
+					&#10095;
+				</button>
+
+
+				<!-- DOTS -->
 				<div class="slider-dots">
+
 					<span class="slider-dot active" data-index="0"></span>
+
 					<span class="slider-dot" data-index="1"></span>
+
 					<span class="slider-dot" data-index="2"></span>
+
 				</div>
+
 			</div>
+
 		</section>
 
 
 
+		<!-- =========================================================
+             FEATURED PRODUCTS
+        ========================================================= -->
 
+		<section class="featured-section">
 
-
-
-		<!-- Product -->
-		<section>
 			<div class="container">
 
-				<!-- Featured Products -->
-				<section class="featured-section">
-					<div class="container">
-						<h2 class="section-title">Featured Products</h2>
-						<div class="row">
-							{{#each product}}
-							<div class="col-xl-3 col-4" style="margin-bottom:25px">
-								<div class="product-card">
-									{{#if this.latestCollection}}
-									<div class="product-badge">New</div>
-									{{/if}}
+				<h2 class="section-title">
+					Featured Products
+				</h2>
+
+
+				<div class="row">
+
+					{{#each product}}
+
+					<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6" style="margin-bottom:25px">
+
+						<div class="product-card">
+
+
+							{{#if this.latestCollection}}
+
+							<div class="product-badge">
+								New
+							</div>
+
+							{{/if}}
+
+
+							{{#if this.details.[0].offerId}}
+
+							<div class="product-badge sale">
+								Sale
+							</div>
+
+							<div class="discount-badge">
+
+								{{calculateDiscountPercentage
+								this.details.[0].price
+								this.details.[0].offerPrice}}%
+
+								OFF
+
+							</div>
+
+							{{/if}}
+
+
+							<!-- PRODUCT IMAGE -->
+							<div class="product-image">
+
+								<a href="/user/singleproduct/{{this._id}}">
+
+									<img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
+
+								</a>
+
+
+								<!-- WISHLIST -->
+								<div class="product-wishlist-container">
+
+									<button class="add-to-wishlist js-addwish-b2" data-product-id="{{this._id}}"
+										data-variation-index="0">
+
+										<i class="fas fa-heart"></i>
+
+									</button>
+
+
+									<button class="added-to-wishlist" data-product-id="{{this._id}}"
+										data-variation-index="0" style="display:none;">
+
+										<i class="fas fa-check"></i>
+
+									</button>
+
+								</div>
+
+							</div>
+
+
+							<!-- PRODUCT DETAILS -->
+							<div class="product-details">
+
+								<h3 class="product-title">
+
+									<a href="/user/singleproduct/{{this._id}}">
+										{{this.name}}
+									</a>
+
+								</h3>
+
+
+								<p class="product-description">
+									{{this.description}}
+								</p>
+
+
+								<div class="price-container">
+
 									{{#if this.details.[0].offerId}}
-									<div class="product-badge sale">Sale</div>
-									<div class="discount-badge">
-										{{calculateDiscountPercentage this.details.[0].price
-										this.details.[0].offerPrice}}% OFF
-									</div>
+
+									<span class="original-price">
+										₹{{this.details.[0].price}}
+									</span>
+
+									<span class="product-price">
+										₹{{this.details.[0].offerPrice}}
+									</span>
+
+									{{else}}
+
+									<span class="product-price">
+										₹{{this.details.[0].price}}
+									</span>
+
 									{{/if}}
 
-									<div class="product-image">
-										<a href="/user/singleproduct/{{this._id}}">
-											<img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
-										</a>
-										<div class="product-wishlist-container">
-											<button class="add-to-wishlist js-addwish-b2" data-product-id="{{this._id}}"
-												data-variation-index="0">
-												<i class="fas fa-heart"></i>
-											</button>
-											<button class="added-to-wishlist" data-product-id="{{this._id}}"
-												data-variation-index="0" style="display: none;">
-												<i class="fas fa-check"></i>
-											</button>
-										</div>
-									</div>
-									<div class="product-details">
-										<h3 class="product-title">
-											<a href="/user/singleproduct/{{this._id}}">{{this.name}}</a>
-										</h3>
-										<p class="product-description">{{this.description}}</p>
-										<div class="price-container">
-											{{#if this.details.[0].offerId}}
-											<span class="original-price">₹{{this.details.[0].price}}</span>
-											<span class="product-price">₹{{this.details.[0].offerPrice}}</span>
-											{{else}}
-											<span class="product-price">₹{{this.details.[0].price}}</span>
-											{{/if}}
-										</div>
-										{{#if this.bestSeller}}
-										<div class="best-seller-badge">Bestseller</div>
-										{{/if}}
-									</div>
 								</div>
+
+
+								{{#if this.bestSeller}}
+
+								<div class="best-seller-badge">
+									Bestseller
+								</div>
+
+								{{/if}}
+
 							</div>
-							{{/each}}
+
 						</div>
-						<div class="text-center mt-5">
-							<a href="/user/collections" class="btn btn-primary">View All Products</a>
-						</div>
+
 					</div>
-				</section>
+
+					{{/each}}
+
+				</div>
+
+
+				<!-- VIEW ALL -->
+				<div class="text-center mt-5">
+
+					<a href="/user/collections" class="btn-primary">
+						View All Products
+					</a>
+
+				</div>
 
 			</div>
 
-			<script>
-				async function addToWishlist(productId, variationIndex) {
-					try {
-						const response = await fetch(`/user/addtowishlist/${productId}/${variationIndex}`, {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json"
-							}
-						});
-						const data = await response.json();
+		</section>
 
-						showPopupMessage(data.message, data.success ? "success" : "error");
+	</div>
 
-						if (data.success) {
-							const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
-							const addedButton = document.querySelector(`.added-to-wishlist[data-product-id="${productId}"]`);
 
-							if (addButton && addedButton) {
-								addButton.style.display = "none";
-								addedButton.style.display = "inline-flex";
-							}
+
+	<!-- =========================================================
+         WISHLIST SCRIPT
+    ========================================================= -->
+
+	<script>
+
+		async function addToWishlist(
+			productId,
+			variationIndex
+		) {
+
+			try {
+
+				const response = await fetch(
+					`/user/addtowishlist/${productId}/${variationIndex}`,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
 						}
-					} catch (error) {
-						console.error("Error adding to wishlist:", error);
-						showPopupMessage("Something went wrong. Please try again.", "error");
 					}
+				);
+
+				const data = await response.json();
+
+
+				showPopupMessage(
+					data.message,
+					data.success
+						? "success"
+						: "error"
+				);
+
+
+				if (data.success) {
+
+					const addButton =
+						document.querySelector(
+							`.add-to-wishlist[data-product-id="${productId}"]`
+						);
+
+					const addedButton =
+						document.querySelector(
+							`.added-to-wishlist[data-product-id="${productId}"]`
+						);
+
+
+					if (
+						addButton &&
+						addedButton
+					) {
+
+						addButton.style.display = "none";
+
+						addedButton.style.display = "inline-flex";
+
+					}
+
+				}
+
+			} catch (error) {
+
+				console.error(
+					"Error adding to wishlist:",
+					error
+				);
+
+				showPopupMessage(
+					"Something went wrong. Please try again.",
+					"error"
+				);
+
+			}
+
+		}
+
+
+		document.addEventListener(
+			'DOMContentLoaded',
+			() => {
+
+				const addToWishlistButtons =
+					document.querySelectorAll(
+						'.add-to-wishlist'
+					);
+
+
+				addToWishlistButtons.forEach(
+					(button) => {
+
+						button.addEventListener(
+							'click',
+							(event) => {
+
+								const productId =
+									event.currentTarget.getAttribute(
+										'data-product-id'
+									);
+
+								const variationIndex =
+									event.currentTarget.getAttribute(
+										'data-variation-index'
+									);
+
+								addToWishlist(
+									productId,
+									variationIndex
+								);
+
+							}
+						);
+
+					}
+				);
+
+			}
+		);
+
+	</script>
+
+
+
+	<!-- =========================================================
+         SLIDER SCRIPT
+    ========================================================= -->
+
+	<script>
+
+		document.addEventListener(
+			"DOMContentLoaded",
+			function () {
+
+				const slides =
+					document.querySelectorAll(
+						'.custom-slide'
+					);
+
+				const dots =
+					document.querySelectorAll(
+						'.slider-dot'
+					);
+
+				const prevBtn =
+					document.querySelector(
+						'.prev-arrow'
+					);
+
+				const nextBtn =
+					document.querySelector(
+						'.next-arrow'
+					);
+
+				let currentSlide = 0;
+
+				let slideInterval;
+
+
+				function showSlide(index) {
+
+					slides[currentSlide].classList.remove(
+						'active'
+					);
+
+					dots[currentSlide].classList.remove(
+						'active'
+					);
+
+
+					currentSlide =
+						(index + slides.length)
+						% slides.length;
+
+
+					slides[currentSlide].classList.add(
+						'active'
+					);
+
+					dots[currentSlide].classList.add(
+						'active'
+					);
+
 				}
 
 
-				document.addEventListener('DOMContentLoaded', () => {
-					const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
-
-					addToWishlistButtons.forEach(button => {
-						button.addEventListener('click', (event) => {
-							const productId = event.currentTarget.getAttribute('data-product-id');
-							const variationIndex = event.currentTarget.getAttribute('data-variation-index');
-							addToWishlist(productId, variationIndex);
-						});
-					});
-				});
-			</script>
+				function nextSlide() {
+					showSlide(currentSlide + 1);
+				}
 
 
+				function prevSlide() {
+					showSlide(currentSlide - 1);
+				}
 
-			<!-- Lightweight Control Script (Vanilla JS) -->
-			<script>
-				document.addEventListener("DOMContentLoaded", function () {
-					const slides = document.querySelectorAll('.custom-slide');
-					const dots = document.querySelectorAll('.slider-dot');
-					const prevBtn = document.querySelector('.prev-arrow');
-					const nextBtn = document.querySelector('.next-arrow');
-					let currentSlide = 0;
-					let slideInterval;
 
-					function showSlide(index) {
-						// Remove active classes
-						slides[currentSlide].classList.remove('active');
-						dots[currentSlide].classList.remove('active');
+				function startAutoplay() {
 
-						// Set new index bounding limits
-						currentSlide = (index + slides.length) % slides.length;
+					clearInterval(slideInterval);
 
-						// Add active classes
-						slides[currentSlide].classList.add('active');
-						dots[currentSlide].classList.add('active');
-					}
+					slideInterval = setInterval(
+						nextSlide,
+						6000
+					);
 
-					function nextSlide() {
-						showSlide(currentSlide + 1);
-					}
+				}
 
-					function prevSlide() {
-						showSlide(currentSlide - 1);
-					}
 
-					function startAutoplay() {
-						clearInterval(slideInterval);
-						slideInterval = setInterval(nextSlide, 6000); // Transitions every 6 seconds
-					}
+				nextBtn.addEventListener(
+					'click',
+					() => {
 
-					// Click event listeners
-					nextBtn.addEventListener('click', () => {
 						nextSlide();
-						startAutoplay();
-					});
 
-					prevBtn.addEventListener('click', () => {
+						startAutoplay();
+
+					}
+				);
+
+
+				prevBtn.addEventListener(
+					'click',
+					() => {
+
 						prevSlide();
+
 						startAutoplay();
-					});
 
-					dots.forEach(dot => {
-						dot.addEventListener('click', (e) => {
-							const index = parseInt(e.target.getAttribute('data-index'));
-							showSlide(index);
-							startAutoplay();
-						});
-					});
-
-					// Initialize Slider Runtime Loop
-					startAutoplay();
-				});
-			</script>
+					}
+				);
 
 
+				dots.forEach(
+					(dot) => {
 
+						dot.addEventListener(
+							'click',
+							(e) => {
+
+								const index = parseInt(
+									e.target.getAttribute(
+										'data-index'
+									)
+								);
+
+								showSlide(index);
+
+								startAutoplay();
+
+							}
+						);
+
+					}
+				);
+
+
+				startAutoplay();
+
+			}
+		);
+
+	</script>
 
 </body>

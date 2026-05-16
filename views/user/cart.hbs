@@ -1,19 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Shopping Cart</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/cart.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
 </head>
 
-<br><br>
-<br><br>
-
-<body>
+<body class="cart-page">
   <div class="container">
     <div class="cart-container">
 
@@ -63,7 +53,17 @@
 
 
       <div class="cart-items-section">
-        <h1>Your Shopping Cart</h1>
+        <div class="cart-page-header">
+
+          <h1 class="cart-page-title">
+            Your Shopping Cart
+          </h1>
+
+          <p class="cart-page-subtitle">
+            Review your selected products and proceed to secure checkout.
+          </p>
+
+        </div>
         <div class="cart-items">
           {{#if cart.items}}
           {{#each cart.items}}
@@ -197,8 +197,7 @@
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -335,7 +334,3 @@
 
   </script>
 </body>
-
-<br><br>
-
-</html>

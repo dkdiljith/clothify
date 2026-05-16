@@ -1,5 +1,5 @@
 <head>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/header.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/header.css">
 </head>
 
 
@@ -10,19 +10,32 @@
 
         <nav class="user-header-container container" role="navigation">
 
-            <!-- LOGO -->
-            <a
-                href="/user/home"
-                class="user-header-logo"
-                aria-label="Go to homepage"
-            >
+            <!-- LEFT -->
+            <div style="
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                ">
 
-                <img
-                    src="/images/icons/logo-01.png"
-                    alt="Website Logo"
-                >
+                <!-- MOBILE TOGGLE -->
+                <button type="button" class="user-header-mobile-toggle" id="userHeaderMobileToggle"
+                    aria-label="Open Menu">
 
-            </a>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
+
+                <!-- LOGO -->
+                <a href="/user/home" class="user-header-logo" aria-label="Go to homepage">
+
+                    <img src="/images/icons/logo-01.png" alt="Website Logo">
+
+                </a>
+
+            </div>
 
 
             <!-- MENU -->
@@ -32,10 +45,7 @@
 
                     <li class="user-header-menu-item {{#if homeActive}}active-menu{{/if}}">
 
-                        <a
-                            href="/user/home"
-                            class="user-header-menu-link"
-                        >
+                        <a href="/user/home" class="user-header-menu-link">
                             Home
                         </a>
 
@@ -44,10 +54,7 @@
 
                     <li class="user-header-menu-item {{#if collectionsActive}}active-menu{{/if}}">
 
-                        <a
-                            href="/user/collections"
-                            class="user-header-menu-link"
-                        >
+                        <a href="/user/collections" class="user-header-menu-link">
                             Collections
                         </a>
 
@@ -62,29 +69,14 @@
             <div class="user-header-right">
 
                 <!-- SEARCH -->
-                <form
-                    method="GET"
-                    action="/user/collections"
-                    role="search"
-                    class="user-header-search-form"
-                >
+                <form method="GET" action="/user/collections" role="search" class="user-header-search-form">
 
                     <div class="user-header-search">
 
-                        <input
-                            type="search"
-                            name="query"
-                            class="user-header-search-input"
-                            placeholder="Search products..."
-                            autocomplete="off"
-                            {{#if query}}value="{{query}}"{{/if}}
-                        >
+                        <input type="search" name="query" class="user-header-search-input"
+                            placeholder="Search products..." autocomplete="off" {{#if query}}value="{{query}}" {{/if}}>
 
-                        <button
-                            type="submit"
-                            class="user-header-search-btn"
-                            aria-label="Search"
-                        >
+                        <button type="submit" class="user-header-search-btn" aria-label="Search">
 
                             <i class="fa fa-search"></i>
 
@@ -99,36 +91,22 @@
                 <div class="user-header-icons">
 
                     <!-- WISHLIST -->
-                    <a
-                        href="/user/wishlist"
-                        class="user-header-icon"
-                        aria-label="Wishlist"
-                    >
+                    <a href="/user/wishlist" class="user-header-icon" aria-label="Wishlist">
 
                         <i class="fa fa-heart"></i>
 
-                        <span
-                            class="user-header-badge wishlist-badge"
-                            style="display: none;"
-                        >
+                        <span class="user-header-badge wishlist-badge" style="display: none;">
                         </span>
 
                     </a>
 
 
                     <!-- CART -->
-                    <a
-                        href="/user/cart"
-                        class="user-header-icon"
-                        aria-label="Shopping Cart"
-                    >
+                    <a href="/user/cart" class="user-header-icon" aria-label="Shopping Cart">
 
                         <i class="fa fa-shopping-cart"></i>
 
-                        <span
-                            class="user-header-badge cart-badge"
-                            style="display: none;"
-                        >
+                        <span class="user-header-badge cart-badge" style="display: none;">
                         </span>
 
                     </a>
@@ -137,13 +115,8 @@
                     <!-- PROFILE -->
                     <div class="user-header-profile">
 
-                        <button
-                            type="button"
-                            class="user-header-icon"
-                            id="userHeaderDropdownButton"
-                            aria-label="User Profile"
-                            aria-expanded="false"
-                        >
+                        <button type="button" class="user-header-icon" id="userHeaderDropdownButton"
+                            aria-label="User Profile" aria-expanded="false">
 
                             <i class="fa fa-user"></i>
 
@@ -151,15 +124,9 @@
 
 
                         <!-- DROPDOWN -->
-                        <div
-                            id="userHeaderDropdown"
-                            class="user-header-dropdown"
-                        >
+                        <div id="userHeaderDropdown" class="user-header-dropdown">
 
-                            <a
-                                href="/user/profile"
-                                class="user-header-dropdown-link"
-                            >
+                            <a href="/user/profile" class="user-header-dropdown-link">
 
                                 <i class="fa fa-user-circle"></i>
 
@@ -168,10 +135,7 @@
                             </a>
 
 
-                            <a
-                                href="/user/orders"
-                                class="user-header-dropdown-link"
-                            >
+                            <a href="/user/orders" class="user-header-dropdown-link">
 
                                 <i class="fa fa-shopping-bag"></i>
 
@@ -180,10 +144,7 @@
                             </a>
 
 
-                            <a
-                                href="/user/wallet"
-                                class="user-header-dropdown-link"
-                            >
+                            <a href="/user/wallet" class="user-header-dropdown-link">
 
                                 <i class="fa fa-wallet"></i>
 
@@ -192,10 +153,7 @@
                             </a>
 
 
-                            <a
-                                href="/user/logout"
-                                class="user-header-dropdown-link user-header-logout"
-                            >
+                            <a href="/user/logout" class="user-header-dropdown-link user-header-logout">
 
                                 <i class="fa fa-sign-out"></i>
 
@@ -217,6 +175,84 @@
 
 </header>
 
+
+<!-- MOBILE MENU -->
+<div class="user-mobile-menu" id="userMobileMenu">
+
+    <div class="user-mobile-menu-header">
+
+        <img src="/images/icons/logo-01.png" alt="Logo">
+
+        <button type="button" class="user-mobile-close" id="userMobileClose" aria-label="Close Menu">
+
+            <i class="fa fa-times"></i>
+
+        </button>
+
+    </div>
+
+
+    <div class="user-mobile-menu-links">
+
+
+
+        <!-- MOBILE SEARCH -->
+        <form method="GET" action="/user/collections" class="user-mobile-search-form">
+
+            <div class="user-mobile-search">
+
+                <input type="search" name="query" placeholder="Search products..." autocomplete="off">
+
+                <button type="submit">
+
+                    <i class="fa fa-search"></i>
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <a href="/user/home">
+            Home
+        </a>
+
+        <a href="/user/collections">
+            Collections
+        </a>
+
+        <a href="/user/profile">
+            Profile
+        </a>
+
+        <a href="/user/orders">
+            Orders
+        </a>
+
+        <a href="/user/wallet">
+            Wallet
+        </a>
+
+        <a href="/user/wishlist">
+            Wishlist
+        </a>
+
+        <a href="/user/cart">
+            Cart
+        </a>
+
+        <a href="/user/logout" class="mobile-logout">
+            Logout
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- MOBILE OVERLAY -->
+<div class="user-mobile-overlay" id="userMobileOverlay"></div>
 
 
 
@@ -241,7 +277,9 @@
 
         if (!userHeaderDropdown) return;
 
-        userHeaderDropdown.classList.toggle("show");
+        userHeaderDropdown.classList.toggle(
+            "show"
+        );
 
         const expanded =
             userHeaderDropdownButton.getAttribute(
@@ -303,6 +341,79 @@
             }
 
         }
+    );
+
+
+    // =====================================================
+    // MOBILE MENU
+    // =====================================================
+
+    const userHeaderMobileToggle =
+        document.getElementById(
+            "userHeaderMobileToggle"
+        );
+
+    const userMobileMenu =
+        document.getElementById(
+            "userMobileMenu"
+        );
+
+    const userMobileOverlay =
+        document.getElementById(
+            "userMobileOverlay"
+        );
+
+    const userMobileClose =
+        document.getElementById(
+            "userMobileClose"
+        );
+
+
+    function openMobileMenu() {
+
+        userMobileMenu.classList.add(
+            "show-mobile-menu"
+        );
+
+        userMobileOverlay.classList.add(
+            "show-mobile-overlay"
+        );
+
+        document.body.style.overflow =
+            "hidden";
+
+    }
+
+
+    function closeMobileMenu() {
+
+        userMobileMenu.classList.remove(
+            "show-mobile-menu"
+        );
+
+        userMobileOverlay.classList.remove(
+            "show-mobile-overlay"
+        );
+
+        document.body.style.overflow =
+            "";
+
+    }
+
+
+    userHeaderMobileToggle?.addEventListener(
+        "click",
+        openMobileMenu
+    );
+
+    userMobileClose?.addEventListener(
+        "click",
+        closeMobileMenu
+    );
+
+    userMobileOverlay?.addEventListener(
+        "click",
+        closeMobileMenu
     );
 
 

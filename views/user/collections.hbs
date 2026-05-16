@@ -1,215 +1,663 @@
 <head>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
-</head>
-
-<br><br>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Products - Your Store</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/productCard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/collection.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="/stylesheets/user/collection.css"
+    >
 </head>
+
 
 <body>
+
     <div class="product-listing-page">
+
         <div class="container">
+
+
+            <!-- =========================================================
+                 PAGE HEADER
+            ========================================================= -->
+
             <div class="page-header">
-                <h1 class="page-title">Shop Products</h1>
-                <p class="page-subtitle">Discover our premium collection of fashion items for men and women</p>
+
+                <h1 class="page-title">
+                    Shop Products
+                </h1>
+
+                <p class="page-subtitle">
+                    Discover our premium collection of fashion items for men and women
+                </p>
+
             </div>
+
+
+
+            <!-- =========================================================
+                 MOBILE ACTIONS
+            ========================================================= -->
 
             <button class="mobile-filter-toggle">
-                <i class="fas fa-filter"></i> Filter Products
+
+                <i class="fas fa-filter"></i>
+
+                Filter Products
+
             </button>
 
-            <div class="product-listing-container" <!-- Product Grid Section -->
+
+            <!-- MOBILE SEARCH -->
+            <form
+                method="GET"
+                action="/user/collections"
+                class="mobile-collection-search"
+            >
+
+                <div class="mobile-search-wrapper">
+
+                    <input
+                        type="search"
+                        name="query"
+                        placeholder="Search products..."
+                        autocomplete="off"
+                        {{#if query}}value="{{query}}"{{/if}}
+                    >
+
+                    {{#if sort}}
+                    <input
+                        type="hidden"
+                        name="sort"
+                        value="{{sort}}"
+                    >
+                    {{/if}}
+
+                    <button type="submit">
+
+                        <i class="fa fa-search"></i>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+
+
+            <!-- =========================================================
+                 PRODUCT LISTING CONTAINER
+            ========================================================= -->
+
+            <div class="product-listing-container">
+
+
+                <!-- =========================================================
+                     FILTER SIDEBAR
+                ========================================================= -->
+
+                {{#if showFilter}}
+
+                <aside class="filter-sidebar">
+
+                    <!-- your filters here -->
+
+                </aside>
+
+                {{/if}}
+
+
+
+                <!-- =========================================================
+                     PRODUCT GRID SECTION
+                ========================================================= -->
+
                 <div class="product-grid-section">
+
+
+                    <!-- GRID HEADER -->
                     <div class="product-grid-header">
+
                         <div class="product-count">
-                            Showing {{products.length}} of {{totalProducts}} products
-                            {{#if query}}matching "{{query}}"{{/if}}
+
+                            Showing
+                            {{products.length}}
+                            of
+                            {{totalProducts}}
+                            products
+
+                            {{#if query}}
+                            matching
+                            "{{query}}"
+                            {{/if}}
+
                         </div>
-                        <!-- Replace your current sort dropdown with this -->
+
+
+                        <!-- SORT -->
                         <div class="sort-dropdown">
-                            <form id="sortForm" method="GET" action="/user/collections" class="d-flex align-items-end">
-                                <input type="hidden" name="query" value="{{query}}">
-                                <select name="sort" id="sortSelect" class="form-select" onchange="this.form.submit()">
-                                    <option value="">Sort By</option>
-                                    <option value="price-low-high" {{#if (eq sort "price-low-high" )}}selected{{/if}}>
-                                        Price: Low to High</option>
-                                    <option value="price-high-low" {{#if (eq sort "price-high-low" )}}selected{{/if}}>
-                                        Price: High to Low</option>
-                                    <option value="name-a-z" {{#if (eq sort "name-a-z" )}}selected{{/if}}>Name: A-Z
+
+                            <form
+                                id="sortForm"
+                                method="GET"
+                                action="/user/collections"
+                                class="d-flex align-items-end"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="query"
+                                    value="{{query}}"
+                                >
+
+                                <select
+                                    name="sort"
+                                    id="sortSelect"
+                                    class="form-select"
+                                    onchange="this.form.submit()"
+                                >
+
+                                    <option value="">
+                                        Sort By
                                     </option>
-                                    <option value="newest" {{#if (eq sort "newest" )}}selected{{/if}}>Newest</option>
+
+                                    <option
+                                        value="price-low-high"
+                                        {{#if (eq sort "price-low-high")}}selected{{/if}}
+                                    >
+                                        Price: Low to High
+                                    </option>
+
+                                    <option
+                                        value="price-high-low"
+                                        {{#if (eq sort "price-high-low")}}selected{{/if}}
+                                    >
+                                        Price: High to Low
+                                    </option>
+
+                                    <option
+                                        value="name-a-z"
+                                        {{#if (eq sort "name-a-z")}}selected{{/if}}
+                                    >
+                                        Name: A-Z
+                                    </option>
+
+                                    <option
+                                        value="newest"
+                                        {{#if (eq sort "newest")}}selected{{/if}}
+                                    >
+                                        Newest
+                                    </option>
+
                                 </select>
+
                             </form>
+
                         </div>
+
                     </div>
 
 
+
+                    <!-- =========================================================
+                         PRODUCT GRID
+                    ========================================================= -->
 
                     <div class="product-grid">
+
+
                         {{#if products.length}}
+
                         {{#each products}}
+
                         <div class="product-card-wrapper">
+
                             <div class="product-card">
+
+
+                                <!-- BADGES -->
                                 {{#if this.latestCollection}}
-                                <div class="product-badge">New</div>
-                                {{/if}}
-                                {{#if this.details.[0].offerId}}
-                                <div class="product-badge sale">Sale</div>
-                                <div class="discount-badge">
-                                    {{calculateDiscountPercentage this.details.[0].price this.details.[0].offerPrice}}% OFF
+
+                                <div class="product-badge">
+                                    New
                                 </div>
+
                                 {{/if}}
 
+
+                                {{#if this.details.[0].offerId}}
+
+                                <div class="product-badge sale">
+                                    Sale
+                                </div>
+
+                                <div class="discount-badge">
+
+                                    {{calculateDiscountPercentage
+                                    this.details.[0].price
+                                    this.details.[0].offerPrice}}%
+
+                                    OFF
+
+                                </div>
+
+                                {{/if}}
+
+
+
+                                <!-- PRODUCT IMAGE -->
                                 <div class="product-image">
+
                                     <a href="/user/singleproduct/{{this._id}}">
-                                        <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
+
+                                        <img
+                                            src="{{this.images.[0].path}}"
+                                            alt="{{this.name}}"
+                                            class="product-img"
+                                        >
+
                                     </a>
+
+
+                                    <!-- WISHLIST -->
                                     <div class="product-wishlist-container">
-                                        <button class="add-to-wishlist js-addwish-b2" data-product-id="{{this._id}}"
-                                            data-variation-index="0">
+
+                                        <button
+                                            class="add-to-wishlist js-addwish-b2"
+                                            data-product-id="{{this._id}}"
+                                            data-variation-index="0"
+                                        >
+
                                             <i class="fas fa-heart"></i>
+
                                         </button>
-                                        <button class="added-to-wishlist" data-product-id="{{this._id}}"
-                                            data-variation-index="0" style="display: none;">
+
+
+                                        <button
+                                            class="added-to-wishlist"
+                                            data-product-id="{{this._id}}"
+                                            data-variation-index="0"
+                                            style="display: none;"
+                                        >
+
                                             <i class="fas fa-check"></i>
+
                                         </button>
+
                                     </div>
+
                                 </div>
+
+
+
+                                <!-- PRODUCT DETAILS -->
                                 <div class="product-details">
+
                                     <h3 class="product-title">
-                                        <a href="/user/singleproduct/{{this._id}}">{{this.name}}</a>
+
+                                        <a href="/user/singleproduct/{{this._id}}">
+
+                                            {{this.name}}
+
+                                        </a>
+
                                     </h3>
-                                    <p class="product-description">{{this.description}}</p>
+
+
+                                    <p class="product-description">
+
+                                        {{this.description}}
+
+                                    </p>
+
+
                                     <div class="price-container">
+
                                         {{#if this.details.[0].offerId}}
-                                        <span class="original-price">₹{{this.details.[0].price}}</span>
-                                        <span class="product-price">₹{{this.details.[0].offerPrice}}</span>
+
+                                        <span class="original-price">
+
+                                            ₹{{this.details.[0].price}}
+
+                                        </span>
+
+                                        <span class="product-price">
+
+                                            ₹{{this.details.[0].offerPrice}}
+
+                                        </span>
+
                                         {{else}}
-                                        <span class="product-price">₹{{this.details.[0].price}}</span>
+
+                                        <span class="product-price">
+
+                                            ₹{{this.details.[0].price}}
+
+                                        </span>
+
                                         {{/if}}
+
                                     </div>
+
+
                                     {{#if this.bestSeller}}
-                                    <div class="best-seller-badge">Bestseller</div>
+
+                                    <div class="best-seller-badge">
+
+                                        Bestseller
+
+                                    </div>
+
                                     {{/if}}
+
                                 </div>
+
                             </div>
+
                         </div>
+
                         {{/each}}
+
+
                         {{else}}
-                        <div class="no-products" style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                            <h3>No products found</h3>
-                            <p>We couldn't find any products matching your criteria.</p>
-                            <a href="/user/collections" class="btn btn-primary">Browse All Products</a>
+
+                        <!-- NO PRODUCTS -->
+                        <div class="no-products">
+
+                            <h3>
+                                No products found
+                            </h3>
+
+                            <p>
+                                We couldn't find any products matching your criteria.
+                            </p>
+
+                            <a
+                                href="/user/collections"
+                                class="btn btn-primary"
+                            >
+
+                                Browse All Products
+
+                            </a>
+
                         </div>
+
                         {{/if}}
+
                     </div>
 
+
+
+                    <!-- =========================================================
+                         PAGINATION
+                    ========================================================= -->
 
                     <div class="pagination">
+
                         <div class="pagination-list">
+
+
                             {{#if (gt currentPage 1)}}
-                            <a href="?page={{subtract currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
-                                class="pagination-item">
+
+                            <a
+                                href="?page={{subtract currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item"
+                            >
+
                                 <i class="fas fa-chevron-left"></i>
+
                             </a>
+
                             {{/if}}
+
+
 
                             {{#if (gt currentPage 3)}}
-                            <a href="?page=1{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
-                                class="pagination-item">1</a>
-                            <span class="pagination-item">...</span>
+
+                            <a
+                                href="?page=1{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item"
+                            >
+
+                                1
+
+                            </a>
+
+                            <span class="pagination-item">
+                                ...
+                            </span>
+
                             {{/if}}
+
+
 
                             {{#each (range (max 1 (subtract currentPage 2)) (min totalPages (add currentPage 2)))}}
-                            <a href="?page={{this}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
-                                class="pagination-item {{#if (eq this ../currentPage)}}active{{/if}}">
+
+                            <a
+                                href="?page={{this}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item {{#if (eq this ../currentPage)}}active{{/if}}"
+                            >
+
                                 {{this}}
+
                             </a>
+
                             {{/each}}
 
+
+
                             {{#if (lt currentPage (subtract totalPages 2))}}
-                            <span class="pagination-item">...</span>
-                            <a href="?page={{totalPages}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
-                                class="pagination-item">{{totalPages}}</a>
+
+                            <span class="pagination-item">
+                                ...
+                            </span>
+
+                            <a
+                                href="?page={{totalPages}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item"
+                            >
+
+                                {{totalPages}}
+
+                            </a>
+
                             {{/if}}
+
+
 
                             {{#if (lt currentPage totalPages)}}
-                            <a href="?page={{add currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
-                                class="pagination-item">
+
+                            <a
+                                href="?page={{add currentPage 1}}{{#if query}}&query={{query}}{{/if}}{{#if sort}}&sort={{sort}}{{/if}}"
+                                class="pagination-item"
+                            >
+
                                 <i class="fas fa-chevron-right"></i>
+
                             </a>
+
                             {{/if}}
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
+
+
+
+    <!-- =========================================================
+         SCRIPTS
+    ========================================================= -->
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Mobile filter toggle
-            const mobileFilterToggle = document.querySelector('.mobile-filter-toggle');
-            const filterSidebar = document.querySelector('.filter-sidebar');
 
-            if (mobileFilterToggle && filterSidebar) {
-                mobileFilterToggle.addEventListener('click', function () {
-                    filterSidebar.classList.toggle('show');
-                });
-            }
+        document.addEventListener(
+            'DOMContentLoaded',
+            function () {
 
-            // Wishlist functionality
-            async function addToWishlist(productId, variationIndex) {
-                try {
-                    const response = await fetch(`/user/addtowishlist/${productId}/${variationIndex}`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
+                // MOBILE FILTER
+                const mobileFilterToggle =
+                    document.querySelector(
+                        '.mobile-filter-toggle'
+                    );
+
+                const filterSidebar =
+                    document.querySelector(
+                        '.filter-sidebar'
+                    );
+
+
+                if (
+                    mobileFilterToggle &&
+                    filterSidebar
+                ) {
+
+                    mobileFilterToggle.addEventListener(
+                        'click',
+                        function () {
+
+                            filterSidebar.classList.toggle(
+                                'show'
+                            );
+
                         }
-                    });
-                    const data = await response.json();
+                    );
 
-                    showPopupMessage(data.message, data.success ? "success" : "error");
-
-                    if (data.success) {
-                        const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
-                        const addedButton = document.querySelector(`.added-to-wishlist[data-product-id="${productId}"]`);
-
-                        if (addButton && addedButton) {
-                            addButton.style.display = "none";
-                            addedButton.style.display = "inline-flex";
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error adding to wishlist:", error);
-                    showPopupMessage("Something went wrong. Please try again.", "error");
                 }
-            }
 
-            // Attach wishlist event listeners
-            const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
-            addToWishlistButtons.forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const productId = event.currentTarget.getAttribute('data-product-id');
-                    const variationIndex = event.currentTarget.getAttribute('data-variation-index');
-                    addToWishlist(productId, variationIndex);
-                });
-            });
-        });
+
+                // WISHLIST
+                async function addToWishlist(
+                    productId,
+                    variationIndex
+                ) {
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                `/user/addtowishlist/${productId}/${variationIndex}`,
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    }
+                                }
+                            );
+
+                        const data =
+                            await response.json();
+
+
+                        showPopupMessage(
+                            data.message,
+                            data.success
+                                ? "success"
+                                : "error"
+                        );
+
+
+                        if (data.success) {
+
+                            const addButton =
+                                document.querySelector(
+                                    `.add-to-wishlist[data-product-id="${productId}"]`
+                                );
+
+                            const addedButton =
+                                document.querySelector(
+                                    `.added-to-wishlist[data-product-id="${productId}"]`
+                                );
+
+
+                            if (
+                                addButton &&
+                                addedButton
+                            ) {
+
+                                addButton.style.display =
+                                    "none";
+
+                                addedButton.style.display =
+                                    "inline-flex";
+
+                            }
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error adding to wishlist:",
+                            error
+                        );
+
+                        showPopupMessage(
+                            "Something went wrong. Please try again.",
+                            "error"
+                        );
+
+                    }
+
+                }
+
+
+                // ATTACH LISTENERS
+                const addToWishlistButtons =
+                    document.querySelectorAll(
+                        '.add-to-wishlist'
+                    );
+
+
+                addToWishlistButtons.forEach(
+                    button => {
+
+                        button.addEventListener(
+                            'click',
+                            (event) => {
+
+                                const productId =
+                                    event.currentTarget.getAttribute(
+                                        'data-product-id'
+                                    );
+
+                                const variationIndex =
+                                    event.currentTarget.getAttribute(
+                                        'data-variation-index'
+                                    );
+
+                                addToWishlist(
+                                    productId,
+                                    variationIndex
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
+
     </script>
 
-</body>
 
-</html>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"
+        defer
+    ></script>
+
+</body>

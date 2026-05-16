@@ -1,23 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Payment | Complete Your Order</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/paymentPage.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/css/generalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/user/paymentPage.css">
 </head>
-
-<br><br>
-<br><br>
 
 <body>
     <div class="container">
         <div class="payment-container">
             <div class="payment-options-section">
-                <h1>Select Payment Method</h1>
+                <div class="payment-page-header">
+
+                    <h1 class="payment-page-title">
+                        Select Payment Method
+                    </h1>
+
+                    <p class="payment-page-subtitle">
+                        Choose your preferred payment option to securely complete your order.
+                    </p>
+
+                </div>
 
                 <div class="payment-methods">
                     <div class="payment-method" data-method="cod">
@@ -131,8 +131,6 @@
         </div>
     </div>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const paymentForm = document.getElementById('payment-form');
@@ -332,8 +330,4 @@
         });
     </script>
 
-    <br><br>
-
 </body>
-
-</html>

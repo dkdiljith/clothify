@@ -41,6 +41,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
 
+app.set('trust proxy', true);
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,

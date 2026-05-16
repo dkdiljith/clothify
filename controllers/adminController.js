@@ -45,16 +45,16 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
 
 
 exports.loginRender = async (req, res) => {
-  return res.render(`admin/login`, { isAdminLogin: true })
+  return res.render(`admin/login`, { plain_body: true })
 }
 exports.registerRender = async (req, res) => {
-  return res.render(`admin/register`, { isAdminLogin: true })
+  return res.render(`admin/register`, { plain_body: true })
 }
 exports.dashboardRender = async (req, res) => {
-  return res.render(`admin/dashboard`, { admin: true })
+  return res.render(`admin/dashboard`)
 }
 exports.activityLogRender = async (req, res) => {
-  return res.render(`admin/activity-log`, { admin: true })
+  return res.render(`admin/activity-log`)
 }
 
 
@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
     const admin = await Admin.findOne({ email }).lean();
 
     if (!admin) {
-      return res.render("admin/login", { message: "Invalid credentials", isAdminLogin: true });
+      return res.render("admin/login", { message: "Invalid credentials", plain_body: true });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    res.render("admin/login", { message: "Invalid credentials", isAdminLogin: true });
+    res.render("admin/login", { message: "Invalid credentials", plain_body: true });
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).render("error", { message: "Internal Server Error" });
@@ -95,7 +95,7 @@ exports.register = async (req, res) => {
     // 1. Check existence FIRST (Save CPU)
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
-      return res.render("admin/register", { message: "Email already exists", isAdminLogin: true });
+      return res.render("admin/register", { message: "Email already exists", plain_body: true });
     }
 
     // 2. Process data only if valid

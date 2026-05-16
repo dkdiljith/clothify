@@ -104,10 +104,6 @@ async function createWallet(userId) {
 // ======================================================================================================
 //GET METHODS / RENDERING PAGES
 
-exports.indexRender = async (req, res) => {
-  return res.render("user/index", { isAdminLogin: true });
-};
-
 
 exports.homeRender = async (req, res) => {
   const product = await Product.find().limit(8).lean()
@@ -140,7 +136,7 @@ exports.resetPasswordRender = async (req, res) => {
     // Render reset password page with token
     return res.render('user/resetPassword', {
       token,
-      isAdminLogin: true
+      plain_body: true
     });
 
   } catch (error) {
@@ -161,15 +157,15 @@ exports.resetPasswordRender = async (req, res) => {
 
 
 exports.registerRender = async (req, res) => {
-  return res.render("user/register", { isAdminLogin: true });
+  return res.render("user/register", { plain_body: true });
 };
 
 exports.loginRender = async (req, res) => {
-  return res.render("user/login", { isAdminLogin: true });
+  return res.render("user/login", { plain_body: true });
 };
 
 exports.forgetPasswordRender = async (req, res) => {
-  return res.render("user/forgetPassword", { isAdminLogin: true });
+  return res.render("user/forgetPassword", { plain_body: true });
 };
 
 exports.userLogout = (req, res) => {
@@ -195,7 +191,7 @@ exports.register = async (req, res) => {
   const existingUser = await User.findOne({ email: req.body.email });
   if (existingUser) {
     if (existingUser.isVerified) {
-      return res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
+      return res.render('user/register', { message: "Email is already registered", plain_body: true });
     } else {
       const checkPassword = await bcrypt.compare(
         req.body.password,
@@ -203,12 +199,12 @@ exports.register = async (req, res) => {
       );
 
       if (checkPassword) {
-        
+
         req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
         await verificationEmailSend(req.body.email, verificationToken);
-        return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
+        return res.render("user/emailVerification", { plain_body: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
       } else {
-        return res.render('user/register', { message: "Email is already registered", isAdminLogin: true });
+        return res.render('user/register', { message: "Email is already registered", plain_body: true });
       }
     }
 
@@ -231,11 +227,11 @@ exports.register = async (req, res) => {
         user.verificationAttempts += 1
         user.verificationTimer = Date.now() + 60000; //1 munute timer
         await user.save()
-        return res.render("user/emailVerification", { isAdminLogin: true, verificationTimer: user.verificationTimer, verificationAttempts: user.verificationAttempts });
+        return res.render("user/emailVerification", { plain_body: true, verificationTimer: user.verificationTimer, verificationAttempts: user.verificationAttempts });
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      return res.render('user/register', { message: "Error during registration", isAdminLogin: true });
+      return res.render('user/register', { message: "Error during registration", plain_body: true });
     }
   }
 };
@@ -571,19 +567,19 @@ exports.showUsers = async (req, res) => {
 
 exports.blockUser = async (req, res) => {
   try {
+    const userId = req.params.id;
 
-
-    const userId = req.params.id; // Should get the ID here
-    const user = await User.findById(userId); // Use the received userId
-
-    if (!user) {
+    if (!userId) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // This instantly flips true to false, or false to true
+    await User.updateOne(
+      { _id: userId },
+      [{ $set: { blocked: { $not: "$blocked" } } }]
+    );
 
-    // Toggle blocked status
-    user.blocked = !user.blocked;
-    await user.save();
+
     return res.redirect('back');
   } catch (error) {
     console.error("Error in blocking user:", error);
