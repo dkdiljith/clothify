@@ -51,7 +51,7 @@ exports.adminAuth = async (req, res, next) => {
             });
         }
 
-        res.locals.admin = admin;
+
         next();
     } catch (error) {
         console.error("Admin Auth Error:", error);

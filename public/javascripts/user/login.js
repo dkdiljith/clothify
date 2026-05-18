@@ -118,20 +118,4 @@ document.addEventListener("DOMContentLoaded", function () {
     };
     xhr.send(JSON.stringify({ token: id_token }));
   }
-
-  function renderGoogleButton() {
-    gapi.signin2.render('googleSignInBtn', {
-      'scope': 'profile email',
-      'width': 240,
-      'height': 50,
-      'longtitle': true,
-      'theme': 'light',
-      'onsuccess': onSignIn,
-      'onfailure': function (error) {
-        console.log(error);
-      }
-    });
-  }
-
-  gapi.load('auth2', renderGoogleButton);
 });

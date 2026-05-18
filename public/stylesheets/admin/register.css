@@ -50,16 +50,16 @@
     margin-bottom: 2rem; /* Adjusted for validation message spacing */
   }
 
-  .form-group i.fas:not(.password-toggle) {
+  .form-group .form-field-icon:not(.password-toggle) {
     position: absolute;
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: #aaa;
+    stroke: #aaa; /* Replaces 'color' to change the vector line color */
     z-index: 1;
-    font-size: 16px;
     pointer-events: none;
-  }
+}
+
 
   .password-toggle {
     position: absolute;
@@ -176,3 +176,17 @@
     visibility: hidden;
     opacity: 0;
   }
+
+
+
+  .form-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Optional styling to make your password eye clickable */
+.password-toggle {
+    cursor: pointer;
+}

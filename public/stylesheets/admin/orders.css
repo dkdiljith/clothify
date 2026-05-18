@@ -54,13 +54,6 @@ th {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    body {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        display: none;
-    }
 
     .orders-table {
         overflow-x: auto;
@@ -240,4 +233,227 @@ th {
     padding: 2px 6px;
     border-radius: 50%;
     font-size: 10px;
+}
+
+.warning-icon {
+    stroke: var(--warning-color, #ffc107);
+}
+
+.finance-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
+/* =========================================================
+   ORDER INFO CELL
+========================================================= */
+
+.order-info-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.75rem;
+}
+
+.order-info-cell svg {
+    width: 34px;
+    height: 34px;
+}
+
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .orders-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 0.7rem;
+    }
+
+    .search-container,
+    .search-input {
+        width: 100%;
+    }
+
+    .search-input {
+
+        height: 42px;
+
+        padding: 0.45rem 0.8rem;
+
+        font-size: 0.9rem;
+    }
+
+    .orders-table {
+
+        overflow-x: auto;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 950px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE CARD TABLE
+========================================================= */
+
+@media (max-width: 576px) {
+
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.4rem;
+    }
+
+    table {
+        min-width: 100%;
+    }
+
+    table thead {
+        display: none;
+    }
+
+    table,
+    table tbody,
+    table tr,
+    table td {
+
+        display: block;
+
+        width: 100%;
+    }
+
+    table tr {
+
+        background: var(--surface);
+
+        border: 1px solid var(--border);
+
+        border-radius: 14px;
+
+        padding: 0.75rem;
+
+        margin-bottom: 0.8rem;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    table td {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        gap: 1rem;
+
+        padding: 0.55rem 0;
+
+        border-bottom: 1px solid var(--border);
+
+        text-align: right;
+
+        white-space: normal;
+
+        font-size: 0.9rem;
+    }
+
+    table td:last-child {
+        border-bottom: none;
+    }
+
+    table td::before {
+
+        content: attr(data-label);
+
+        font-weight: 700;
+
+        color: var(--text);
+
+        text-align: left;
+
+        font-size: 0.85rem;
+    }
+
+
+    /* DARKER SL NO */
+
+    table td:first-child {
+
+        background: rgba(0,0,0,0.06);
+
+        padding: 0.65rem 0.8rem;
+
+        border-radius: 10px;
+
+        margin-bottom: 0.8rem;
+
+        font-weight: 700;
+    }
+
+    [data-theme="dark"] table td:first-child {
+
+        background: rgba(255,255,255,0.08);
+    }
+
+
+    /* ORDER INFO */
+
+    .order-info-cell {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        justify-content: flex-end;
+    }
+
+    .user-avatar {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+
+    /* BUTTON */
+
+    .btn-primary {
+
+        padding: 7px 14px;
+
+        font-size: 0.85rem;
+    }
+
+
+    /* PAGINATION */
+
+    .pagination {
+
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
 }

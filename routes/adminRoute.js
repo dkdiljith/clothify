@@ -6,6 +6,12 @@ router.use((req, res, next) => {
     next();
 });
 
+//session for user
+router.use((req, res, next) => {
+  res.locals.admin = req.session.admin || null;
+  next();
+});
+
 //controllers
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')

@@ -1,72 +1,5 @@
 <head>
     <link rel="stylesheet" type="text/css" href="/stylesheets/user/header.css">
-    <style>
-        /* Container alignment */
-        .user-header-login-wrapper {
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-        }
-
-        /* Modern Button Styling */
-        .user-header-login-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 18px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            /* Modern Indigo Gradient */
-            color: #ffffff !important;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Subtle accent line over the top edge of the button */
-        .user-header-login-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
-
-        /* Interactive Hover Effects */
-        .user-header-login-btn:hover {
-            background: linear-gradient(135deg, #4f46e5, #4338ca);
-            transform: translateY(-2px);
-            /* Slight lift effect */
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
-        }
-
-        .user-header-login-btn:hover::before {
-            transform: translateX(100%);
-            /* Glint shine effect across the top */
-        }
-
-        .user-header-login-btn:active {
-            transform: translateY(0);
-        }
-
-        /* Icon Animation */
-        .user-header-login-btn i {
-            transition: transform 0.2s ease;
-        }
-
-        .user-header-login-btn:hover i {
-            transform: translateX(3px);
-            /* Subtle nudge forward */
-        }
-    </style>
 </head>
 
 
@@ -511,60 +444,38 @@
     // CART BADGE
     // =====================================================
 
+    
     async function updateCartIcon() {
-
         try {
-
-            const response = await fetch(
-                "/user/cartDataIcon"
-            );
+            const response = await fetch("/user/cartDataIcon");
 
             if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
 
-                throw new Error(
-                    `HTTP Error: ${response.status}`
-                );
-
+            // CHECK: If the server returns HTML (Login Page), exit safely
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                console.log("Cart Badge: User is logged out. Skipping update.");
+                return;
             }
 
             const data = await response.json();
-
-            const itemCount =
-                data.itemCount || 0;
-
-            const cartBadges =
-                document.querySelectorAll(
-                    ".cart-badge"
-                );
+            const itemCount = data.itemCount || 0;
+            const cartBadges = document.querySelectorAll(".cart-badge");
 
             cartBadges.forEach((badge) => {
-
                 if (itemCount > 0) {
-
-                    badge.textContent =
-                        itemCount;
-
-                    badge.style.display =
-                        "flex";
-
+                    badge.textContent = itemCount;
+                    badge.style.display = "flex";
                 } else {
-
-                    badge.style.display =
-                        "none";
-
+                    badge.style.display = "none";
                 }
-
             });
 
         } catch (error) {
-
-            console.error(
-                "Cart Icon Error:",
-                error
-            );
-
+            console.error("Cart Icon Error:", error);
         }
-
     }
 
 
@@ -573,59 +484,36 @@
     // =====================================================
 
     async function updateWishlistIcon() {
-
         try {
-
-            const response = await fetch(
-                "/user/wishlistDataIcon"
-            );
+            const response = await fetch("/user/wishlistDataIcon");
 
             if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
 
-                throw new Error(
-                    `HTTP Error: ${response.status}`
-                );
-
+            // CHECK: If the server returns HTML (Login Page), exit safely
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                console.log("Wishlist Badge: User is logged out. Skipping update.");
+                return;
             }
 
             const data = await response.json();
-
-            const wishlistCount =
-                data.wishlistCount || 0;
-
-            const wishlistBadges =
-                document.querySelectorAll(
-                    ".wishlist-badge"
-                );
+            const wishlistCount = data.wishlistCount || 0;
+            const wishlistBadges = document.querySelectorAll(".wishlist-badge");
 
             wishlistBadges.forEach((badge) => {
-
                 if (wishlistCount > 0) {
-
-                    badge.textContent =
-                        wishlistCount;
-
-                    badge.style.display =
-                        "flex";
-
+                    badge.textContent = wishlistCount;
+                    badge.style.display = "flex";
                 } else {
-
-                    badge.style.display =
-                        "none";
-
+                    badge.style.display = "none";
                 }
-
             });
 
         } catch (error) {
-
-            console.error(
-                "Wishlist Icon Error:",
-                error
-            );
-
+            console.error("Wishlist Icon Error:", error);
         }
-
     }
 
 

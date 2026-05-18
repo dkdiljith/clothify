@@ -1,391 +1,590 @@
-<head>
-    <title>Order #{{order.orderId}} | Admin Dashboard</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/orderDetails.css">
-</head>
+{{#section 'head'}}
+<title>Order #{{order.orderId}} | Admin Dashboard</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/admin/orderDetails.css">
+{{/section}}
 
-<body>
-    <main class="dashboard-container" style="background:#F2F2F2;">
-        <div class="container-fluid py-4">
-            <!-- Order Header -->
-            <div class="order-header d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <div class="d-flex align-items-center gap-3">
-                        <h1 class="h4 mb-0 fw-bold text-gray-800">Order #{{order.orderId}}</h1>
-                        <span class="badge bg-primary">Total Items: {{order.items.length}}</span>
-                    </div>
-                    <div class="d-flex flex-wrap gap-3 mt-2">
-                        <span class="text-muted"><i class="far fa-calendar-alt me-1"></i> Placed on {{formatDate
-                            order.createdAt}}</span>
-                        <span class="text-muted"><i class="fas fa-sync-alt me-1"></i> Last updated: {{formatDate
-                            order.updatedAt}}</span>
-                    </div>
+<main class="dashboard-container" style="background:#F2F2F2;">
+    <div class="container-fluid py-4">
+        <!-- Order Header -->
+        <div class="order-header d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="h4 mb-0 fw-bold text-gray-800">Order #{{order.orderId}}</h1>
+                    <span class="badge bg-primary">Total Items: {{order.items.length}}</span>
                 </div>
-                <div>
-                    <button id="download-invoice-button" class="btn btn-secondary">
-                        Download Invoice
-                    </button>
-
-                    <a href="/admin/orders" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i> Back to Orders
-                    </a>
+                <div class="d-flex flex-wrap gap-3 mt-2">
+                    <span class="text-muted"><i class="far fa-calendar-alt me-1"></i> Placed on {{formatDate
+                        order.createdAt}}</span>
+                    <span class="text-muted"><svg class="admin-icon me-1" xmlns="http://w3.org" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                        </svg>
+                        Last updated: {{formatDate
+                        order.updatedAt}}</span>
                 </div>
             </div>
+            <div>
+                <button id="download-invoice-button" class="btn btn-secondary">
+                    Download Invoice
+                </button>
 
-            <div class="row">
-                <!-- Left Column -->
-                <div class="col-lg-8">
-                    <!-- Order Items Card -->
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Order Items</h5>
-                            <span class="badge bg-primary">{{order.items.length}} items</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="bg-light">
-                                        <tr
-                                            class="{{#if (eq order.paymentStatus 'Failed')}}bg-danger text-white{{/if}}">
-                                            <th style="width: 100px;">Item</th>
-                                            <th>Product Details</th>
-                                            <th style="width: 200px;">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {{#each order.items}}
-                                        <tr class="{{#if (eq this.status 'Return Requested')}}alert-row{{/if}}">
-                                            <td>
-                                                <div class="product-img-container">
-                                                    <img src="{{this.productImg}}" alt="{{this.productName}}"
-                                                        class="product-img">
-                                                    {{#if (eq this.status 'Return Requested')}}
-                                                    <div class="attention-required"
-                                                        title="Return Request - Requires Action">
-                                                        <i class="fas fa-exclamation"></i>
-                                                    </div>
-                                                    {{/if}}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <strong>{{this.productName}}</strong>
-                                                    <small class="text-muted mb-1">
-                                                        ₹{{this.productPrice}} × {{this.quantity}} | Size:
-                                                        {{this.productSize}}
-                                                    </small>
-                                                    {{#if this.returnReason.length}}
-                                                    <div class="return-reason-box">
-                                                        <strong class="d-block mb-1"><i
-                                                                class="fas fa-undo me-1"></i>Return
-                                                            Reason</strong>
-                                                        <p class="mb-0 small">{{this.returnReason.[0].reason}}</p>
-                                                    </div>
-                                                    {{/if}}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    {{#if (eq ../order.paymentStatus "Failed")}}
-                                                    <!-- State: Payment Failed - Lock the UI -->
-                                                    <select class="form-select form-select-sm mb-2" disabled>
-                                                        <option selected>Cancelled</option>
-                                                    </select>
-                                                    <span class="status-badge bg-danger text-white align-self-start">
-                                                        Payment Failed
-                                                    </span>
-                                                    {{else}}
-                                                    <!-- State: Payment Success/Pending - Allow Status Changes -->
-                                                    {{#if (or (eq this.status "Return Requested") (eq this.status
-                                                    "Return Accepted") (eq this.status "Return Rejected"))}}
-                                                    <select class="form-select form-select-sm mb-2"
-                                                        onchange="updateItemStatus('{{this._id}}', this.value)" {{#if
-                                                        (or (eq this.status "Returned" ) (eq this.status "Cancelled"
-                                                        ))}}disabled{{/if}}>
-                                                        <option value="" disabled selected>Accept or Reject Return
-                                                        </option>
-                                                        <option value="Return Rejected" {{#ifEquals
-                                                            this.status "Return Rejected" }}selected{{/ifEquals}}>Reject
-                                                            Return</option>
-                                                        <option value="Returned" {{#ifEquals this.status "Returned"
-                                                            }}selected{{/ifEquals}}>Accept Return</option>
-                                                    </select>
-                                                    {{else}}
-                                                    <select class="form-select form-select-sm mb-2"
-                                                        onchange="updateItemStatus('{{this._id}}', this.value)" {{#if
-                                                        (or (eq this.status "Completed" ) (eq this.status "Returned" )
-                                                        (eq this.status "Cancelled" ))}}disabled{{/if}}>
-                                                        <option value="Pending" {{#ifEquals this.status "Pending"
-                                                            }}selected{{/ifEquals}}>Pending</option>
-                                                        <option value="Shipped" {{#ifEquals this.status "Shipped"
-                                                            }}selected{{/ifEquals}}>Shipped</option>
-                                                        <option value="Completed" {{#ifEquals this.status "Completed"
-                                                            }}selected{{/ifEquals}}>Completed</option>
-                                                        <option value="Cancelled" {{#ifEquals this.status "Cancelled"
-                                                            }}selected{{/ifEquals}}>Cancelled</option>
-                                                    </select>
-                                                    {{/if}}
-
-                                                    <!-- Dynamic Badge for normal statuses -->
-                                                    <span
-                                                        class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
-                                                        {{this.status}}
-                                                    </span>
-                                                    {{/if}}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {{/each}}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Delivery Information Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Delivery Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12 mb-3 mb-md-0">
-                                    <h6 class="text-uppercase text-muted mb-3">Shipping Address</h6>
-                                    <div class="address-container">
-                                        <h6 class="fw-bold mb-2">{{order.deliveryAddress.name}}</h6>
-                                        <p class="mb-1">{{order.deliveryAddress.streetAddress}}</p>
-                                        {{#if order.deliveryAddress.landmark}}
-                                        <p class="mb-1">Landmark: {{order.deliveryAddress.landmark}}</p>
-                                        {{/if}}
-                                        <p class="mb-1">{{order.deliveryAddress.city}}, {{order.deliveryAddress.state}}
-                                            {{order.deliveryAddress.zip}}</p>
-                                        <p class="mb-1">{{order.deliveryAddress.country}}</p>
-                                        <p class="mb-0"><i class="fas fa-phone me-1"></i>
-                                            {{order.deliveryAddress.phone}}
-                                        </p>
-                                    </div>
-                                </div>
-                                {{!-- <div class="col-md-6">
-                                    <h6 class="text-uppercase text-muted mb-3">Shipping Method</h6>
-                                    <div class="d-flex align-items-center gap-3 mb-3">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded">
-                                            <i class="fas fa-shipping-fast text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0">Standard Delivery</h6>
-                                            <small class="text-muted">3-5 business days</small>
-                                        </div>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 75%;"
-                                            aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <div class="mt-2 small text-muted">
-                                        <span>Order Placed</span>
-                                        <span class="float-end">Out for Delivery</span>
-                                    </div>
-                                </div> --}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column -->
-                <div class="col-lg-4">
-                    <!-- Order Summary Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="summary-item">
-                                <span>Subtotal ({{order.items.length}} items)</span>
-                                <span>₹{{order.subtotal}}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Shipping Fee</span>
-                                <span>₹{{order.shippingFee}}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Tax</span>
-                                <span>₹{{order.tax}}</span>
-                            </div>
-                            {{#if order.couponDiscount}}
-                            <div class="summary-item text-danger">
-                                <span>Coupon Discount</span>
-                                <span>-₹{{order.couponDiscount}}</span>
-                            </div>
-                            {{/if}}
-                            {{#if order.offerDiscount}}
-                            <div class="summary-item text-danger">
-                                <span>Offer Discount</span>
-                                <span>-₹{{order.offerDiscount}}</span>
-                            </div>
-                            {{/if}}
-                            <div class="summary-item pt-2 mt-2 summary-total">
-                                <span>Total Amount</span>
-                                <span>₹{{order.totalAmount}}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Information Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <h6 class="text-uppercase text-muted mb-2">Payment Method</h6>
-                                <div class="payment-method">
-                                    <div class="payment-icon">
-                                        {{#ifEquals order.paymentMethod "wallet"}}
-                                        <i class="fas fa-wallet"></i>
-                                        {{else ifEquals order.paymentMethod "cod"}}
-                                        <i class="fas fa-money-bill-wave"></i>
-                                        {{else ifEquals order.paymentMethod "card"}}
-                                        <i class="far fa-credit-card"></i>
-                                        {{else}}
-                                        <i class="fas fa-money-check-alt"></i>
-                                        {{/ifEquals}}
-                                    </div>
-                                    <div>
-                                        <p class="mb-0 text-capitalize">{{order.paymentMethod}}</p>
-                                        <span class="badge bg-{{#ifEquals order.paymentStatus "
-                                            Completed"}}success{{else}}warning{{/ifEquals}}">
-                                            {{order.paymentStatus}}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{#if order.transactionId}}
-                            <div>
-                                <h6 class="text-uppercase text-muted mb-2">Transaction Details</h6>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="text-muted">ID:</span>
-                                    <span class="font-monospace">{{order.transactionId}}</span>
-                                </div>
-                            </div>
-                            {{/if}}
-                        </div>
-                    </div>
-
-
-                    <!-- Customer Actions Card -->
-                    {{!-- <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-user-cog me-2"></i>Customer Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <button class="btn btn-outline-primary w-100 mb-2">
-                                <i class="fas fa-envelope me-2"></i> Contact Customer
-                            </button>
-                            <button class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-print me-2"></i> Print Invoice
-                            </button>
-                        </div>
-                    </div> --}}
-                </div>
+                <a href="/admin/orders" class="btn btn-outline-secondary">
+                    <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                        </path>
+                        <path d="M2 10h20"></path>
+                    </svg>
+                    Back to Orders
+                </a>
             </div>
         </div>
-    </main>
+
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Order Items Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Order Items</h5>
+                        <span class="badge bg-primary">{{order.items.length}} items</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr class="{{#if (eq order.paymentStatus 'Failed')}}bg-danger text-white{{/if}}">
+                                        <th style="width: 100px;">Item</th>
+                                        <th>Product Details</th>
+                                        <th style="width: 200px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {{#each order.items}}
+
+                                    <tr class="{{#if (eq this.status 'Return Requested')}}alert-row{{/if}}">
+
+                                        <td data-label="Item">
+
+                                            <div class="product-img-container">
+
+                                                <img src="{{this.productImg}}" alt="{{this.productName}}"
+                                                    class="product-img">
+
+                                                {{#if (eq this.status 'Return Requested')}}
+
+                                                <div class="attention-required"
+                                                    title="Return Request - Requires Action">
+
+                                                    <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+
+                                                        <circle cx="12" cy="12" r="10"></circle>
+
+                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+
+                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+
+                                                    </svg>
+
+                                                </div>
+
+                                                {{/if}}
+
+                                            </div>
+
+                                        </td>
+
+                                        <td data-label="Product Details">
+
+                                            <div class="d-flex flex-column">
+
+                                                <strong>
+                                                    {{this.productName}}
+                                                </strong>
+
+                                                <small class="text-muted mb-1">
+
+                                                    ₹{{this.productPrice}}
+                                                    ×
+                                                    {{this.quantity}}
+
+                                                    |
+
+                                                    Size:
+                                                    {{this.productSize}}
+
+                                                </small>
+
+                                                {{#if this.returnReason.length}}
+
+                                                <div class="return-reason-box">
+
+                                                    <strong class="d-block mb-1">
+
+                                                        Return Reason
+
+                                                    </strong>
+
+                                                    <p class="mb-0 small">
+
+                                                        {{this.returnReason.[0].reason}}
+
+                                                    </p>
+
+                                                </div>
+
+                                                {{/if}}
+
+                                            </div>
+
+                                        </td>
+
+                                        <td data-label="Status">
+
+                                            <div class="d-flex flex-column">
+
+                                                {{#if (eq ../order.paymentStatus "Failed")}}
+
+                                                <select class="form-select form-select-sm mb-2" disabled>
+
+                                                    <option selected>
+
+                                                        Cancelled
+
+                                                    </option>
+
+                                                </select>
+
+                                                <span class="status-badge bg-danger text-white align-self-start">
+
+                                                    Payment Failed
+
+                                                </span>
+
+                                                {{else}}
+
+                                                {{#if (or
+                                                (eq this.status "Return Requested")
+                                                (eq this.status "Return Accepted")
+                                                (eq this.status "Return Rejected")
+                                                )}}
+
+                                                <select class="form-select form-select-sm mb-2"
+                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
+                                                    (eq this.status "Returned" ) (eq this.status "Cancelled" ) ) }}
+                                                    disabled {{/if}}>
+
+                                                    <option value="" disabled selected>
+
+                                                        Accept or Reject Return
+
+                                                    </option>
+
+                                                    <option value="Return Rejected" {{#ifEquals
+                                                        this.status "Return Rejected" }} selected {{/ifEquals}}>
+
+                                                        Reject Return
+
+                                                    </option>
+
+                                                    <option value="Returned" {{#ifEquals this.status "Returned" }}
+                                                        selected {{/ifEquals}}>
+
+                                                        Accept Return
+
+                                                    </option>
+
+                                                </select>
+
+                                                {{else}}
+
+                                                <select class="form-select form-select-sm mb-2"
+                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
+                                                    (eq this.status "Completed" ) (eq this.status "Returned" ) (eq
+                                                    this.status "Cancelled" ) ) }} disabled {{/if}}>
+
+                                                    <option value="Pending" {{#ifEquals this.status "Pending" }}
+                                                        selected {{/ifEquals}}>
+
+                                                        Pending
+
+                                                    </option>
+
+                                                    <option value="Shipped" {{#ifEquals this.status "Shipped" }}
+                                                        selected {{/ifEquals}}>
+
+                                                        Shipped
+
+                                                    </option>
+
+                                                    <option value="Completed" {{#ifEquals this.status "Completed" }}
+                                                        selected {{/ifEquals}}>
+
+                                                        Completed
+
+                                                    </option>
+
+                                                    <option value="Cancelled" {{#ifEquals this.status "Cancelled" }}
+                                                        selected {{/ifEquals}}>
+
+                                                        Cancelled
+
+                                                    </option>
+
+                                                </select>
+
+                                                {{/if}}
+
+                                                <span
+                                                    class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
+
+                                                    {{this.status}}
+
+                                                </span>
+
+                                                {{/if}}
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                    {{/each}}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Information Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                            </svg>
+                            Delivery Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3 mb-md-0">
+                                <h6 class="text-uppercase text-muted mb-3">Shipping Address</h6>
+                                <div class="address-container">
+                                    <h6 class="fw-bold mb-2">{{order.deliveryAddress.name}}</h6>
+                                    <p class="mb-1">{{order.deliveryAddress.streetAddress}}</p>
+                                    {{#if order.deliveryAddress.landmark}}
+                                    <p class="mb-1">Landmark: {{order.deliveryAddress.landmark}}</p>
+                                    {{/if}}
+                                    <p class="mb-1">{{order.deliveryAddress.city}}, {{order.deliveryAddress.state}}
+                                        {{order.deliveryAddress.zip}}</p>
+                                    <p class="mb-1">{{order.deliveryAddress.country}}</p>
+                                    <p class="mb-0"><svg class="admin-icon me-1" xmlns="http://w3.org"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                            </path>
+                                        </svg>
+
+                                        {{order.deliveryAddress.phone}}
+                                    </p>
+                                </div>
+                            </div>
+                            {{!-- <div class="col-md-6">
+                                <h6 class="text-uppercase text-muted mb-3">Shipping Method</h6>
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                        <svg class="admin-icon text-primary" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                        </svg>
+
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Standard Delivery</h6>
+                                        <small class="text-muted">3-5 business days</small>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%;"
+                                        aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="mt-2 small text-muted">
+                                    <span>Order Placed</span>
+                                    <span class="float-end">Out for Delivery</span>
+                                </div>
+                            </div> --}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Order Summary Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z">
+                                </path>
+                                <path d="M6 8h12M6 12h12M6 16h8"></path>
+                            </svg>
+                            Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-item">
+                            <span>Subtotal ({{order.items.length}} items)</span>
+                            <span>₹{{order.subtotal}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Shipping Fee</span>
+                            <span>₹{{order.shippingFee}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Tax</span>
+                            <span>₹{{order.tax}}</span>
+                        </div>
+                        {{#if order.couponDiscount}}
+                        <div class="summary-item text-danger">
+                            <span>Coupon Discount</span>
+                            <span>-₹{{order.couponDiscount}}</span>
+                        </div>
+                        {{/if}}
+                        {{#if order.offerDiscount}}
+                        <div class="summary-item text-danger">
+                            <span>Offer Discount</span>
+                            <span>-₹{{order.offerDiscount}}</span>
+                        </div>
+                        {{/if}}
+                        <div class="summary-item pt-2 mt-2 summary-total">
+                            <span>Total Amount</span>
+                            <span>₹{{order.totalAmount}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                            Payment Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-uppercase text-muted mb-2">Payment Method</h6>
+                            <div class="payment-method">
+                                <div class="payment-icon">
+                                    {{#ifEquals order.paymentMethod "wallet"}}
+                                    <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                                        <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                                        <path d="M18 12a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4v-6z"></path>
+                                    </svg>
+
+                                    {{else ifEquals order.paymentMethod "cod"}}
+                                    <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                        <circle cx="12" cy="12" r="2"></circle>
+                                        <path d="M6 12h.01M18 12h.01"></path>
+                                    </svg>
+
+                                    {{else ifEquals order.paymentMethod "card"}}
+                                    <i class="far fa-credit-card"></i>
+                                    {{else}}
+                                    <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                                        <line x1="6" y1="14" x2="10" y2="14"></line>
+                                        <line x1="14" y1="14" x2="18" y2="14"></line>
+                                    </svg>
+
+                                    {{/ifEquals}}
+                                </div>
+                                <div>
+                                    <p class="mb-0 text-capitalize">{{order.paymentMethod}}</p>
+                                    <span class="badge bg-{{#ifEquals order.paymentStatus "
+                                        Completed"}}success{{else}}warning{{/ifEquals}}">
+                                        {{order.paymentStatus}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{#if order.transactionId}}
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Transaction Details</h6>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-muted">ID:</span>
+                                <span class="font-monospace">{{order.transactionId}}</span>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
 
 
-    <script>
-        function updateItemStatus(itemId, newStatus) {
-            const orderId = `{{order._id}}`;
-            if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) {
-                return;
-            }
+                <!-- Customer Actions Card -->
+                {{!-- <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <circle cx="19" cy="11" r="2"></circle>
+                            </svg>
+                            Customer Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-outline-primary w-100 mb-2">
+                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <circle cx="19" cy="11" r="2"></circle>
+                            </svg>
+                            Contact Customer
+                        </button>
+                        <button class="btn btn-outline-secondary w-100">
+                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                </path>
+                                <rect x="6" y="14" width="12" height="8"></rect>
+                            </svg>
+                            Print Invoice
+                        </button>
+                    </div>
+                </div> --}}
+            </div>
+        </div>
+    </div>
+</main>
 
-            fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    showPopupMessage(`Status updated to ${newStatus}`, 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                })
-                .catch(error => {
-                    console.error('Error updating status:', error);
-                    showPopupMessage('Failed to update status', 'error');
-                });
+
+<script>
+    function updateItemStatus(itemId, newStatus) {
+        const orderId = `{{order._id}}`;
+        if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) {
+            return;
         }
 
-        // Download Invoice
-        document.getElementById("download-invoice-button")
-            ?.addEventListener("click", async function () {
+        fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showPopupMessage(`Status updated to ${newStatus}`, 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                showPopupMessage('Failed to update status', 'error');
+            });
+    }
 
-                try {
+    // Download Invoice
+    document.getElementById("download-invoice-button")
+        ?.addEventListener("click", async function () {
 
-                    const response = await fetch(
-                        "/admin/download-invoice",
-                        {
-                            method: "POST",
+            try {
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
+                const response = await fetch(
+                    "/admin/download-invoice",
+                    {
+                        method: "POST",
 
-                            body: JSON.stringify({
-                                orderId: "{{order._id}}"
-                            })
-                        }
-                    );
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                    if (!response.ok) {
-
-                        showPopupMessage(
-                            "Invoice generation failedddddddddddddddd",
-                            "error"
-                        );
-
-                        return;
+                        body: JSON.stringify({
+                            orderId: "{{order._id}}"
+                        })
                     }
+                );
 
-                    const blob =
-                        await response.blob();
-
-                    const url =
-                        window.URL.createObjectURL(blob);
-
-                    const a =
-                        document.createElement("a");
-
-                    a.href = url;
-
-                    a.download =
-                        "invoice.pdf";
-
-                    document.body.appendChild(a);
-
-                    a.click();
-
-                    a.remove();
-
-                    window.URL.revokeObjectURL(url);
-
-                } catch (error) {
-
-                    console.log(error);
+                if (!response.ok) {
 
                     showPopupMessage(
-                        "Invoice could not be generated",
+                        "Invoice generation failedddddddddddddddd",
                         "error"
                     );
-                }
-            });
-    </script>
-</body>
 
-</html>
+                    return;
+                }
+
+                const blob =
+                    await response.blob();
+
+                const url =
+                    window.URL.createObjectURL(blob);
+
+                const a =
+                    document.createElement("a");
+
+                a.href = url;
+
+                a.download =
+                    "invoice.pdf";
+
+                document.body.appendChild(a);
+
+                a.click();
+
+                a.remove();
+
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+
+                console.log(error);
+
+                showPopupMessage(
+                    "Invoice could not be generated",
+                    "error"
+                );
+            }
+        });
+</script>

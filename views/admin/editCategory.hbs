@@ -1,210 +1,259 @@
-<head>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/admin/category.css" />
-</head>
+{{#section 'head'}}
+<link rel="stylesheet" type="text/css" href="/stylesheets/admin/category.css" />
+{{/section}}
 
-<body>
-    <div class="dashboard-container">
+<div class="dashboard-container">
 
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 class="page-title">Edit Category: {{parentCategory.name}}</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="page-title">Edit Category: {{parentCategory.name}}</h2>
 
-            <button type="button" onclick="location.href='/admin/category'" class="btn btn-secondary">
-                ← Back
-            </button>
-        </div>
+        <button type="button" onclick="location.href='/admin/category'" class="btn btn-secondary">
+            ← Back
+        </button>
+    </div>
 
-        <div class="category-management-layout">
+    <div class="category-management-layout">
 
-            <!-- left side -->
-            <div class="categories-list-container">
+        <!-- left side -->
+        <div class="categories-list-container">
 
-                {{#if subcategories.length}}
+            {{#if subcategories.length}}
 
-                <div class="categories-table-header">
-                    <h3>Subcategories</h3>
-                    <span>{{subcategories.length}} Items</span>
-                </div>
+            <div class="categories-table-header">
+                <h3>Subcategories</h3>
+                <span>{{subcategories.length}} Items</span>
+            </div>
 
-                <div class="categories-table-wrapper">
-                    <table class="categories-table">
+            <div class="categories-table-wrapper">
+                <table class="categories-table">
 
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Subcategory</th>
-                                <th>Products</th>
-                                <th>Offer Code</th>
-                                <th>Offer Applied</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Subcategory</th>
+                            <th>Products</th>
+                            <th>Offer Code</th>
+                            <th>Offer Applied</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-                        <tbody>
+                    <tbody>
 
-                            {{#each subcategories}}
-                            <tr>
+                        {{#each subcategories}}
 
-                                <td>{{incrementedIndex @index}}</td>
+                        <tr>
 
-                                <td>{{this.name}}</td>
+                            <td data-label="Sl No">
+                                {{incrementedIndex @index}}
+                            </td>
 
-                                <td>{{this.productCount}}</td>
+                            <td data-label="Subcategory">
 
-                                <td>
-                                    {{#if this.offerId}}
+                                <div class="category-name">
+
+                                    <span class="subcategory-icon">📄</span>
+
+                                    {{this.name}}
+
+                                </div>
+
+                            </td>
+
+                            <td data-label="Products">
+                                {{this.productCount}}
+                            </td>
+
+                            <td data-label="Offer Code">
+
+                                {{#if this.offerId}}
+
+                                {{this.offerCode}}
+
+                                {{else}}
+
+                                <span style="color:#9ca3af;">
+
+                                    None
+
+                                </span>
+
+                                {{/if}}
+
+                            </td>
+
+                            <td data-label="Offer Applied">
+
+                                {{#if this.offerId}}
+
+                                {{#if this.offerLocked}}
+
+                                <div style="font-size:12px; font-weight:700; color:#ea580c;">
+
+                                    Manual
+
+                                </div>
+
+                                {{else}}
+
+                                <div style="font-size:12px; font-weight:700; color:#2563eb;">
+
+                                    Automated
+
+                                </div>
+
+                                {{/if}}
+
+                                <div style="font-size:11px; opacity:.8; margin-top:2px;">
+
+                                    {{#each ../offers}}
+
+                                    {{#ifCond this._id "==" ../this.offerId}}
+
                                     {{this.offerCode}}
-                                    {{else}}
-                                    <span style="color:#9ca3af;">None</span>
-                                    {{/if}}
-                                </td>
 
-                                <td>
+                                    {{/ifCond}}
 
-                                    {{#if this.offerId}}
+                                    {{/each}}
 
-                                    {{#if this.offerLocked}}
-                                    <div style="font-size:12px; font-weight:700; color:#ea580c;">
-                                        Manual
-                                    </div>
-                                    {{else}}
-                                    <div style="font-size:12px; font-weight:700; color:#2563eb;">
-                                        Automated
-                                    </div>
-                                    {{/if}}
+                                </div>
 
-                                    <div style="font-size:11px; opacity:.8; margin-top:2px;">
+                                {{else}}
 
-                                        {{#each ../offers}}
-                                        {{#ifCond this._id "==" ../this.offerId}}
-                                        {{this.offerCode}}
-                                        {{/ifCond}}
-                                        {{/each}}
+                                <span style="font-size:12px; color:#9ca3af;">
 
-                                    </div>
+                                    None
 
-                                    {{else}}
+                                </span>
 
-                                    <span style="font-size:12px; color:#9ca3af;">
-                                        None
-                                    </span>
+                                {{/if}}
 
-                                    {{/if}}
+                            </td>
 
-                                </td>
+                            <td data-label="Actions">
 
-                                <td style="display:flex; gap:6px; flex-wrap:wrap;">
+                                <div class="action-buttons">
 
                                     <button class="btn btn-danger btn-sm btn-delete" data-id="{{this._id}}">
+
                                         Delete
+
                                     </button>
 
                                     <button type="button" class="btn btn-apply-offer" data-category-id="{{this._id}}"
                                         style="font-size:12px; padding:6px 10px; border:none; border-radius:4px; background:#f4f4f4; color:#333;">
+
                                         <i class="bi bi-check2"></i>
+
                                         Apply 🏷️
+
                                     </button>
 
+                                </div>
 
-                                </td>
+                            </td>
 
-                            </tr>
-                            {{/each}}
+                        </tr>
 
-                        </tbody>
+                        {{/each}}
 
-                    </table>
-                </div>
+                    </tbody>
 
-                {{else}}
-
-                <div class="empty-state">
-                    <h3>No Subcategories Found</h3>
-                </div>
-
-                {{/if}}
-
+                </table>
             </div>
 
-            <!-- right side -->
-            <div class="add-category-container">
+            {{else}}
 
-                <div class="add-category-card">
+            <div class="empty-state">
+                <h3>No Subcategories Found</h3>
+            </div>
 
-                    <h3>Add Subcategory</h3>
+            {{/if}}
 
-                    <form class="form">
+        </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Parent Category</label>
+        <!-- right side -->
+        <div class="add-category-container">
 
-                            <input type="text" class="form-control" value="{{parentCategory.name}}" id="categoryName"
-                                disabled>
-                        </div>
+            <div class="add-category-card">
 
-                        <div class="form-group">
-                            <label class="form-label">Subcategory Name</label>
+                <h3>Add Subcategory</h3>
 
-                            <input type="text" class="form-control" id="newSubcategory"
-                                placeholder="Enter subcategory name">
-                        </div>
+                <form class="form">
 
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                Save
-                            </button>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Parent Category</label>
 
-                    </form>
+                        <input type="text" class="form-control" value="{{parentCategory.name}}" id="categoryName"
+                            disabled>
+                    </div>
 
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Subcategory Name</label>
+
+                        <input type="text" class="form-control" id="newSubcategory"
+                            placeholder="Enter subcategory name">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Save
+                        </button>
+                    </div>
+
+                </form>
 
             </div>
 
         </div>
+
     </div>
+</div>
 
 
-    <!-- modal -->
-    <div id="mainOverlay" class="app-overlay">
+<!-- modal -->
+<div id="mainOverlay" class="app-overlay">
 
-        <div class="modal-card">
+    <div class="modal-card">
 
-            <div class="form-header">
-                <h1 class="page-title" id="formModalTitle">Apply Offer</h1>
+        <div class="form-header">
+            <h1 class="page-title" id="formModalTitle">Apply Offer</h1>
 
-                <button id="closeFormBtn" class="btn btn-icon" type="button">
-                    ✕
+            <button id="closeFormBtn" class="btn btn-icon" type="button">
+                ✕
+            </button>
+        </div>
+
+        <form id="mainForm">
+
+            <input type="text" id="offerSearch" class="form-control mb-3" placeholder="Search offers..."
+                onkeyup="filterOffers()">
+
+            <div id="offerListContainer"></div>
+
+            <input type="hidden" id="selectedOfferIdInput">
+            <input type="hidden" id="selectedCategoryIdInput">
+
+            <div class="form-actions">
+
+                <button type="submit" class="btnForm btn-primary">
+                    Apply Offer
                 </button>
+
+                <button type="button" id="autoPricingBtn" class="btnForm" style="background:#e5e7eb; color:#111827;">
+                    Use Automatic Pricing
+                </button>
+
             </div>
 
-            <form id="mainForm">
-
-                <input type="text" id="offerSearch" class="form-control mb-3" placeholder="Search offers..."
-                    onkeyup="filterOffers()">
-
-                <div id="offerListContainer"></div>
-
-                <input type="hidden" id="selectedOfferIdInput">
-                <input type="hidden" id="selectedCategoryIdInput">
-
-                <div class="form-actions">
-
-                    <button type="submit" class="btnForm btn-primary">
-                        Apply Offer
-                    </button>
-
-                    <button type="button" id="autoPricingBtn" class="btnForm"
-                        style="background:#e5e7eb; color:#111827;">
-                        Use Automatic Pricing
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
+        </form>
 
     </div>
 
-    <script src="/javascripts/admin/editCategory.js" defer></script>
-</body>
+</div>
+
+
+
+{{#section 'scripts'}}
+<script src="/javascripts/admin/editCategory.js" defer></script>
+{{/section}}
