@@ -20,7 +20,7 @@ const MESSAGES = require(`../utils/constants`)
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '..', 'public', 'uploads')
+        const uploadPath = path.join(__dirname, '..', 'public', 'images' , 'productImages')
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -313,7 +313,7 @@ exports.addProducts = async (req, res) => {
                 const images = req.files.map(
                     (file, index) => ({
                         path:
-                            "/uploads/" +
+                            "/images/productImages/" +
                             file.filename,
 
                         altText:
@@ -852,7 +852,7 @@ exports.updateProduct = async (req, res) => {
                             ) => ({
 
                                 path:
-                                    "/uploads/" +
+                                    "/images/productImages/" +
                                     file.filename,
 
                                 altText:
@@ -1076,6 +1076,40 @@ exports.blockProduct = async (req, res) => {
         }
 
         product.isActive = !product.isActive;
+        await product.save();
+
+        return res.json({
+            success: true,
+            message: 'success',
+        });
+
+    } catch (error) {
+        res.redirect('back');
+    }
+};
+
+
+exports.deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.productId).setOptions({ showInactive: true });
+
+        if (!product) {
+            return res.json({
+                success: true,
+                message: 'Product not found',
+            });
+        }
+
+        const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean()
+
+        if (!product.isActive && existingActive) {
+            return res.json({
+                success: false,
+                message: "Cannot Restore. An active product with this name already exists.",
+            });
+        }
+
+        product.isDeleted = !product.isDeleted;
         await product.save();
 
         return res.json({

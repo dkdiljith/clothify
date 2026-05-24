@@ -31,3 +31,20 @@
 .popup-message.error { background-color: #e74c3c; }
 .popup-message.warning { background-color: #f1c40f; }
 .popup-message.info { background-color: #349adb; }
+
+
+.popup-svg {
+    width: 20px;       /* Adjust size as needed */
+    height: 20px;      /* Keep width and height equal */
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;    /* Prevents the icon from shrinking if text is long */
+}
+
+
+/* Replace '.popup-container' with your actual popup class or ID */
+.popup-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;         /* Creates a clean space between the SVG and the message text */
+}

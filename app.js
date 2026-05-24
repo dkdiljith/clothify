@@ -20,12 +20,15 @@ const nocache = require(`nocache`)
 app.use(nocache())
 
 
+const sections = require('express-handlebars-sections');
+
 //HBS Connections
 const hbs = exphbs.create({
   extname: 'hbs',
   defaultLayout: 'layout',
   layoutsDir: path.join(__dirname, 'views', 'layout'),
   partialsDir: path.join(__dirname, 'views', 'partials'),
+  helpers: { section: sections() }
 });
 
 //REGISTERING HBS HELPERS
@@ -47,7 +50,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  rolling:true,
+  rolling: true,
   cookie: {
     maxAge: 900000, // 15 min // 300000 is 5min
     secure: process.env.NODE_ENV === 'production',

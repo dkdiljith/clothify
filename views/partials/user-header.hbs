@@ -1,6 +1,5 @@
-<head>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/header.css">
-</head>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/header.css">
+
 
 
 <!-- USER HEADER -->
@@ -90,6 +89,8 @@
                 <!-- ICONS -->
                 <div class="user-header-icons">
 
+                    {{#if user}}
+
                     <!-- WISHLIST -->
                     <a href="/user/wishlist" class="user-header-icon" aria-label="Wishlist">
 
@@ -165,6 +166,18 @@
 
                     </div>
 
+                    {{else}}
+
+                    <!-- LOGIN BUTTON -->
+                    <div class="user-header-login-wrapper">
+                        <a href="/user/login" class="user-header-login-btn" aria-label="Login">
+                            <i class="fa fa-sign-in-alt"></i>
+                            <span>Login</span>
+                        </a>
+                    </div>
+
+                    {{/if}}
+
                 </div>
 
             </div>
@@ -222,6 +235,8 @@
             Collections
         </a>
 
+        {{#if user}}
+
         <a href="/user/profile">
             Profile
         </a>
@@ -245,6 +260,13 @@
         <a href="/user/logout" class="mobile-logout">
             Logout
         </a>
+
+        {{else}}
+
+        <a href="/user/login" class="mobile-logout">
+            Login
+        </a>
+        {{/if}}
 
     </div>
 
@@ -421,60 +443,38 @@
     // CART BADGE
     // =====================================================
 
+
     async function updateCartIcon() {
-
         try {
-
-            const response = await fetch(
-                "/user/cartDataIcon"
-            );
+            const response = await fetch("/user/cartDataIcon");
 
             if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
 
-                throw new Error(
-                    `HTTP Error: ${response.status}`
-                );
-
+            // CHECK: If the server returns HTML (Login Page), exit safely
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                console.log("Cart Badge: User is logged out. Skipping update.");
+                return;
             }
 
             const data = await response.json();
-
-            const itemCount =
-                data.itemCount || 0;
-
-            const cartBadges =
-                document.querySelectorAll(
-                    ".cart-badge"
-                );
+            const itemCount = data.itemCount || 0;
+            const cartBadges = document.querySelectorAll(".cart-badge");
 
             cartBadges.forEach((badge) => {
-
                 if (itemCount > 0) {
-
-                    badge.textContent =
-                        itemCount;
-
-                    badge.style.display =
-                        "flex";
-
+                    badge.textContent = itemCount;
+                    badge.style.display = "flex";
                 } else {
-
-                    badge.style.display =
-                        "none";
-
+                    badge.style.display = "none";
                 }
-
             });
 
         } catch (error) {
-
-            console.error(
-                "Cart Icon Error:",
-                error
-            );
-
+            console.error("Cart Icon Error:", error);
         }
-
     }
 
 
@@ -483,59 +483,36 @@
     // =====================================================
 
     async function updateWishlistIcon() {
-
         try {
-
-            const response = await fetch(
-                "/user/wishlistDataIcon"
-            );
+            const response = await fetch("/user/wishlistDataIcon");
 
             if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
 
-                throw new Error(
-                    `HTTP Error: ${response.status}`
-                );
-
+            // CHECK: If the server returns HTML (Login Page), exit safely
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                console.log("Wishlist Badge: User is logged out. Skipping update.");
+                return;
             }
 
             const data = await response.json();
-
-            const wishlistCount =
-                data.wishlistCount || 0;
-
-            const wishlistBadges =
-                document.querySelectorAll(
-                    ".wishlist-badge"
-                );
+            const wishlistCount = data.wishlistCount || 0;
+            const wishlistBadges = document.querySelectorAll(".wishlist-badge");
 
             wishlistBadges.forEach((badge) => {
-
                 if (wishlistCount > 0) {
-
-                    badge.textContent =
-                        wishlistCount;
-
-                    badge.style.display =
-                        "flex";
-
+                    badge.textContent = wishlistCount;
+                    badge.style.display = "flex";
                 } else {
-
-                    badge.style.display =
-                        "none";
-
+                    badge.style.display = "none";
                 }
-
             });
 
         } catch (error) {
-
-            console.error(
-                "Wishlist Icon Error:",
-                error
-            );
-
+            console.error("Wishlist Icon Error:", error);
         }
-
     }
 
 

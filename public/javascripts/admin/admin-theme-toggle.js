@@ -1,29 +1,115 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('theme-toggle');
+
+    const themeToggles =
+        document.querySelectorAll('.theme-toggle-btn');
+
     const root = document.documentElement;
 
-    // Guard clause: If the button doesn't exist on this specific page (like the Login page), stop running
-    if (!themeToggle) return;
 
-    // Sync the button text to match the theme applied by the head tag
-    updateButtonText();
-
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = root.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        root.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateButtonText();
-
-        // Optional: wrap inside a safety check if analytics isn't loaded yet
-        if (typeof updateChartColors === 'function') {
-            updateChartColors();
-        }
-    });
+    // =====================================================
+    // THEME BUTTON TEXT UPDATE
+    // =====================================================
 
     function updateButtonText() {
-        const currentTheme = root.getAttribute('data-theme');
-        themeToggle.textContent = currentTheme === 'dark' ? '☀️ Light Mode' : '🌓 Dark Mode';
+
+        const currentTheme =
+            root.getAttribute('data-theme');
+
+        themeToggles.forEach(button => {
+
+            const span = button.querySelector('span');
+
+            if (span) {
+
+                span.textContent =
+                    currentTheme === 'dark'
+                        ? 'Light Mode'
+                        : 'Dark Mode';
+
+            } else {
+
+                button.textContent =
+                    currentTheme === 'dark'
+                        ? '☀️ Light Mode'
+                        : '🌓 Dark Mode';
+            }
+
+        });
+
     }
+
+
+    // =====================================================
+    // THEME TOGGLE
+    // =====================================================
+
+    if (themeToggles.length > 0) {
+
+        updateButtonText();
+
+        themeToggles.forEach(button => {
+
+            button.addEventListener('click', () => {
+
+                const currentTheme =
+                    root.getAttribute('data-theme');
+
+                const newTheme =
+                    currentTheme === 'dark'
+                        ? 'light'
+                        : 'dark';
+
+                root.setAttribute('data-theme', newTheme);
+
+                localStorage.setItem('theme', newTheme);
+
+                updateButtonText();
+
+                if (typeof updateChartColors === 'function') {
+                    updateChartColors();
+                }
+
+            });
+
+        });
+
+    }
+
+
+    // =====================================================
+    // SIDEBAR TOGGLE
+    // =====================================================
+
+    const sidebar = document.querySelector('.sidebar');
+
+    const sidebarToggle =
+        document.getElementById('adminSidebarToggle');
+
+    const sidebarOverlay =
+        document.getElementById('sidebarOverlay');
+
+    if (sidebar && sidebarToggle && sidebarOverlay) {
+
+        sidebarToggle.addEventListener('click', () => {
+
+            sidebar.classList.add('show-sidebar');
+
+            sidebarOverlay.classList.add('show-overlay');
+
+            document.body.style.overflow = 'hidden';
+
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+
+            sidebar.classList.remove('show-sidebar');
+
+            sidebarOverlay.classList.remove('show-overlay');
+
+            document.body.style.overflow = '';
+
+        });
+
+    }
+
 });

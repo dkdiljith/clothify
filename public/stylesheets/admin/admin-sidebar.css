@@ -8,6 +8,7 @@
   --surface: #FFFFFF;
   --text: #1E293B;
   --border: #E2E8F0;
+  --sidebar-width: 230px;
 }
 
 [data-theme="dark"] {
@@ -44,19 +45,53 @@ body {
   font-weight: 600;
 }
 
- /* Sidebar Layout */
- .sidebar-container {
+/* Sidebar Layout */
+.sidebar-container {
   display: grid;
   min-height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
+  width: var(--sidebar-width);
+
   background: var(--surface);
+
   padding: 1.3rem;
-  padding-top:0.95em;
+  padding-top: 0.95em;
+
   height: 100vh;
+
   position: fixed;
+  top: 0;
+  left: 0;
+
+  overflow-y: auto;
+
+  transition: left 0.3s ease;
+
+  z-index: 1400;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+
+  z-index: 1300;
+}
+
+.sidebar-overlay.show-overlay {
+  opacity: 1;
+  visibility: visible;
 }
 
 .nav-item {
@@ -71,9 +106,10 @@ body {
 }
 
 /* DashBoard starts here */
- .main-content {
+.main-content {
   padding: 1.4rem;
-  margin-left: 230px;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease;
 }
 
 /* Header */
@@ -83,7 +119,7 @@ body {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   background-color: var(--surface);
-  border-radius: 15px; 
+  border-radius: 15px;
   padding: 15px;
   width: 100%;
 }
@@ -91,7 +127,7 @@ body {
 .header-controls {
   display: flex;
   gap: 1rem;
-  align-items: center;  
+  align-items: center;
 }
 
 .theme-btn {
@@ -102,6 +138,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
+
 .bar-title {
   font-size: 1rem;
   font-weight: 600;
@@ -110,12 +147,13 @@ body {
 
 /* ///////////////////////////////////////////////////////////////////// */
 /* Container */
+
 .dashboard-container {
-  max-width: 100% !important; 
-    margin: 0 auto;
-    background: var(--surface);
-    border-radius: 15px;
-    padding: 1.5rem;
+  max-width: 100% !important;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: 15px;
+  padding: 1.5rem;
 }
 
 .page-title {
@@ -123,66 +161,88 @@ body {
   font-weight: 600;
   color: var(--text-primary);
 }
-/* /////////////////////////////////////////////////////////////////////////////// */
-     /* Notification styles    (    <div id="notification-container"></div>     ) */
-/* Notification container */
-#notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 99999; /* ⬅️ Higher than modals */
-    pointer-events: none; /* Prevents blocking clicks behind */
-}
-
-/* Notification styles */
-.notification {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    color: #fff;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: slideUp 0.4s ease-out forwards, fadeOut 0.5s 3.5s forwards;
-    backdrop-filter: blur(3px); /* soft background blur */
-    pointer-events: auto;
-}
-
-/* Notification types */
-.notification.success {
-    background-color: var(--success, #4CAF50);
-}
-
-.notification.error {
-    background-color: var(--danger, #F44336);
-}
-
-/* Close button */
-.notification .close-btn {
-    margin-left: 15px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.2rem;
-}
 
 /* Animations */
 @keyframes slideUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeOut {
-    to {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
 
 
+
+@media (max-width: 991px) {
+
+  .sidebar {
+    left: -100%;
+  }
+
+  .sidebar.show-sidebar {
+    left: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  .dashboard-header {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .main-content {
+    padding: 1rem;
+  }
+
+}
+
+
+
 /*///////////////////////////////////////////////////////////////////////////////////////////*/
+
+
+
+
+
+
+
+
+.action-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Optional helper rules for status notifications */
+.close-icon { stroke: var(--danger-color, #dc3545); }
+.check-icon { stroke: var(--success-color, #198754); }
+
+
+
+.pagination-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Spaces the text nicely from the icon */
+}
+
+.pagination-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+

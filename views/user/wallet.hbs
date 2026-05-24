@@ -270,9 +270,9 @@
                     key: 'rzp_test_TVFPFUZdUa9wz4', // Your Razorpay key
                     amount: order.amount,
                     currency: order.currency,
-                    order_id: order.id,
                     name: 'Add Wallet Funds',
                     description: `Adding ₹${amount} to your wallet`,
+                    order_id: order.id,
                     handler: async function (response) {
                         // Verify payment on server
                         const verifyResponse = await fetch('/user/wallet/verify-payment', {
@@ -299,6 +299,11 @@
                         } else {
                             throw new Error(result.message || 'Payment verification failed');
                         }
+                    },
+                    "prefill": {
+                        "name": "{{user.name}}",
+                        "email": "{{user.email}}",
+                        "contact": "{{user.phone}}" 
                     },
                     modal: {
                         ondismiss: function () {
@@ -327,5 +332,5 @@
             }
         }
     </script>
-    
+
 </body>

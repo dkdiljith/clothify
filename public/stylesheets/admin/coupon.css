@@ -326,7 +326,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+  z-index: 99999;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -457,4 +457,377 @@
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
     max-width: 400px;
+}
+
+
+.status-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .coupons-table-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 0.8rem;
+    }
+
+    .coupons-table-header>div {
+
+        width: 100%;
+
+        display: flex !important;
+
+        flex-direction: column;
+
+        gap: 0.8rem;
+    }
+
+    .search-container,
+    .search-input {
+
+        width: 100%;
+    }
+
+    #toggleCouponForm {
+
+        width: 100%;
+
+        margin-left: 0 !important;
+
+        height: 44px;
+    }
+
+    .coupons-table-wrapper {
+
+        overflow-x: auto;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .coupons-table {
+
+        min-width: 900px;
+    }
+
+    .form-columns {
+
+        grid-template-columns: 1fr;
+    }
+
+    .add-coupon-card {
+
+        width: 90%;
+
+        max-width: 700px;
+
+        min-height: auto;
+    }
+}
+
+
+/* =========================================================
+   MOBILE CARD TABLE
+========================================================= */
+
+@media (max-width: 576px) {
+
+    .dashboard-container,
+    .coupons-list-container {
+
+        padding: 1rem;
+    }
+
+    .page-title {
+
+        font-size: 1.4rem;
+    }
+
+    .coupons-table {
+
+        min-width: 100%;
+    }
+
+    .coupons-table thead {
+
+        display: none;
+    }
+
+    .coupons-table,
+    .coupons-table tbody,
+    .coupons-table tr,
+    .coupons-table td {
+
+        display: block;
+
+        width: 100%;
+    }
+
+    .coupons-table tr {
+
+        background: var(--surface);
+
+        border: 1px solid var(--border);
+
+        border-radius: 14px;
+
+        padding: 0.9rem;
+
+        margin-bottom: 0.9rem;
+
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .coupons-table td {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        gap: 1rem;
+
+        padding: 0.7rem 0;
+
+        border-bottom: 1px solid var(--border);
+
+        text-align: right;
+
+        font-size: 0.9rem;
+
+        white-space: normal;
+    }
+
+    .coupons-table td:last-child {
+
+        border-bottom: none;
+    }
+
+    .coupons-table td::before {
+
+        content: attr(data-label);
+
+        font-weight: 700;
+
+        color: var(--text);
+
+        text-align: left;
+
+        font-size: 0.85rem;
+    }
+
+
+    /* DARKER SL NO */
+
+    .coupons-table td:first-child {
+
+        background: rgba(0, 0, 0, 0.06);
+
+        padding: 0.7rem 0.85rem;
+
+        border-radius: 10px;
+
+        margin-bottom: 0.8rem;
+
+        font-weight: 700;
+    }
+
+    [data-theme="dark"] .coupons-table td:first-child {
+
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+
+    /* COUPON CODE */
+
+    .coupon-code {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: flex-end;
+
+        gap: 0.5rem;
+
+        text-align: right;
+
+        word-break: break-word;
+    }
+
+
+    /* ACTION BUTTONS */
+
+    .action-buttons {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        align-items: center;
+
+        gap: 0.45rem;
+
+        flex-wrap: nowrap;
+    }
+
+    .btn-sm {
+
+        width: fit-content;
+
+        min-width: unset;
+
+        padding: 0.45rem 0.7rem;
+
+        font-size: 0.8rem;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       MODAL MOBILE
+    ========================================================= */
+
+    .add-coupon-overlay {
+
+        padding: 0.8rem;
+
+        align-items: flex-end;
+    }
+
+    .add-coupon-card {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        max-height: 94vh;
+
+        overflow-y: auto;
+
+        border-radius: 20px 20px 0 0;
+
+        padding: 1.2rem;
+
+        animation: mobileModalSlide 0.25s ease;
+    }
+
+    @keyframes mobileModalSlide {
+
+        from {
+
+            transform: translateY(40px);
+
+            opacity: 0;
+        }
+
+        to {
+
+            transform: translateY(0);
+
+            opacity: 1;
+        }
+    }
+
+    #couponModalTitle {
+
+        font-size: 1.35rem;
+
+        padding-right: 35px;
+    }
+
+    #closeFormBtn {
+
+        width: 34px;
+
+        height: 34px;
+
+        top: -4px;
+
+        right: -2px;
+    }
+
+
+    /* FORM */
+
+    .form-columns {
+
+        gap: 0.6rem;
+    }
+
+    .form-group {
+
+        margin-bottom: 0.9rem;
+    }
+
+    .form-label {
+
+        font-size: 0.88rem;
+    }
+
+    .form-control {
+
+        height: 44px;
+
+        padding: 0.7rem 0.85rem;
+
+        font-size: 0.9rem;
+    }
+
+    .error-message {
+
+        min-height: 16px;
+
+        font-size: 0.72rem;
+    }
+
+    .btnForm {
+
+        width: 100%;
+
+        min-width: 100%;
+
+        height: 46px;
+
+        font-size: 0.9rem;
+    }
+
+
+    /* PAGINATION */
+
+    .pagination {
+
+        flex-direction: column;
+
+        gap: 10px;
+    }
+}
+
+
+
+
+/* =========================================================
+   SELECT2 DROPDOWN ABOVE MODALS
+========================================================= */
+
+.select2-container--open {
+    z-index: 999999 !important;
+}
+
+.select2-dropdown {
+    z-index: 999999 !important;
 }

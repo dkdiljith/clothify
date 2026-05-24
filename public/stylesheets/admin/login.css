@@ -49,16 +49,16 @@
     margin-bottom: 1.5rem;
   }
 
-  .form-group i.fas:not(.password-toggle) {
+ .form-group .form-field-icon:not(.password-toggle) {
     position: absolute;
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
     color: #aaa;
     z-index: 1;
-    font-size: 16px;
     pointer-events: none;
-  }
+}
+
 
   .password-toggle {
     position: absolute;
@@ -201,3 +201,15 @@
     visibility: hidden;
     opacity: 0;
   }
+
+
+  .form-field-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.password-toggle {
+    cursor: pointer;
+}

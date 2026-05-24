@@ -71,7 +71,7 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, admin.password);
 
     if (isMatch) {
-      req.session.admin = { _id: admin._id };
+      req.session.admin = { _id: admin._id , name:admin.name , email:admin.email};
 
       return req.session.save((err) => {
         if (err) return next(err);
@@ -111,8 +111,7 @@ exports.register = async (req, res) => {
 
     await newAdmin.save();
 
-    // 3. Log them in automatically or redirect to login
-    res.redirect("/admin/login");
+    res.redirect("/admin/dashboard");
   } catch (error) {
     console.error("Registration Error:", error);
     res.status(500).send("Internal Server Error");

@@ -35,5 +35,5 @@ const activityLogSchema = new mongoose.Schema({
   }
 });
 
-const activity_log = mongoose.model('activity-log',activityLogSchema );
-module.exports = activity_log;
+const activityLogs = mongoose.model('activityLogs',activityLogSchema );
+module.exports = activityLogs;

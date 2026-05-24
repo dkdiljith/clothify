@@ -152,6 +152,294 @@
  }
 
  .table-danger {
-    background-color: #f8d7da !important;
-    color: #842029;
-}
+     background-color: #f8d7da !important;
+     color: #842029;
+ }
+
+ .admin-icon {
+     width: 16px;
+     height: 16px;
+     display: inline-block;
+     vertical-align: middle;
+ }
+
+
+
+ /* =========================================================
+   TABLET
+========================================================= */
+
+ @media (max-width: 991px) {
+
+     .order-header {
+
+         padding: 1.2rem;
+     }
+
+     .card-body {
+
+         padding: 1rem;
+     }
+
+     .table-responsive {
+
+         overflow-x: auto;
+
+         -webkit-overflow-scrolling: touch;
+     }
+
+     .table {
+
+         min-width: 750px;
+     }
+
+     .summary-item {
+
+         font-size: 0.95rem;
+     }
+ }
+
+
+ /* =========================================================
+   MOBILE
+========================================================= */
+
+ @media (max-width: 576px) {
+
+     .dashboard-container {
+
+         padding: 0.8rem;
+     }
+
+     .container-fluid {
+
+         padding-left: 0;
+
+         padding-right: 0;
+     }
+
+
+     /* ORDER HEADER */
+
+     .order-header {
+
+         padding: 1rem;
+
+         gap: 1rem;
+     }
+
+     .order-header h1 {
+
+         font-size: 1.15rem;
+     }
+
+     .order-header .d-flex.justify-content-between {
+
+         flex-direction: column;
+
+         align-items: flex-start !important;
+     }
+
+     .order-header .btn {
+
+         width: 100%;
+
+         margin-top: 0.6rem;
+     }
+
+     .order-header .d-flex.flex-wrap.gap-3 {
+
+         gap: 0.6rem !important;
+     }
+
+
+     /* CARDS */
+
+     .card {
+
+         border-radius: 14px;
+
+         overflow: hidden;
+     }
+
+     .card-header {
+
+         padding: 0.9rem 1rem;
+     }
+
+     .card-header h5 {
+
+         font-size: 1rem;
+     }
+
+     .card-body {
+
+         padding: 1rem;
+     }
+
+
+     /* TABLE -> CARD */
+
+     .table {
+
+         min-width: 100%;
+     }
+
+     .table thead {
+
+         display: none;
+     }
+
+     .table,
+     .table tbody,
+     .table tr,
+     .table td {
+
+         display: block;
+
+         width: 100%;
+     }
+
+     .table tr {
+
+         background: var(--surface);
+
+         border: 1px solid var(--border);
+
+         border-radius: 14px;
+
+         padding: 0.9rem;
+
+         margin-bottom: 0.9rem;
+
+         box-shadow:
+             0 2px 8px rgba(0, 0, 0, 0.04);
+     }
+
+     .table td {
+
+         display: flex;
+
+         justify-content: space-between;
+
+         align-items: flex-start;
+
+         gap: 1rem;
+
+         padding: 0.75rem 0;
+
+         border-bottom: 1px solid var(--border);
+
+         text-align: right;
+
+         font-size: 0.9rem;
+
+         white-space: normal;
+     }
+
+     .table td:last-child {
+
+         border-bottom: none;
+     }
+
+     .table td::before {
+
+         content: attr(data-label);
+
+         font-weight: 700;
+
+         color: var(--text);
+
+         text-align: left;
+
+         font-size: 0.85rem;
+
+         flex-shrink: 0;
+     }
+
+
+     /* PRODUCT IMAGE */
+
+     .product-img-container {
+
+         width: 72px;
+
+         height: 72px;
+
+         margin-left: auto;
+     }
+
+
+     /* PRODUCT DETAILS */
+
+     .table td .d-flex.flex-column {
+
+         align-items: flex-end;
+
+         text-align: right;
+     }
+
+     .return-reason-box {
+
+         text-align: left;
+
+         width: 100%;
+     }
+
+
+     /* STATUS SELECT */
+
+     .form-select {
+
+         min-height: 42px;
+
+         font-size: 0.88rem;
+     }
+
+     .status-badge {
+
+         font-size: 0.7rem;
+     }
+
+
+     /* ADDRESS */
+
+     .address-container {
+
+         padding: 0.9rem;
+     }
+
+
+     /* PAYMENT */
+
+     .payment-method {
+
+         align-items: flex-start;
+     }
+
+     .font-monospace {
+
+         word-break: break-word;
+     }
+
+
+     /* SUMMARY */
+
+     .summary-item {
+
+         font-size: 0.9rem;
+     }
+
+     .summary-total {
+
+         font-size: 1rem;
+     }
+
+
+     /* BUTTONS */
+
+     .btn {
+
+         min-height: 44px;
+     }
+ }

@@ -23,7 +23,6 @@ exports.userAuth = async (req, res, next) => {
             });
         }
 
-        res.locals.user = user;
         next();
     } catch (error) {
         console.error("User Auth Error:", error);
@@ -52,7 +51,7 @@ exports.adminAuth = async (req, res, next) => {
             });
         }
 
-        res.locals.admin = admin;
+
         next();
     } catch (error) {
         console.error("Admin Auth Error:", error);

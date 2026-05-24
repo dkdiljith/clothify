@@ -9,7 +9,9 @@ const adminPaginationFactory = require(`../utils/pagination`);
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
 
-/////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////
 
 
 
@@ -88,11 +90,11 @@ async function calculateRefund(orderId, itemId, isCancellation) {
 
  
   // Return fee only for returns
-  const RETURN_FEE = 80;
+  // const RETURN_FEE = 80;
 
-  if (!isCancellation) {
-    refundableAmount -= RETURN_FEE;
-  }
+  // if (!isCancellation) {
+  //   refundableAmount -= RETURN_FEE;
+  // }
 
 
   // Prevent negative refund
@@ -118,6 +120,10 @@ async function calculateRefund(orderId, itemId, isCancellation) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 
 
 exports.ordersRender = async (req, res) => {

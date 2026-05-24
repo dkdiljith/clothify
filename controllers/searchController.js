@@ -10,10 +10,10 @@ const MESSAGES = require(`../utils/constants`)
 
 exports.collections = async (req, res) => {
   try {
-    let { query, sort, page = 1, limit = 12 } = req.query;
+    let { query, sort, page = 1, limit = 8 } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 12;
+    limit = parseInt(limit) || 8;
 
     const skip = (page - 1) * limit;
 

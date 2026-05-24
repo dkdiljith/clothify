@@ -1,560 +1,58 @@
-<head>
-	<link rel="stylesheet" type="text/css" href="/stylesheets/user/home.css">
-</head>
+<script src="/javascripts/user/productCard.js"></script>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/productCard.css">
 
 
-<body class="user-body">
-
-	<div class="animsition">
+<div class="animsition">
 
 
-		<!-- =========================================================
+	<!-- =========================================================
              HERO SLIDER
         ========================================================= -->
 
-		<section class="custom-slider-section">
-
-			<div class="custom-slider-wrapper">
-
-
-				<!-- SLIDE 1 -->
-				<div class="custom-slide active" style="background-image:
-                        linear-gradient(
-                            rgba(0,0,0,0.1),
-                            rgba(0,0,0,0.1)
-                        ),
-                        url('https://i.postimg.cc/ryBXLphh/slide-07.jpg');">
-
-					<div class="custom-slide-container">
-
-						<span class="anim-text-down slide-sub">
-							Women Collection 2018
-						</span>
-
-						<h2 class="anim-text-up slide-title">
-							NEW SEASON
-						</h2>
-
-						<div class="anim-text-zoom">
-
-							<a href="/user/collections" class="slide-btn">
-								Shop Now
-							</a>
-
-						</div>
-
-					</div>
-
-				</div>
-
-
-				<!-- SLIDE 2 -->
-				<div class="custom-slide" style="background-image:
-                        linear-gradient(
-                            rgba(0,0,0,0.1),
-                            rgba(0,0,0,0.1)
-                        ),
-                        url('https://i.postimg.cc/kgPjT6jG/slide-05.jpg');">
-
-					<div class="custom-slide-container">
-
-						<span class="anim-text-down slide-sub">
-							Men New-Season
-						</span>
-
-						<h2 class="anim-text-up slide-title">
-							Jackets & Coats
-						</h2>
-
-						<div class="anim-text-zoom">
-
-							<a href="/user/collections" class="slide-btn">
-								Shop Now
-							</a>
-
-						</div>
-
-					</div>
-
-				</div>
-
-
-				<!-- SLIDE 3 -->
-				<div class="custom-slide" style="background-image:
-                        linear-gradient(
-                            rgba(0,0,0,0.1),
-                            rgba(0,0,0,0.1)
-                        ),
-                        url('https://i.postimg.cc/QMyYk6vZ/slide-04.jpg');">
-
-					<div class="custom-slide-container">
-
-						<span class="anim-text-down slide-sub">
-							Men New-Season
-						</span>
-
-						<h2 class="anim-text-up slide-title">
-							Jackets & Coats
-						</h2>
-
-						<div class="anim-text-zoom">
-
-							<a href="/user/collections" class="slide-btn">
-								Shop Now
-							</a>
-
-						</div>
-
-					</div>
-
-				</div>
-
-
-				<!-- NAVIGATION -->
-				<button class="slider-arrow prev-arrow" aria-label="Previous Slide">
-					&#10094;
-				</button>
-
-				<button class="slider-arrow next-arrow" aria-label="Next Slide">
-					&#10095;
-				</button>
-
-
-				<!-- DOTS -->
-				<div class="slider-dots">
-
-					<span class="slider-dot active" data-index="0"></span>
-
-					<span class="slider-dot" data-index="1"></span>
-
-					<span class="slider-dot" data-index="2"></span>
-
-				</div>
-
-			</div>
-
-		</section>
+	{{> user/slider}}
 
 
 
-		<!-- =========================================================
+	<!-- =========================================================
              FEATURED PRODUCTS
         ========================================================= -->
 
-		<section class="featured-section">
+	<section class="featured-section">
 
-			<div class="container">
+		<div class="container">
 
-				<h2 class="section-title">
-					Featured Products
-				</h2>
+			<h2 class="section-title">
+				Featured Products
+			</h2>
 
+			<div class="row">
 
-				<div class="row">
+				{{#each product}}
 
-					{{#each product}}
+				<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 mb-4">
 
-					<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6" style="margin-bottom:25px">
-
-						<div class="product-card">
-
-
-							{{#if this.latestCollection}}
-
-							<div class="product-badge">
-								New
-							</div>
-
-							{{/if}}
-
-
-							{{#if this.details.[0].offerId}}
-
-							<div class="product-badge sale">
-								Sale
-							</div>
-
-							<div class="discount-badge">
-
-								{{calculateDiscountPercentage
-								this.details.[0].price
-								this.details.[0].offerPrice}}%
-
-								OFF
-
-							</div>
-
-							{{/if}}
-
-
-							<!-- PRODUCT IMAGE -->
-							<div class="product-image">
-
-								<a href="/user/singleproduct/{{this._id}}">
-
-									<img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
-
-								</a>
-
-
-								<!-- WISHLIST -->
-								<div class="product-wishlist-container">
-
-									<button class="add-to-wishlist js-addwish-b2" data-product-id="{{this._id}}"
-										data-variation-index="0">
-
-										<i class="fas fa-heart"></i>
-
-									</button>
-
-
-									<button class="added-to-wishlist" data-product-id="{{this._id}}"
-										data-variation-index="0" style="display:none;">
-
-										<i class="fas fa-check"></i>
-
-									</button>
-
-								</div>
-
-							</div>
-
-
-							<!-- PRODUCT DETAILS -->
-							<div class="product-details">
-
-								<h3 class="product-title">
-
-									<a href="/user/singleproduct/{{this._id}}">
-										{{this.name}}
-									</a>
-
-								</h3>
-
-
-								<p class="product-description">
-									{{this.description}}
-								</p>
-
-
-								<div class="price-container">
-
-									{{#if this.details.[0].offerId}}
-
-									<span class="original-price">
-										₹{{this.details.[0].price}}
-									</span>
-
-									<span class="product-price">
-										₹{{this.details.[0].offerPrice}}
-									</span>
-
-									{{else}}
-
-									<span class="product-price">
-										₹{{this.details.[0].price}}
-									</span>
-
-									{{/if}}
-
-								</div>
-
-
-								{{#if this.bestSeller}}
-
-								<div class="best-seller-badge">
-									Bestseller
-								</div>
-
-								{{/if}}
-
-							</div>
-
-						</div>
-
-					</div>
-
-					{{/each}}
+					{{> user/productCard this}}
 
 				</div>
 
-
-				<!-- VIEW ALL -->
-				<div class="text-center mt-5">
-
-					<a href="/user/collections" class="btn-primary">
-						View All Products
-					</a>
-
-				</div>
+				{{/each}}
 
 			</div>
 
-		</section>
 
-	</div>
+			<!-- VIEW ALL -->
+			<div class="text-center mt-5">
 
+				<a href="/user/collections" class="btn-primary">
 
+					View All Products
 
-	<!-- =========================================================
-         WISHLIST SCRIPT
-    ========================================================= -->
+				</a>
 
-	<script>
+			</div>
 
-		async function addToWishlist(
-			productId,
-			variationIndex
-		) {
+		</div>
 
-			try {
+	</section>
 
-				const response = await fetch(
-					`/user/addtowishlist/${productId}/${variationIndex}`,
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json"
-						}
-					}
-				);
-
-				const data = await response.json();
-
-
-				showPopupMessage(
-					data.message,
-					data.success
-						? "success"
-						: "error"
-				);
-
-
-				if (data.success) {
-
-					const addButton =
-						document.querySelector(
-							`.add-to-wishlist[data-product-id="${productId}"]`
-						);
-
-					const addedButton =
-						document.querySelector(
-							`.added-to-wishlist[data-product-id="${productId}"]`
-						);
-
-
-					if (
-						addButton &&
-						addedButton
-					) {
-
-						addButton.style.display = "none";
-
-						addedButton.style.display = "inline-flex";
-
-					}
-
-				}
-
-			} catch (error) {
-
-				console.error(
-					"Error adding to wishlist:",
-					error
-				);
-
-				showPopupMessage(
-					"Something went wrong. Please try again.",
-					"error"
-				);
-
-			}
-
-		}
-
-
-		document.addEventListener(
-			'DOMContentLoaded',
-			() => {
-
-				const addToWishlistButtons =
-					document.querySelectorAll(
-						'.add-to-wishlist'
-					);
-
-
-				addToWishlistButtons.forEach(
-					(button) => {
-
-						button.addEventListener(
-							'click',
-							(event) => {
-
-								const productId =
-									event.currentTarget.getAttribute(
-										'data-product-id'
-									);
-
-								const variationIndex =
-									event.currentTarget.getAttribute(
-										'data-variation-index'
-									);
-
-								addToWishlist(
-									productId,
-									variationIndex
-								);
-
-							}
-						);
-
-					}
-				);
-
-			}
-		);
-
-	</script>
-
-
-
-	<!-- =========================================================
-         SLIDER SCRIPT
-    ========================================================= -->
-
-	<script>
-
-		document.addEventListener(
-			"DOMContentLoaded",
-			function () {
-
-				const slides =
-					document.querySelectorAll(
-						'.custom-slide'
-					);
-
-				const dots =
-					document.querySelectorAll(
-						'.slider-dot'
-					);
-
-				const prevBtn =
-					document.querySelector(
-						'.prev-arrow'
-					);
-
-				const nextBtn =
-					document.querySelector(
-						'.next-arrow'
-					);
-
-				let currentSlide = 0;
-
-				let slideInterval;
-
-
-				function showSlide(index) {
-
-					slides[currentSlide].classList.remove(
-						'active'
-					);
-
-					dots[currentSlide].classList.remove(
-						'active'
-					);
-
-
-					currentSlide =
-						(index + slides.length)
-						% slides.length;
-
-
-					slides[currentSlide].classList.add(
-						'active'
-					);
-
-					dots[currentSlide].classList.add(
-						'active'
-					);
-
-				}
-
-
-				function nextSlide() {
-					showSlide(currentSlide + 1);
-				}
-
-
-				function prevSlide() {
-					showSlide(currentSlide - 1);
-				}
-
-
-				function startAutoplay() {
-
-					clearInterval(slideInterval);
-
-					slideInterval = setInterval(
-						nextSlide,
-						6000
-					);
-
-				}
-
-
-				nextBtn.addEventListener(
-					'click',
-					() => {
-
-						nextSlide();
-
-						startAutoplay();
-
-					}
-				);
-
-
-				prevBtn.addEventListener(
-					'click',
-					() => {
-
-						prevSlide();
-
-						startAutoplay();
-
-					}
-				);
-
-
-				dots.forEach(
-					(dot) => {
-
-						dot.addEventListener(
-							'click',
-							(e) => {
-
-								const index = parseInt(
-									e.target.getAttribute(
-										'data-index'
-									)
-								);
-
-								showSlide(index);
-
-								startAutoplay();
-
-							}
-						);
-
-					}
-				);
-
-
-				startAutoplay();
-
-			}
-		);
-
-	</script>
-
-</body>
+</div>

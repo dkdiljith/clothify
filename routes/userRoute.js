@@ -8,6 +8,12 @@ const passport = passportFile.passport
 router.use(passport.initialize());
 router.use(passport.session());
 
+//session for user
+router.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
 //RAZORPAY integration//
 const razorpay = require(`../services/razorpay`)
 
@@ -18,12 +24,17 @@ const productController = require('../controllers/productController')
 const cartController = require(`../controllers/cartController`)
 const wishlistController = require(`../controllers/wishlistController`)
 const orderController = require(`../controllers/orderController`)
+const userOrderController = require(`../controllers/userOrderController`)
 const walletController = require(`../controllers/walletController`)
 const couponController = require(`../controllers/couponController`)
 const searchController = require(`../controllers/searchController`)
+const addressController = require(`../controllers/addressController`)
 
 //usetAuth (session) 
 const userAuth = require(`../middlewares/auth`).userAuth
+
+//product validator
+const productValidator = require(`../middlewares/productValidator`)
 
 //invoice generator
 const downloadInvoice = require(`../services/downloadInvoice`)
@@ -66,29 +77,29 @@ router.get(`/cartDataIcon`, userAuth, cartController.cartDataIcon)
 router.get(`/wishlistDataIcon`, userAuth, wishlistController.wishlistDataIcon)
 
 //ADD TO CART
-router.get(`/cart`, userAuth, cartController.cartRender)
-router.post('/cart/:productId/:variationIndex/:quantity', userAuth, cartController.addToCart)
+router.get(`/cart`, userAuth,productValidator, cartController.cartRender)
+router.post('/cart/:productId/:variationIndex/:quantity', userAuth,productValidator, cartController.addToCart)
 router.delete('/cart/:productId/:variationIndex', userAuth, cartController.deleteCart)
-router.get(`/addressInCart`, userAuth, cartController.getAddressInCart)
+router.get(`/addressInCart`, userAuth,productValidator, cartController.getAddressInCart)
 
-router.get('/address/:id', userAuth, cartController.renderEditForm)
-router.post('/postAddressInCart', userAuth, cartController.addAddress);
-router.put('/address/:id', userAuth, cartController.editAddress);
-router.delete('/address/:id', userAuth, cartController.deleteAddress);
-router.put('/address/default/:id', userAuth, cartController.setDefaultAddress);
+router.get('/address/:id', userAuth,productValidator, addressController.renderEditForm)
+router.post('/postAddressInCart', userAuth,productValidator, addressController.addAddress);
+router.put('/address/:id', userAuth,productValidator, addressController.editAddress);
+router.delete('/address/:id', userAuth,productValidator, addressController.deleteAddress);
+router.put('/address/default/:id', userAuth,productValidator, addressController.setDefaultAddress);
 
-router.get('/payment', userAuth, cartController.payment);
-router.post(`/placeorder`, userAuth, cartController.placeOrder)
-router.post(`/payment/failure`, userAuth, cartController.placeOrderFailed)
-router.get(`/orderSuccess`, userAuth, cartController.orderSuccess)
-router.get(`/orderFailure`, userAuth, cartController.orderFailed)
+router.get('/payment', userAuth,productValidator, userOrderController.payment);
+router.post(`/placeorder`, userAuth,productValidator, userOrderController.placeOrder)
+router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)
+router.get(`/orderSuccess`, userAuth, userOrderController.orderSuccess)
+router.get(`/orderFailure`, userAuth, userOrderController.orderFailed)
 
 //coupon
 router.post(`/cart/apply-coupon`, userAuth, couponController.applyCoupon)
 router.delete(`/cart/remove-coupon`, userAuth, couponController.removeCoupon)
 
 //WIshlist
-router.get(`/wishlist`, userAuth, wishlistController.wishlistRender)
+router.get(`/wishlist`, userAuth,productValidator, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex`, userAuth, wishlistController.addToWishlist)
 router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFromWishlist)
 

@@ -17,53 +17,89 @@
     border-bottom: none;
 }
 
+
+/* =========================================================
+   FILTER SECTION
+========================================================= */
+
 .filter-container {
     display: flex;
     gap: 15px;
     align-items: center;
+
     margin-bottom: 20px;
+
     background: #f8f9fa;
+
     padding: 15px;
+
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .filter-container input[type="date"] {
     padding: 8px 12px;
+
     border: 1px solid #ddd;
     border-radius: 4px;
+
     font-size: 14px;
+
     background: white;
+
+    min-width: 0;
 }
 
 #applyFilter {
     padding: 8px 20px;
+
     background-color: #4e73df;
+
     color: white;
+
     border: none;
     border-radius: 4px;
+
     cursor: pointer;
+
     font-weight: 500;
+
     transition: all 0.3s ease;
 }
 
 #applyFilter:hover {
     background-color: #3a5bc7;
+
     transform: translateY(-1px);
 }
+
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .users-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     margin-bottom: 20px;
+
     flex-wrap: wrap;
+
     gap: 15px;
 }
 
 .page-title {
     margin: 0;
 }
+
+
+/* =========================================================
+   EXPORT BUTTONS
+========================================================= */
 
 .export-buttons {
     display: flex;
@@ -72,14 +108,23 @@
 
 .export-btn {
     padding: 8px 15px;
+
     border: none;
     border-radius: 4px;
+
     cursor: pointer;
+
     font-weight: 500;
+
     transition: all 0.3s ease;
+
     display: flex;
     align-items: center;
+    justify-content: center;
+
     gap: 5px;
+
+    min-width: 0;
 }
 
 .export-btn:hover {
@@ -105,95 +150,373 @@
 }
 
 .csv-btn {
-    background-color: #f6c23e; 
+    background-color: #f6c23e;
     color: white;
 }
 
 .csv-btn:hover {
-    background-color: #dda20a; 
+    background-color: #dda20a;
 }
 
 
-@media (max-width: 768px) {
-    .filter-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+/* =========================================================
+   TABLE
+========================================================= */
 
-    .users-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+.sales-table-wrapper {
+    width: 100%;
 
-    .export-buttons {
-        width: 100%;
-        justify-content: flex-end;
-    }
+    overflow-x: auto;
 
-    /*pagination*/
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-        gap: 15px;
-    }
+    border-radius: 14px;
 
-    .pagination-button {
-        padding: 8px 15px;
-        background-color: #4e73df;
-        color: white;
-        border-radius: 4px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
+    -webkit-overflow-scrolling: touch;
+}
 
-    .pagination-button:hover {
-        background-color: #3a5bc7;
-        transform: translateY(-1px);
-    }
+.users-table {
+    width: 100%;
+}
 
-    .pagination-info {
-        font-weight: 500;
-        color: #555;
-    }
+#salesTable {
+    width: 100%;
 
-    /* Empty State Styles */
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 3rem;
-        text-align: center;
-        background: var(--surface);
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        margin-top: 1rem;
-    }
-
-    .empty-state-image {
-        width: 200px;
-        height: auto;
-        margin-bottom: 1.5rem;
-        opacity: 0.7;
-    }
-
-    .empty-state h2 {
-        color: var(--text);
-        margin-bottom: 0.5rem;
-        font-size: 1.5rem;
-    }
-
-    .empty-state p {
-        color: var(--text-secondary);
-        margin-bottom: 1.5rem;
-        max-width: 400px;
-    }
+    border-collapse: collapse;
 }
 
 .order-number-container {
     position: relative;
     display: inline-block;
+
     padding-right: 15px;
+}
+
+.order-id-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   TABLET + MOBILE
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .users-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 1rem;
+    }
+
+
+    /* EXPORT BUTTONS */
+
+    .export-buttons {
+
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 10px;
+
+        width: 100%;
+    }
+
+    .export-btn {
+
+        width: 100%;
+
+        padding: 10px;
+
+        font-size: 0.9rem;
+    }
+
+
+    /* FILTERS */
+
+    .filter-container {
+
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 10px;
+
+        align-items: center;
+    }
+
+    .filter-container span {
+        display: none;
+    }
+
+    .filter-container input,
+    .filter-container button {
+        width: 100%;
+        min-width: 0;
+    }
+
+
+    /* TABLE */
+
+    #salesTable {
+        min-width: 700px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 576px) {
+
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.4rem;
+    }
+
+
+    /* EXPORT BUTTONS */
+
+    .export-buttons {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .export-btn {
+        font-size: 0.8rem;
+
+        padding: 9px 6px;
+    }
+
+
+    /* FILTERS */
+
+    .filter-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .filter-container input,
+    .filter-container button {
+        font-size: 0.8rem;
+    }
+
+
+    /* REMOVE TABLE EXPANSION */
+
+    #salesTable {
+        min-width: 100%;
+    }
+
+
+    /* CARD TABLE */
+
+    #salesTable thead {
+        display: none;
+    }
+
+    #salesTable,
+    #salesTable tbody,
+    #salesTable tr,
+    #salesTable td {
+        display: block;
+
+        width: 100%;
+    }
+
+    #salesTable tr {
+
+        background: var(--surface);
+
+        border: 1px solid var(--border);
+
+        border-radius: 14px;
+
+        padding: 1rem;
+
+        margin-bottom: 1rem;
+
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    #salesTable td {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        gap: 1rem;
+
+        padding: 0.75rem 0;
+
+        border-bottom: 1px solid var(--border);
+
+        text-align: right;
+
+        white-space: normal;
+    }
+
+    #salesTable td:last-child {
+        border-bottom: none;
+    }
+
+    #salesTable td::before {
+
+        content: attr(data-label);
+
+        font-weight: 700;
+
+        color: var(--text);
+
+        text-align: left;
+    }
+
+    .order-id-cell {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        justify-content: flex-end;
+    }
+
+    .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    /* =========================================================
+   MOBILE POLISH
+========================================================= */
+
+
+    /* DARKER SL NO ROW */
+
+    #salesTable td:first-child {
+
+        background: rgba(0, 0, 0, 0.06);
+
+        padding: 0.85rem;
+
+        border-radius: 10px;
+
+        margin-bottom: 0.8rem;
+
+        font-weight: 700;
+    }
+
+    [data-theme="dark"] #salesTable td:first-child {
+
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+/* =========================================================
+   MOBILE FILTER LAYOUT
+========================================================= */
+
+.filter-container {
+
+    display: grid;
+
+    grid-template-columns: 1fr auto;
+
+    grid-template-rows: auto auto;
+
+    gap: 10px;
+
+    align-items: center;
+}
+
+
+/* START DATE */
+
+.filter-container input[type="date"]:first-of-type {
+
+    grid-column: 1;
+    grid-row: 1;
+}
+
+
+/* END DATE */
+
+.filter-container input[type="date"]:last-of-type {
+
+    grid-column: 1;
+    grid-row: 2;
+}
+
+
+/* APPLY BUTTON */
+
+#applyFilter {
+
+    grid-column: 2;
+    grid-row: 1 / 3;
+
+    align-self: center;
+
+    height: 100%;
+
+    min-width: 80px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+    /* SMALLER BUTTON TEXT */
+
+    .pdf-btn {
+        font-size: 0;
+    }
+
+    .pdf-btn::after {
+        content: "PDF";
+        font-size: 0.8rem;
+    }
+
+    .excel-btn {
+        font-size: 0;
+    }
+
+    .excel-btn::after {
+        content: "EXCEL";
+        font-size: 0.8rem;
+    }
+
+    .csv-btn {
+        font-size: 0;
+    }
+
+    .csv-btn::after {
+        content: "CSV";
+        font-size: 0.8rem;
+    }
+
+
+    /* APPLY BUTTON TEXT */
+
+    #applyFilter {
+        font-size: 0;
+    }
+
+    #applyFilter::after {
+        content: "Apply";
+        font-size: 0.8rem;
+    }
+
+
 }
