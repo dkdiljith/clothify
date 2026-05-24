@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}}</title>
 
+  {{!-- page individual headers --}}
+  {{{_sections.user-head}}}
+
   <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,6 +58,9 @@
   <script src="/javascripts/utils/popUpMessage.js" defer></script>
   <script src="/javascripts/utils/constants.js" defer></script>
 
+
+  {{!-- page individual scripts --}}
+  {{{_sections.user-scripts}}}
 </body>
 
 </html>

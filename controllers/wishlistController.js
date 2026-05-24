@@ -2,6 +2,8 @@ const Wishlist = require(`../models/wishListSchema`)
 const Product = require(`../models/productSchema`)
 
 
+const { verifyProductVariation } = require('../services/productHelper');
+
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
 
@@ -95,36 +97,48 @@ exports.wishlistRender = async (req, res) => {
 
 exports.addToWishlist = async (req, res) => {
     try {
-        const userId = res.locals.user._id
+        const userId = res.locals.user._id;
         const productId = req.params.id;
         const variationIndex = parseInt(req.params.variationIndex);
-        console.log(productId, "this is productId")
 
-        let wishlist = await Wishlist.findOne({ userId: userId })
+        // Validate that the product and specific variation exist and are active
+        const check = await verifyProductVariation(productId, variationIndex);
+        if (!check.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: check.message 
+            });
+        }
 
+
+        let wishlist = await Wishlist.findOne({ userId: userId });
         if (!wishlist) {
             wishlist = new Wishlist({ userId: userId, items: [] });
         }
 
+      
         const existingItem = wishlist.items.find(item =>
             item.productId.toString() === productId && item.variationIndex === variationIndex
-        )
+        );
 
         if (existingItem) {
-        } else {
-            wishlist.items.push({
-                productId: productId,
-                variationIndex: variationIndex,
-            });
-            responseData = {
+            return res.status(200).json({
                 success: true,
-                message: 'Item added to wishlist!',
-            };
+                message: 'Item is already in your wishlist!'
+            });
         }
 
-        await wishlist.save();
-        return res.json(responseData);
+        wishlist.items.push({
+            productId: productId,
+            variationIndex: variationIndex,
+        });
 
+        await wishlist.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Added ${check.product.name} (${check.variation.size}) to wishlist!`
+        });
 
     } catch (error) {
         console.error("Error adding to wishlist:", error);

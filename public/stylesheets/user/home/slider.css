@@ -1,0 +1,449 @@
+/* =========================================================
+   SLIDER SECTION
+========================================================= */
+
+.custom-slider-section {
+    width: 100%;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+.custom-slider-wrapper {
+    position: relative;
+
+    width: 100%;
+
+    height: calc(100vh - 84px);
+    min-height: 700px;
+
+    background-color: #000;
+
+    overflow: hidden;
+}
+
+.custom-slide {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    opacity: 0;
+    visibility: hidden;
+
+    z-index: 1;
+
+    transition:
+        opacity 1s ease-in-out,
+        visibility 1s ease-in-out;
+}
+
+.custom-slide.active {
+    opacity: 1;
+    visibility: visible;
+
+    z-index: 2;
+}
+
+.custom-slide-container {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 0 40px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SLIDER TEXT
+========================================================= */
+
+.slide-sub {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 24px;
+
+    color: #333;
+
+    opacity: 0;
+
+    transform: translateY(-40px);
+}
+
+.slide-title {
+    margin: 0 0 35px;
+
+    font-size: 60px;
+    font-weight: 700;
+
+    line-height: 1.1;
+
+    color: #333;
+
+    opacity: 0;
+
+    transform: translateY(40px);
+}
+
+.slide-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 14px 40px;
+
+    border-radius: 999px;
+
+    background: #717fe0;
+
+    color: #fff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    opacity: 0;
+
+    transform: scale(0.8);
+
+    transition:
+        background-color 0.3s ease,
+        transform 0.3s ease;
+}
+
+.slide-btn:hover {
+    background: #333;
+
+    color: #fff;
+}
+
+
+/* =========================================================
+   TEXT ANIMATIONS
+========================================================= */
+
+.custom-slide.active .anim-text-down {
+    opacity: 1;
+
+    transform: translateY(0);
+
+    transition:
+        transform 0.8s ease-out,
+        opacity 0.8s ease-out;
+
+    transition-delay: 0.3s;
+}
+
+.custom-slide.active .anim-text-up {
+    opacity: 1;
+
+    transform: translateY(0);
+
+    transition:
+        transform 0.8s ease-out,
+        opacity 0.8s ease-out;
+
+    transition-delay: 0.6s;
+}
+
+.custom-slide.active .anim-text-zoom .slide-btn {
+    opacity: 1;
+
+    transform: scale(1);
+
+    transition:
+        transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity 0.6s ease-out;
+
+    transition-delay: 1.1s;
+}
+
+
+/* =========================================================
+   SLIDER ARROWS
+========================================================= */
+
+.slider-arrow {
+    position: absolute;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    z-index: 10;
+
+    width: 52px;
+    height: 52px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.18);
+
+    color: #fff;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    transition:
+        background 0.3s ease,
+        transform 0.3s ease;
+}
+
+.slider-arrow:hover {
+    background: #717fe0;
+
+    transform: translateY(-50%) scale(1.05);
+}
+
+.prev-arrow {
+    left: 30px;
+}
+
+.next-arrow {
+    right: 30px;
+}
+
+
+/* =========================================================
+   SLIDER DOTS
+========================================================= */
+
+.slider-dots {
+    position: absolute;
+
+    bottom: 30px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 10;
+
+    display: flex;
+
+    gap: 12px;
+}
+
+.slider-dot {
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.4);
+
+    border: 2px solid #fff;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+}
+
+.slider-dot.active {
+    background: #717fe0;
+
+    border-color: #717fe0;
+}
+
+
+/* =========================================================
+   LARGE TABLET
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .custom-slide-container {
+        padding: 0 50px;
+    }
+
+    .slide-title {
+        font-size: 52px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .custom-slider-wrapper {
+        height: 420px;
+
+        min-height: unset;
+    }
+
+    .custom-slide-container {
+        padding: 0 40px;
+    }
+
+    .slide-title {
+        font-size: 44px;
+    }
+
+    .slide-sub {
+        font-size: 20px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .custom-slider-wrapper {
+        height: 340px;
+    }
+
+    .custom-slide-container {
+        padding: 0 28px;
+    }
+
+    .slide-sub {
+        font-size: 16px;
+
+        margin-bottom: 10px;
+    }
+
+    .slide-title {
+        font-size: 32px;
+
+        margin-bottom: 18px;
+    }
+
+    .slide-btn {
+        padding: 11px 24px;
+
+        font-size: 11px;
+    }
+
+    .slider-arrow {
+        width: 42px;
+        height: 42px;
+
+        font-size: 16px;
+    }
+
+    .prev-arrow {
+        left: 12px;
+    }
+
+    .next-arrow {
+        right: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 576px) {
+
+    .custom-slider-wrapper {
+        height: 260px;
+    }
+
+    .custom-slide-container {
+        padding: 0 22px;
+    }
+
+    .slide-sub {
+        font-size: 12px;
+
+        margin-bottom: 8px;
+    }
+
+    .slide-title {
+        font-size: 24px;
+
+        margin-bottom: 14px;
+    }
+
+    .slide-btn {
+        width: fit-content;
+
+        padding: 10px 22px;
+
+        font-size: 11px;
+    }
+
+    .slider-arrow {
+        display: none;
+    }
+
+    .slider-dots {
+        bottom: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   EXTRA SMALL DEVICES
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .custom-slider-wrapper {
+        height: 220px;
+    }
+
+    .slide-title {
+        font-size: 20px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+
+}

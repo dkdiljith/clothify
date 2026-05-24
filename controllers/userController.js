@@ -60,13 +60,11 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
 
 // Email verification code generator
 const generateVerificationCode = () => {
-  const verificationToken = crypto.randomBytes(3).toString("hex");
+  const verificationToken = crypto.randomInt(100000, 1000000).toString();
   const tokenExpiration = Date.now() + 900000; // 15 minutes in milliseconds
+  
   return { verificationToken, tokenExpiration };
 };
-
-
-
 
 
 
@@ -102,7 +100,6 @@ async function createWallet(userId) {
 
 
 // ======================================================================================================
-//GET METHODS / RENDERING PAGES
 
 
 exports.homeRender = async (req, res) => {
@@ -291,29 +288,32 @@ exports.login = async (req, res) => {
 
 exports.emailVerification = async (req, res) => {
   try {
-    const userId = req.session.unknown_user._id
+    const userId = req.session.unknown_user?._id; // Safe navigation operator
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Session expired. Please log in again." });
+    }
+
     const user = await User.findById(userId);
-
-    if (!userId || !user) {
-      return res.status(404).json({ success: false, error: "An Error Occured" });
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
-
-
-    if (user.verificationAttempts > 5) {
-      user.verificationTimer = Date.now() + 86400000; //24 hours
-      user.verificationAttempts = 0
-      user.save()
-      return res.status(404).json({ success: false, error: "Maximum attempts reached" });
+    // 1. Rate Limiting Check
+    if (user.verificationAttempts >= 5) { // Recommended >= instead of >
+      user.verificationTimer = new Date(Date.now() + 86400000); // 24 hours
+      user.verificationAttempts = 0;
+      await user.save(); // Fix 1: Added await
+      return res.status(429).json({ success: false, error: "Maximum attempts reached. Try again in 24 hours." }); // 429 is best for rate-limiting
     }
 
+    // 2. Token Matching Logic
     if (user.verificationToken === req.body.verificationCode) {
       if (user.verificationTokenExpires > Date.now()) {
         user.isVerified = true;
         user.verificationToken = null;
         user.verificationTokenExpires = null;
-        user.verificationAttempts = 0
-        user.verificationTimer = null
+        user.verificationAttempts = 0;
+        user.verificationTimer = null;
         await user.save();
 
         req.session.user = {
@@ -322,21 +322,30 @@ exports.emailVerification = async (req, res) => {
           email: user.email,
           phone: user.phone || null
         };
-        createWallet(user._id);
+        
+        // Clean up temporary user tracking session token context memory
+        delete req.session.unknown_user; 
 
+        // Safely call wallet creation (ensure this handles async internally if needed)
+        createWallet(user._id);
 
         return res.json({ success: true, message: "Email verified successfully" });
       } else {
-        console.log("verification code expired")
+        // Fix 2: Increment failure count even on expired tokens
+        user.verificationAttempts += 1;
+        await user.save();
+        console.log("verification code expired");
         return res.json({ success: false, error: "Verification code expired" });
       }
     } else {
-      console.log("invalid verification code")
+      // Fix 2: Increment tracking count on incorrect entries
+      user.verificationAttempts += 1;
+      await user.save();
+      console.log("invalid verification code");
       return res.json({ success: false, error: "Invalid verification code" });
     }
   } catch (error) {
     console.error("Error during email verification:", error);
-    console.log("an error occured")
     return res.status(500).json({ success: false, error: "An error occurred during verification" });
   }
 };
@@ -345,33 +354,54 @@ exports.emailVerification = async (req, res) => {
 
 
 exports.resendEmailVerification = async (req, res) => {
-  const userId = req.session.unknown_user._id
-  const userEmail = req.session.unknown_user.email
-  const user = await User.findById(userId);
+  try {
+    // 1. Safe Session Check (Prevents server crashes)
+    if (!req.session || !req.session.unknown_user) {
+      return res.status(401).json({ success: false, error: "Session expired. Please log in again." });
+    }
 
-  if (!userId || !userEmail || !user) {
-    return res.status(404).json({ success: false, error: "An Error Occured" });
-  }
+    const userId = req.session.unknown_user._id;
+    const userEmail = req.session.unknown_user.email;
+    
+    // 2. Database Fetch
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
 
-  if (user.verificationTimer <= Date.now()) {
-    let { verificationToken, tokenExpiration } = generateVerificationCode();
+    // 3. Timer Check
+    const currentTime = Date.now();
+    if (user.verificationTimer  > currentTime) {
+      return res.json({ 
+        success: false, 
+        newTimer: user.verificationTimer, 
+        error: "Please wait 1 minute before requesting a new code." 
+      });
+    }
 
-    user.verificationToken = verificationToken,
-      user.verificationTokenExpires = tokenExpiration,
-      user.verificationAttempts += 1
-    user.verificationTimer = new Date(Date.now() + 60000); // 1 minute from now
+    // 4. Generate & Assign New Token Data
+    const { verificationToken, tokenExpiration } = generateVerificationCode();
+
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = new Date(tokenExpiration); // Ensure it saves as ISODate
+    user.verificationAttempts += 1;
+    user.verificationTimer = new Date(currentTime + 60000); // 1 minute from now
+
+    // 5. Save to Database First
     await user.save();
 
-    await verificationEmailSend(userEmail, verificationToken);
+    // 6. Send Email Safely
+    const emailResult = await verificationEmailSend(userEmail, verificationToken);
 
-    if (verificationEmailSend) {
-      return res.json({ success: true, newTimer: user.verificationTimer }); // send new timer back
-    }
-  } else {
-    return res.json({ success: false, newTimer: user.verificationTimer, error: "Reached Maximum Limit" });
+    // 7. Proper response delivery
+    return res.json({ success: true, newTimer: user.verificationTimer });
+
+  } catch (error) {
+    console.error("Resend Email Error:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-
 };
+
 
 
 

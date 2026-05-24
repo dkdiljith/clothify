@@ -59,7 +59,7 @@ router.get(`/salesReport/csv`, adminAuth, salesController.downloadSalesReportCsv
 router.get(`/products`, adminAuth, productController.showProducts)
 router.get(`/addproducts`, adminAuth, productController.addProductsRender)
 router.get(`/editproducts/:id`, adminAuth, productController.editProductsRender)
-// router.get('/delete-product/:id', adminAuth, productController.deleteProducts)
+router.get('/deleteProduct/:productId', adminAuth, productController.deleteProduct)
 router.get(`/blockProduct/:productId`, adminAuth, productController.blockProduct)
 router.post(`/addproducts`, adminAuth, productController.addProducts)
 router.post("/updateproduct/:id", adminAuth, productController.updateProduct);

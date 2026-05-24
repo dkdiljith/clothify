@@ -233,6 +233,13 @@
                             </button>
                             {{/if}}
 
+                            {{!-- <button type="button"
+                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1"
+                                onclick="handleBlock('{{this._id}}')">
+                                <i class="bi bi-unlock"></i>
+                                Delete
+                            </button> --}}
+
                         </div>
 
 
@@ -363,6 +370,17 @@
 <script>
     async function handleBlock(productId) {
         const response = await fetch(`/admin/blockProduct/${productId}`);
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.reload();
+        } else {
+            showPopupMessage(data.message, `error`)
+        }
+    }
+
+     async function handleDeleted(productId) {
+        const response = await fetch(`/admin/deleteProduct/${productId}`);
         const data = await response.json();
 
         if (data.success) {

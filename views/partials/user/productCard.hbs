@@ -1,0 +1,134 @@
+<div
+    class="product-card"
+    data-url="/user/singleproduct/{{this._id}}"
+>
+
+    <!-- =========================================================
+         BADGES
+    ========================================================= -->
+
+    {{#if this.latestCollection}}
+
+    <div class="product-badge">
+        New
+    </div>
+
+    {{/if}}
+
+
+    {{#if this.details.[0].offerId}}
+
+    <div class="product-badge sale">
+        Sale
+    </div>
+
+    <div class="discount-badge">
+
+        {{calculateDiscountPercentage
+        this.details.[0].price
+        this.details.[0].offerPrice}}%
+
+        OFF
+
+    </div>
+
+    {{/if}}
+
+
+
+    <!-- =========================================================
+         PRODUCT IMAGE
+    ========================================================= -->
+
+    <div class="product-image">
+
+        <img
+            src="{{this.images.[0].path}}"
+            alt="{{this.name}}"
+            class="product-img"
+        >
+
+    </div>
+
+
+
+    <!-- =========================================================
+         WISHLIST
+    ========================================================= -->
+
+    {{#if @root.user}}
+
+    <div class="product-wishlist-container">
+
+        <button
+            class="wishlist-btn {{#if this.isWishlisted}}active{{/if}}"
+            data-product-id="{{this._id}}"
+            data-variation-index="0"
+            aria-label="Toggle Wishlist"
+        >
+
+            <i class="fas fa-heart"></i>
+
+        </button>
+
+    </div>
+
+    {{/if}}
+
+
+
+    <!-- =========================================================
+         PRODUCT DETAILS
+    ========================================================= -->
+
+    <div class="product-details">
+
+        <h3 class="product-title">
+            {{this.name}}
+        </h3>
+
+
+
+        <!-- =========================================================
+             PRICE
+        ========================================================= -->
+
+        <div class="price-container">
+
+            {{#if this.details.[0].offerId}}
+
+            <span class="original-price">
+                ₹{{this.details.[0].price}}
+            </span>
+
+            <span class="product-price">
+                ₹{{this.details.[0].offerPrice}}
+            </span>
+
+            {{else}}
+
+            <span class="product-price">
+                ₹{{this.details.[0].price}}
+            </span>
+
+            {{/if}}
+
+        </div>
+
+
+
+        <!-- =========================================================
+             BESTSELLER
+        ========================================================= -->
+
+        {{#if this.bestSeller}}
+
+        <div class="best-seller-badge">
+            Bestseller
+        </div>
+
+        {{/if}}
+
+    </div>
+
+</div>
