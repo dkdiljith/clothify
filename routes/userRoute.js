@@ -101,6 +101,7 @@ router.delete(`/cart/remove-coupon`, userAuth, couponController.removeCoupon)
 //WIshlist
 router.get(`/wishlist`, userAuth,productValidator, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex`, userAuth, wishlistController.addToWishlist)
+router.post(`/cart/wishlist/:productId` , userAuth,wishlistController.addToCartFromWishlist)
 router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFromWishlist)
 
 //USER PROFILE

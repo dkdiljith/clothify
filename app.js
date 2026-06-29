@@ -17,6 +17,7 @@ const nocache = require(`nocache`)
 app.use(nocache())
 
 
+//express-handlebars-section
 const sections = require('express-handlebars-sections');
 
 //HBS Connections
@@ -79,6 +80,9 @@ require("./jobs/pricingExpiryEngine");
 // Routes
 app.use(`/admin`, adminRouter);
 app.use('/user', userRouter);
+app.get('/', (req, res) => {
+  res.redirect(`/user`);
+});
 
 // Handling Unhandled Requests
 const ErrorMessage = require(`./utils/ErrorMessage`)

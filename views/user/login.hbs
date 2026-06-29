@@ -1,10 +1,12 @@
-<head>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/login.css">
-</head>
+{{#section 'head'}}
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/login.css">
+{{/section}}
 
-<body
-  style="background: url('https://i.postimg.cc/Cdy0YQZc/pexels-markus-winkler-1430818-3925956.jpg') no-repeat center center fixed; background-size: cover; position: relative;">
+
+<div class="bg"
+  style="background: url('https://i.postimg.cc/Cdy0YQZc/pexels-markus-winkler-1430818-3925956.jpg') no-repeat center center fixed; background-size: cover; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;">
   <img src="https://i.postimg.cc/Njc59RgL/Clothify-logo-white.png" alt="Clothify Logo" class="website-logo" />
+
 
   <section class="d-flex justify-content-center align-items-center vh-100">
     <div class="container">
@@ -55,6 +57,8 @@
       </div>
     </div>
   </section>
-  
-  <script src="/javascripts/user/login.js" defer></script>
-</body>
+</div>
+
+{{#section 'scripts'}}
+<script src="/javascripts/user/login.js" defer></script>
+{{/section}}

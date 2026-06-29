@@ -1,8 +1,9 @@
-<head>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/register.css">
-</head>
+{{#section 'head'}}
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/register.css">
+{{/section}}
 
-<body
+
+<div
   style="background: url('https://i.postimg.cc/GptyXvpN/pexels-badun-17097094.jpg') no-repeat center center fixed; background-size: cover; position: relative;">
   <!-- Website logo in the top-left corner -->
   <img src="https://i.postimg.cc/Njc59RgL/Clothify-logo-white.png" alt="Clothify Logo" class="website-logo" />
@@ -66,6 +67,9 @@
       </div>
     </div>
   </section>
+</div>
 
-  <script src="/javascripts/user/register.js" defer></script>
-</body>
+
+{{#section 'scripts'}}
+<script src="/javascripts/user/register.js" defer></script>
+{{/section}}

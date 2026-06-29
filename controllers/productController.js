@@ -1,7 +1,9 @@
-
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema")
 const Offer = require("../models/offerSchema")
+const Wishlist = require(`../models/wishListSchema`)
+const Cart = require(`../models/cartSchema`)
+
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs');
@@ -20,7 +22,7 @@ const MESSAGES = require(`../utils/constants`)
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '..', 'public', 'images' , 'productImages')
+        const uploadPath = path.join(__dirname, '..', 'public', 'images', 'productImages')
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -1019,36 +1021,115 @@ exports.showProducts = async (req, res) => {
 
 
 
-
 exports.singleProductPage = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).lean()
-        const categoryId = product.categoryId
-        const categories = await Category.findById(categoryId).lean();
+        // PRODUCT
+
+        const product = await Product.findById(req.params.id).lean();
 
         if (!product) {
-            return res.status(404).render('error', { message: 'Product not found' });
+
+            return res.status(404).render("error", {
+                message: "Product not found"
+            });
+
         }
 
+        // USER
+
+        const userId = res.locals.user?._id || null;
+
+
+        // CATEGORY
+
+
+        const categories = await Category
+            .findById(product.categoryId)
+            .lean();
+
+
+        // =====================================================
+        // RELATED PRODUCTS
+        // =====================================================
+
         const relatedProducts = await Product.find({
+
             categoryId: product.categoryId,
-            _id: { $ne: product._id },
-        }).limit(4).lean()
 
-        const offers = await Offer.find().lean()
+            _id: {
+                $ne: product._id
+            }
 
-        return res.render('user/singleProductPage', {
-            product: product,
-            relatedProducts: relatedProducts,
-            categories: categories,
-            offers: offers,
+        })
+            .limit(4)
+            .lean();
+
+
+        const offers = await Offer.find().lean();
+
+
+        let isWishlisted = false;
+        let isInCart = false;
+
+        if (userId) {
+
+            const wishlist = await Wishlist
+                .findOne({ userId })
+                .lean();
+
+            const cart = await Cart
+                .findOne({ userId })
+                .lean();
+
+
+            if (wishlist?.items) {
+
+                isWishlisted = wishlist.items.some(item =>
+
+                    item.productId.toString() === product._id.toString()
+
+                );
+
+            }
+
+
+            if (cart?.items) {
+
+                isInCart = cart.items.some(item =>
+
+                    item.productId.toString() === product._id.toString()
+
+                );
+
+            }
+
+        }
+
+        return res.render("user/singleProductPage", {
+
+            product,
+            relatedProducts,
+            categories,
+            offers,
+
+            isWishlisted,
+            isInCart
+
         });
-    } catch (err) {
-        console.error('Error fetching product:', err);
-        return res.status(500).render('error', { message: 'Server error' });
-    }
-}
 
+    }
+
+    catch (err) {
+
+        console.error("Error fetching product:", err);
+
+        return res.status(500).render("error", {
+            message: "Server Error"
+        });
+
+    }
+
+};
 
 
 

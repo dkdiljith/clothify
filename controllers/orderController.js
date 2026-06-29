@@ -88,14 +88,6 @@ async function calculateRefund(orderId, itemId, isCancellation) {
     + itemTaxShare
     + itemShippingShare;
 
- 
-  // Return fee only for returns
-  // const RETURN_FEE = 80;
-
-  // if (!isCancellation) {
-  //   refundableAmount -= RETURN_FEE;
-  // }
-
 
   // Prevent negative refund
 
@@ -109,7 +101,6 @@ async function calculateRefund(orderId, itemId, isCancellation) {
     itemOfferShare: Math.round(itemOfferShare),
     itemTaxShare: Math.round(itemTaxShare),
     itemShippingShare: Math.round(itemShippingShare),
-    returnFee: isCancellation ? 0 : RETURN_FEE,
     totalRefundableAmount: refundableAmount,
   };
 

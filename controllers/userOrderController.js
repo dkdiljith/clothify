@@ -1,7 +1,8 @@
 const Order = require("../models/orderSchema");
 const Wallet = require(`../models/walletSchema`)
 const Coupon = require(`../models/couponSchema`)
-
+const Cart = require(`../models/cartSchema`)
+const Address = require(`../models/addressSchema`)
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -11,6 +12,7 @@ const MESSAGES = require(`../utils/constants`)
 
 //OrderId - creation
 const orderIdGeneration = async () => {
+  const crypto = require(`crypto`)
   const randomNumber = crypto.randomInt(100000, 1000000);
   const orderId = `ORD-${randomNumber}`;
   const order = await Order.findOne({ orderId });

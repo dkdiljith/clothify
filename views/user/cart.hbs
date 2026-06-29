@@ -1,9 +1,10 @@
-<head>
-  <title>Your Shopping Cart</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
-</head>
+{{#section 'head'}}
+<title>Your Shopping Cart</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
+{{/section}}
 
-<body class="cart-page">
+
+<div class="cart-page">
   <div class="container">
     <div class="cart-container">
 
@@ -196,141 +197,143 @@
       {{/if}}
     </div>
   </div>
+</div>
 
 
+{{#section 'scripts'}}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    // Quantity adjustment buttons
+    document.querySelectorAll(".btn-quantity").forEach((button) => {
+      button.addEventListener("click", async function () {
+        const productId = this.getAttribute("data-product-id");
+        const variationIndex = this.getAttribute("data-variation-index");
+        const isIncrement = this.classList.contains("increment-quantity");
 
-      // Quantity adjustment buttons
-      document.querySelectorAll(".btn-quantity").forEach((button) => {
-        button.addEventListener("click", async function () {
-          const productId = this.getAttribute("data-product-id");
-          const variationIndex = this.getAttribute("data-variation-index");
-          const isIncrement = this.classList.contains("increment-quantity");
+        const quantityChange = isIncrement ? 1 : -1;
 
-          const quantityChange = isIncrement ? 1 : -1;
+        try {
+          const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantityChange}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: quantityChange }),
+          });
 
-          try {
-            const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantityChange}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quantity: quantityChange }),
-            });
+          const data = await response.json();
 
-            const data = await response.json();
-
-            if (data.success) {
-              location.reload();
-            } else {
-              showPopupMessage(data.message || "Operation failed", "error");
-            }
-          } catch (error) {
-            console.error("Request failed:", error);
-            showPopupMessage("Something went wrong. Please try again.", "error");
+          if (data.success) {
+            location.reload();
+          } else {
+            showPopupMessage(data.message || "Operation failed", "error");
           }
-        });
-      });
-
-      // Remove item buttons
-      document.querySelectorAll(".btn-remove").forEach((button) => {
-        button.addEventListener("click", async function () {
-          const productId = this.getAttribute("data-product-id");
-          const variationIndex = this.getAttribute("data-variation-index");
-
-          try {
-            const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
-              method: "DELETE"
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              location.reload();
-            } else {
-              showPopupMessage(data.message || "Failed to remove item", "error");
-            }
-          } catch (error) {
-            console.error("Request failed:", error);
-            showPopupMessage("Failed to remove item. Please try again.", "error");
-          }
-        });
+        } catch (error) {
+          console.error("Request failed:", error);
+          showPopupMessage("Something went wrong. Please try again.", "error");
+        }
       });
     });
 
-    async function applyCoupon(couponId) {
-      const couponCard = document.querySelector(`.coupon-card button[onclick="applyCoupon('${couponId}')"]`).closest('.coupon-card');
-      const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
-      const currentSubtotal = parseFloat('{{subtotal}}');
+    // Remove item buttons
+    document.querySelectorAll(".btn-remove").forEach((button) => {
+      button.addEventListener("click", async function () {
+        const productId = this.getAttribute("data-product-id");
+        const variationIndex = this.getAttribute("data-variation-index");
 
-      if (currentSubtotal < minPurchase) {
-        showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
-        return;
-      }
+        try {
+          const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
+            method: "DELETE"
+          });
 
-      const confirmation = await Swal.fire({
-        title: 'Apply Coupon?',
-        html: `Are you sure you want to apply this coupon?<br><br>
+          const data = await response.json();
+
+          if (data.success) {
+            location.reload();
+          } else {
+            showPopupMessage(data.message || "Failed to remove item", "error");
+          }
+        } catch (error) {
+          console.error("Request failed:", error);
+          showPopupMessage("Failed to remove item. Please try again.", "error");
+        }
+      });
+    });
+  });
+
+  async function applyCoupon(couponId) {
+    const couponCard = document.querySelector(`.coupon-card button[onclick="applyCoupon('${couponId}')"]`).closest('.coupon-card');
+    const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
+    const currentSubtotal = parseFloat('{{subtotal}}');
+
+    if (currentSubtotal < minPurchase) {
+      showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
+      return;
+    }
+
+    const confirmation = await Swal.fire({
+      title: 'Apply Coupon?',
+      html: `Are you sure you want to apply this coupon?<br><br>
               <strong>${couponCard.querySelector('.coupon-code').textContent}</strong><br>
               ${couponCard.querySelector('.coupon-discount').textContent}<br><br>
               Current discount will be replaced.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, apply it!',
-        cancelButtonText: 'Cancel'
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, apply it!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      const response = await fetch('/user/cart/apply-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponId: couponId,
+        })
       });
 
-      if (!confirmation.isConfirmed) return;
-
-      try {
-        const response = await fetch('/user/cart/apply-coupon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            couponId: couponId,
-          })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          location.reload();
-        } else {
-          showPopupMessage(data.message || 'Failed to apply coupon', 'error');
-        }
-      } catch (error) {
-        console.error('Error applying coupon:', error);
-        showPopupMessage('Failed to apply coupon. Please try again.', 'error');
+      const data = await response.json();
+      if (data.success) {
+        location.reload();
+      } else {
+        showPopupMessage(data.message || 'Failed to apply coupon', 'error');
       }
+    } catch (error) {
+      console.error('Error applying coupon:', error);
+      showPopupMessage('Failed to apply coupon. Please try again.', 'error');
     }
+  }
 
-    async function removeCoupon() {
-      const confirmation = await Swal.fire({
-        title: 'Remove Coupon?',
-        text: 'Are you sure you want to remove the applied coupon?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, remove it!',
-        cancelButtonText: 'Cancel'
+  async function removeCoupon() {
+    const confirmation = await Swal.fire({
+      title: 'Remove Coupon?',
+      text: 'Are you sure you want to remove the applied coupon?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      const response = await fetch('/user/cart/remove-coupon', {
+        method: 'DELETE'
       });
 
-      if (!confirmation.isConfirmed) return;
-
-      try {
-        const response = await fetch('/user/cart/remove-coupon', {
-          method: 'DELETE'
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          location.reload();
-        } else {
-          showPopupMessage(data.message || 'Failed to remove coupon', 'error');
-        }
-      } catch (error) {
-        console.error('Error removing coupon:', error);
-        showPopupMessage('Failed to remove coupon. Please try again.', 'error');
+      const data = await response.json();
+      if (data.success) {
+        location.reload();
+      } else {
+        showPopupMessage(data.message || 'Failed to remove coupon', 'error');
       }
+    } catch (error) {
+      console.error('Error removing coupon:', error);
+      showPopupMessage('Failed to remove coupon. Please try again.', 'error');
     }
+  }
 
-  </script>
-</body>
+</script>
+
+{{/section}}

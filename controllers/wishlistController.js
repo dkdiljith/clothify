@@ -3,6 +3,7 @@ const Product = require(`../models/productSchema`)
 
 
 const { verifyProductVariation } = require('../services/productHelper');
+const addToCart = require(`../controllers/cartController`).addToCart
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -183,3 +184,42 @@ exports.removeFromWishlist = async (req, res) => {
 
 
 
+exports.addToCartFromWishlist = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({
+                success:false,
+                message:"Product not found"
+            });
+        }
+
+        // first available variation
+        const variationIndex =
+            product.details.findIndex(
+                detail => detail.quantity > 0
+            );
+
+        if (variationIndex === -1){
+            return res.status(400).json({
+                success:false,
+                message:"Out of Stock"
+            });
+        }
+
+        req.params.variationIndex = variationIndex;
+        req.params.quantity = 1;
+        return addToCart(req, res);
+
+    }
+
+    catch(err){
+        console.error(err);
+        return res.status(500).json({
+            success:false,
+            message:"Server Error"
+        });
+    }
+}

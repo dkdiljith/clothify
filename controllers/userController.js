@@ -1,8 +1,6 @@
 const User = require("../models/userSchema");
 const Product = require(`../models/productSchema`)
 const Wallet = require(`../models/walletSchema`)
-const Coupon = require(`../models/couponSchema`)
-const Offer = require(`../models/offerSchema`)
 
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");

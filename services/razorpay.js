@@ -1,5 +1,5 @@
 const Cart = require(`../models/cartSchema`)
-const placeOrder = require(`../controllers/cartController`).placeOrder
+const placeOrder = require(`../controllers/userOrderController`).placeOrder
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)

@@ -1,9 +1,10 @@
-<head>
-    <title>Order Details | Clothify</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/orderDetails.css">
-</head>
+{{#section 'head'}}
+<title>Order Details | Clothify</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/orderDetails.css">
+{{/section}}
 
-<body class="body">
+
+<div class="body">
     <div class="container" style="margin-top:20px;">
         <div class="profile-header"></div>
 
@@ -168,6 +169,7 @@
                         data-completion-date="{{order.completionDate}}">
                         <i class="fas fa-undo"></i> Return Item
                     </button>
+                    
                     <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}">
                         <i class="fas fa-times"></i> Cancel Item
                     </button>
@@ -256,232 +258,238 @@
         <button id="close-success-message" class="btn btn-primary">OK</button>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Elements
-            const cancelButton = document.getElementById("cancel-order-button");
-            const returnButton = document.getElementById("return-order-button");
-            const cancelModal = document.getElementById("cancel-order-modal");
-            const returnModal = document.getElementById("return-order-modal");
-            const successMessage = document.getElementById("success-message");
-            const orderStatus = cancelButton.dataset.orderStatus;
-            const completionDate = new Date(returnButton.dataset.completionDate);
+</div>
 
-            // Cancel Button Logic
-            if (orderStatus !== "Pending") {
-                cancelButton.disabled = true;
-            } else {
-                cancelButton.addEventListener("click", function () {
-                    cancelModal.style.display = "flex";
-                });
+
+
+
+{{#section 'scripts'}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Elements
+        const cancelButton = document.getElementById("cancel-order-button");
+        const returnButton = document.getElementById("return-order-button");
+        const cancelModal = document.getElementById("cancel-order-modal");
+        const returnModal = document.getElementById("return-order-modal");
+        const successMessage = document.getElementById("success-message");
+        const orderStatus = cancelButton.dataset.orderStatus;
+        const completionDate = new Date(returnButton.dataset.completionDate);
+
+        // Cancel Button Logic
+        if (orderStatus !== "Pending") {
+            cancelButton.disabled = true;
+        } else {
+            cancelButton.addEventListener("click", function () {
+                cancelModal.style.display = "flex";
+            });
+        }
+
+        // Close Cancel Modal
+        document.querySelector("#cancel-order-modal .close-modal").addEventListener("click", function () {
+            cancelModal.style.display = "none";
+        });
+
+        document.getElementById("cancel-modal-button").addEventListener("click", function () {
+            cancelModal.style.display = "none";
+        });
+
+        // Submit Cancellation
+        document.getElementById("submit-cancellation").addEventListener("click", async function () {
+            const reason = document.getElementById("cancellation-reason").value.trim();
+
+            if (!reason) {
+                alert("Please provide a reason for cancellation.");
+                return;
             }
 
-            // Close Cancel Modal
-            document.querySelector("#cancel-order-modal .close-modal").addEventListener("click", function () {
-                cancelModal.style.display = "none";
-            });
+            const data = {
+                orderId: "{{order._id}}",
+                itemId: "{{item._id}}",
+                variationIndex: "{{item.variationIndex}}",
+                reason: reason
+            };
 
-            document.getElementById("cancel-modal-button").addEventListener("click", function () {
-                cancelModal.style.display = "none";
-            });
-
-            // Submit Cancellation
-            document.getElementById("submit-cancellation").addEventListener("click", async function () {
-                const reason = document.getElementById("cancellation-reason").value.trim();
-
-                if (!reason) {
-                    alert("Please provide a reason for cancellation.");
-                    return;
-                }
-
-                const data = {
-                    orderId: "{{order._id}}",
-                    itemId: "{{item._id}}",
-                    variationIndex: "{{item.variationIndex}}",
-                    reason: reason
-                };
-
-                try {
-                    const response = await fetch("/user/cancel-order", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    if (response.ok) {
-                        cancelModal.style.display = "none";
-                        showSuccessMessage();
-                    } else {
-                        const errorData = await response.json();
-                        alert(errorData.message || "Failed to cancel order. Please try again.");
-                    }
-                } catch (error) {
-                    console.error("Error:", error);
-                    alert("An error occurred. Please try again.");
-                }
-            });
-
-
-
-            // Download Invoice
-            document.getElementById("download-invoice-button")
-                ?.addEventListener("click", async function () {
-
-                    try {
-
-                        const response = await fetch(
-                            "/user/download-invoice",
-                            {
-                                method: "POST",
-
-                                headers: {
-                                    "Content-Type":
-                                        "application/json"
-                                },
-
-                                body: JSON.stringify({
-                                    orderId: "{{order._id}}"
-                                })
-                            }
-                        );
-
-                        if (!response.ok) {
-
-                            showPopupMessage(
-                                "Invoice generation failedddddddddddddddd",
-                                "error"
-                            );
-
-                            return;
-                        }
-
-                        const blob =
-                            await response.blob();
-
-                        const url =
-                            window.URL.createObjectURL(blob);
-
-                        const a =
-                            document.createElement("a");
-
-                        a.href = url;
-
-                        a.download =
-                            "invoice.pdf";
-
-                        document.body.appendChild(a);
-
-                        a.click();
-
-                        a.remove();
-
-                        window.URL.revokeObjectURL(url);
-
-                    } catch (error) {
-
-                        console.log(error);
-
-                        showPopupMessage(
-                            "Invoice could not be generated",
-                            "error"
-                        );
-                    }
+            try {
+                const response = await fetch("/user/cancel-order", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
                 });
 
-            // Return Button Logic
-            if (orderStatus === "Completed") {
-                const currentDate = new Date();
-                const returnEndDate = new Date(completionDate);
-                returnEndDate.setDate(returnEndDate.getDate() + 7);
-
-                if (currentDate > returnEndDate) {
-                    returnButton.disabled = true;
-                } else {
-                    returnButton.addEventListener("click", function () {
-                        returnModal.style.display = "flex";
-                    });
-                }
-            } else {
-                returnButton.disabled = true;
-            }
-
-            // Close Return Modal
-            document.querySelector("#return-order-modal .close-modal").addEventListener("click", function () {
-                returnModal.style.display = "none";
-            });
-
-            document.getElementById("cancel-return-modal-button").addEventListener("click", function () {
-                returnModal.style.display = "none";
-            });
-
-            // Submit Return
-            document.getElementById("submit-return").addEventListener("click", async function () {
-                const reason = document.getElementById("return-reason").value.trim();
-                const errorElement = document.getElementById("return-reason-error");
-
-                if (!reason) {
-                    errorElement.style.display = "block";
-                    return;
-                }
-
-                errorElement.style.display = "none";
-
-                const data = {
-                    orderId: "{{order._id}}",
-                    itemId: "{{item._id}}",
-                    reason: reason
-                };
-
-                try {
-                    const response = await fetch("/user/return-order", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    if (response.ok) {
-                        returnModal.style.display = "none";
-                        showSuccessMessage();
-                    } else {
-                        const errorData = await response.json();
-                        alert(errorData.message || "Failed to return order. Please try again.");
-                    }
-                } catch (error) {
-                    console.error("Error:", error);
-                    alert("An error occurred. Please try again.");
-                }
-            });
-
-            // Close Success Message
-            document.getElementById("close-success-message").addEventListener("click", function () {
-                successMessage.style.display = "none";
-                window.location.reload();
-            });
-
-            // Close modals when clicking outside
-            window.addEventListener("click", function (event) {
-                if (event.target === cancelModal) {
+                if (response.ok) {
                     cancelModal.style.display = "none";
+                    showSuccessMessage();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || "Failed to cancel order. Please try again.");
                 }
-                if (event.target === returnModal) {
-                    returnModal.style.display = "none";
-                }
-            });
-
-            // Helper function to show success message
-            function showSuccessMessage() {
-                successMessage.style.display = "block";
-                setTimeout(() => {
-                    if (successMessage.style.display === "block") {
-                        successMessage.style.display = "none";
-                        window.location.reload();
-                    }
-                }, 3000);
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
             }
         });
-    </script>
-</body>
+
+
+
+        // Download Invoice
+        document.getElementById("download-invoice-button")
+            ?.addEventListener("click", async function () {
+
+                try {
+
+                    const response = await fetch(
+                        "/user/download-invoice",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                orderId: "{{order._id}}"
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+
+                        showPopupMessage(
+                            "Invoice generation failedddddddddddddddd",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    const blob =
+                        await response.blob();
+
+                    const url =
+                        window.URL.createObjectURL(blob);
+
+                    const a =
+                        document.createElement("a");
+
+                    a.href = url;
+
+                    a.download =
+                        "invoice.pdf";
+
+                    document.body.appendChild(a);
+
+                    a.click();
+
+                    a.remove();
+
+                    window.URL.revokeObjectURL(url);
+
+                } catch (error) {
+
+                    console.log(error);
+
+                    showPopupMessage(
+                        "Invoice could not be generated",
+                        "error"
+                    );
+                }
+            });
+
+        // Return Button Logic
+        if (orderStatus === "Completed") {
+            const currentDate = new Date();
+            const returnEndDate = new Date(completionDate);
+            returnEndDate.setDate(returnEndDate.getDate() + 7);
+
+            if (currentDate > returnEndDate) {
+                returnButton.disabled = true;
+            } else {
+                returnButton.addEventListener("click", function () {
+                    returnModal.style.display = "flex";
+                });
+            }
+        } else {
+            returnButton.disabled = true;
+        }
+
+        // Close Return Modal
+        document.querySelector("#return-order-modal .close-modal").addEventListener("click", function () {
+            returnModal.style.display = "none";
+        });
+
+        document.getElementById("cancel-return-modal-button").addEventListener("click", function () {
+            returnModal.style.display = "none";
+        });
+
+        // Submit Return
+        document.getElementById("submit-return").addEventListener("click", async function () {
+            const reason = document.getElementById("return-reason").value.trim();
+            const errorElement = document.getElementById("return-reason-error");
+
+            if (!reason) {
+                errorElement.style.display = "block";
+                return;
+            }
+
+            errorElement.style.display = "none";
+
+            const data = {
+                orderId: "{{order._id}}",
+                itemId: "{{item._id}}",
+                reason: reason
+            };
+
+            try {
+                const response = await fetch("/user/return-order", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    returnModal.style.display = "none";
+                    showSuccessMessage();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || "Failed to return order. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+
+        // Close Success Message
+        document.getElementById("close-success-message").addEventListener("click", function () {
+            successMessage.style.display = "none";
+            window.location.reload();
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener("click", function (event) {
+            if (event.target === cancelModal) {
+                cancelModal.style.display = "none";
+            }
+            if (event.target === returnModal) {
+                returnModal.style.display = "none";
+            }
+        });
+
+        // Helper function to show success message
+        function showSuccessMessage() {
+            successMessage.style.display = "block";
+            setTimeout(() => {
+                if (successMessage.style.display === "block") {
+                    successMessage.style.display = "none";
+                    window.location.reload();
+                }
+            }, 3000);
+        }
+    });
+</script>
+{{/section}}
