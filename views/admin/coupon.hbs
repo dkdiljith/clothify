@@ -201,18 +201,25 @@
             </div>
             <br><br>
             <form id="couponForm" method="post" action="/admin/coupon/addCoupon" novalidate>
+
+                <div class="form-group">
+                    <label for="couponCode" class="form-label">Coupon Code</label>
+                    <input type="text" name="couponCode" id="couponCode" maxlength="6" class="form-control"
+                        placeholder="e.g. SUMMER20" required />
+                    <div class="error-message" id="code-error"></div>
+                </div>
                 <div class="form-columns">
-                    <div class="form-group">
-                        <label for="couponCode" class="form-label">Coupon Code</label>
-                        <input type="text" name="couponCode" id="couponCode" maxlength="6" class="form-control"
-                            placeholder="e.g. SUMMER20" required />
-                        <div class="error-message" id="code-error"></div>
-                    </div>
                     <div class="form-group">
                         <label for="minimumPurchaseAmount" class="form-label">Minimum Purchase (₹)</label>
                         <input type="number" name="minimumPurchaseAmount" id="minimumPurchaseAmount"
                             class="form-control" placeholder="e.g. 500" required />
                         <div class="error-message" id="minPurchase-error"></div>
+                    </div>
+                    <div>
+                        <label for="maximumPurchaseAmount" class="form-label">Maximum Purchase (₹)</label>
+                        <input type="number" name="maximumPurchaseAmount" id="maximumPurchaseAmount"
+                            class="form-control" placeholder="e.g. 500" required />
+                        <div class="error-message" id="maxPurchase-error"></div>
                     </div>
                 </div>
 

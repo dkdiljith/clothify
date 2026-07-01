@@ -33,7 +33,7 @@ exports.couponRender = async (req, res) => {
         });
 
     } catch (error) {
-        
+
         console.error(error);
         return res.render('admin/coupon', {
 
@@ -46,7 +46,7 @@ exports.couponRender = async (req, res) => {
                 totalPages: 1,
                 hasNextPage: false,
                 hasPrevPage: false,
-                serialNumberStart: 0 
+                serialNumberStart: 0
             },
             errorMessage: "Error fetching coupons. Please try again later."
         });
@@ -81,7 +81,7 @@ exports.couponEditJson = async (req, res) => {
 
 exports.createCoupon = async (req, res) => {
     try {
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate, endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount, maximumPurchaseAmount, startDate, endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -103,9 +103,18 @@ exports.createCoupon = async (req, res) => {
             discountType,
             discountValue,
             minimumPurchaseAmount,
+            maximumPurchaseAmount,
             startDate,
             endDate,
         });
+
+        if (minimumPurchaseAmount > maximumPurchaseAmount) {
+            return res.status(500).json({
+                success: false,
+                type: "error",
+                message: "maximum Purchase Amount should be Greater than minimum purchase amount",
+            });
+        }
 
         const result = await coupon.save();
         await pricingExpiryUpdate();
@@ -141,7 +150,7 @@ exports.createCoupon = async (req, res) => {
 exports.couponEdit = async (req, res) => {
     try {
         const couponId = req.params.couponId;
-        const { couponCode, discountType, discountValue, minimumPurchaseAmount, startDate, endDate } = req.body;
+        const { couponCode, discountType, discountValue, minimumPurchaseAmount, maximumPurchaseAmount, startDate, endDate } = req.body;
 
         //existence of coupon checking
         if (couponCode) {
@@ -176,6 +185,7 @@ exports.couponEdit = async (req, res) => {
                 discountType,
                 discountValue,
                 minimumPurchaseAmount,
+                maximumPurchaseAmount,
                 startDate,
                 endDate,
             },
@@ -185,6 +195,15 @@ exports.couponEdit = async (req, res) => {
         if (updatedCoupon.endDate >= new Date()) {
             updatedCoupon.isActive = true
         }
+
+        if (minimumPurchaseAmount > maximumPurchaseAmount) {
+            return res.status(500).json({
+                success: false,
+                type: "error",
+                message: "maximum Purchase Amount should be Greater than minimum purchase amount",
+            });
+        }
+
 
         const result = updatedCoupon.save()
         await pricingExpiryUpdate();
@@ -250,11 +269,19 @@ exports.applyCoupon = async (req, res) => {
             return res.json({ success: false, message: 'Coupon is not valid' });
         }
 
+        if (coupon.minimumPurchaseAmount > coupon.maximumPurchaseAmount) {
+            return res.json({ success: false, message: 'Coupon is not valid' });
+        }
+
         const cart = await Cart.findOne({ userId });
-        
+
         // Use offerAmount or subtotal depending on your business logic
         if (cart.totalAmount < coupon.minimumPurchaseAmount) {
             return res.json({ success: false, message: `Minimum purchase of ₹${coupon.minimumPurchaseAmount} required` });
+        }
+
+        if (cart.totalAmount > coupon.maximumPurchaseAmount) {
+            return res.json({ success: false, message: `Maximum purchase limit ₹${coupon.maximumPurchaseAmount} Exceeded` });
         }
 
         cart.couponId = coupon._id;
