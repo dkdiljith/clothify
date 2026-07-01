@@ -71,7 +71,7 @@ async function calculateRefund(orderId, itemId, isCancellation) {
     (order.tax || 0) *
     itemSharePercentage;
 
-  
+
   // Shipping share for this item
 
   const itemShippingShare =
@@ -91,7 +91,7 @@ async function calculateRefund(orderId, itemId, isCancellation) {
 
   // Prevent negative refund
 
-  refundableAmount = Math.max( 0,Math.round(refundableAmount));
+  refundableAmount = Math.max(0, Math.round(refundableAmount));
 
   //////////////////////////////////////////////////////
 
@@ -494,7 +494,7 @@ exports.orderCancel = async (req, res) => {
 
 exports.orderReturn = async (req, res) => {
 
-  const { orderId, itemId, reason } = req.body;
+  const { orderId, itemId, reason, returnAll } = req.body;
 
   try {
 
@@ -541,17 +541,55 @@ exports.orderReturn = async (req, res) => {
         message: "Only delivered items can be returned",
       });
     }
+    if (returnAll) {
+      
+      const nonReturnableItems = order.items.filter(item => item.status !== 'Completed');
+
+      if (nonReturnableItems.length > 0) {
+        const details = nonReturnableItems.map(item => {
+          let statusReason = "is not eligible for return";
+          if (item.status === "Returned") statusReason = "has already been returned";
+          if (item.status === "Return Requested") statusReason = "already has a pending return request";
+
+          return `${item.productName} (${statusReason})`;
+        }).join(", ");
+
+        return res.status(400).json({
+          success: false,
+          message: `Cannot process bulk return. Problem items: ${details}.`
+        });
+      }
+    }
 
     //////////////////////////////////////////////////////
-    // update item
 
-    item.status = "Return Requested";
+    if (returnAll) {
 
-    item.returnReason.push({
-      itemId: item._id,
-      reason,
-      requestedAt: new Date(),
-    });
+      for (let i = 0; i < order.items.length; i++) {
+        let item = order.items[i]
+
+        item.status = "Return Requested";
+
+        item.returnReason.push({
+          itemId: item._id,
+          reason,
+          requestedAt: new Date(),
+        });
+      }
+
+    } else {
+
+      // update item
+
+      item.status = "Return Requested";
+
+      item.returnReason.push({
+        itemId: item._id,
+        reason,
+        requestedAt: new Date(),
+      });
+
+    }
 
     //////////////////////////////////////////////////////
 

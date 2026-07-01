@@ -165,14 +165,27 @@
                 <div class="action-buttons">
                     {{!-- Hide Return/Cancel if payment failed --}}
                     {{#if (neq order.paymentStatus 'Failed')}}
+
+                    {{#if (eq item.status 'Completed')}}
                     <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
                         data-completion-date="{{order.completionDate}}">
                         <i class="fas fa-undo"></i> Return Item
                     </button>
-                    
+                    {{/if}}
+
+                    {{#if (eq order.deliveryStatus 'Completed')}}
+                    <button id="returnAll-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
+                        data-completion-date="{{order.completionDate}}">
+                        <i class="fas fa-undo"></i> Return All
+                    </button>
+                    {{/if}}
+
+                    {{#if (eq item.status 'Pending')}}
                     <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}">
                         <i class="fas fa-times"></i> Cancel Item
                     </button>
+                    {{/if}}
+
                     {{/if}}
 
                     <button class="btn btn-primary" onclick="location.href='/user/orders'">
@@ -262,39 +275,44 @@
 
 
 
-
 {{#section 'scripts'}}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Elements
         const cancelButton = document.getElementById("cancel-order-button");
         const returnButton = document.getElementById("return-order-button");
+        const returnAllButton = document.getElementById("returnAll-order-button");
+        let returnAll = false;
+
         const cancelModal = document.getElementById("cancel-order-modal");
         const returnModal = document.getElementById("return-order-modal");
         const successMessage = document.getElementById("success-message");
-        const orderStatus = cancelButton.dataset.orderStatus;
-        const completionDate = new Date(returnButton.dataset.completionDate);
+
+        const orderStatus = cancelButton ? cancelButton.dataset.orderStatus : "";
+        const completionDate = returnButton ? new Date(returnButton.dataset.completionDate) : null;
 
         // Cancel Button Logic
-        if (orderStatus !== "Pending") {
-            cancelButton.disabled = true;
-        } else {
-            cancelButton.addEventListener("click", function () {
-                cancelModal.style.display = "flex";
-            });
+        if (cancelButton) {
+            if (orderStatus !== "Pending") {
+                cancelButton.disabled = true;
+            } else {
+                cancelButton.addEventListener("click", function () {
+                    cancelModal.style.display = "flex";
+                });
+            }
         }
 
         // Close Cancel Modal
-        document.querySelector("#cancel-order-modal .close-modal").addEventListener("click", function () {
+        document.querySelector("#cancel-order-modal .close-modal")?.addEventListener("click", function () {
             cancelModal.style.display = "none";
         });
 
-        document.getElementById("cancel-modal-button").addEventListener("click", function () {
+        document.getElementById("cancel-modal-button")?.addEventListener("click", function () {
             cancelModal.style.display = "none";
         });
 
         // Submit Cancellation
-        document.getElementById("submit-cancellation").addEventListener("click", async function () {
+        document.getElementById("submit-cancellation")?.addEventListener("click", async function () {
             const reason = document.getElementById("cancellation-reason").value.trim();
 
             if (!reason) {
@@ -331,114 +349,95 @@
             }
         });
 
-
-
         // Download Invoice
-        document.getElementById("download-invoice-button")
-            ?.addEventListener("click", async function () {
+        document.getElementById("download-invoice-button")?.addEventListener("click", async function () {
+            try {
+                const response = await fetch("/user/download-invoice", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ orderId: "{{order._id}}" })
+                });
 
-                try {
-
-                    const response = await fetch(
-                        "/user/download-invoice",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                orderId: "{{order._id}}"
-                            })
-                        }
-                    );
-
-                    if (!response.ok) {
-
-                        showPopupMessage(
-                            "Invoice generation failedddddddddddddddd",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-                    const blob =
-                        await response.blob();
-
-                    const url =
-                        window.URL.createObjectURL(blob);
-
-                    const a =
-                        document.createElement("a");
-
-                    a.href = url;
-
-                    a.download =
-                        "invoice.pdf";
-
-                    document.body.appendChild(a);
-
-                    a.click();
-
-                    a.remove();
-
-                    window.URL.revokeObjectURL(url);
-
-                } catch (error) {
-
-                    console.log(error);
-
-                    showPopupMessage(
-                        "Invoice could not be generated",
-                        "error"
-                    );
+                if (!response.ok) {
+                    showPopupMessage("Invoice generation failed", "error");
+                    return;
                 }
-            });
 
-        // Return Button Logic
-        if (orderStatus === "Completed") {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "invoice.pdf";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.log(error);
+                showPopupMessage("Invoice could not be generated", "error");
+            }
+        });
+
+        //  Return Button Initialization Logic
+        if (orderStatus === "Completed" && completionDate && !isNaN(completionDate)) {
             const currentDate = new Date();
             const returnEndDate = new Date(completionDate);
             returnEndDate.setDate(returnEndDate.getDate() + 7);
 
             if (currentDate > returnEndDate) {
-                returnButton.disabled = true;
+                if (returnButton) returnButton.disabled = true;
+                if (returnAllButton) returnAllButton.disabled = true;
             } else {
-                returnButton.addEventListener("click", function () {
+                returnButton?.addEventListener("click", function () {
+                    returnAll = false; // FIX: Reset state flag for single items explicitly
+                    returnModal.style.display = "flex";
+                });
+                returnAllButton?.addEventListener("click", function () {
+                    returnAll = true; // Set state flag for full returns
                     returnModal.style.display = "flex";
                 });
             }
         } else {
-            returnButton.disabled = true;
+            // If item status is already modified, fallback lets user press button or disables gracefully
+            returnButton?.addEventListener("click", function () {
+                returnAll = false;
+                returnModal.style.display = "flex";
+            });
+            returnAllButton?.addEventListener("click", function () {
+                returnAll = true;
+                returnModal.style.display = "flex";
+            });
         }
 
         // Close Return Modal
-        document.querySelector("#return-order-modal .close-modal").addEventListener("click", function () {
+        document.querySelector("#return-order-modal .close-modal")?.addEventListener("click", function () {
+            returnAll = false;
             returnModal.style.display = "none";
         });
 
-        document.getElementById("cancel-return-modal-button").addEventListener("click", function () {
+        document.getElementById("cancel-return-modal-button")?.addEventListener("click", function () {
+            returnAll = false;
             returnModal.style.display = "none";
         });
 
         // Submit Return
-        document.getElementById("submit-return").addEventListener("click", async function () {
+        document.getElementById("submit-return")?.addEventListener("click", async function () {
             const reason = document.getElementById("return-reason").value.trim();
             const errorElement = document.getElementById("return-reason-error");
 
             if (!reason) {
-                errorElement.style.display = "block";
+                if (errorElement) errorElement.style.display = "block";
                 return;
             }
 
-            errorElement.style.display = "none";
+            if (errorElement) errorElement.style.display = "none";
 
             const data = {
                 orderId: "{{order._id}}",
                 itemId: "{{item._id}}",
+                returnAll: returnAll, // Correct context mapping
                 reason: reason
             };
 
@@ -465,7 +464,7 @@
         });
 
         // Close Success Message
-        document.getElementById("close-success-message").addEventListener("click", function () {
+        document.getElementById("close-success-message")?.addEventListener("click", function () {
             successMessage.style.display = "none";
             window.location.reload();
         });
@@ -477,6 +476,7 @@
             }
             if (event.target === returnModal) {
                 returnModal.style.display = "none";
+                returnAll = false;
             }
         });
 
