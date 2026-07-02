@@ -45,10 +45,10 @@
 
       <div class="thumbnail-gallery">
         {{#each product.images}}
-        <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail{{#if @first}} active{{/if}}"
-          onclick="changeMainImage('{{this.path}}', this)" />
+        <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail{{#if @first}} active{{/if}}" />
         {{/each}}
       </div>
+
     </div>
 
     <!-- Product Details -->
@@ -84,11 +84,10 @@
         <div class="size-options">
           {{#each product.details}}
           <div class="size-option
-                   {{#if @first}}active{{/if}}
-                   {{#ifCond this.quantity '<=' 0}}disabled{{/ifCond}}" data-product-id="{{../product._id}}"
+           {{#if @first}}active{{/if}}
+           {{#ifCond this.quantity '<=' 0}}disabled{{/ifCond}}" data-product-id="{{../product._id}}"
             data-size="{{this.size}}" data-quantity="{{this.quantity}}" data-price="{{this.price}}"
-            data-offer-price="{{this.offerPrice}}" data-offer-id="{{this.offerId}}" data-details-id="{{this._id}}"
-            onclick="updatePriceAndStock(this)">
+            data-offer-price="{{this.offerPrice}}" data-offer-id="{{this.offerId}}" data-details-id="{{this._id}}">
 
             {{this.size}}
             {{#ifCond this.quantity '<=' 0}} <span class="size-out-badge">Out</span>
@@ -96,6 +95,8 @@
           </div>
           {{/each}}
         </div>
+
+
       </div>
 
       <!-- Quantity -->
@@ -106,38 +107,39 @@
         </div>
 
         <div class="quantity-control">
-          <button class="quantity-btn" onclick="adjustQuantity(-1)">
+          <button type="button" class="quantity-btn" data-step="-1">
             -
           </button>
+
           <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity">
-          <button class="quantity-btn" onclick="adjustQuantity(1)">
+
+          <button type="button" class="quantity-btn" data-step="1">
             +
           </button>
         </div>
+
       </div>
 
       <!-- Action Buttons -->
       <div class="action-buttons">
 
         <!-- Add To Cart -->
-        <button id="add-to-cart-btn" onclick="addToCart()" class="action-btn btn-add-to-cart" {{#ifCond
-          product.details.[0].quantity '<=' 0}} disabled {{/ifCond}}>
+        <button id="add-to-cart-btn" class="action-btn btn-add-to-cart" {{#ifCond product.details.[0].quantity '<=' 0}}
+          disabled {{/ifCond}}>
           <i class="fas fa-shopping-cart"></i> Add to Cart
         </button>
 
         <!-- Buy Now -->
-        <button id="buy-now-btn" onclick="addToCart(); setTimeout(() => { window.location.href = '/user/cart'; }, 200);"
-          class="action-btn btn-buy-now" {{#ifCond product.details.[0].quantity '<=' 0}} disabled {{/ifCond}}>
+        <button id="buy-now-btn" class="action-btn btn-buy-now" {{#ifCond product.details.[0].quantity '<=' 0}} disabled
+          {{/ifCond}}>
           <i class="fas fa-bolt"></i> Buy Now
         </button>
 
         <!-- Wishlist -->
         <button class="add-to-wishlist action-btn btn-wishlist" data-product-id="{{product._id}}"
           data-variation-index="0">
-
           <i class="far fa-heart"></i>
           Wishlist
-
         </button>
 
       </div>
@@ -147,9 +149,10 @@
   <!-- Product Tabs -->
   <div class="product-tabs">
     <div class="tabs-header">
-      <button class="tab-btn active" onclick="openTab(event, 'description')">Description</button>
-      <button class="tab-btn" onclick="openTab(event, 'shipping')">Shipping & Returns</button>
+      <button class="tab-btn active" data-tab="description">Description</button>
+      <button class="tab-btn" data-tab="shipping">Shipping & Returns</button>
     </div>
+
 
     <div id="description" class="tab-content active">
       <h3>Product Description</h3>
@@ -177,13 +180,7 @@
           <span class="review-author">{{this.author}}</span>
           <span class="review-date">{{this.date}}</span>
         </div>
-        <div class="review-rating">
-          {{#stars this.rating}}
-          {{#if this.full}}<i class="fas fa-star"></i>{{/if}}
-          {{#if this.half}}<i class="fas fa-star-half-alt"></i>{{/if}}
-          {{#if this.empty}}<i class="far fa-star"></i>{{/if}}
-          {{/stars}}
-        </div>
+
         <p class="review-text">{{this.comment}}</p>
       </div>
       {{/each}}
@@ -224,326 +221,5 @@
 
 {{#section 'scripts'}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/zoom.js/0.0.1/zoom.min.js" defer></script>
-
-<script>
-  // Global variables
-  let selectedSize = null;
-  let selectedQuantity = 1;
-  let currentImageIndex = 0;
-
-  // Frequently used DOM elements (global)
-  const quantityInput = document.getElementById('quantity');
-  const addToCartButton = document.querySelector('.btn-add-to-cart');
-  const selectedPriceEl = document.getElementById('selected-price');
-  const originalPriceEl = document.getElementById('original-price');
-  const selectedStockEl = document.getElementById('selected-stock');
-  const cartCountEl = document.getElementById("cart-count");
-  const mainImg = document.getElementById("main-image");
-
-  // Reusable helper function to fetch product-related data
-  function getCartDataFromElement(element) {
-    return {
-      productId: element.getAttribute('data-product-id'),
-      productDetailsId: element.getAttribute('data-details-id'),
-      price: element.getAttribute('data-price'),
-
-      stock: element.getAttribute('data-quantity'),
-    };
-  }
-
-  // Update Price and Stock when a size option is clicked
-  // Update Price and Stock when a size option is clicked
-  function updatePriceAndStock(element) {
-    // 1. SELECTOR LOGIC: Remove 'active' class from all and add to clicked
-    document.querySelectorAll('.size-option').forEach(option => {
-      option.classList.remove('active');
-    });
-    element.classList.add('active');
-
-    // 2. DATA EXTRACTION
-    const productId = element.getAttribute('data-product-id');
-    const detailsId = element.getAttribute('data-details-id');
-    const size = element.getAttribute('data-size');
-    const price = parseFloat(element.getAttribute('data-price'));
-    const offerPrice = parseFloat(element.getAttribute('data-offer-price'));
-    const stock = parseInt(element.getAttribute('data-quantity'));
-
-    // 3. VARIATION INDEX CALCULATION (Restoring Old Feature)
-    const sizeOptions = document.querySelectorAll('.size-option');
-    let variationIndex = -1;
-    sizeOptions.forEach((option, index) => {
-      if (option === element) variationIndex = index;
-    });
-
-    // 4. PRICE UPDATE LOGIC
-    const selectedPriceEl = document.getElementById('selected-price');
-    const originalPriceEl = document.getElementById('original-price');
-    const discountEl = document.getElementById('discount-val');
-
-    if (offerPrice && offerPrice < price) {
-      selectedPriceEl.textContent = `₹${offerPrice}`;
-      originalPriceEl.textContent = `₹${price}`;
-      originalPriceEl.style.display = 'inline';
-
-      const discountPercent = Math.round(((price - offerPrice) / price) * 100);
-      discountEl.textContent = `${discountPercent}% OFF`;
-      discountEl.style.display = 'inline';
-    } else {
-      selectedPriceEl.textContent = `₹${price}`;
-      originalPriceEl.style.display = 'none';
-      discountEl.style.display = 'none';
-    }
-
-    // 5. STOCK & QUANTITY LOGIC
-    const stockInfo = document.getElementById('stock-info');
-    const quantityContainer = document.querySelector('.quantity-control');
-    const quantityInputEl = document.getElementById('quantity');
-
-    if (stock <= 0) {
-      stockInfo.innerHTML = `<span class="stock-status stock-out">This product is currently unavailable</span>`;
-      quantityContainer.style.opacity = "0.5";
-      quantityContainer.style.pointerEvents = "none";
-      quantityInputEl.disabled = true;
-    } else {
-      quantityContainer.style.opacity = "1";
-      quantityContainer.style.pointerEvents = "auto";
-      quantityInputEl.disabled = false;
-
-      if (stock < 5) {
-        stockInfo.innerHTML = `<span class="stock-status stock-low">⚠️ Only ${stock} units left! Hurry up!</span>`;
-      } else {
-        stockInfo.innerHTML = `<span class="stock-status stock-in">In Stock</span>`;
-      }
-    }
-
-    // 6. UPDATE ADD TO CART DATA (Preserving data for addToCart function)
-    const addToCartBtn = document.querySelector('.btn-add-to-cart');
-    const buyNowBtn = document.querySelector('.btn-buy-now');
-    const isOut = stock <= 0;
-
-    // Enable/Disable buttons based on stock
-    addToCartBtn.disabled = isOut;
-    buyNowBtn.disabled = isOut;
-
-    // Sync data to the main button variable (addToCartButton)
-    addToCartBtn.setAttribute('data-product-id', productId);
-    addToCartBtn.setAttribute('data-details-id', detailsId);
-    addToCartBtn.setAttribute('data-price', offerPrice || price);
-    addToCartBtn.setAttribute('data-variation-index', variationIndex);
-
-    // Update global state variables if your script uses them
-    if (typeof selectedSize !== 'undefined') selectedSize = size;
-    if (typeof quantityInput !== 'undefined') quantityInput.value = 1;
-
-    console.log('Size Selected. Index:', variationIndex, 'Stock:', stock);
-  }
-
-
-
-
-
-  // Adjust quantity
-  function adjustQuantity(change) {
-    let newQuantity = parseInt(quantityInput.value) + change;
-    if (newQuantity < 1) newQuantity = 1;
-    if (newQuantity > 10) newQuantity = 10;
-
-    quantityInput.value = newQuantity;
-    selectedQuantity = newQuantity;
-  }
-
-  // Add to Cart function
-  async function addToCart() {
-    // Get all data from the Add to Cart button
-    const productId = addToCartButton.getAttribute('data-product-id');
-    const detailsId = addToCartButton.getAttribute('data-details-id');
-    const variationIndex = addToCartButton.getAttribute('data-variation-index');
-    const quantity = quantityInput.value;
-
-    console.log('Attempting to add to cart with:', {
-      productId,
-      detailsId,
-      variationIndex,
-      quantity
-    });
-
-    if (!productId || !variationIndex) {
-      showValidationError();
-      showPopupMessage('Please select a size first', 'error');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantity}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const data = await response.json();
-      showPopupMessage(data.message, data.success ? "success" : "error");
-
-      if (data.cartCount) {
-        updateCartCount(data.cartCount);
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      showPopupMessage("Login First :)", "error");
-    }
-  }
-  //Add to wishlist
-  async function addToWishlist(productId, variationIndex) {
-    try {
-      const response = await fetch(`/user/addtowishlist/${productId}/${variationIndex}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      const data = await response.json();
-
-      showPopupMessage(data.message, data.success ? "success" : "error");
-
-      if (data.success) {
-        const addButton = document.querySelector(`.add-to-wishlist[data-product-id="${productId}"]`);
-        const addedButton = document.querySelector(`.added-to-wishlist[data-product-id="${productId}"]`);
-
-        if (addButton && addedButton) {
-          addButton.style.display = "none";
-          addedButton.style.display = "inline-flex";
-        }
-      }
-    } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      showPopupMessage("Login First :)", "error");
-    }
-  }
-
-  // Update cart count
-  function updateCartCount(count) {
-    if (cartCountEl) {
-      cartCountEl.textContent = count;
-      cartCountEl.style.transform = "scale(1.5)";
-      setTimeout(() => {
-        cartCountEl.style.transform = "scale(1)";
-      }, 300);
-    }
-  }
-
-  // Validation effect on size options
-  function showValidationError() {
-    const sizeOptions = document.querySelectorAll('.size-option');
-    sizeOptions.forEach(option => option.classList.add('validation-error'));
-    setTimeout(() => {
-      sizeOptions.forEach(option => option.classList.remove('validation-error'));
-    }, 1000);
-  }
-
-  // Change main image
-  function changeMainImage(newSrc, thumbnail) {
-    mainImg.src = newSrc;
-
-    document.querySelectorAll('.thumbnail').forEach(thumb => {
-      thumb.classList.remove('active');
-    });
-    thumbnail.classList.add('active');
-
-    const magnifierGlass = document.querySelector(".magnifier");
-    if (magnifierGlass) {
-      magnifierGlass.style.backgroundImage = `url('${newSrc}')`;
-    }
-  }
-
-  // Tab switching
-  function openTab(evt, tabName) {
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-
-    document.getElementById(tabName).classList.add("active");
-    evt.currentTarget.classList.add("active");
-  }
-
-  // Magnify zoom effect
-  function magnify(imgID, zoom) {
-    const img = document.getElementById(imgID);
-    const magnifierGlass = document.querySelector(".magnifier");
-
-    magnifierGlass.style.backgroundImage = `url('${img.src}')`;
-    magnifierGlass.style.backgroundRepeat = "no-repeat";
-    magnifierGlass.style.backgroundSize = `${img.offsetWidth * zoom}px ${img.offsetHeight * zoom}px`;
-
-    img.addEventListener("mousemove", moveMagnifier);
-    img.addEventListener("mouseenter", () => magnifierGlass.style.display = "block");
-    img.addEventListener("mouseleave", () => magnifierGlass.style.display = "none");
-
-    function moveMagnifier(e) {
-      e.preventDefault();
-      const pos = getCursorPos(e);
-      let x = pos.x;
-      let y = pos.y;
-      const w = magnifierGlass.offsetWidth / 2;
-      const h = magnifierGlass.offsetHeight / 2;
-
-      if (x > img.offsetWidth - (w / zoom)) x = img.offsetWidth - (w / zoom);
-      if (x < w / zoom) x = w / zoom;
-      if (y > img.offsetHeight - (h / zoom)) y = img.offsetHeight - (h / zoom);
-      if (y < h / zoom) y = h / zoom;
-
-      magnifierGlass.style.left = `${x - w}px`;
-      magnifierGlass.style.top = `${y - h}px`;
-      magnifierGlass.style.backgroundPosition = `-${(x * zoom) - w}px -${(y * zoom) - h}px`;
-    }
-
-    function getCursorPos(e) {
-      const rect = img.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    }
-  }
-
-  // On page load
-  document.addEventListener("DOMContentLoaded", function () {
-    magnify("main-image", 2);
-
-    const firstSizeOption = document.querySelector('.size-option');
-    if (firstSizeOption) {
-      updatePriceAndStock(firstSizeOption);
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
-
-    addToWishlistButtons.forEach(button => {
-      button.addEventListener('click', (event) => {
-        const productId = event.currentTarget.getAttribute('data-product-id');
-        const variationIndex = event.currentTarget.getAttribute('data-variation-index');
-        addToWishlist(productId, variationIndex);
-      });
-    });
-  });
-
-  // Star rating helper (for templating engine)
-  function stars(rating) {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push({ full: true, half: false, empty: false });
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push({ full: false, half: true, empty: false });
-      } else {
-        stars.push({ full: false, half: false, empty: true });
-      }
-    }
-
-    return stars;
-  }
-</script>
-
+<script src="/javascripts/user/singleProductPage.js" defer></script>
 {{/section}}

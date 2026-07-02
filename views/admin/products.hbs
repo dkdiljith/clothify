@@ -205,7 +205,7 @@
 
                                 <i class="bi bi-tag"></i>
 
-                                Apply 🏷️
+                                Apply
 
                             </button>
 
@@ -214,31 +214,26 @@
                                 this.isActive}} onclick="location.href='/admin/editproducts/{{this._id}}'" {{else}}
                                 disabled title="Cannot edit an inactive product" {{/if}}>
                                 <i class="bi bi-pencil"></i>
-                                Edit ✏️
+                                Edit
                             </button>
 
                             <!-- Block / Unblock Button -->
                             {{#if this.isActive}}
-                            <button type="button" class="btn btn-danger d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
+                            <button type="button"
+                                class="btn btn-danger d-inline-flex align-items-center gap-1 block-toggle-btn"
+                                data-user-id="{{this._id}}">
                                 <i class="bi bi-slash-circle"></i>
-                                Block 🍃
+                                Block
                             </button>
                             {{else}}
                             <button type="button"
-                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
+                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1 block-toggle-btn"
+                                data-user-id="{{this._id}}">
                                 <i class="bi bi-unlock"></i>
-                                Unblock 🍂
+                                Unblock
                             </button>
                             {{/if}}
 
-                            {{!-- <button type="button"
-                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
-                                <i class="bi bi-unlock"></i>
-                                Delete
-                            </button> --}}
 
                         </div>
 
@@ -369,29 +364,5 @@
 
 
 {{#section 'scripts'}}
-<script src="/javascripts/admin/product.js" defer></script>
-
-<script>
-    async function handleBlock(productId) {
-        const response = await fetch(`/admin/blockProduct/${productId}`);
-        const data = await response.json();
-
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showPopupMessage(data.message, `error`)
-        }
-    }
-
-    async function handleDeleted(productId) {
-        const response = await fetch(`/admin/deleteProduct/${productId}`);
-        const data = await response.json();
-
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showPopupMessage(data.message, `error`)
-        }
-    }
-</script>
+<script src="/javascripts/admin/products.js" defer></script>
 {{/section}}

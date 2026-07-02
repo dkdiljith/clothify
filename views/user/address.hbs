@@ -105,9 +105,10 @@
                             <i class="fas fa-edit"></i> Edit
                         </button>
 
-                        <button onclick="confirmDelete('{{this._id}}')" class="btn btn-sm btn-danger">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </button>
+                      <button class="btn btn-sm btn-danger delete-btn" data-id="{{this._id}}">
+    <i class="fas fa-trash-alt"></i> Delete
+</button>
+
                     </div>
                 </div>
                 {{/each}}
@@ -131,11 +132,5 @@
 
 
 {{#section 'scripts'}}
-<script>
-    function confirmDelete(addressId) {
-        if (confirm('Are you sure you want to delete this address?')) {
-            window.location.href = `/user/deleteaddress/${addressId}`;
-        }
-    }
-</script>
+<script src="/javascripts/user/address.js" defer></script>
 {{/section}}

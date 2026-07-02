@@ -25,9 +25,10 @@
                 </div>
             </div>
             <div>
-                <button id="download-invoice-button" class="btn btn-secondary">
+                <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
                     Download Invoice
                 </button>
+
 
                 <a href="/admin/orders" class="btn btn-outline-secondary">
                     <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
@@ -154,102 +155,49 @@
                                             <div class="d-flex flex-column">
 
                                                 {{#if (eq ../order.paymentStatus "Failed")}}
-
                                                 <select class="form-select form-select-sm mb-2" disabled>
-
-                                                    <option selected>
-
-                                                        Cancelled
-
-                                                    </option>
-
+                                                    <option selected>Cancelled</option>
                                                 </select>
-
                                                 <span class="status-badge bg-danger text-white align-self-start">
-
                                                     Payment Failed
-
                                                 </span>
 
                                                 {{else}}
 
-                                                {{#if (or
-                                                (eq this.status "Return Requested")
-                                                (eq this.status "Return Accepted")
-                                                (eq this.status "Return Rejected")
-                                                )}}
-
-                                                <select class="form-select form-select-sm mb-2"
-                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
-                                                    (eq this.status "Returned" ) (eq this.status "Cancelled" ) ) }}
-                                                    disabled {{/if}}>
-
-                                                    <option value="" disabled selected>
-
-                                                        Accept or Reject Return
-
-                                                    </option>
-
+                                                {{#if (or (eq this.status "Return Requested") (eq this.status "Return
+                                                Accepted") (eq this.status "Return Rejected") )}}
+                                                <!-- First Dropdown -->
+                                                <select class="form-select form-select-sm mb-2 status-dropdown"
+                                                    data-item-id="{{this._id}}" data-order-id="{{../order._id}}" {{#if (or (eq this.status "Returned" )
+                                                    (eq this.status "Cancelled" ) ) }} disabled {{/if}}>
+                                                    <option value="" disabled selected>Accept or Reject Return</option>
                                                     <option value="Return Rejected" {{#ifEquals
-                                                        this.status "Return Rejected" }} selected {{/ifEquals}}>
-
-                                                        Reject Return
-
-                                                    </option>
-
+                                                        this.status "Return Rejected" }} selected {{/ifEquals}}>Reject
+                                                        Return</option>
                                                     <option value="Returned" {{#ifEquals this.status "Returned" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Accept Return
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Accept Return</option>
                                                 </select>
 
                                                 {{else}}
-
-                                                <select class="form-select form-select-sm mb-2"
-                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
-                                                    (eq this.status "Completed" ) (eq this.status "Returned" ) (eq
-                                                    this.status "Cancelled" ) ) }} disabled {{/if}}>
-
+                                                <!-- Second Dropdown  -->
+                                                <select class="form-select form-select-sm mb-2 status-dropdown"
+                                                    data-item-id="{{this._id}}" data-order-id="{{../order._id}}" {{#if (or (eq this.status "Completed" )
+                                                    (eq this.status "Returned" ) (eq this.status "Cancelled" ) ) }}
+                                                    disabled {{/if}}>
                                                     <option value="Pending" {{#ifEquals this.status "Pending" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Pending
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Pending</option>
                                                     <option value="Shipped" {{#ifEquals this.status "Shipped" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Shipped
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Shipped</option>
                                                     <option value="Completed" {{#ifEquals this.status "Completed" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Completed
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Completed</option>
                                                     <option value="Cancelled" {{#ifEquals this.status "Cancelled" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Cancelled
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Cancelled</option>
                                                 </select>
-
                                                 {{/if}}
 
                                                 <span
                                                     class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
-
                                                     {{this.status}}
-
                                                 </span>
 
                                                 {{/if}}
@@ -494,99 +442,5 @@
 
 
 {{#section 'scripts'}}
-<script>
-    function updateItemStatus(itemId, newStatus) {
-        const orderId = `{{order._id}}`;
-        if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) {
-            return;
-        }
-
-        fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: newStatus }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                showPopupMessage(`Status updated to ${newStatus}`, 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            })
-            .catch(error => {
-                console.error('Error updating status:', error);
-                showPopupMessage('Failed to update status', 'error');
-            });
-    }
-
-    // Download Invoice
-    document.getElementById("download-invoice-button")
-        ?.addEventListener("click", async function () {
-
-            try {
-
-                const response = await fetch(
-                    "/admin/download-invoice",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            orderId: "{{order._id}}"
-                        })
-                    }
-                );
-
-                if (!response.ok) {
-
-                    showPopupMessage(
-                        "Invoice generation failedddddddddddddddd",
-                        "error"
-                    );
-
-                    return;
-                }
-
-                const blob =
-                    await response.blob();
-
-                const url =
-                    window.URL.createObjectURL(blob);
-
-                const a =
-                    document.createElement("a");
-
-                a.href = url;
-
-                a.download =
-                    "invoice.pdf";
-
-                document.body.appendChild(a);
-
-                a.click();
-
-                a.remove();
-
-                window.URL.revokeObjectURL(url);
-
-            } catch (error) {
-
-                console.log(error);
-
-                showPopupMessage(
-                    "Invoice could not be generated",
-                    "error"
-                );
-            }
-        });
-</script>
+<script src="/javascripts/admin/orderDetails.js" defer></script>
 {{/section}}
