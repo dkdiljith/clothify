@@ -1,6 +1,6 @@
 {{#section 'head'}}
 <title>My Orders | Clothify</title>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/userOrders.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/userPendingOrders.css">
 {{/section}}
 
 
@@ -22,10 +22,10 @@
                 <li onclick="location.href='/user/wallet'">
                     <i class="fas fa-wallet"></i> Wallet
                 </li>
-                <li class="active" onclick="location.href='/user/orders'">
+                <li onclick="location.href='/user/orders'">
                     <i class="fas fa-shopping-bag"></i> Orders
                 </li>
-                <li onclick="location.href='/user/orders?retryPendingOrder=true'">
+                <li class="active" onclick="location.href='/user/orders?retryPendingOrder=true'">
                     <i class="fas fa-shopping-bag"></i> Pending Orders
                 </li>
                 <li onclick="location.href='/user/address'">
@@ -119,12 +119,13 @@
                     <div class="no-orders-icon">
                         <i class="far fa-clipboard"></i>
                     </div>
-                    <h3>No Orders Found</h3>
-                    <p>You haven't placed any orders yet. Start shopping to see your orders here.</p>
-                    <a href="/user/home" class="shop-button">
-                        <i class="fas fa-shopping-bag"></i> Start Shopping
+                    <h3>No Pending Orders Currently Available</h3>
+                    <p>You don't have any orders waiting for payment verification right now.</p>
+                    <a href="/user/orders" class="shop-button">
+                        <i class="fas fa-shopping-bag"></i> Return to Orders
                     </a>
                 </div>
+
                 {{/if}}
             </div>
 
@@ -155,5 +156,5 @@
 </div>
 
 {{#section 'scripts'}}
-<script src="/javascripts/user/userOrders.js" defer></script>
+<script src="/javascripts/user/userPendingOrders.js" defer></script>
 {{/section}}

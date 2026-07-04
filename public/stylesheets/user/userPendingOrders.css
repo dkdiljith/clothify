@@ -461,8 +461,9 @@
 }
 
 
+/* The CSS Styles */
 .btn-retry-payment {
-  background-color: #dc2626;
+  background-color: #dc2626; /* Warning Red */
   color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -472,18 +473,25 @@
   border-radius: 6px;
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
-  
-  /* CRITICAL FLICKER FIX: Start invisible */
-  opacity: 0; 
-  transition: opacity 0.15s ease-in-out, transform 0.2s ease-in-out;
-  
+  transition: all 0.2s ease-in-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 8px; /* Spaces the icon cleanly from the text */
 }
 
-/* Add a global utility class to fade valid buttons back into view smoothly */
-.btn-retry-payment.is-valid {
-  opacity: 1;
+.btn-retry-payment:hover {
+  background-color: #b91c1c; /* Darker red on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
+}
+
+.btn-retry-payment:active {
+  transform: translateY(1px);
+}
+
+/* Optional: Slight rotation animation on the icon when hovering over the button */
+.btn-retry-payment:hover svg {
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
 }

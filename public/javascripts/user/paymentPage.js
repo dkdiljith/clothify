@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             addressId: addressId,
-                            orderId: order.id, // Razorpay order ID
+                            razorpayOrderId: order.id, // Razorpay order ID
                             reason: response.error.description,
                             errorCode: response.error.code,
                             paymentId: response.error.metadata.payment_id

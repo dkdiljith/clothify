@@ -171,82 +171,92 @@ exports.deleteUser = async (req, res) => {
 };
 
 
-exports.userOrders = async (req, res) => {
-    const userId = res.locals.user._id
 
-    // Pagination parameters
+exports.userOrders = async (req, res) => {
+    const userId = res.locals.user._id;
     const page = parseInt(req.query.page) || 1;
-    const limit = 2; // 2 orders per page
+    const limit = 2;
 
     try {
-        // Get total count of orders
-        const totalOrders = await Order.countDocuments({ userId });
-        const totalPages = Math.ceil(totalOrders / limit);
+        const isRetryPendingOrder = req.query.retryPendingOrder === 'true';
+        const currentTime = new Date();
 
-        // Get paginated orders (latest first)
-        const orders = await Order.find({ userId })
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+        let totalOrders = 0;
+        let orders = [];
 
-        return res.render('user/userOrders', {
+        if (isRetryPendingOrder) {
+            // POOL 1: Only failed orders where RETRY IS ELIGIBLE (Both conditions must be healthy)
+            const eligibleQuery = {
+                userId,
+                paymentStatus: "Failed",
+                $or: [
+                    { paymentRetryExpiresAt: { $gt: currentTime } }, // Limit 1 exceeded: Time up
+                    { paymentAttemptsCount: { $lt: 6 } }             // Limit 2 exceeded: Max attempts
+                ]
+            };
+
+            totalOrders = await Order.countDocuments(eligibleQuery);
+            orders = await Order.find(eligibleQuery)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+
+        } else {
+            // POOL 2: Every order that is completed, pending, OR failed but retry limits exceeded
+            const regularPoolQuery = {
+                userId,
+                $or: [
+                    { paymentStatus: { $in: ['Completed', 'Pending', 'Refunded'] } },
+                    {
+                        paymentStatus: "Failed",
+                        $or: [
+                            { paymentRetryExpiresAt: { $lte: currentTime } }, // Limit 1 exceeded: Time up
+                            { paymentAttemptsCount: { $gte: 6 } }             // Limit 2 exceeded: Max attempts
+                        ]
+                    }
+                ]
+            };
+
+            totalOrders = await Order.countDocuments(regularPoolQuery);
+            orders = await Order.find(regularPoolQuery)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+        }
+
+        const totalPages = Math.ceil(totalOrders / limit) || 1;
+        const viewName = isRetryPendingOrder ? 'user/userPendingOrders' : 'user/userOrders';
+
+        return res.render(viewName, {
             orders,
+            isRetryPendingOrder,
             pagination: {
-                currentPage: page,
+                page,
                 limit,
                 totalPages,
                 hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1
             }
         });
+
     } catch (error) {
         console.error('Error fetching orders:', error);
         return res.render('user/userOrders', {
             orders: [],
-            pagination: {
-                currentPage: 1,
-                limit,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            }
+            isRetryPendingOrder: false,
+            pagination: { page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false, nextPage: 1, prevPage: 1 }
         });
     }
-}; exports.userOrders = async (req, res) => {
-    const userId = res.locals.user._id
-
-    // Pagination variables
-    const page = parseInt(req.query.page) || 1;
-    const limit = 2; // 2 orders per page
-    let orders = await Order.find({ userId }).lean();
-    let totalPages = 0;
-
-    if (orders.length > 0) {
-        // Reverse orders to show latest first
-        const reversedOrders = orders.reverse();
-
-        // Calculate total pages
-        totalPages = Math.ceil(reversedOrders.length / limit);
-
-        // Get orders for current page
-        const startIndex = (page - 1) * limit;
-        orders = reversedOrders.slice(startIndex, startIndex + limit);
-    }
-
-    return res.render('user/userOrders', {
-        orders,
-        pagination: {
-            page,
-            limit,
-            totalPages,
-            nextPage: page + 1,
-            prevPage: page - 1,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1
-        }
-    });
 };
+
+
+
+
+
 
 exports.userOrderDetails = async (req, res) => {
 
@@ -262,7 +272,7 @@ exports.userOrderDetails = async (req, res) => {
 
     return res.render(`user/orderDetails`, { order: order, item: item })
 }
-  
+
 
 
 

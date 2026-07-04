@@ -3,6 +3,7 @@ const Wallet = require(`../models/walletSchema`)
 const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 const Address = require(`../models/addressSchema`)
+const Product = require(`../models/productSchema`)
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -293,9 +294,24 @@ exports.placeOrderFailed = async (req, res) => {
   console.log("Razopray faile order is working...................................")
   try {
     const userId = res.locals.user._id;
-    const { addressId, reason } = req.body;
+    const { addressId, reason, orderId } = req.body;
     const paymentMethod = 'razorpay'
+    let retryOrder = null
 
+    if (orderId) {
+      retryOrder = await Order.findOne({ orderId, userId })
+
+      if (!retryOrder) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot Find Order"
+        });
+      } else {
+        const retryObj = await retryFailedOrderFailed(req, res, orderId) ?? null
+        return retryObj
+      }
+
+    }
 
     console.log(`this is userId ${userId} , and this is addressId ${addressId} and this is reason ${reason}`)
     if (!paymentMethod || !addressId || !reason || !userId) {
@@ -412,6 +428,8 @@ exports.placeOrderFailed = async (req, res) => {
     // save order
     await order.save();
 
+    await Cart.findByIdAndDelete(cart._id);
+
 
     return res.json({
       success: true,
@@ -429,6 +447,124 @@ exports.placeOrderFailed = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+exports.retryFailedOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: "Invalid Order ID provided" });
+    }
+
+    // 1. Fetch the order document from database
+    const order = await Order.findOne({ orderId: orderId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    // 2. Prevent reducing stock twice if the payment was already completed
+    if (order.paymentStatus === 'Completed') {
+      return res.status(400).json({ success: false, message: "Order is already completed" });
+    }
+
+    // 3. Change statuses on the order document
+    order.paymentStatus = 'Completed';
+    order.items.forEach(item => {
+      item.status = 'Pending';
+    });
+
+    // 4. Save the updated order first
+    await order.save();
+
+    // 5. Your exact stock reduction logic (adapted to use order items instead of cart)
+    await Promise.all(
+      order.items.map(async (item) => {
+        // Fetch the populated product document to match your logic's requirements
+        const product = await Product.findById(item.productId)
+        const vIndex = item.variationIndex;
+
+        if (
+          product &&
+          product.details &&
+          product.details[vIndex]
+        ) {
+          product.details[vIndex].quantity -= item.quantity;
+          await product.save();
+        }
+      })
+    );
+
+    // 6. Send success response back to the client
+    return res.status(200).json({
+      success: true,
+      message: "Order status updated and stock reduced successfully.",
+      order
+    });
+
+  } catch (error) {
+    console.error("Order Placement Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retry payment."
+    });
+  }
+};
+
+
+
+async function retryFailedOrderFailed(req, res, orderId) {
+  try {
+    const userId = res.locals.user._id;
+    const retryOrder = await Order.findOne({ orderId, userId });
+
+    if (!retryOrder) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot Find Order"
+      });
+    }
+
+    // 1. CHECK IF THE TIME WINDOW HAS EXPIRED
+    const currentTime = new Date();
+    if (currentTime > retryOrder.paymentRetryExpiresAt) {
+      return res.status(400).json({
+        success: false,
+        message: "The 30-minute retry window has expired. Please create a new order."
+      });
+    }
+
+    // 2. CHECK IF THE MAX ATTEMPTS ARE EXCEEDED (Max 5 attempts)
+    if (retryOrder.paymentAttemptsCount >= 6) {
+      return res.status(400).json({
+        success: false,
+        message: "You have reached the maximum limit of 5 payment attempts for this order."
+      });
+    }
+
+    // 3. INCREMENT THE ATTEMPT COUNTER
+    retryOrder.paymentAttemptsCount++;
+    
+
+    // 4. SAFELY SAVE THE CHANGES (Added await)
+    await retryOrder.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/5 used.`
+    });
+
+  } catch (error) {
+    console.error(error); // Keep this for debugging errors in your terminal
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the retry order."
+    });
+  }
+}
 
 
 

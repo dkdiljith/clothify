@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 1. DYNAMIC CLEANER LOOP (Removes expired buttons anywhere on the page)
     // =========================================================================
     function cleanUpExpiredButtons() {
+        // Find all retry buttons on the page (using class to support tables/lists)
         const retryButtons = document.querySelectorAll(".btn-retry-payment");
         const currentTime = Date.now();
 
@@ -12,12 +13,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const expiresTime = new Date(expiresAtRaw).getTime();
             const attemptsCount = Number(button.getAttribute("data-attempts-count"));
 
-            // 1. If it fails validation, remove it immediately 
-            if (!expiresTime || isNaN(expiresTime) || expiresTime < currentTime || attemptsCount >= 5) {
+            // If the date is invalid, time has passed, or attempts are maxed out: REMOVE IT
+            if (!expiresTime || isNaN(expiresTime) || expiresTime < currentTime || attemptsCount >= 6) {
                 button.remove();
-            } else {
-                // 2. If it is fully valid, show it cleanly without flickering
-                button.classList.add("is-valid");
             }
         });
     }

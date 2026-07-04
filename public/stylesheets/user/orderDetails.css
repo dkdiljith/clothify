@@ -536,3 +536,34 @@
     font-weight: bold;
     margin-top: 5px;
 }
+
+
+
+
+.btn-retry-payment {
+  background-color: #dc2626;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+  
+  /* CRITICAL FLICKER FIX: Start invisible */
+  opacity: 0; 
+  transition: opacity 0.15s ease-in-out, transform 0.2s ease-in-out;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Add a global utility class to fade valid buttons back into view smoothly */
+.btn-retry-payment.is-valid {
+  opacity: 1;
+}
+

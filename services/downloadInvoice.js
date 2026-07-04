@@ -236,7 +236,6 @@ const downloadInvoice = async (req, res) => {
               });
       
       
-              console.log(Buffer.isBuffer(pdfBuffer));
               return res.end(pdfBuffer);
 
     } catch (error) {
