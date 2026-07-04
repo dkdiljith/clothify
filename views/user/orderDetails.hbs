@@ -4,298 +4,271 @@
 {{/section}}
 
 
-<div class="body">
-    <div class="container" style="margin-top:20px;">
-        <div class="profile-header"></div>
 
-        <div class="profile-container">
-            <div class="profile-sidebar">
-                <ul>
-                    <li onclick="location.href='/user/profile'"><i class="fas fa-user"></i> Profile</li>
-                    <li onclick="location.href='/user/security'"><i class="fas fa-lock"></i> Security & Password</li>
-                    <li onclick="location.href='/user/wallet'"><i class="fas fa-wallet"></i> Wallet</li>
-                    <li class="active" onclick="location.href='/user/orders'"><i class="fas fa-shopping-bag"></i> Orders
-                    </li>
-                    <li onclick="location.href='/user/orders?retryPendingOrder=true'">
-                    <i class="fas fa-shopping-bag"></i> Pending Orders
-                </li>
-                    <li onclick="location.href='/user/address'"><i class="fas fa-map-marker-alt"></i> Addresses</li>
-                    <li onclick="location.href='/user/deleteuser'"><i class="fas fa-trash-alt"></i> Delete Account</li>
-                </ul>
-            </div>
-
-            <div class="profile-content">
-                {{!-- Header changes color if payment failed --}}
-                <div class="order-header {{#ifeq order.paymentStatus 'Failed'}}payment-failed{{/ifeq}}">
-                    <div>
-                        <h2 class="order-title">
-                            <i class="fas fa-clipboard-list"></i> Order Details
-                        </h2>
-                        <div class="order-number">Order #{{order.orderId}}</div>
-                    </div>
-
-                    <div>
-                        {{#ifeq order.paymentStatus 'Failed'}}
-
-                        <button id="retryPayment" class="btn-retry-payment" data-order-id="{{order.orderId}}"
-                            data-expires-at="{{order.paymentRetryExpiresAt}}"
-                            data-attempts-count="{{order.paymentAttemptsCount}}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                            </svg>
-                            Retry Payment
-                        </button>
-
-
-
-
-
-                        {{else}}
-                        <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
-                            Download Invoice
-                        </button>
-
-                        {{/ifeq}}
-                    </div>
-
-                    <div>
-                        <h15><i class="fas fa-money-bill-wave"></i> Payment Status</h15>
-                        <div style="display:flex; justify-content:center;"
-                            class="order-status-badge status-{{toLowerCase order.paymentStatus}}">
-                            {{order.paymentStatus}}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Item Card -->
-                <div class="order-card {{#ifeq order.paymentStatus 'Failed'}}failed-border{{/ifeq}}">
-                    <div class="order-card-header">
-                        <div class="order-card-title">Item Details</div>
-                        <div class="order-item-status">
-                            <div>
-                                <h10><i class="fas fa-box"></i> Shipment Status</h10>
-                                <span class="status-text"
-                                    style="color: {{#if (eq item.status 'Completed')}}var(--success-color){{else if (eq item.status 'Cancelled')}}var(--accent-color){{else if (eq item.status 'Returned')}}var(--accent-color){{else}}var(--secondary-color){{/if}};">
-                                    {{item.status}}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{#ifeq order.paymentStatus 'Failed'}}
-                    <div class="retry-notice" style="padding: 0 20px;">
-                        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed.
-                    </div>
-                    {{/ifeq}}
-
-                    <div class="order-item">
-                        <div class="order-item-image">
-                            <img src="{{item.productImg}}" alt="{{item.productName}}">
-                        </div>
-                        <div class="order-item-details">
-                            <div class="order-item-name">{{item.productName}}</div>
-                            <div class="order-item-attributes">
-                                <span>Size: {{item.productSize}}</span>
-                                <span>Quantity: {{item.quantity}}</span>
-                                <span>Price: ₹{{ item.productPrice}}</span>
-                            </div>
-                            <div class="order-item-price">
-                                Total: ₹{{multiply item.productPrice item.quantity}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Delivery Address Card -->
-                <div class="order-card delivery-address-card">
-                    <div class="order-card-header">
-                        <div class="order-card-title">Delivery Address</div>
-                    </div>
-                    <div class="address-details">
-                        <p><strong>{{order.deliveryAddress.name}}</strong></p>
-                        <p>{{order.deliveryAddress.streetAddress}}</p>
-                        <p>Landmark: {{order.deliveryAddress.landmark}}</p>
-                        <p>{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},</p>
-                        <p>{{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}</p>
-                        <p>{{order.deliveryAddress.country}}</p>
-                        <p>Phone: {{order.deliveryAddress.phone}}</p>
-                    </div>
-                </div>
-
-                <!-- Price Details Card -->
-                <div class="order-card price-details-card">
-                    <div class="order-card-header">
-                        <div class="order-card-title">Payment Details</div>
-                    </div>
-                    <div class="price-summary">
-                        <div class="price-row">
-                            <span class="price-label">Subtotal ({{order.totalItems}} items)</span>
-                            <span class="price-value">₹{{order.subtotal}}</span>
-                        </div>
-
-                        <div class="price-row">
-                            <span class="price-label">Shipping</span>
-                            {{#ifEquals order.shippingFee 0}}
-                            <span class="price-value" style="color: var(--success-color);">Free</span>
-                            {{else}}
-                            <span class="price-value">₹{{order.shippingFee}}</span>
-                            {{/ifEquals}}
-                        </div>
-
-                        <div class="price-row">
-                            <span class="price-label">Tax</span>
-                            <span class="price-value">₹{{order.tax}}</span>
-                        </div>
-
-                        {{#if order.couponId}}
-                        <div class="price-row">
-                            <span class="price-label">Coupon Discount</span>
-                            <span class="price-value"
-                                style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
-                        </div>
-                        {{/if}}
-
-                        {{#if order.offerDiscount}}
-                        <div class="price-row">
-                            <span class="price-label">Discount</span>
-                            <span class="price-value"
-                                style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
-                        </div>
-                        {{/if}}
-
-                        <div class="price-row total-price">
-                            <span class="price-label">
-                                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To
-                                    Pay{{else}}Paid{{/ifeq}}</strong>
-                            </span>
-                            <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
-                        </div>
-
-                        <div class="payment-method">
-                            <span class="price-label">Payment Method:</span>
-                            <span class="price-value" style="text-transform: uppercase;">{{order.paymentMethod}}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    {{!-- Hide Return/Cancel if payment failed --}}
-                    {{#if (neq order.paymentStatus 'Failed')}}
-
-                    {{#if (eq item.status 'Completed')}}
-                    <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
-                        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}"
-                        data-item-id="{{item._id}}" data-return-all="false">
-                        <i class="fas fa-undo"></i> Return Item
-                    </button>
-                    {{/if}}
-
-                    {{#if (eq order.deliveryStatus 'Completed')}}
-                    <button id="returnAll-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
-                        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}"
-                        data-item-id="{{item._id}}" data-return-all="true">
-                        <i class="fas fa-undo"></i> Return All
-                    </button>
-                    {{/if}}
-
-                    {{#if (eq item.status 'Pending')}}
-                    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}"
-                        data-order-id="{{order._id}}" data-item-id="{{item._id}}"
-                        data-variation-index="{{item.variationIndex}}">
-                        <i class="fas fa-times"></i> Cancel Item
-                    </button>
-
-                    {{/if}}
-
-                    {{/if}}
-
-                    <button class="btn btn-primary" onclick="location.href='/user/orders'">
-                        <i class="fas fa-arrow-left"></i> Back to Orders
-                    </button>
-                </div>
-
-                {{#if (gt order.items.length 1)}}
-                <!-- Other Items in Order -->
-                <div class="order-card other-items-card">
-                    <div class="order-card-header">
-                        <div class="order-card-title">Other Items in This Order</div>
-                    </div>
-                    {{#each order.items}}
-                    {{#if (neq this._id ../item._id)}}
-                    <a href="/user/orderDetails/{{../order._id}}/{{this._id}}" class="other-item">
-                        <div class="other-item-image">
-                            <img src="{{this.productImg}}" alt="{{this.productName}}">
-                        </div>
-                        <div class="other-item-name">
-                            {{this.productName}} (Size: {{this.productSize}}, Qty: {{this.quantity}})
-                        </div>
-                        <div class="other-item-arrow">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </a>
-                    {{/if}}
-                    {{/each}}
-                </div>
-                {{/if}}
-            </div>
-        </div>
+{{!-- Header changes color if payment failed --}}
+<div class="order-header {{#ifeq order.paymentStatus 'Failed'}}payment-failed{{/ifeq}}">
+    <div>
+        <h2 class="order-title">
+            <i class="fas fa-clipboard-list"></i> Order Details
+        </h2>
+        <div class="order-number">Order #{{order.orderId}}</div>
     </div>
 
-    <!-- Cancel Order Modal -->
-    <div id="cancel-order-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Cancel Order Item</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Please provide a reason for cancellation:</p>
-                <textarea id="cancellation-reason" class="modal-textarea"
-                    placeholder="Enter reason for cancellation..."></textarea>
-            </div>
-            <div class="modal-footer">
-                <button id="cancel-modal-button" class="btn btn-secondary">Close</button>
-                <button id="submit-cancellation" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
+    <div>
+        {{#ifeq order.paymentStatus 'Failed'}}
+
+        <button id="retryPayment" class="btn-retry-payment" data-order-id="{{order.orderId}}"
+            data-expires-at="{{order.paymentRetryExpiresAt}}" data-attempts-count="{{order.paymentAttemptsCount}}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            Retry Payment
+        </button>
+
+
+
+
+
+        {{else}}
+        <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
+            Download Invoice
+        </button>
+
+        {{/ifeq}}
     </div>
 
-    <!-- Return Order Modal -->
-    <div id="return-order-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Return Order Item</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Please provide a reason for return:</p>
-                <textarea id="return-reason" class="modal-textarea" placeholder="Enter reason for return..."></textarea>
-                <div id="return-reason-error" style="color: var(--accent-color); margin-top: 10px; display: none;">
-                    Please provide a reason for return.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="cancel-return-modal-button" class="btn btn-secondary">Close</button>
-                <button id="submit-return" class="btn btn-primary">Submit</button>
-            </div>
+    <div>
+        <h15><i class="fas fa-money-bill-wave"></i> Payment Status</h15>
+        <div style="display:flex; justify-content:center;"
+            class="order-status-badge status-{{toLowerCase order.paymentStatus}}">
+            {{order.paymentStatus}}
         </div>
     </div>
-
-    <!-- Success Message -->
-    <div id="success-message" class="success-message">
-        <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="success-text">
-            Your request has been submitted successfully!
-        </div>
-        <button id="close-success-message" class="btn btn-primary">OK</button>
-    </div>
-
 </div>
 
+<!-- Order Item Card -->
+<div class="order-card {{#ifeq order.paymentStatus 'Failed'}}failed-border{{/ifeq}}">
+    <div class="order-card-header">
+        <div class="order-card-title">Item Details</div>
+        <div class="order-item-status">
+            <div>
+                <h10><i class="fas fa-box"></i> Shipment Status</h10>
+                <span class="status-text"
+                    style="color: {{#if (eq item.status 'Completed')}}var(--success-color){{else if (eq item.status 'Cancelled')}}var(--accent-color){{else if (eq item.status 'Returned')}}var(--accent-color){{else}}var(--secondary-color){{/if}};">
+                    {{item.status}}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {{#ifeq order.paymentStatus 'Failed'}}
+    <div class="retry-notice" style="padding: 0 20px;">
+        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed.
+    </div>
+    {{/ifeq}}
+
+    <div class="order-item">
+        <div class="order-item-image">
+            <img src="{{item.productImg}}" alt="{{item.productName}}">
+        </div>
+        <div class="order-item-details">
+            <div class="order-item-name">{{item.productName}}</div>
+            <div class="order-item-attributes">
+                <span>Size: {{item.productSize}}</span>
+                <span>Quantity: {{item.quantity}}</span>
+                <span>Price: ₹{{ item.productPrice}}</span>
+            </div>
+            <div class="order-item-price">
+                Total: ₹{{multiply item.productPrice item.quantity}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delivery Address Card -->
+<div class="order-card delivery-address-card">
+    <div class="order-card-header">
+        <div class="order-card-title">Delivery Address</div>
+    </div>
+    <div class="address-details">
+        <p><strong>{{order.deliveryAddress.name}}</strong></p>
+        <p>{{order.deliveryAddress.streetAddress}}</p>
+        <p>Landmark: {{order.deliveryAddress.landmark}}</p>
+        <p>{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},</p>
+        <p>{{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}</p>
+        <p>{{order.deliveryAddress.country}}</p>
+        <p>Phone: {{order.deliveryAddress.phone}}</p>
+    </div>
+</div>
+
+<!-- Price Details Card -->
+<div class="order-card price-details-card">
+    <div class="order-card-header">
+        <div class="order-card-title">Payment Details</div>
+    </div>
+    <div class="price-summary">
+        <div class="price-row">
+            <span class="price-label">Subtotal ({{order.totalItems}} items)</span>
+            <span class="price-value">₹{{order.subtotal}}</span>
+        </div>
+
+        <div class="price-row">
+            <span class="price-label">Shipping</span>
+            {{#ifEquals order.shippingFee 0}}
+            <span class="price-value" style="color: var(--success-color);">Free</span>
+            {{else}}
+            <span class="price-value">₹{{order.shippingFee}}</span>
+            {{/ifEquals}}
+        </div>
+
+        <div class="price-row">
+            <span class="price-label">Tax</span>
+            <span class="price-value">₹{{order.tax}}</span>
+        </div>
+
+        {{#if order.couponId}}
+        <div class="price-row">
+            <span class="price-label">Coupon Discount</span>
+            <span class="price-value" style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
+        </div>
+        {{/if}}
+
+        {{#if order.offerDiscount}}
+        <div class="price-row">
+            <span class="price-label">Discount</span>
+            <span class="price-value" style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
+        </div>
+        {{/if}}
+
+        <div class="price-row total-price">
+            <span class="price-label">
+                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To
+                    Pay{{else}}Paid{{/ifeq}}</strong>
+            </span>
+            <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
+        </div>
+
+        <div class="payment-method">
+            <span class="price-label">Payment Method:</span>
+            <span class="price-value" style="text-transform: uppercase;">{{order.paymentMethod}}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="action-buttons">
+    {{!-- Hide Return/Cancel if payment failed --}}
+    {{#if (neq order.paymentStatus 'Failed')}}
+
+    {{#if (eq item.status 'Completed')}}
+    <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
+        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
+        data-return-all="false">
+        <i class="fas fa-undo"></i> Return Item
+    </button>
+    {{/if}}
+
+    {{#if (eq order.deliveryStatus 'Completed')}}
+    <button id="returnAll-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
+        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
+        data-return-all="true">
+        <i class="fas fa-undo"></i> Return All
+    </button>
+    {{/if}}
+
+    {{#if (eq item.status 'Pending')}}
+    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}"
+        data-order-id="{{order._id}}" data-item-id="{{item._id}}" data-variation-index="{{item.variationIndex}}">
+        <i class="fas fa-times"></i> Cancel Item
+    </button>
+
+    {{/if}}
+
+    {{/if}}
+
+    <button class="btn btn-primary" onclick="location.href='/user/orders'">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+    </button>
+</div>
+
+{{#if (gt order.items.length 1)}}
+<!-- Other Items in Order -->
+<div class="order-card other-items-card">
+    <div class="order-card-header">
+        <div class="order-card-title">Other Items in This Order</div>
+    </div>
+    {{#each order.items}}
+    {{#if (neq this._id ../item._id)}}
+    <a href="/user/orderDetails/{{../order._id}}/{{this._id}}" class="other-item">
+        <div class="other-item-image">
+            <img src="{{this.productImg}}" alt="{{this.productName}}">
+        </div>
+        <div class="other-item-name">
+            {{this.productName}} (Size: {{this.productSize}}, Qty: {{this.quantity}})
+        </div>
+        <div class="other-item-arrow">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </a>
+    {{/if}}
+    {{/each}}
+</div>
+{{/if}}
+
+
+
+
+<!-- Cancel Order Modal -->
+<div id="cancel-order-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Cancel Order Item</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Please provide a reason for cancellation:</p>
+            <textarea id="cancellation-reason" class="modal-textarea"
+                placeholder="Enter reason for cancellation..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button id="cancel-modal-button" class="btn btn-secondary">Close</button>
+            <button id="submit-cancellation" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Return Order Modal -->
+<div id="return-order-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Return Order Item</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Please provide a reason for return:</p>
+            <textarea id="return-reason" class="modal-textarea" placeholder="Enter reason for return..."></textarea>
+            <div id="return-reason-error" style="color: var(--accent-color); margin-top: 10px; display: none;">
+                Please provide a reason for return.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="cancel-return-modal-button" class="btn btn-secondary">Close</button>
+            <button id="submit-return" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div id="success-message" class="success-message">
+    <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="success-text">
+        Your request has been submitted successfully!
+    </div>
+    <button id="close-success-message" class="btn btn-primary">OK</button>
+</div>
 
 
 {{#section 'scripts'}}

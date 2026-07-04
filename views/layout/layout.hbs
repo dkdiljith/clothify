@@ -37,9 +37,17 @@
   {{{body}}}
   {{else}}
   {{> user-header}}
+
+  {{#if user_sidebar}}
+  {{> user-sidebar}}
+  {{else}}
   {{{body}}}
+  {{/if}}
+
   {{> user-footer}}
   {{/if}}
+
+
 
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -61,7 +69,7 @@
 
   {{!-- page individual scripts --}}
   {{{_sections.scripts}}}
-  
+
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-<style>
+{{!-- <style>
     :root {
         --primary-color: #2c3e50;
         --secondary-color: #3498db;
@@ -150,42 +150,109 @@
             justify-content: flex-start;
         }
     }
-</style>
-</head>
+</style> --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentPath = window.location.pathname;
+        const searchParams = new URLSearchParams(window.location.search);
+        const menuItems = document.querySelectorAll("#user-sidebar-menu li");
 
-<body>
-    <div class="container">
-        <div class="profile-header">
+        // Clear previous active classes safely
+        menuItems.forEach(item => item.classList.remove("active"));
+
+        let targetKey = "";
+
+        // Rule 1: Address Matching
+        if (currentPath.includes("/user/address") ||
+            currentPath.includes("/user/addaddress") ||
+            currentPath.includes("/user/editaddress")) {
+            targetKey = "address";
+        }
+
+        // Rule 2: Profile Matching
+        else if (currentPath.includes("/user/profile") ||
+            currentPath.includes("/user/profileEdit") ||
+            currentPath.includes("/user/profileView")) {
+            targetKey = "profile";
+        }
+
+        // Rule 3: Order Details Parent Routing Logic
+        else if (currentPath.includes("/user/orderDetails")) {
+            if (searchParams.get("from") === "pending") {
+                targetKey = "orders-pending";
+            } else {
+                targetKey = "orders-regular";
+            }
+        }
+
+        // Rule 4: Regular Orders vs Pending Orders Main Landing Lists
+        else if (currentPath.includes("/user/orders")) {
+            if (searchParams.get("retryPendingOrder") === "true") {
+                targetKey = "orders-pending";
+            } else {
+                targetKey = "orders-regular";
+            }
+        }
+
+        // Rule 5: Fallback Direct Matching for Security, Wallet, Delete Account
+        else {
+            if (currentPath.includes("/user/security")) targetKey = "security";
+            if (currentPath.includes("/user/wallet")) targetKey = "wallet";
+            if (currentPath.includes("/user/deleteuser")) targetKey = "deleteuser";
+        }
+
+        // Apply the active class to the matched key element
+        if (targetKey) {
+            const activeItem = document.querySelector(`#user-sidebar-menu li[data-match="${targetKey}"]`);
+            if (activeItem) {
+                activeItem.classList.add("active");
+            }
+        }
+    });
+
+</script>
+
+
+
+
+
+
+<div class="container" style="margin-top:20px;">
+    <div class="profile-header">
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-sidebar">
+            <ul id="user-sidebar-menu">
+                <li data-match="profile" onclick="location.href='/user/profile'">
+                    <i class="fas fa-user"></i> Profile
+                </li>
+                <li data-match="security" onclick="location.href='/user/security'">
+                    <i class="fas fa-lock"></i> Security & Password
+                </li>
+                <li data-match="wallet" onclick="location.href='/user/wallet'">
+                    <i class="fas fa-wallet"></i> Wallet
+                </li>
+                <li data-match="orders-regular" onclick="location.href='/user/orders'">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </li>
+                <li data-match="orders-pending" onclick="location.href='/user/orders?retryPendingOrder=true'">
+                    <i class="fas fa-shopping-bag"></i> Pending Orders
+                </li>
+                <li data-match="address" onclick="location.href='/user/address'">
+                    <i class="fas fa-map-marker-alt"></i> Addresses
+                </li>
+                <li data-match="deleteuser" onclick="location.href='/user/deleteuser'">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </li>
+            </ul>
         </div>
 
-        <div class="profile-container">
-            <div class="profile-sidebar">
-                <ul>
-                    <li class="active" onclick="location.href='/user/profile'">
-                        <i class="fas fa-user"></i> Profile
-                    </li>
-                    <li onclick="location.href='/user/security'">
-                        <i class="fas fa-lock"></i> Security & Password
-                    </li>
-                    <li onclick="location.href='/user/wallet'">
-                        <i class="fas fa-wallet"></i> Wallet
-                    </li>
-                    <li onclick="location.href='/user/orders'">
-                        <i class="fas fa-shopping-bag"></i> Orders
-                    </li>
-                    <li onclick="location.href='/user/address'">
-                        <i class="fas fa-map-marker-alt"></i> Addresses
-                    </li>
-                    <li onclick="location.href='/user/deleteuser'">
-                        <i class="fas fa-trash-alt"></i> Delete Account
-                    </li>
-                </ul>
-            </div>
 
-            <div class="profile-content">
+        <div class="profile-content">
 
-                {{body}}
+            {{{body}}}
 
-            </div>
         </div>
     </div>
+</div>

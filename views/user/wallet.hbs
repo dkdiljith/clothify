@@ -4,170 +4,130 @@
 {{/section}}
 
 
-<div class="container" style="margin-top:20px;">
-    <div class="profile-header">
-    </div>
+<div class="wallet-header">
+    <h2 class="wallet-title">
+        <i class="fas fa-wallet"></i> Wallet Summary
+    </h2>
+</div>
 
-    <div class="profile-container">
-        <div class="profile-sidebar">
-            <ul>
-                <li onclick="location.href='/user/profile'">
-                    <i class="fas fa-user"></i> Profile
-                </li>
-                <li onclick="location.href='/user/security'">
-                    <i class="fas fa-lock"></i> Security & Password
-                </li>
-                <li class="active" onclick="location.href='/user/wallet'">
-                    <i class="fas fa-wallet"></i> Wallet
-                </li>
-                <li onclick="location.href='/user/orders'">
-                    <i class="fas fa-shopping-bag"></i> Orders
-                </li>
-                <li onclick="location.href='/user/orders?retryPendingOrder=true'">
-                    <i class="fas fa-shopping-bag"></i> Pending Orders
-                </li>
-                <li onclick="location.href='/user/address'">
-                    <i class="fas fa-map-marker-alt"></i> Addresses
-                </li>
-                <li onclick="location.href='/user/deleteuser'">
-                    <i class="fas fa-trash-alt"></i> Delete Account
-                </li>
-            </ul>
+<!-- Wallet Balance Card -->
+{{#if wallet.balance}}
+<div class="wallet-balance-card">
+    <div class="wallet-balance-label">Available Balance</div>
+    <div class="wallet-balance-amount">₹{{wallet.balance}}</div>
+    <div class="wallet-balance-details">
+        <div class="wallet-balance-detail">
+            <i class="fas fa-arrow-down" style="margin-right: 5px;"></i>
+            ₹{{#if credit}}{{credit}}{{else}}0{{/if}} Total Credits
         </div>
-
-        <div class="profile-content">
-            <div class="wallet-header">
-                <h2 class="wallet-title">
-                    <i class="fas fa-wallet"></i> Wallet Summary
-                </h2>
-            </div>
-
-            <!-- Wallet Balance Card -->
-            {{#if wallet.balance}}
-            <div class="wallet-balance-card">
-                <div class="wallet-balance-label">Available Balance</div>
-                <div class="wallet-balance-amount">₹{{wallet.balance}}</div>
-                <div class="wallet-balance-details">
-                    <div class="wallet-balance-detail">
-                        <i class="fas fa-arrow-down" style="margin-right: 5px;"></i>
-                        ₹{{#if credit}}{{credit}}{{else}}0{{/if}} Total Credits
-                    </div>
-                    <div class="wallet-balance-detail">
-                        <i class="fas fa-arrow-up" style="margin-right: 5px;"></i>
-                        ₹{{#if debit}}{{debit}}{{else}}0{{/if}} Total Debits
-                    </div>
-                </div>
-            </div>
-            {{else}}
-            <div class="wallet-balance-card"
-                style="background: linear-gradient(135deg, #e74c3c, #c0392b); text-align: center;">
-                <div style="font-size: 24px; margin-bottom: 15px;">
-                    <i class="fas fa-wallet" style="margin-right: 10px;"></i>
-                    Your wallet is empty
-                </div>
-                <div
-                    style="margin-bottom: 20px; background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
-                    Add money to your wallet for faster and easier payments
-                </div>
-                <button class="btn btn-primary btn-add-funds" style="margin: 0 auto;">
-                    <i class="fas fa-plus-circle"></i> Add Funds Now
-                </button>
-            </div>
-            {{/if}}
-
-            <!-- Wallet Actions -->
-            {{#if wallet.balance}}
-            <div class="wallet-actions">
-                <button class="btn btn-primary btn-add-funds">
-                    <i class="fas fa-plus-circle"></i> Add Funds
-                </button>
-            </div>
-            {{/if}}
-
-            <!-- Recent Transactions -->
-            <h3 class="wallet-section-title">
-                <i class="fas fa-exchange-alt"></i> Recent Transactions
-            </h3>
-
-            <div class="transaction-history">
-                {{#if wallet.transactions.length}}
-                <table class="transaction-table">
-                    <thead>
-                        <tr>
-                            <th>Transaction</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each wallet.transactions}}
-                        <tr>
-                            <td>
-                                <div class="transaction-type">
-                                    <div class="transaction-icon">
-                                        {{#ifeq this.type 'credit'}}
-                                        <i class="fas fa-arrow-down"></i>
-                                        {{else}}
-                                        <i class="fas fa-arrow-up"></i>
-                                        {{/ifeq}}
-                                    </div>
-                                    <div>
-                                        <div style="text-transform: capitalize;">{{this.type}}</div>
-                                        <div class="transaction-date">{{formatDate this.createdAt "MMM D, YYYY"}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{formatDate this.createdAt "h:mm A"}}</td>
-                            <td
-                                class="{{#ifeq this.type 'credit'}}transaction-credit{{else}}transaction-debit{{/ifeq}}">
-                                {{#ifeq this.type 'credit'}}+{{else}}-{{/ifeq}}₹{{this.amount}}
-                            </td>
-                            <td class="transaction-description" title="{{this.description}}">
-                                {{this.description}}
-                            </td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-                {{else}}
-                <div class="no-transactions">
-                    <i class="fas fa-exchange-alt" style="font-size: 24px; margin-bottom: 10px;"></i>
-                    <p>No recent transactions found</p>
-                </div>
-                {{/if}}
-            </div>
-
-
-
-            {{#if wallet.transactions.length}}
-            <!-- Pagination Controls -->
-            <div style="display: flex; justify-content: center; margin-top: 20px; padding: 15px 0;">
-                {{#if pagination.hasPrevPage}}
-                <a href="/user/wallet?page={{pagination.prevPage}}"
-                    style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
-                    <i class="fas fa-chevron-left"></i> Previous
-                </a>
-                {{/if}}
-
-                <span style="padding: 8px 16px; margin: 0 5px;">
-                    Page {{pagination.page}} of {{pagination.totalPages}}
-                </span>
-
-                {{#if pagination.hasNextPage}}
-                <a href="/user/wallet?page={{pagination.nextPage}}"
-                    style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
-                    Next <i class="fas fa-chevron-right"></i>
-                </a>
-                {{/if}}
-            </div>
-            {{/if}}
-
-
+        <div class="wallet-balance-detail">
+            <i class="fas fa-arrow-up" style="margin-right: 5px;"></i>
+            ₹{{#if debit}}{{debit}}{{else}}0{{/if}} Total Debits
         </div>
     </div>
 </div>
+{{else}}
+<div class="wallet-balance-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b); text-align: center;">
+    <div style="font-size: 24px; margin-bottom: 15px;">
+        <i class="fas fa-wallet" style="margin-right: 10px;"></i>
+        Your wallet is empty
+    </div>
+    <div style="margin-bottom: 20px; background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+        Add money to your wallet for faster and easier payments
+    </div>
+    <button class="btn btn-primary btn-add-funds" style="margin: 0 auto;">
+        <i class="fas fa-plus-circle"></i> Add Funds Now
+    </button>
+</div>
+{{/if}}
+
+<!-- Wallet Actions -->
+{{#if wallet.balance}}
+<div class="wallet-actions">
+    <button class="btn btn-primary btn-add-funds">
+        <i class="fas fa-plus-circle"></i> Add Funds
+    </button>
+</div>
+{{/if}}
+
+<!-- Recent Transactions -->
+<h3 class="wallet-section-title">
+    <i class="fas fa-exchange-alt"></i> Recent Transactions
+</h3>
+
+<div class="transaction-history">
+    {{#if wallet.transactions.length}}
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each wallet.transactions}}
+            <tr>
+                <td>
+                    <div class="transaction-type">
+                        <div class="transaction-icon">
+                            {{#ifeq this.type 'credit'}}
+                            <i class="fas fa-arrow-down"></i>
+                            {{else}}
+                            <i class="fas fa-arrow-up"></i>
+                            {{/ifeq}}
+                        </div>
+                        <div>
+                            <div style="text-transform: capitalize;">{{this.type}}</div>
+                            <div class="transaction-date">{{formatDate this.createdAt "MMM D, YYYY"}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{formatDate this.createdAt "h:mm A"}}</td>
+                <td class="{{#ifeq this.type 'credit'}}transaction-credit{{else}}transaction-debit{{/ifeq}}">
+                    {{#ifeq this.type 'credit'}}+{{else}}-{{/ifeq}}₹{{this.amount}}
+                </td>
+                <td class="transaction-description" title="{{this.description}}">
+                    {{this.description}}
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{else}}
+    <div class="no-transactions">
+        <i class="fas fa-exchange-alt" style="font-size: 24px; margin-bottom: 10px;"></i>
+        <p>No recent transactions found</p>
+    </div>
+    {{/if}}
+</div>
+
+
+
+{{#if wallet.transactions.length}}
+<!-- Pagination Controls -->
+<div style="display: flex; justify-content: center; margin-top: 20px; padding: 15px 0;">
+    {{#if pagination.hasPrevPage}}
+    <a href="/user/wallet?page={{pagination.prevPage}}"
+        style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
+        <i class="fas fa-chevron-left"></i> Previous
+    </a>
+    {{/if}}
+
+    <span style="padding: 8px 16px; margin: 0 5px;">
+        Page {{pagination.page}} of {{pagination.totalPages}}
+    </span>
+
+    {{#if pagination.hasNextPage}}
+    <a href="/user/wallet?page={{pagination.nextPage}}"
+        style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
+        Next <i class="fas fa-chevron-right"></i>
+    </a>
+    {{/if}}
+</div>
+{{/if}}
 
 
 

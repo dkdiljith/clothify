@@ -18,20 +18,20 @@ exports.profileRender = async (req, res) => {
     const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
     const address = await Address.findOne({ userId: userId, isDefault: true }).lean();
-    return res.render(`user/profileView`, { userData: userData, address: address })
+    return res.render(`user/profileView`, { userData: userData, address: address, user_sidebar: true })
 }
 
 exports.profileEditRender = async (req, res) => {
     const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
-    return res.render(`user/profileEdit`, { userData: userData, })
+    return res.render(`user/profileEdit`, { userData: userData, user_sidebar: true })
 }
 
 exports.addressRender = async (req, res) => {
     try {
         const userId = res.locals.user._id
         const addresses = await Address.find({ userId }).lean();
-        return res.render('user/address', { addresses: addresses, });
+        return res.render('user/address', { addresses: addresses, user_sidebar: true });
     } catch (error) {
         console.error(error);
         return res.status(500).send('Internal Server Error');
@@ -41,7 +41,7 @@ exports.addressRender = async (req, res) => {
 exports.editAddressRender = async (req, res) => {
     const addressId = req.params.id
     const address = await Address.findById(addressId).lean()
-    return res.render(`user/editAddress`, { address: address })
+    return res.render(`user/editAddress`, { address: address, user_sidebar: true })
 }
 
 
@@ -61,9 +61,9 @@ exports.securityRender = async (req, res) => {
     user.resetTokenExpires = tokenExpires;
     await user.save();
 
-    const user1 = await User.findOne({ _id: userId })
+    const user1 = await User.findById(userId)
 
-    return res.render(`user/security`, { token, user: user1 })
+    return res.render(`user/security`, { token, user: user1, user_sidebar: true })
 }
 
 
@@ -124,11 +124,11 @@ exports.editAddress = async (req, res) => {
 
 
 exports.addAddressRender = async (req, res) => {
-    return res.render(`user/addAddress`,)
+    return res.render(`user/addAddress`, { user_sidebar: true })
 }
 
 exports.deleteUserRender = async (req, res) => {
-    return res.render(`user/deleteAccount`)
+    return res.render(`user/deleteAccount`, { user_sidebar: true })
 }
 
 exports.deleteUser = async (req, res) => {
@@ -189,10 +189,8 @@ exports.userOrders = async (req, res) => {
             const eligibleQuery = {
                 userId,
                 paymentStatus: "Failed",
-                $or: [
-                    { paymentRetryExpiresAt: { $gt: currentTime } }, // Limit 1 exceeded: Time up
-                    { paymentAttemptsCount: { $lt: 6 } }             // Limit 2 exceeded: Max attempts
-                ]
+                paymentRetryExpiresAt: { $gt: currentTime }, // Must not be expired yet
+                paymentAttemptsCount: { $lt: 6 }             // Must have attempts remaining
             };
 
             totalOrders = await Order.countDocuments(eligibleQuery);
@@ -240,7 +238,8 @@ exports.userOrders = async (req, res) => {
                 hasPrevPage: page > 1,
                 nextPage: page + 1,
                 prevPage: page - 1
-            }
+            },
+            user_sidebar: true
         });
 
     } catch (error) {
@@ -248,7 +247,8 @@ exports.userOrders = async (req, res) => {
         return res.render('user/userOrders', {
             orders: [],
             isRetryPendingOrder: false,
-            pagination: { page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false, nextPage: 1, prevPage: 1 }
+            pagination: { page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false, nextPage: 1, prevPage: 1 },
+            user_sidebar: true,
         });
     }
 };
@@ -270,7 +270,7 @@ exports.userOrderDetails = async (req, res) => {
     )
 
 
-    return res.render(`user/orderDetails`, { order: order, item: item })
+    return res.render(`user/orderDetails`, { order: order, item: item, user_sidebar: true })
 }
 
 
@@ -300,7 +300,7 @@ exports.profileEdit = async (req, res) => {
         }
         const user = await User.findById(userId).lean()
 
-        return res.render('user/profileView', { userData: user, });
+        return res.render('user/profileView', { userData: user, user_sidebar: true });
 
     } catch (error) {
         console.error(error);
@@ -332,7 +332,7 @@ exports.addAddress = async (req, res) => {
         await newAddress.save();
         const address = await Address.find({ userId: userId }).lean()
 
-        return res.render('user/address', { addresses: address });
+        return res.render('user/address', { addresses: address, user_sidebar: true });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Server error' });

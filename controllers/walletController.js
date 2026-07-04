@@ -91,7 +91,8 @@ exports.walletRender = async (req, res) => {
             prevPage: page - 1,
             hasNextPage: page < totalPages,
             hasPrevPage: page > 1
-        }
+        },
+        user_sidebar:true
     });
 };
 

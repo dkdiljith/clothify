@@ -4,90 +4,54 @@
 {{/section}}
 
 
-<div class="container" style="margin-top:20px;">
-    <div class="profile-header">
+<div class="delete-section">
+    <div class="delete-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2 class="delete-title">Delete Your Clothify Account</h2>
+    <p class="delete-subtitle">
+        We're sorry to see you go. Before you proceed, please understand that this action is permanent
+        and cannot be undone.
+    </p>
 
+    <div class="delete-warning-card">
+        <h3 class="delete-warning-title">
+            <i class="fas fa-exclamation-circle"></i> What happens when you delete your account
+        </h3>
+        <ul class="delete-warning-list">
+            <li>All your personal data, order history, saved payment methods, and addresses will be
+                permanently removed from our systems.</li>
+            <li>Any active Clothify Credit, Clothify Cash, or promotional balances will be forfeited
+                immediately.</li>
+            <li>Pending orders, returns, or refunds may be affected. We recommend completing all
+                transactions before deletion.</li>
+            <li>You will lose access to any digital content associated with your account.</li>
+            <li>Account deletion may take up to 30 days to process completely from our backup systems.
+            </li>
+            <li>Certain data may be retained as required by law or for legitimate business purposes
+                (fraud prevention, dispute resolution, etc.).</li>
+        </ul>
     </div>
 
-    <div class="profile-container">
-        <div class="profile-sidebar">
-            <ul>
-                <li onclick="location.href='/user/profile'">
-                    <i class="fas fa-user"></i> Profile
-                </li>
-                <li onclick="location.href='/user/security'">
-                    <i class="fas fa-lock"></i> Security & Password
-                </li>
-                <li onclick="location.href='/user/wallet'">
-                    <i class="fas fa-wallet"></i> Wallet
-                </li>
-                <li onclick="location.href='/user/orders'">
-                    <i class="fas fa-shopping-bag"></i> Orders
-                </li>
-                <li onclick="location.href='/user/orders?retryPendingOrder=true'">
-                    <i class="fas fa-shopping-bag"></i> Pending Orders
-                </li>
-                <li onclick="location.href='/user/address'">
-                    <i class="fas fa-map-marker-alt"></i> Addresses
-                </li>
-                <li class="active" onclick="location.href='/user/deleteuser'">
-                    <i class="fas fa-trash-alt"></i> Delete Account
-                </li>
-            </ul>
-        </div>
-
-        <div class="profile-content">
-            <div class="delete-section">
-                <div class="delete-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h2 class="delete-title">Delete Your Clothify Account</h2>
-                <p class="delete-subtitle">
-                    We're sorry to see you go. Before you proceed, please understand that this action is permanent
-                    and cannot be undone.
-                </p>
-
-                <div class="delete-warning-card">
-                    <h3 class="delete-warning-title">
-                        <i class="fas fa-exclamation-circle"></i> What happens when you delete your account
-                    </h3>
-                    <ul class="delete-warning-list">
-                        <li>All your personal data, order history, saved payment methods, and addresses will be
-                            permanently removed from our systems.</li>
-                        <li>Any active Clothify Credit, Clothify Cash, or promotional balances will be forfeited
-                            immediately.</li>
-                        <li>Pending orders, returns, or refunds may be affected. We recommend completing all
-                            transactions before deletion.</li>
-                        <li>You will lose access to any digital content associated with your account.</li>
-                        <li>Account deletion may take up to 30 days to process completely from our backup systems.
-                        </li>
-                        <li>Certain data may be retained as required by law or for legitimate business purposes
-                            (fraud prevention, dispute resolution, etc.).</li>
-                    </ul>
-                </div>
-
-                <div class="delete-confirm-checkbox">
-                    <input type="checkbox" id="confirmDeletion">
-                    <label for="confirmDeletion" class="delete-confirm-label">
-                        I understand that deleting my account is permanent and cannot be undone.
-                        I have reviewed the <a href="/privacy" target="_blank"
-                            style="color: var(--secondary-color);">Privacy Policy</a> and understand how my data will be
-                        handled.
-                    </label>
-                </div>
+    <div class="delete-confirm-checkbox">
+        <input type="checkbox" id="confirmDeletion">
+        <label for="confirmDeletion" class="delete-confirm-label">
+            I understand that deleting my account is permanent and cannot be undone.
+            I have reviewed the <a href="/privacy" target="_blank" style="color: var(--secondary-color);">Privacy
+                Policy</a> and understand how my data will be
+            handled.
+        </label>
+    </div>
 
 
-                <div class="delete-actions">
-                    <button id="deleteButton" class="btn btn-danger" disabled>
-                        <i class="fas fa-trash-alt"></i> Delete Account Permanently
-                    </button>
+    <div class="delete-actions">
+        <button id="deleteButton" class="btn btn-danger" disabled>
+            <i class="fas fa-trash-alt"></i> Delete Account Permanently
+        </button>
 
-                    <button class="btn btn-secondary" onclick="location.href='/user/profile'">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
+        <button class="btn btn-secondary" onclick="location.href='/user/profile'">
+            <i class="fas fa-times"></i> Cancel
+        </button>
     </div>
 </div>
 
