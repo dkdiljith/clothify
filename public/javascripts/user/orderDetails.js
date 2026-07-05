@@ -13,15 +13,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const orderStatus = cancelButton ? cancelButton.dataset.orderStatus : "";
     const completionDate = returnButton ? new Date(returnButton.dataset.completionDate) : null;
 
-    document.getElementById('retryPayment').addEventListener('click', function () {
-        const orderId = this.dataset.orderId;
+    const retryPaymentBtn = document.getElementById("retryPayment");
 
-        if (orderId) {
-            startRazorpayPayment(orderId)
-        } else {
-            console.error("Order ID is missing from the button attributes.");
-        }
-    });
+    if (retryPaymentBtn) {
+        retryPaymentBtn.addEventListener("click", function () {
+            const orderId = this.dataset.orderId;
+
+            if (orderId) {
+                startRazorpayPayment(orderId);
+            } else {
+                console.error("Order ID is missing from the button attributes.");
+            }
+        });
+    }
 
     // Cancel Button Logic
     if (cancelButton) {
@@ -44,20 +48,46 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Submit Cancellation
+    // Submit Cancellation
     document.getElementById("submit-cancellation")?.addEventListener("click", async function () {
         const reason = document.getElementById("cancellation-reason").value.trim();
 
+        // 1. Check validation first
         if (!reason) {
-            alert("Please provide a reason for cancellation.");
+            // Hide the reason modal immediately so the alert is completely clean
+            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
+
+            await showCustomConfirm("Reason Required", "Please provide a reason for cancellation.", "warning");
+
+            // Re-open it if they need to fix their mistake
+            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "flex";
             return;
         }
 
         const cancelBtn = document.getElementById("cancel-order-button");
         if (!cancelBtn) {
-            alert("Error: Cancel button context not found.");
+            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
+            await showCustomConfirm("System Error", "Error: Cancel button context not found.", "danger");
             return;
         }
 
+        // 2. CLOSE THE REASON MODAL HERE (Before the confirmation await pause!)
+        if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
+
+        // 3. Now fire the confirmation alert over a clean screen
+        const dynamicProceedConfirm = await showCustomConfirm(
+            "Confirm Cancellation",
+            "Are you absolutely sure you want to request cancellation for this item?\nThis choice cannot be undone.",
+            "danger"
+        );
+
+        // If they click "Cancel" on your alert, re-open the reason modal so they don't lose their text
+        if (!dynamicProceedConfirm) {
+            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "flex";
+            return;
+        }
+
+        // 4. Proceed with Network Fetch safely...
         const data = {
             orderId: cancelBtn.dataset.orderId,
             itemId: cancelBtn.dataset.itemId,
@@ -68,25 +98,21 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const response = await fetch("/user/cancel-order", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
 
             if (response.ok) {
-                if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
-                showSuccessMessage();
+                await showCustomConfirm("Request Submitted", "Your cancellation request has been successfully processed.", "success");
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || "Failed to cancel order. Please try again.");
+                await showCustomConfirm("Request Rejected", errorData.message || "Failed to cancel order.", "warning");
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("An error occurred. Please try again.");
+            await showCustomConfirm("Network Error", "An unexpected error occurred. Please try again.", "danger");
         }
     });
-
 
 
     // Download Invoice
@@ -182,10 +208,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Submit Return Listener
+    // Submit Return Listener
     document.getElementById("submit-return")?.addEventListener("click", async function () {
         const reason = document.getElementById("return-reason").value.trim();
         const errorElement = document.getElementById("return-reason-error");
 
+        // 1. Local DOM validation error handling (Keeps the modal open)
         if (!reason) {
             if (errorElement) errorElement.style.display = "block";
             return;
@@ -193,9 +221,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (errorElement) errorElement.style.display = "none";
 
-        // Ensure we have context data from the clicked button
+        // 2. Validate state variables
         if (!activeReturnContext) {
-            alert("Error: Return context missing. Please try again.");
+            // Clear the typing modal out of the way before firing the custom alert
+            if (typeof returnModal !== 'undefined') returnModal.style.display = "none";
+
+            await showCustomConfirm(
+                "Return Context Missing",
+                "We couldn't retrieve the reference for this item.\nPlease reload the page and try again.",
+                "danger"
+            );
+            return;
+        }
+
+        // 3. CLOSE THE RETURN TYPING MODAL HERE (Before the confirmation await pause!)
+        if (typeof returnModal !== 'undefined') returnModal.style.display = "none";
+
+        // 4. Now display the clear screen custom confirmation prompt safely
+        const confirmReturn = await showCustomConfirm(
+            "Confirm Return Request",
+            "Are you sure you want to initiate a return request for this order?\nOur team will review your reason for approval.",
+            "warning"
+        );
+
+        // User opted out or canceled the choice -> Re-open the typing modal cleanly
+        if (!confirmReturn) {
+            if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
             return;
         }
 
@@ -217,18 +268,39 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (response.ok) {
-                if (typeof returnModal !== 'undefined') returnModal.style.display = "none";
-                showSuccessMessage();
+                // Typing modal was already hidden earlier, show clean success state
+                await showCustomConfirm(
+                    "Return Initiated",
+                    "Your return request has been submitted successfully.\nCheck your email or dashboard updates for status changes.",
+                    "success"
+                );
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || "Failed to return order. Please try again.");
+
+                // Rejection processing alert
+                await showCustomConfirm(
+                    "Submission Refused",
+                    errorData.message || "Failed to process order return. Please try again.",
+                    "warning"
+                );
+
+                // Re-open the input window so they don't lose their data on network refusal
+                if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("An error occurred. Please try again.");
+
+            // Critical exception alert
+            await showCustomConfirm(
+                "Network Connection Timeout",
+                "An unexpected infrastructure error occurred.\nPlease verify link status and try again.",
+                "danger"
+            );
+
+            // Re-open the window on hard breakdown drops as a defensive measure
+            if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
         }
     });
-
 
     // Close Success Message
     document.getElementById("close-success-message")?.addEventListener("click", function () {
@@ -366,18 +438,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Razorpay Error:", error);
             showPopupMessage("Payment failed to initialize", "error");
         }
-    }
-
-
-    // Helper function to show success message
-    function showSuccessMessage() {
-        successMessage.style.display = "block";
-        setTimeout(() => {
-            if (successMessage.style.display === "block") {
-                successMessage.style.display = "none";
-                window.location.reload();
-            }
-        }, 3000);
     }
 });
 

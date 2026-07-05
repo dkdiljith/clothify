@@ -63,12 +63,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const remainingSeconds = calculateRemainingTime(data.newTimer);
         // Fallback protection guarantees fallback layout if clock drifts
         startResendTimer(remainingSeconds > 0 ? remainingSeconds : 60);
+
+        // OPTIONAL: Added a smooth feedback modal letting the user know it was sent successfully
+        await showCustomConfirm("Code Resent", "A fresh verification code has been dispatched to your email inbox.", "success");
       } else {
-        alert('Error resending code: ' + data.error);
+        // CHANGED: Using your custom alert system for errors instead of window.alert
+        await showCustomConfirm("Resend Failed", data.error || "We could not resend your code at this time.", "warning");
         resendButton.disabled = false;
       }
     } catch (error) {
       console.error("Error resending verification code:", error);
+      await showCustomConfirm("Network Error", "Unable to reach the server.\nPlease verify your network connection and try again.", "danger");
       resendButton.disabled = false;
     }
   });
@@ -94,20 +99,26 @@ document.addEventListener("DOMContentLoaded", function () {
       body: JSON.stringify({ verificationCode: verificationCode })
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
       if (data.success) {
         window.location.href = '/user/home';
       } else {
         verifyButton.disabled = false; // Release input hold state lock
         verificationCodeErrorDiv.textContent = data.error;
         verificationCodeErrorDiv.classList.add("visible");
+        
+        // OPTIONAL: Keeps critical interaction errors completely visible in an explicit alert
+        await showCustomConfirm("Verification Failed", data.error, "danger");
       }
     })
-    .catch(error => {
+    .catch(async error => {
       console.error("Error verifying email:", error);
       verifyButton.disabled = false;
       verificationCodeErrorDiv.textContent = "An unexpected error occurred. Please try again.";
       verificationCodeErrorDiv.classList.add("visible");
+
+      // CHANGED: Replaced unexpected stream crash drops with error component
+      await showCustomConfirm("Server Error", "An unexpected error occurred. Please try again.", "danger");
     });
   });
 });
