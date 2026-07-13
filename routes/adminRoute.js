@@ -21,6 +21,7 @@ const categoryController = require('../controllers/categoryController')
 const couponController = require(`../controllers/couponController`)
 const offerController = require(`../controllers/offerController`)
 const salesController = require(`../controllers/salesController`)
+const settingController = require(`../controllers/settingController`)
 
 //adminAuth (session)
 const adminAuth = require("../middlewares/auth").adminAuth
@@ -116,7 +117,13 @@ router.route(`/offer/:offerId`)
     .get(adminAuth, offerController.offerEditJson)
     .put(adminAuth, offerController.editOffer)
     .delete(adminAuth, offerController.offerDelete);
+    
+///SETTINGS MANAGEMENT///
+router.get(`/settings` ,adminAuth, settingController.landingPage)
 
+router.route(`/settings/referral`)
+.get(adminAuth, settingController.referralSettingsRender )
+.post(adminAuth, settingController.referralSettings)
 
 
 module.exports = router

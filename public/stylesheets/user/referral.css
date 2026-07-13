@@ -1,0 +1,822 @@
+/* ==========================================================
+   Referral Page
+========================================================== */
+
+.referral-page {
+  padding: 25px 0 40px;
+  background: #f7f8fb;
+  min-height: 100vh;
+}
+
+.referral-container {
+  width: 100%;
+  max-width: 920px;
+  margin: auto;
+}
+
+/* ==========================================================
+   Header
+========================================================== */
+
+.page-header {
+  margin-bottom: 22px;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: #666;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* ==========================================================
+   Stats
+========================================================== */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+
+  border-radius: 14px;
+
+  padding: 18px 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  transition: 0.25s;
+
+  border: 1px solid #ececec;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  width: 54px;
+
+  height: 54px;
+
+  border-radius: 14px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  flex-shrink: 0;
+}
+
+.stat-icon i {
+  font-size: 1.3rem;
+}
+
+.orange {
+  background: #fff2df;
+}
+
+.orange i {
+  color: #f48c06;
+}
+
+.green {
+  background: #ecfaef;
+}
+
+.green i {
+  color: #22a447;
+}
+
+.blue {
+  background: #edf5ff;
+}
+
+.blue i {
+  color: #2563eb;
+}
+
+.purple {
+  background: #f2edff;
+}
+
+.purple i {
+  color: #7c3aed;
+}
+
+.stat-card span {
+  display: block;
+
+  color: #888;
+
+  font-size: 0.85rem;
+
+  margin-bottom: 4px;
+}
+
+.stat-card h3 {
+  font-size: 1.45rem;
+
+  color: #222;
+
+  margin-bottom: 2px;
+}
+
+.stat-card small {
+  color: #999;
+}
+
+/* ==========================================================
+   Common Card
+========================================================== */
+
+.content-card {
+  background: #fff;
+
+  border-radius: 16px;
+
+  padding: 24px;
+
+  margin-bottom: 22px;
+
+  border: 1px solid #ececec;
+}
+
+.card-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.card-header h2 {
+  font-size: 1.3rem;
+
+  color: #222;
+
+  margin-bottom: 6px;
+}
+
+.card-header p {
+  color: #666;
+
+  line-height: 1.7;
+
+  font-size: 0.92rem;
+}
+
+/* ==========================================================
+   Referral Code
+========================================================== */
+
+.referral-code-box {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 15px;
+
+  background: #fffaf2;
+
+  border: 2px dashed #f48c06;
+
+  border-radius: 14px;
+
+  padding: 18px;
+}
+
+.code-value {
+  font-size: 1.5rem;
+
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #f48c06;
+
+  word-break: break-word;
+}
+
+.copy-btn {
+  border: none;
+
+  cursor: pointer;
+
+  background: #f48c06;
+
+  color: #fff;
+
+  border-radius: 10px;
+
+  padding: 12px 18px;
+
+  font-weight: 600;
+
+  transition: 0.25s;
+
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #db7b05;
+}
+
+.copy-btn i {
+  margin-right: 8px;
+}
+
+/* ==========================================================
+   Apply Referral
+========================================================== */
+
+.redeem-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-group input {
+  width: 100%;
+
+  height: 50px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 10px;
+
+  padding: 0 16px;
+
+  outline: none;
+
+  transition: 0.25s;
+
+  font-size: 0.95rem;
+}
+
+.input-group input:focus {
+  border-color: #f48c06;
+
+  box-shadow: 0 0 0 4px rgba(244, 140, 6, 0.15);
+}
+
+.input-error-msg {
+  position: absolute;
+
+  left: 4px;
+
+  bottom: -20px;
+
+  font-size: 13px;
+
+  color: #e53935;
+
+  opacity: 0;
+
+  transition: 0.25s;
+}
+
+.redeem-form button {
+  height: 48px;
+
+  border: none;
+
+  cursor: pointer;
+
+  background: #f48c06;
+
+  color: #fff;
+
+  border-radius: 10px;
+
+  font-weight: 600;
+
+  transition: 0.25s;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.redeem-form button:hover {
+  background: #db7b05;
+}
+
+.redeem-form button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.75;
+}
+
+/* ==========================================================
+   Referral History
+========================================================== */
+
+.count-badge {
+  background: #fff3e1;
+  color: #f48c06;
+  padding: 8px 14px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.referral-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.referral-table thead {
+  background: #fafafa;
+}
+
+.referral-table thead th {
+  padding: 15px;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #666;
+  border-bottom: 1px solid #ececec;
+}
+
+.referral-table tbody td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #f3f3f3;
+  vertical-align: middle;
+}
+
+.referral-table tbody tr {
+  transition: 0.25s;
+}
+
+.referral-table tbody tr:hover {
+  background: #fcfcfc;
+}
+
+/* ==========================================================
+   User Cell
+========================================================== */
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f48c06;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-cell strong {
+  color: #222;
+  font-size: 0.95rem;
+}
+
+/* ==========================================================
+   Status
+========================================================== */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.status i {
+  font-size: 0.75rem;
+}
+
+.completed {
+  background: #eaf8ee;
+  color: #1c8b47;
+}
+
+.pending {
+  background: #fff7df;
+  color: #b57d00;
+}
+
+.cancelled {
+  background: #ffeaea;
+  color: #d73939;
+}
+
+/* ==========================================================
+   Empty State
+========================================================== */
+
+.empty-box {
+  padding: 55px 20px;
+  text-align: center;
+}
+
+.empty-box i {
+  font-size: 3rem;
+  color: #f48c06;
+  margin-bottom: 15px;
+}
+
+.empty-box h3 {
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.empty-box p {
+  color: #777;
+  line-height: 1.7;
+  max-width: 420px;
+  margin: auto;
+}
+
+/* ==========================================================
+   Policy
+========================================================== */
+
+.policy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.policy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: 0.25s;
+}
+
+.policy-item:hover {
+  background: #f5f5f5;
+}
+
+.policy-item i {
+  color: #2fa94f;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.policy-item span {
+  color: #666;
+  line-height: 1.7;
+}
+
+/* ==========================================================
+   Scrollbar
+========================================================== */
+
+.table-container::-webkit-scrollbar {
+  height: 7px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #f48c06;
+  border-radius: 20px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #ededed;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .count-badge {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .referral-page {
+    padding: 18px 0 30px;
+  }
+
+  .page-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .content-card {
+    padding: 18px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-card h3 {
+    font-size: 1.3rem;
+  }
+
+  .referral-code-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .code-value {
+    text-align: center;
+    font-size: 1.35rem;
+    letter-spacing: 1px;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-header {
+    margin-bottom: 18px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header p {
+    font-size: 0.9rem;
+  }
+
+  .content-card {
+    border-radius: 14px;
+  }
+
+  .stat-card {
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .stat-icon i {
+    font-size: 1.05rem;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .policy-item {
+    padding: 12px;
+  }
+
+  .status {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+
+  .coin-item {
+    align-items: flex-start;
+    animation: coinFade 0.25s ease;
+  }
+
+  .coin-right {
+    width: 100%;
+
+    text-align: left;
+
+    margin-left: 58px;
+  }
+}
+
+/* ==========================================================
+   Animations
+========================================================== */
+
+.content-card,
+.stat-card {
+  animation: fadeUp 0.35s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes coinFade {
+  from {
+    opacity: 0;
+
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   Coin History
+========================================================== */
+
+.coin-history {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.coin-item {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
+}
+
+.coin-item:hover {
+  background: #fafafa;
+}
+
+.coin-left {
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+.coin-icon {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  color: #fff;
+
+  flex-shrink: 0;
+}
+
+.coin-icon.credit {
+  background: #2fa94f;
+}
+
+.coin-icon.debit {
+  background: #e74c3c;
+}
+
+.coin-left h4 {
+  margin-bottom: 4px;
+
+  color: #222;
+
+  font-size: 0.95rem;
+}
+
+.coin-left small {
+  color: #888;
+}
+
+.coin-right {
+  text-align: right;
+
+  min-width: 90px;
+}
+
+.coin-credit {
+  color: #2fa94f;
+
+  font-weight: 700;
+
+  font-size: 1.15rem;
+}
+
+.coin-debit {
+  color: #e74c3c;
+
+  font-weight: 700;
+
+  font-size: 1.15rem;
+}
+
+.coin-right small {
+  display: block;
+
+  color: #888;
+}
+
+/* ==========================================================
+   Redeem Locked
+========================================================== */
+
+.redeem-locked-msg {
+  text-align: center;
+
+  background: #fff8e8;
+
+  border: 1px solid #ffe2a8;
+
+  border-radius: 14px;
+
+  padding: 22px;
+}
+
+.redeem-locked-msg p {
+  margin: 6px 0;
+
+  color: #6f5b28;
+}
+
+.redeem-locked-msg strong {
+  color: #d88700;
+}
+
+.stat-card:first-child {
+  border-color: #ffd89a;
+
+  box-shadow: 0 6px 18px rgba(244, 140, 6, 0.08);
+}

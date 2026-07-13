@@ -1,60 +1,68 @@
-{{#section 'head'}}
-<script src="/javascripts/user/productCard.js"></script>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/productCard.css">
-{{/section}}
-
-
-
 <div class="animsition">
 
-	<!-- =========================================================
+    <!-- =========================================================
              HERO SLIDER
         ========================================================= -->
 
-	{{> user/slider}}
+    {{> home/slider}}
 
 
 
-	<!-- =========================================================
+    <!-- =========================================================
              FEATURED PRODUCTS
         ========================================================= -->
 
-	<section class="featured-section">
+    <section class="featured-section">
 
-		<div class="container">
+        <div class="container">
 
-			<h2 class="section-title">
-				Featured Products
-			</h2>
+            <h2 class="section-title">
+                Featured Products
+            </h2>
 
-			<div class="row">
+            <div class="row">
 
-				{{#each product}}
+                {{#each product}}
 
-				<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 mb-4">
+                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 mb-4">
 
-					{{> user/productCard this}}
+                    {{> home/productCard this}}
 
-				</div>
+                </div>
 
-				{{/each}}
+                {{/each}}
 
-			</div>
+            </div>
 
 
-			<!-- VIEW ALL -->
-			<div class="text-center mt-5">
+            <!-- VIEW ALL -->
+            <div class="text-center mt-5">
 
-				<a href="/user/collections" class="btn-primary">
+                <a href="/user/collections" class="btn-primary">
 
-					View All Products
+                    View All Products
 
-				</a>
+                </a>
 
-			</div>
+            </div>
 
-		</div>
+        </div>
 
-	</section>
+    </section>
+
+
+    <!-- =========================================================
+             Referrals & Signup Bonus
+        ========================================================= -->
+
+
+    {{> home/signupReferral}}
+
+
 
 </div>
+
+
+{{#section 'scripts'}}
+
+{{/section}}

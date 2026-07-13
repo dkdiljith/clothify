@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(async data => {
       if (data.success) {
-        window.location.href = '/user/home';
+        window.location.href = '/user/home?welcome=true';
       } else {
         verifyButton.disabled = false; // Release input hold state lock
         verificationCodeErrorDiv.textContent = data.error;

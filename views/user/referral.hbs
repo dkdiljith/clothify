@@ -1,0 +1,549 @@
+{{#section "head"}}
+<title>Referral | Clothify</title>
+<link rel="stylesheet" href="/stylesheets/user/referral.css" />
+{{/section}}
+
+<main class="referral-page">
+
+  <div class="referral-container">
+
+    <!-- ================================================= -->
+    <!-- Header -->
+    <!-- ================================================= -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>Referral & Earn</h1>
+
+        <p>
+          Invite your friends to Clothify, earn referral coins and redeem them
+          later for wallet rewards.
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- Stats -->
+    <!-- ================================================= -->
+
+    <section class="stats-grid">
+
+      <!-- Coins -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon orange">
+          <i class="fa-solid fa-coins"></i>
+        </div>
+
+        <div>
+
+          <span>Total Coins</span>
+
+          <h3 id="coinBalance">
+
+            {{user.referralCoins}}
+
+          </h3>
+
+          <small>Available Balance</small>
+
+        </div>
+
+      </div>
+
+      <!-- Coin Value -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon green">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+
+        <div>
+
+          <span>Coin Value</span>
+
+          <h3>{{coinValuePreview referralSettings.coinValue}}</h3>
+
+          <small>Current Value</small>
+
+        </div>
+
+      </div>
+
+      <!-- Successful -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon blue">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+
+        <div>
+
+          <span>Successful Referrals</span>
+
+          <h3>{{successfulReferralCount}}</h3>
+
+          <small>Completed</small>
+
+        </div>
+
+      </div>
+
+      <!-- Joined Through -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon purple">
+          <i class="fa-solid fa-user-group"></i>
+        </div>
+
+        <div>
+
+          {{#if referredBy}}
+
+          <h3>{{referredBy.name}}</h3>
+
+          <small>Invited you to Clothify</small>
+
+          {{else}}
+
+          <h3>Welcome to the Clothify community.</h3>
+
+          {{/if}}
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- Referral Code -->
+    <!-- ================================================= -->
+
+    <section class="content-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>Your Referral Code</h2>
+
+          <p>
+            Share this code with your friends. You'll receive referral coins
+            after they complete their first successful order.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="referral-code-box">
+
+        <div class="code-value" id="referralCode">
+
+          {{user.referralCode}}
+
+        </div>
+
+        <button class="copy-btn" id="copyBtn">
+
+          <i class="fa-regular fa-copy"></i>
+
+          Copy Code
+
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- Reedeem Referral -->
+    <!-- ================================================= -->
+
+    <section class="content-card">
+
+      {{#if completedOrders}}
+
+      <!-- Store your backend balance variable in data-balance -->
+      <form class="redeem-form" data-balance="{{user.referralCoins}}">
+        <div class="input-group">
+          <input type="text" name="reedeemCoinInput" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+            placeholder="Enter coins (Multiples of 1000)" />
+          <div class="input-error-msg"></div>
+        </div>
+
+        <button type="submit">
+          Redeem
+        </button>
+      </form>
+
+      {{else}}
+
+      <!-- Catchy message for users with no completed orders -->
+      <div class="redeem-locked-msg">
+        <p>🔒 <strong>Unlock Your Rewards!</strong></p>
+        <p>Complete your first order to start redeeming your coins.</p>
+      </div>
+
+      {{/if}}
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- Coin History -->
+    <!-- ================================================= -->
+
+    <section class="content-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>Coin History</h2>
+
+          <p>
+            View all referral coin credits and redemptions.
+          </p>
+
+        </div>
+
+        <span class="count-badge">
+
+          {{coinHistory.length}}
+          Transactions
+
+        </span>
+
+      </div>
+
+      {{#if coinHistory.length}}
+
+      <div class="coin-history">
+
+        {{#each coinHistory}}
+
+        <div class="coin-item">
+
+          <div class="coin-left">
+
+            {{#ifCond this.coins ">" 0}}
+
+            <div class="coin-icon credit">
+              <i class="fa-solid fa-arrow-down"></i>
+            </div>
+
+            {{else}}
+
+            <div class="coin-icon debit">
+              <i class="fa-solid fa-arrow-up"></i>
+            </div>
+
+            {{/ifCond}}
+
+            <div>
+
+              <h4>{{this.description}}</h4>
+
+              <small>{{formatDate this.createdAt}}</small>
+
+            </div>
+
+          </div>
+
+          <div class="coin-right">
+
+            {{#ifCond this.coins ">" 0}}
+
+            <span class="coin-credit">
+
+              +{{this.coins}}
+
+            </span>
+
+            {{else}}
+
+            <span class="coin-debit">
+
+              {{this.coins}}
+
+            </span>
+
+            {{/ifCond}}
+
+            <small>Coins</small>
+
+          </div>
+
+        </div>
+
+        {{/each}}
+
+      </div>
+
+      {{else}}
+
+      <div class="empty-box empty-history">
+
+        <i class="fa-solid fa-coins"></i>
+
+        <h3>No Coin Transactions</h3>
+
+        <p>
+
+          Your referral rewards and coin redemptions will appear here.
+
+        </p>
+
+      </div>
+
+      {{/if}}
+
+
+      {{#if (gt coinPagination.totalPages 1)}}
+
+      <div class="pagination">
+
+        {{#if coinPagination.hasPrevPage}}
+
+        <a  class="pagination-button" href="?referralPage={{referralPagination.page}}&coinPage={{coinPagination.prevPage}}">
+
+          Previous
+
+        </a>
+
+        {{/if}}
+
+        <span class="pagination-info" >
+
+          Page {{coinPagination.page}} of {{coinPagination.totalPages}}
+
+        </span>
+
+        {{#if coinPagination.hasNextPage}}
+
+        <a  class="pagination-button" href="?referralPage={{referralPagination.page}}&coinPage={{coinPagination.nextPage}}">
+
+          Next
+
+        </a>
+
+        {{/if}}
+
+      </div>
+
+      {{/if}}
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- Referral History -->
+    <!-- ================================================= -->
+
+    <section class="content-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>Users You Referred</h2>
+
+          <p>
+            Track the status of every referral you've made.
+          </p>
+
+        </div>
+
+        <span class="count-badge">
+
+          {{referrals.length}}
+          Total
+
+        </span>
+
+      </div>
+
+      {{#if referrals.length}}
+
+      <div class="table-container">
+
+        <table class="referral-table">
+
+          <thead>
+
+            <tr>
+
+              <th>#</th>
+
+              <th>User</th>
+
+              <th>Status</th>
+
+              <th>Reward</th>
+
+              <th>Date</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {{#each referrals}}
+
+            <tr>
+
+              <td>
+
+                {{incrementedIndex @index}}
+
+              </td>
+
+              <td>
+
+                <div class="user-cell">
+
+                  <div class="avatar">
+
+                    {{initial this.userId.name}}
+
+                  </div>
+
+                  <div>
+
+                    <strong>
+
+                      {{this.userId.name}}
+
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+              <td>
+
+                {{#ifEquals this.status "Completed"}}
+
+                <span class="status completed">
+
+                  <i class="fa-solid fa-circle-check"></i>
+
+                  Completed
+
+                </span>
+
+                {{/ifEquals}}
+
+                {{#ifEquals this.status "Pending"}}
+
+                <span class="status pending">
+
+                  <i class="fa-solid fa-clock"></i>
+
+                  Pending
+
+                </span>
+
+                {{/ifEquals}}
+
+                {{#ifEquals this.status "Cancelled"}}
+
+                <span class="status cancelled">
+
+                  <i class="fa-solid fa-circle-xmark"></i>
+
+                  Cancelled
+
+                </span>
+
+                {{/ifEquals}}
+
+              </td>
+
+              <td>
+
+                {{referrerReward}}
+                Coins
+
+              </td>
+
+              <td>
+
+                {{formatDate createdAt}}
+
+              </td>
+
+            </tr>
+
+            {{/each}}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {{else}}
+
+      <div class="empty-box">
+
+        <i class="fa-solid fa-user-group"></i>
+
+        <h3>No Referrals Yet</h3>
+
+        <p>
+
+          Invite your friends using your referral code and start earning
+          referral coins.
+
+        </p>
+
+      </div>
+
+      {{/if}}
+
+      {{#if (gt referralPagination.totalPages 1)}}
+
+      <div class="pagination">
+        {{#if referralPagination.hasPrevPage}}
+        <a  class="pagination-button" href="?referralPage={{referralPagination.prevPage}}&coinPage={{coinPagination.page}}">
+          Previous
+        </a>
+
+        {{/if}}
+        <span class="pagination-info" >
+          Page
+          {{referralPagination.page}}
+          of
+          {{referralPagination.totalPages}}
+        </span>
+
+        {{#if referralPagination.hasNextPage}}
+        <a  class="pagination-button" href="?referralPage={{referralPagination.nextPage}}&coinPage={{coinPagination.page}}">
+          Next
+        </a>
+        {{/if}}
+      </div>
+
+      {{/if}}
+
+    </section>
+
+  </div>
+
+</main>
+
+{{#section "scripts"}}
+<script src="/javascripts/user/referral.js" defer></script>
+{{/section}}

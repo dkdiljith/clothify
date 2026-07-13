@@ -1,226 +1,10 @@
-{{!-- <style>
-    :root {
-        --primary-color: #2c3e50;
-        --secondary-color: #3498db;
-        --accent-color: #e74c3c;
-        --success-color: #2ecc71;
-        --light-gray: #f8f9fa;
-        --medium-gray: #e0e0e0;
-        --dark-gray: #333;
-        --white: #ffffff;
-        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        color: var(--dark-gray);
-        background-color: var(--light-gray);
-        line-height: 1.6;
-    }
-
-
-    .profile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid var(--medium-gray);
-    }
-
-    .profile-title {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin: 0;
-    }
-
-    .profile-container {
-        display: flex;
-        gap: 30px;
-        background-color: var(--white);
-        border-radius: 8px;
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-
-    .profile-sidebar {
-        width: 250px;
-        background-color: #f8f9fa;
-        padding: 25px 0;
-    }
-
-    .profile-sidebar ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .profile-sidebar li {
-        padding: 12px 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border-left: 3px solid transparent;
-    }
-
-    .profile-sidebar li:hover {
-        background-color: rgba(52, 152, 219, 0.1);
-        color: var(--secondary-color);
-    }
-
-    .profile-sidebar li.active {
-        background-color: rgba(52, 152, 219, 0.1);
-        border-left: 3px solid var(--secondary-color);
-        color: var(--secondary-color);
-        font-weight: 500;
-    }
-
-    .profile-sidebar li i {
-        width: 20px;
-        text-align: center;
-    }
-
-    .profile-content {
-        flex: 1;
-        padding: 30px;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 992px) {
-        .profile-container {
-            flex-direction: column;
-        }
-
-        .profile-sidebar {
-            width: 100%;
-            padding: 15px 0;
-        }
-
-        .profile-sidebar ul {
-            display: flex;
-            overflow-x: auto;
-            padding: 0 15px;
-        }
-
-        .profile-sidebar li {
-            white-space: nowrap;
-            border-left: none;
-            border-bottom: 3px solid transparent;
-            padding: 10px 15px;
-        }
-
-        .profile-sidebar li.active {
-            border-left: none;
-            border-bottom: 3px solid var(--secondary-color);
-        }
-
-        .profile-header-section {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .profile-stats {
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .profile-details-grid {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .detail-label {
-            padding-bottom: 0;
-        }
-
-        .profile-actions {
-            flex-direction: column;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .profile-stats {
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-    }
-</style> --}}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const currentPath = window.location.pathname;
-        const searchParams = new URLSearchParams(window.location.search);
-        const menuItems = document.querySelectorAll("#user-sidebar-menu li");
-
-        // Clear previous active classes safely
-        menuItems.forEach(item => item.classList.remove("active"));
-
-        let targetKey = "";
-
-        // Rule 1: Address Matching
-        if (currentPath.includes("/user/address") ||
-            currentPath.includes("/user/addaddress") ||
-            currentPath.includes("/user/editaddress")) {
-            targetKey = "address";
-        }
-
-        // Rule 2: Profile Matching
-        else if (currentPath.includes("/user/profile") ||
-            currentPath.includes("/user/profileEdit") ||
-            currentPath.includes("/user/profileView")) {
-            targetKey = "profile";
-        }
-
-        // Rule 3: Order Details Parent Routing Logic
-        else if (currentPath.includes("/user/orderDetails")) {
-            if (searchParams.get("from") === "pending") {
-                targetKey = "orders-pending";
-            } else {
-                targetKey = "orders-regular";
-            }
-        }
-
-        // Rule 4: Regular Orders vs Pending Orders Main Landing Lists
-        else if (currentPath.includes("/user/orders")) {
-            if (searchParams.get("retryPendingOrder") === "true") {
-                targetKey = "orders-pending";
-            } else {
-                targetKey = "orders-regular";
-            }
-        }
-
-        // Rule 5: Fallback Direct Matching for Security, Wallet, Delete Account
-        else {
-            if (currentPath.includes("/user/security")) targetKey = "security";
-            if (currentPath.includes("/user/wallet")) targetKey = "wallet";
-            if (currentPath.includes("/user/deleteuser")) targetKey = "deleteuser";
-        }
-
-        // Apply the active class to the matched key element
-        if (targetKey) {
-            const activeItem = document.querySelector(`#user-sidebar-menu li[data-match="${targetKey}"]`);
-            if (activeItem) {
-                activeItem.classList.add("active");
-            }
-        }
-    });
-
-</script>
-
-
-
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/user-sidebar.css">
+<script src="/javascripts/user/user-sidebar.js"></script>
 
 
 
 <div class="container" style="margin-top:20px;">
-    <div class="profile-header">
-    </div>
-
+    <div class="profile-header"></div>
     <div class="profile-container">
         <div class="profile-sidebar">
             <ul id="user-sidebar-menu">
@@ -232,6 +16,10 @@
                 </li>
                 <li data-match="wallet" onclick="location.href='/user/wallet'">
                     <i class="fas fa-wallet"></i> Wallet
+                </li>
+                <!-- Fixed data-match attribute from "wallet" to "referral" below -->
+                <li data-match="referral" onclick="location.href='/user/referral'">
+                    <i class="fas fa-gift"></i> Referral
                 </li>
                 <li data-match="orders-regular" onclick="location.href='/user/orders'">
                     <i class="fas fa-shopping-bag"></i> Orders
@@ -247,12 +35,8 @@
                 </li>
             </ul>
         </div>
-
-
         <div class="profile-content">
-
             {{{body}}}
-
         </div>
     </div>
 </div>

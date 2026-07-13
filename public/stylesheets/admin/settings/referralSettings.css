@@ -1,0 +1,342 @@
+/* ==========================================================
+   Settings Content
+========================================================== */
+
+.settings-content {
+  background: var(--surface);
+
+  border-radius: 15px;
+
+  border: 1px solid var(--border);
+
+  padding: 30px;
+}
+
+/* ==========================================================
+   Header
+========================================================== */
+
+.settings-card-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 30px;
+}
+
+.settings-card-header h2 {
+  font-size: 1.7rem;
+
+  margin-bottom: 6px;
+}
+
+.settings-card-header p {
+  color: #64748b;
+
+  font-weight: 500;
+}
+
+/* ==========================================================
+   Form
+========================================================== */
+
+.settings-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 28px;
+}
+
+/* ==========================================================
+   Layout
+========================================================== */
+
+.settings-body {
+  display: grid;
+
+  grid-template-columns: 420px 1fr;
+
+  gap: 35px;
+
+  align-items: flex-start;
+}
+
+.settings-fields {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+/* ==========================================================
+   Form Group
+========================================================== */
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+
+  font-weight: 700;
+
+  margin-bottom: 10px;
+}
+
+.form-group input {
+  width: 100%;
+
+  padding: 13px 15px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 10px;
+
+  background: var(--surface);
+
+  color: var(--text);
+
+  font-size: 0.95rem;
+
+  transition: 0.25s;
+}
+
+.form-group input:focus {
+  outline: none;
+
+  border-color: var(--primary);
+
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.form-group input.error {
+  border-color: #ef4444;
+
+  box-shadow: none;
+}
+
+/* ==========================================================
+   Inline Input
+========================================================== */
+
+.inline-input {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.inline-input span {
+  padding: 12px 18px;
+
+  border-radius: 10px;
+
+  background: var(--background);
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* ==========================================================
+   Validation
+========================================================== */
+
+.input-error-msg {
+  display: none;
+
+  color: #ef4444;
+
+  font-size: 0.82rem;
+
+  margin-top: 8px;
+
+  line-height: 1.5;
+}
+
+/* ==========================================================
+   Summary
+========================================================== */
+
+.settings-summary {
+  position: sticky;
+
+  top: 20px;
+
+  background: rgba(59, 130, 246, 0.05);
+
+  border: 1px solid rgba(59, 130, 246, 0.15);
+
+  border-radius: 14px;
+
+  padding: 24px;
+}
+
+.settings-summary h3 {
+  margin-bottom: 20px;
+
+  font-size: 1.15rem;
+}
+
+.settings-summary ul {
+  list-style: none;
+}
+
+.settings-summary li {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 14px 0;
+
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.settings-summary li:last-child {
+  border-bottom: none;
+}
+
+.settings-summary span {
+  color: var(--text);
+
+  font-weight: 500;
+}
+
+.settings-summary strong {
+  color: var(--primary);
+
+  font-weight: 700;
+}
+
+/* ==========================================================
+   Footer
+========================================================== */
+
+.settings-footer {
+  display: flex;
+
+  justify-content: flex-end;
+}
+
+.settings-footer .btn-primary {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 13px 24px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.settings-footer .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.22);
+}
+
+.settings-footer .btn-primary:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   Number Inputs
+========================================================== */
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+
+  margin: 0;
+}
+
+/* input[type="number"] {
+  -moz-appearance: textfield;
+} */
+
+/* ==========================================================
+   Dark Theme
+========================================================== */
+
+[data-theme="dark"] .settings-card-header p {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .settings-summary {
+  background: rgba(96, 165, 250, 0.08);
+
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+[data-theme="dark"] .inline-input span {
+  background: #3b3b3b;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 992px) {
+  .settings-body {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-content {
+    padding: 20px;
+  }
+
+  .settings-summary li {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 8px;
+  }
+
+  .settings-footer {
+    justify-content: center;
+  }
+
+  .settings-footer .btn-primary {
+    width: 100%;
+
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .inline-input {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .inline-input span {
+    text-align: center;
+  }
+}

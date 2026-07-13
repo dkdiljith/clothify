@@ -1,6 +1,7 @@
 const User = require("../models/userSchema");
 const Product = require(`../models/productSchema`)
 const Wallet = require(`../models/walletSchema`)
+const Settings = require(`../models/settingSchema`)
 
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -14,6 +15,10 @@ const sendResetEmail = require(`../services/nodemailer`).passwordResetEmailSend
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
+
+//////////////wallet cretaion/////////////////////
+const createWallet = require(`../controllers/walletController`).createWallet
+const createReferral = require(`../controllers/referralController`).createReferral
 
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
@@ -60,53 +65,50 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
 const generateVerificationCode = () => {
   const verificationToken = crypto.randomInt(100000, 1000000).toString();
   const tokenExpiration = Date.now() + 900000; // 15 minutes in milliseconds
-  
+
   return { verificationToken, tokenExpiration };
 };
-
-
-
-//wallet creation
-async function createWallet(userId) {
-  try {
-    const existingWallet = await Wallet.findOne({ userId }).lean()
-
-    if (existingWallet) {
-      return existingWallet;
-    }
-
-    const newWallet = new Wallet({
-      userId: userId,
-      balance: 0,
-      transactions: [],
-    });
-
-    const savedWallet = await newWallet.save();
-    return savedWallet;
-  } catch (error) {
-    if (error.code === 11000) {
-      // Duplicate key error
-      console.error("Wallet creation failed: Wallet already exists for this user.");
-      return null; // Or throw a specific error object
-    } else {
-      console.error("Error creating wallet:", error);
-      throw error; // Rethrow other errors
-    }
-  }
-}
-
 
 
 // ======================================================================================================
 
 
 exports.homeRender = async (req, res) => {
-  const product = await Product.find().limit(8).lean()
+  try {
 
-  return res.render(`user/home`, {
-    product: product
-  })
-}
+    const [product, settings] = await Promise.all([
+
+      Product.find().limit(8).lean(),
+      Settings.findOne({
+        settingsType: "global_settings",
+      }).lean(),
+
+    ]);
+
+    const showModal = !!(
+      req.session.user &&
+      req.session.user.showWelcomeModal === true
+    );
+
+    const referralSettings = settings?.referralSettings || {
+      coinValue: "0.010",
+      referrerReward: 300,
+      refereeReward: 500,
+      signupBonus: 1000,
+      referralHoldingPeriodDays: 7,
+    };
+
+    return res.render("user/home", {
+      product,
+      showWelcomeModal: showModal,
+      referralSettings,
+    });
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
 
 // Display reset password form (with token verification)
@@ -176,61 +178,69 @@ exports.userLogout = (req, res) => {
 //POST METHODS
 
 
-
 exports.register = async (req, res) => {
-  const passwordHash = await securePassword(req.body.password);
-  const validatePhone = await validatePhoneStartsWithPlus91(req.body.phone);
+  try {
+    // 1. Secure inputs first inside the try block
+    const passwordHash = await securePassword(req.body.password);
+    const validatePhone = await validatePhoneStartsWithPlus91(req.body.phone);
+    const { verificationToken, tokenExpiration } = generateVerificationCode();
 
-  const { verificationToken, tokenExpiration } = generateVerificationCode();
+    const existingUser = await User.findOne({ email: req.body.email });
 
-  const existingUser = await User.findOne({ email: req.body.email });
-  if (existingUser) {
-    if (existingUser.isVerified) {
-      return res.render('user/register', { message: "Email is already registered", plain_body: true });
-    } else {
-      const checkPassword = await bcrypt.compare(
-        req.body.password,
-        existingUser.password
-      );
-
-      if (checkPassword) {
-
-        req.session.unknown_user = { _id: existingUser._id, email: existingUser.email }
-        await verificationEmailSend(req.body.email, verificationToken);
-        return res.render("user/emailVerification", { plain_body: true, verificationTimer: existingUser.verificationTimer, verificationAttempts: existingUser.verificationAttempts });
-      } else {
+    if (existingUser) {
+      // Scenario A: User is already fully registered
+      if (existingUser.isVerified) {
         return res.render('user/register', { message: "Email is already registered", plain_body: true });
       }
-    }
 
-  } else {
-    try {
-      const user = new User({
-        name: req.body.name,
-        phone: validatePhone,
-        email: req.body.email,
-        password: passwordHash,
-        verificationToken: verificationToken,
-        verificationTokenExpires: tokenExpiration,
+      // Scenario B: User exists but is unverified (Overwrite old token and let them try verifying again)
+      existingUser.password = passwordHash; // Update to latest password choice
+      existingUser.phone = validatePhone;
+      existingUser.name = req.body.name;
+      existingUser.verificationToken = verificationToken;
+      existingUser.verificationTokenExpires = tokenExpiration;
+      existingUser.verificationAttempts += 1;
+      existingUser.verificationTimer = Date.now() + 60000; // 1 minute timer
+
+      await existingUser.save();
+      await verificationEmailSend(req.body.email, verificationToken);
+
+      req.session.unknown_user = { _id: existingUser._id, email: existingUser.email };
+
+      return res.render("user/emailVerification", {
+        plain_body: true,
+        verificationTimer: existingUser.verificationTimer,
+        verificationAttempts: existingUser.verificationAttempts
       });
-
-      let result = await user.save();
-
-      if (result) {
-        req.session.unknown_user = { _id: user._id, email: user.email }
-        await verificationEmailSend(req.body.email, verificationToken);
-        user.verificationAttempts += 1
-        user.verificationTimer = Date.now() + 60000; //1 munute timer
-        await user.save()
-        return res.render("user/emailVerification", { plain_body: true, verificationTimer: user.verificationTimer, verificationAttempts: user.verificationAttempts });
-      }
-    } catch (error) {
-      console.error("Error during registration:", error);
-      return res.render('user/register', { message: "Error during registration", plain_body: true });
     }
+
+    const user = new User({
+      name: req.body.name,
+      phone: validatePhone,
+      email: req.body.email,
+      password: passwordHash,
+      verificationToken: verificationToken,
+      verificationTokenExpires: tokenExpiration,
+      verificationAttempts: 1,
+      verificationTimer: Date.now() + 60000
+    });
+
+    await user.save();
+    await verificationEmailSend(req.body.email, verificationToken);
+
+    req.session.unknown_user = { _id: user._id, email: user.email };
+
+    return res.render("user/emailVerification", {
+      plain_body: true,
+      verificationTimer: user.verificationTimer,
+      verificationAttempts: user.verificationAttempts
+    });
+
+  } catch (error) {
+    console.error("Error during registration:", error);
+    return res.render('user/register', { message: "Error during registration", plain_body: true });
   }
 };
-
 
 
 
@@ -239,7 +249,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).lean()
 
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
@@ -273,6 +283,7 @@ exports.login = async (req, res) => {
 
     // Create wallet if needed
     await createWallet(user._id);
+    await createReferral(user._id)
 
     return res.status(200).json({ success: true, message: "Login successful" });
 
@@ -320,12 +331,16 @@ exports.emailVerification = async (req, res) => {
           email: user.email,
           phone: user.phone || null
         };
-        
+
+        //session for showing modal for newely registered users
+        req.session.user.showWelcomeModal = true;
+
         // Clean up temporary user tracking session token context memory
-        delete req.session.unknown_user; 
+        delete req.session.unknown_user;
 
         // Safely call wallet creation (ensure this handles async internally if needed)
-        createWallet(user._id);
+        await createWallet(user._id);
+        await createReferral(user._id);
 
         return res.json({ success: true, message: "Email verified successfully" });
       } else {
@@ -360,7 +375,7 @@ exports.resendEmailVerification = async (req, res) => {
 
     const userId = req.session.unknown_user._id;
     const userEmail = req.session.unknown_user.email;
-    
+
     // 2. Database Fetch
     const user = await User.findById(userId);
     if (!user) {
@@ -369,11 +384,11 @@ exports.resendEmailVerification = async (req, res) => {
 
     // 3. Timer Check
     const currentTime = Date.now();
-    if (user.verificationTimer  > currentTime) {
-      return res.json({ 
-        success: false, 
-        newTimer: user.verificationTimer, 
-        error: "Please wait 1 minute before requesting a new code." 
+    if (user.verificationTimer > currentTime) {
+      return res.json({
+        success: false,
+        newTimer: user.verificationTimer,
+        error: "Please wait 1 minute before requesting a new code."
       });
     }
 

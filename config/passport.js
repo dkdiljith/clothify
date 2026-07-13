@@ -6,8 +6,9 @@ const Wallet = require(`../models/walletSchema`)
 require('dotenv').config();
 
 
-//////////////wallet cretaion/////////////////////
+///////////////////////////////////////////////
 const createWallet = require(`../controllers/walletController`).createWallet
+const createReferral = require(`../controllers/referralController`).createReferral
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,19 +22,24 @@ passport.use(new GoogleStrategy(
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      let user = await User.findOne({ googleId: profile.id });
+      // 1. Use .lean() here safely on the query for existing users
+      let user = await User.findOne({ googleId: profile.id }).lean();
       if (user) {
         return done(null, user);
       }
-      // Check if a user exists with the same email
+
+      // 2. Use .lean() here safely on the query for email checking
       user = await User.findOne({ email: profile.emails[0].value });
       if (user) {
         user.googleId = profile.id;
         user.name = profile.displayName;
         await user.save();
-        return done(null, user);
+
+        // Convert to a plain object since save() returns a document
+        return done(null, user.toObject());
       }
-      // Create a new user if not found
+
+      // 3. For new users, create and save them normally
       const newUser = new User({
         googleId: profile.id,
         email: profile.emails[0].value,
@@ -41,18 +47,27 @@ passport.use(new GoogleStrategy(
         isVerified: true,
       });
       await newUser.save();
-      await createWallet(newUser._id)
+      await createWallet(newUser._id);
+      await createReferral(newUser._id);
 
-      return done(null, newUser);
+      // Alternative to .toObject(): Extract raw object using JSON methods
+      const registeredUser = JSON.parse(JSON.stringify(newUser));
+      registeredUser.isNewRegistration = true;
+
+      return done(null, registeredUser);
+
     } catch (error) {
       return done(error);
     }
   }
 ));
 
+
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  const userId = user._id || user.id;
+  done(null, userId);
 });
+
 
 passport.deserializeUser(async (id, done) => {
   try {
@@ -75,7 +90,7 @@ const googleLogin = (req, res, next) => {
 const googleCallback = (req, res, next) => {
   passport.authenticate('google', (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.redirect('/login');
+    if (!user) return res.redirect('/user/login');
 
     req.login(user, { keepSessionInfo: true }, (err) => {
       if (err) return next(err);
@@ -86,6 +101,11 @@ const googleCallback = (req, res, next) => {
         email: user.email,
         phone: user.phone || null
       };
+
+      if (user.isNewRegistration) {
+        req.session.user.showWelcomeModal = true;
+        return res.redirect('/user/home');
+      }
 
       return res.redirect('/user/home');
     });

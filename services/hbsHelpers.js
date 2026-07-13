@@ -54,12 +54,6 @@ module.exports = {
     }
     return null;
   },
-  multiply: function (a, b) {
-    if (a === null || a === undefined || b === null || b === undefined) {
-      return 0;
-    }
-    return a * b;
-  },
 
 
 
@@ -106,8 +100,14 @@ module.exports = {
     return a < b;
   },
   formatDate: function (date) {
-    return new Date(date).toLocaleDateString(); // Format the date
-  },
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+},
 
   //userOrderDetails
   or: function () {
@@ -206,9 +206,21 @@ module.exports = {
   and: function () {
     const args = Array.prototype.slice.call(arguments, 0, -1);
     return args.every(Boolean);
-  }
+  },
 
+  //referral page
+ initial: function (name) {
+    if (!name) return "";
+    return name.charAt(0).toUpperCase();
+},
 
+coinValuePreview: function (coinValue) {
+    if (!coinValue) return "100 Coins = ₹0";
 
+    return `100 Coins = ₹${100 * Number(coinValue)}`;
+},
+coinValue: (coins, value) => {
+    return (Number(coins) * Number(value)).toFixed(2);
+}
 };
 

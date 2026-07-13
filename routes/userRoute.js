@@ -29,6 +29,7 @@ const walletController = require(`../controllers/walletController`)
 const couponController = require(`../controllers/couponController`)
 const searchController = require(`../controllers/searchController`)
 const addressController = require(`../controllers/addressController`)
+const referralController = require(`../controllers/referralController`)
 
 //usetAuth (session) 
 const userAuth = require(`../middlewares/auth`).userAuth
@@ -77,19 +78,19 @@ router.get(`/cartDataIcon`, userAuth, cartController.cartDataIcon)
 router.get(`/wishlistDataIcon`, userAuth, wishlistController.wishlistDataIcon)
 
 //ADD TO CART
-router.get(`/cart`, userAuth,productValidator, cartController.cartRender)
-router.post('/cart/:productId/:variationIndex/:quantity', userAuth,productValidator, cartController.addToCart)
+router.get(`/cart`, userAuth, productValidator, cartController.cartRender)
+router.post('/cart/:productId/:variationIndex/:quantity', userAuth, productValidator, cartController.addToCart)
 router.delete('/cart/:productId/:variationIndex', userAuth, cartController.deleteCart)
-router.get(`/addressInCart`, userAuth,productValidator, cartController.getAddressInCart)
+router.get(`/addressInCart`, userAuth, productValidator, cartController.getAddressInCart)
 
-router.get('/address/:id', userAuth,productValidator, addressController.renderEditForm)
-router.post('/postAddressInCart', userAuth,productValidator, addressController.addAddress);
-router.put('/address/:id', userAuth,productValidator, addressController.editAddress);
-router.delete('/address/:id', userAuth,productValidator, addressController.deleteAddress);
-router.put('/address/default/:id', userAuth,productValidator, addressController.setDefaultAddress);
+router.get('/address/:id', userAuth, productValidator, addressController.renderEditForm)
+router.post('/postAddressInCart', userAuth, productValidator, addressController.addAddress);
+router.put('/address/:id', userAuth, productValidator, addressController.editAddress);
+router.delete('/address/:id', userAuth, productValidator, addressController.deleteAddress);
+router.put('/address/default/:id', userAuth, productValidator, addressController.setDefaultAddress);
 
-router.get('/payment', userAuth,productValidator, userOrderController.payment);
-router.post(`/placeorder`, userAuth,productValidator, userOrderController.placeOrder)
+router.get('/payment', userAuth, productValidator, userOrderController.payment);
+router.post(`/placeorder`, userAuth, productValidator, userOrderController.placeOrder)
 router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)
 router.get(`/orderSuccess`, userAuth, userOrderController.orderSuccess)
 router.get(`/orderFailure`, userAuth, userOrderController.orderFailed)
@@ -99,9 +100,9 @@ router.post(`/cart/apply-coupon`, userAuth, couponController.applyCoupon)
 router.delete(`/cart/remove-coupon`, userAuth, couponController.removeCoupon)
 
 //WIshlist
-router.get(`/wishlist`, userAuth,productValidator, wishlistController.wishlistRender)
+router.get(`/wishlist`, userAuth, productValidator, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex`, userAuth, wishlistController.addToWishlist)
-router.post(`/cart/wishlist/:productId` , userAuth,wishlistController.addToCartFromWishlist)
+router.post(`/cart/wishlist/:productId`, userAuth, wishlistController.addToCartFromWishlist)
 router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFromWishlist)
 
 //USER PROFILE
@@ -118,6 +119,12 @@ router.get(`/orders`, userAuth, userProfileController.userOrders)
 router.get(`/orderDetails/:orderId/:itemId`, userAuth, userProfileController.userOrderDetails)
 router.post(`/download-invoice`, userAuth, downloadInvoice)
 router.get(`/security`, userAuth, userProfileController.securityRender)
+
+router.route(`/referral`)
+  .get(userAuth, referralController.referral)
+  .post(userAuth, referralController.applyReferral)
+router.post(`/referral/reedeem`, userAuth, referralController.redeemCoin)
+router.post(`/referral/cancel`, userAuth, referralController.cancelReferral)
 
 router.post('/cancel-order', userAuth, orderController.orderCancel)
 router.post('/return-order', userAuth, orderController.orderReturn)
