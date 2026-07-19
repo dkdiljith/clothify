@@ -33,14 +33,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     //block product handle
-    document.body.addEventListener('click', (event) => {
+    document.body.addEventListener('click', async (event) => {
         const button = event.target.closest('.block-toggle-btn');
-
         if (button) {
             const userId = button.dataset.userId;
-            handleBlock(userId);
+
+            const isBlocking = button.textContent.toLowerCase().includes('block') && !button.textContent.toLowerCase().includes('unblock');
+            const actionText = isBlocking ? "Block" : "Unblock";
+            const modalType = isBlocking ? "danger" : "warning";
+
+            // Await confirmation directly from the standalone alert modal script file
+            const confirmed = await showCustomConfirm(
+                `${actionText} Product?`,
+                `Are you sure you want to ${actionText.toLowerCase()} this product layout?\nThis updates store-front catalog visibility configurations instantly.`,
+                modalType
+            );
+
+            if (confirmed) {
+                handleBlock(userId);
+            }
         }
     });
+
 
 
     async function handleBlock(productId) {

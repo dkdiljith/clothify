@@ -67,6 +67,8 @@ function initializeRemoveButtons() {
 
             await removeFromWishlist(productId);
 
+               showPopupMessage("Product removed from wishlist successfully!", "success");
+
         });
 
     });
@@ -95,6 +97,8 @@ function initializeAddToCartButtons() {
             await addToCart(
                 productId,
             );
+
+               showPopupMessage("Product added to cart successfully!", "success");
 
         });
 

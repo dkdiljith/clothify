@@ -4,9 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const applyButtons = document.querySelectorAll('.btn-submit-coupon');
 
     removeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            removeCoupon();
-        });
+        button.addEventListener('click', () => { removeCoupon(); });
     });
 
     applyButtons.forEach(button => {
@@ -16,15 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-
-    // Quantity adjustment buttons
+    // =========================================================
+    // QUANTITY ADJUSTMENT BUTTONS (REFRESH-FREE WORKFLOW)
+    // =========================================================
     document.querySelectorAll(".btn-quantity").forEach((button) => {
         button.addEventListener("click", async function () {
             const productId = this.getAttribute("data-product-id");
             const variationIndex = this.getAttribute("data-variation-index");
             const isIncrement = this.classList.contains("increment-quantity");
-
             const quantityChange = isIncrement ? 1 : -1;
+
+            const itemRow = this.closest(".cart-item");
+            const quantityInput = itemRow ? itemRow.querySelector(".quantity-input") : null;
+            const itemTotalElement = itemRow ? itemRow.querySelector(".total-price") : null;
+            const decrementButton = itemRow ? itemRow.querySelector(".decrement-quantity") : null;
 
             try {
                 const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantityChange}`, {
@@ -32,11 +35,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ quantity: quantityChange }),
                 });
-
                 const data = await response.json();
 
                 if (data.success) {
-                    location.reload();
+                    if (quantityInput && data.newQuantity !== undefined) {
+                        quantityInput.value = data.newQuantity;
+
+                        if (decrementButton) {
+                            if (parseInt(data.newQuantity) <= 1) {
+                                decrementButton.setAttribute("disabled", "true");
+                            } else {
+                                decrementButton.removeAttribute("disabled");
+                            }
+                        }
+                    }
+
+                    if (itemTotalElement && data.itemTotal !== undefined) {
+                        itemTotalElement.innerHTML = `Total: ₹${parseFloat(data.itemTotal).toFixed(2)}`;
+                    }
+
+                    updateCartSummaryUI(data);
+                    showPopupMessage(data.message || "Cart updated successfully", "success");
                 } else {
                     showPopupMessage(data.message || "Operation failed", "error");
                 }
@@ -47,21 +66,47 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Remove item buttons
+    // =========================================================
+    // REMOVE ITEM BUTTONS (REFRESH-FREE WORKFLOW)
+    // =========================================================
     document.querySelectorAll(".btn-remove").forEach((button) => {
         button.addEventListener("click", async function () {
             const productId = this.getAttribute("data-product-id");
             const variationIndex = this.getAttribute("data-variation-index");
+            const itemRow = this.closest(".cart-item");
+
+            const confirmed = await showCustomConfirm(
+                "Remove Item?",
+                "Are you sure you want to completely remove this product from your shopping cart?",
+                "danger"
+            );
+
+            if (!confirmed) return;
 
             try {
                 const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
                     method: "DELETE"
                 });
-
                 const data = await response.json();
 
                 if (data.success) {
-                    location.reload();
+                    if (itemRow) {
+                        itemRow.style.transition = "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+                        itemRow.style.opacity = "0";
+                        itemRow.style.transform = "translate3d(-20px, 0, 0)";
+
+                        setTimeout(() => {
+                            itemRow.remove();
+
+                            const remainingItems = document.querySelectorAll(".cart-item");
+                            if (remainingItems.length === 0) {
+                                location.reload(); // Reload to render Handlebars empty checkout templates cleanly
+                            } else {
+                                updateCartSummaryUI(data);
+                            }
+                        }, 300);
+                    }
+                    showPopupMessage("Item removed from cart.", "info");
                 } else {
                     showPopupMessage(data.message || "Failed to remove item", "error");
                 }
@@ -73,39 +118,98 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// =========================================================
+// INTERNALS: CART TOTAL SUMMARY UI NODE REWRITER
+// =========================================================
+function updateCartSummaryUI(data) {
+    const summarySection = document.querySelector(".cart-summary-section");
+    if (!summarySection || !data) return;
+
+    if (data.cartSubtotal !== undefined) window.currentCartSubtotal = parseFloat(data.cartSubtotal);
+
+    const itemsCountLabel = summarySection.querySelector(".summary-item:nth-of-type(1) span:nth-of-type(1)");
+    const subtotalPriceLabel = summarySection.querySelector(".summary-item:nth-of-type(1) span:nth-of-type(2)");
+    const shippingFeeLabel = summarySection.querySelector(".summary-item:nth-of-type(2) span:nth-of-type(2)");
+    const taxPriceLabel = summarySection.querySelector(".summary-item:nth-of-type(3) span:nth-of-type(2)");
+    const totalAmountLabel = summarySection.querySelector(".summary-item.total span:nth-of-type(2)");
+
+    if (itemsCountLabel && data.cartTotalItems !== undefined) itemsCountLabel.textContent = `Subtotal (${data.cartTotalItems} items)`;
+    if (subtotalPriceLabel && data.cartSubtotal !== undefined) subtotalPriceLabel.textContent = `₹${parseFloat(data.cartSubtotal).toFixed(2)}`;
+    if (taxPriceLabel && data.tax !== undefined) taxPriceLabel.textContent = `₹${parseFloat(data.tax).toFixed(2)}`;
+    if (totalAmountLabel && data.totalAmount !== undefined) totalAmountLabel.textContent = `₹${parseFloat(data.totalAmount).toFixed(2)}`;
+
+    if (shippingFeeLabel && data.shippingFee !== undefined) {
+        if (parseFloat(data.shippingFee) === 0) {
+            shippingFeeLabel.textContent = "Free";
+            shippingFeeLabel.style.color = "var(--success-color)";
+        } else {
+            shippingFeeLabel.textContent = `₹${parseFloat(data.shippingFee).toFixed(2)}`;
+            shippingFeeLabel.style.color = "inherit";
+        }
+    }
+
+    // Dynamic Coupon and Offer row handling
+    let summaryContainer = summarySection.querySelector(".price-summary");
+    let totalRow = summarySection.querySelector(".summary-item.total");
+
+    let couponRow = summarySection.querySelector(".coupon-discount-row");
+    if (data.couponDiscount > 0) {
+        if (!couponRow) {
+            couponRow = document.createElement("div");
+            couponRow.className = "summary-item coupon-discount-row";
+            couponRow.innerHTML = `<span>Coupon Discount</span><span style="color: var(--success-color);">-₹${parseFloat(data.couponDiscount).toFixed(2)}</span>`;
+            summaryContainer.insertBefore(couponRow, totalRow);
+        } else {
+            couponRow.querySelector("span:nth-of-type(2)").textContent = `-₹${parseFloat(data.couponDiscount).toFixed(2)}`;
+        }
+    } else if (couponRow) {
+        couponRow.remove();
+    }
+
+    let offerRow = summarySection.querySelector(".offer-discount-row");
+    if (data.offerDiscount > 0) {
+        if (!offerRow) {
+            offerRow = document.createElement("div");
+            offerRow.className = "summary-item offer-discount-row";
+            offerRow.innerHTML = `<span>Discount For You</span><span style="color: var(--success-color);">-₹${parseFloat(data.offerDiscount).toFixed(2)}</span>`;
+            summaryContainer.insertBefore(offerRow, totalRow);
+        } else {
+            offerRow.querySelector("span:nth-of-type(2)").textContent = `-₹${parseFloat(data.offerDiscount).toFixed(2)}`;
+        }
+    } else if (offerRow) {
+        offerRow.remove();
+    }
+}
+
+// =========================================================
+// COUPONS CONTROL CHANNELS
+// =========================================================
 async function applyCoupon(couponId) {
     const couponCard = document.querySelector(`.coupon-card button[data-id="${couponId}"]`).closest('.coupon-card');
     const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
-    const currentSubtotal = parseFloat('{{subtotal}}');
+
+    const subtotalEl = document.querySelector(".cart-summary-section .summary-item:nth-of-type(1) span:nth-of-type(2)");
+    const currentSubtotal = window.currentCartSubtotal || (subtotalEl ? parseFloat(subtotalEl.textContent.replace('₹', '')) : 0);
 
     if (currentSubtotal < minPurchase) {
         showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
         return;
     }
 
-    const confirmation = await Swal.fire({
-        title: 'Apply Coupon?',
-        html: `Are you sure you want to apply this coupon?<br><br>
-              <strong>${couponCard.querySelector('.coupon-code').textContent}</strong><br>
-              ${couponCard.querySelector('.coupon-discount').textContent}<br><br>
-              Current discount will be replaced.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, apply it!',
-        cancelButtonText: 'Cancel'
-    });
+    const confirmed = await showCustomConfirm(
+        'Apply Coupon?',
+        `Are you sure you want to apply this coupon?\n\nCode: ${couponCard.querySelector('.coupon-code').textContent}\n${couponCard.querySelector('.coupon-discount').textContent}\n\nYour active checkout deduction records will refresh.`,
+        'info'
+    );
 
-    if (!confirmation.isConfirmed) return;
+    if (!confirmed) return;
 
     try {
         const response = await fetch('/user/cart/apply-coupon', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                couponId: couponId,
-            })
+            body: JSON.stringify({ couponId: couponId })
         });
-
         const data = await response.json();
         if (data.success) {
             location.reload();
@@ -118,23 +222,19 @@ async function applyCoupon(couponId) {
     }
 }
 
-async function removeCoupon() {
-    const confirmation = await Swal.fire({
-        title: 'Remove Coupon?',
-        text: 'Are you sure you want to remove the applied coupon?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, remove it!',
-        cancelButtonText: 'Cancel'
-    });
 
-    if (!confirmation.isConfirmed) return;
+
+async function removeCoupon() {
+    const confirmed = await showCustomConfirm(
+        'Remove Coupon?',
+        'Are you sure you want to release the active coupon balance configurations from this transaction?',
+        'warning'
+    );
+
+    if (!confirmed) return;
 
     try {
-        const response = await fetch('/user/cart/remove-coupon', {
-            method: 'DELETE'
-        });
-
+        const response = await fetch('/user/cart/remove-coupon', { method: 'DELETE' });
         const data = await response.json();
         if (data.success) {
             location.reload();
@@ -146,3 +246,5 @@ async function removeCoupon() {
         showPopupMessage('Failed to remove coupon. Please try again.', 'error');
     }
 }
+
+

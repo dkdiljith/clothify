@@ -1,206 +1,189 @@
-{{#section 'head'}}
-<title>Your Shopping Cart</title>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
-{{/section}}
+{{#section 'head'}} 
+<title>Your Shopping Cart</title> 
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css"> 
+{{/section}} 
 
+<div class="cart-page"> 
+  <div class="container"> 
+    <div class="cart-container"> 
+      
+      {{#if coupons.length}} 
+      <div class="coupons-available"> 
+        <h3><i class="fas fa-tag"></i> Available Coupons</h3> 
+        {{#each coupons}} 
+        <div class="coupon-card {{#if (eq this._id ../cart.couponId)}}applied-coupon{{/if}}"> 
+          {{#if (eq this._id ../cart.couponId)}} 
+          <div class="applied-coupon-badge" title="Currently Applied"> 
+            <i class="fas fa-check"></i> 
+          </div> 
+          {{/if}} 
+          <div class="coupon-header"> 
+            <span class="coupon-code">{{this.couponCode}}</span> 
+            <span class="coupon-discount"> 
+              {{#if (eq this.discountType 'percentage')}} 
+              {{this.discountValue}}% OFF 
+              {{else}} 
+              ₹{{this.discountValue}} OFF 
+              {{/if}} 
+            </span> 
+          </div> 
+          <div class="coupon-details"> 
+            {{#if (eq this.discountType 'percentage')}} 
+            Get {{this.discountValue}}% discount on your order 
+            {{else}} 
+            Get flat ₹{{this.discountValue}} discount on your order 
+            {{/if}} 
+          </div> 
+          <div class="coupon-min-purchase"> 
+            Min. purchase: ₹{{this.minimumPurchaseAmount}} 
+          </div> 
+          {{#if (eq this._id ../cart.couponId)}} 
+          <button class="btn-apply-coupon btn-remove-coupon"> 
+            <i class="fas fa-times"></i> Remove Coupon 
+          </button> 
+          {{else}} 
+          <button class="btn-apply-coupon btn-submit-coupon" data-id="{{this._id}}"> 
+            <i class="fas fa-tag"></i> Apply Coupon 
+          </button> 
+          {{/if}} 
+        </div> 
+        {{/each}} 
+      </div> 
+      {{/if}} 
 
-<div class="cart-page">
-  <div class="container">
-    <div class="cart-container">
+      <div class="cart-items-section"> 
+        <div class="cart-page-header"> 
+          <h1 class="cart-page-title"> Your Shopping Cart </h1> 
+          <p class="cart-page-subtitle"> Review your selected products and proceed to secure checkout. </p> 
+        </div> 
+        
+        <div class="cart-items"> 
+          {{#if cart.items}} 
+          {{#each cart.items}} 
+          <div class="cart-item"> 
+            <div class="item-image"> 
+              <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}"> 
+            </div> 
+            <div class="item-details"> 
+              <h3>{{this.productId.name}}</h3> 
+              <p class="item-variation"> 
+                {{#if (getDetail this.productId.details this.variationIndex "size")}} 
+                Size: {{getDetail this.productId.details this.variationIndex "size"}} 
+                {{else}} 
+                Size: Not Specified 
+                {{/if}} 
+              </p> 
+              <p class="price"> 
+                ₹{{#if (getDetail this.productId.details this.variationIndex "price")}} 
+                {{getDetail this.productId.details this.variationIndex "price"}} 
+                {{else}} 
+                Price not available 
+                {{/if}} per unit 
+              </p> 
+              <div class="quantity-selector"> 
+                <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" {{#if (lte this.quantity 1)}}disabled{{/if}}> 
+                  <i class="fas fa-minus"></i> 
+                </button> 
+                <input type="number" value="{{this.quantity}}" min="1" class="quantity-input" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" readonly> 
+                <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}"> 
+                  <i class="fas fa-plus"></i> 
+                </button> 
+              </div> 
+              <p class="total-price"> 
+                Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}} 
+              </p> 
+            </div> 
+            <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}"> 
+              <i class="fas fa-trash"></i> Remove 
+            </button> 
+          </div> 
+          {{/each}} 
+          {{else}} 
+          <div class="empty-cart-message"> 
+            <i class="fas fa-shopping-cart"></i> 
+            <h3>Your Cart is Empty</h3> 
+            <p>Looks like you haven't added anything to your cart yet</p> 
+            <a href="/user/home" class="btn-shop"> 
+              <i class="fas fa-arrow-left"></i> Continue Shopping 
+            </a> 
+          </div> 
+          {{/if}} 
+        </div> 
+      </div> 
 
-      {{#if coupons.length}}
-      <div class="coupons-available">
-        <h3><i class="fas fa-tag"></i> Available Coupons</h3>
-        {{#each coupons}}
-        <div class="coupon-card {{#if (eq this._id ../cart.couponId)}}applied-coupon{{/if}}">
-          {{#if (eq this._id ../cart.couponId)}}
-          <div class="applied-coupon-badge" title="Currently Applied">
-            <i class="fas fa-check"></i>
-          </div>
-          {{/if}}
-          <div class="coupon-header">
-            <span class="coupon-code">{{this.couponCode}}</span>
-            <span class="coupon-discount">
-              {{#if (eq this.discountType 'percentage')}}
-              {{this.discountValue}}% OFF
-              {{else}}
-              ₹{{this.discountValue}} OFF
-              {{/if}}
-            </span>
-          </div>
-          <div class="coupon-details">
-            {{#if (eq this.discountType 'percentage')}}
-            Get {{this.discountValue}}% discount on your order
-            {{else}}
-            Get flat ₹{{this.discountValue}} discount on your order
-            {{/if}}
-          </div>
-          <div class="coupon-min-purchase">
-            Min. purchase: ₹{{this.minimumPurchaseAmount}}
-          </div>
-          {{#if (eq this._id ../cart.couponId)}}
-          <button class="btn-apply-coupon btn-remove-coupon">
-            <i class="fas fa-times"></i> Remove Coupon
-          </button>
-          {{else}}
-          <button class="btn-apply-coupon btn-submit-coupon" data-id="{{this._id}}">
-            <i class="fas fa-tag"></i> Apply Coupon
-          </button>
+      {{#if cart.items}} 
+      <div class="cart-summary-section"> 
+        <div class="price-summary cart-summary"> 
+          <h2>Order Summary</h2> 
+          <div class="summary-item"> 
+            <span>Subtotal ({{cart.totalItems}} items)</span> 
+            <span>₹{{subtotal}}</span> 
+          </div> 
+          <div class="summary-item"> 
+            <span>Shipping</span> 
+            {{#ifEquals shippingFee 0}} 
+            <span style="color: var(--success-color);">Free</span> 
+            {{else}} 
+            <span>₹{{shippingFee}}</span> 
+            {{/ifEquals}} 
+          </div> 
+          <div class="summary-item"> 
+            <span>Tax</span> 
+            <span>₹{{tax}}</span> 
+          </div> 
+          
+          <!-- FIX 1: Coupon Discount Row (Always rendered, visually toggled via styles instead of dropped) -->
+          <div class="summary-item coupon-discount-row" style="{{#unless cart.couponId}}display: none;{{/unless}}"> 
+            <span>Coupon Discount</span> 
+            <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span> 
+          </div> 
 
-          {{/if}}
-        </div>
-        {{/each}}
-      </div>
-      {{/if}}
+          <!-- FIX 2: Offer Discount Row (Always rendered, visually toggled via styles instead of dropped) -->
+          <div class="summary-item offer-discount-row" style="{{#unless cart.offerDiscount}}display: none;{{/unless}}"> 
+            <span>Discount For You</span> 
+            <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span> 
+          </div> 
 
+          <div class="summary-item total"> 
+            <span>Total Amount</span> 
+            <span>₹{{totalAmount}}</span> 
+          </div> 
+        </div> 
+        <button onclick="location.href='/user/addressInCart'" class="btn-checkout"> 
+          <i class="fas fa-lock"></i> Proceed to Checkout 
+        </button> 
+      </div> 
+      {{else}} 
+      <div class="cart-summary-section"> 
+        <div class="price-summary cart-summary"> 
+          <h2>Order Summary</h2> 
+          <div class="summary-item"> 
+            <span>Subtotal (0 items)</span> 
+            <span>₹0.00</span> 
+          </div> 
+          <div class="summary-item"> 
+            <span>Shipping</span> 
+            <span>₹0.00</span> 
+          </div> 
+          <div class="summary-item"> 
+            <span>Tax</span> 
+            <span>₹0.00</span> 
+          </div> 
+          <div class="summary-item total"> 
+            <span>Total Amount</span> 
+            <span>₹0.00</span> 
+          </div> 
+        </div> 
+        <button class="btn-checkout" disabled> 
+          <i class="fas fa-lock"></i> Proceed to Checkout 
+        </button> 
+      </div> 
+      {{/if}} 
 
-      <div class="cart-items-section">
-        <div class="cart-page-header">
+    </div> 
+  </div> 
+</div> 
 
-          <h1 class="cart-page-title">
-            Your Shopping Cart
-          </h1>
-
-          <p class="cart-page-subtitle">
-            Review your selected products and proceed to secure checkout.
-          </p>
-
-        </div>
-        <div class="cart-items">
-          {{#if cart.items}}
-          {{#each cart.items}}
-          <div class="cart-item">
-            <div class="item-image">
-              <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}">
-            </div>
-            <div class="item-details">
-              <h3>{{this.productId.name}}</h3>
-              <p class="item-variation">
-                {{#if (getDetail this.productId.details this.variationIndex "size")}}
-                Size: {{getDetail this.productId.details this.variationIndex "size"}}
-                {{else}}
-                Size: Not Specified
-                {{/if}}
-              </p>
-              <p class="price">
-                ₹{{#if (getDetail this.productId.details this.variationIndex "price")}}
-                {{getDetail this.productId.details this.variationIndex "price"}}
-                {{else}}
-                Price not available
-                {{/if}} per unit
-              </p>
-              <div class="quantity-selector">
-                <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}"
-                  data-variation-index="{{this.variationIndex}}" {{#if (lte this.quantity 1)}}disabled{{/if}}>
-                  <i class="fas fa-minus"></i>
-                </button>
-                <input type="number" value="{{this.quantity}}" min="1" class="quantity-input"
-                  data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" readonly>
-                <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}"
-                  data-variation-index="{{this.variationIndex}}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-              <p class="total-price">
-                Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}}
-              </p>
-            </div>
-            <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}"
-              data-variation-index="{{this.variationIndex}}">
-              <i class="fas fa-trash"></i> Remove
-            </button>
-          </div>
-          {{/each}}
-          {{else}}
-          <div class="empty-cart-message">
-            <i class="fas fa-shopping-cart"></i>
-            <h3>Your Cart is Empty</h3>
-            <p>Looks like you haven't added anything to your cart yet</p>
-            <a href="/user/home" class="btn-shop">
-              <i class="fas fa-arrow-left"></i> Continue Shopping
-            </a>
-          </div>
-          {{/if}}
-        </div>
-      </div>
-
-      {{#if cart.items}}
-      <div class="cart-summary-section">
-        <div class="price-summary cart-summary">
-          <h2>Order Summary</h2>
-          <div class="summary-item">
-            <span>Subtotal ({{cart.totalItems}} items)</span>
-            <span>₹{{subtotal}}</span>
-          </div>
-          <div class="summary-item">
-            <span>Shipping</span>
-            {{#ifEquals shippingFee 0}}
-            <span style="color: var(--success-color);">Free</span>
-            {{else}}
-            <span>₹{{shippingFee}}</span>
-            {{/ifEquals}}
-          </div>
-          <div class="summary-item">
-            <span>Tax</span>
-            <span>₹{{tax}}</span>
-          </div>
-
-
-
-          {{#if cart.couponId}}
-          <div class="summary-item">
-            <span>Coupon Discount</span>
-            <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
-          </div>
-          {{/if}}
-
-          {{#if cart.offerDiscount}}
-          <div class="summary-item">
-            <span>Discount For You</span>
-            <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
-          </div>
-          {{/if}}
-
-          <div class="summary-item total">
-            <span>Total Amount</span>
-            <span>₹{{totalAmount}}</span>
-          </div>
-        </div>
-        <button onclick="location.href='/user/addressInCart'" class="btn-checkout">
-          <i class="fas fa-lock"></i> Proceed to Checkout
-        </button>
-      </div>
-      {{else}}
-      <div class="cart-summary-section">
-        <div class="price-summary cart-summary">
-          <h2>Order Summary</h2>
-          <div class="summary-item">
-            <span>Subtotal (0 items)</span>
-            <span>₹0.00</span>
-          </div>
-          <div class="summary-item">
-            <span>Shipping</span>
-            <span>₹0.00</span>
-          </div>
-          <div class="summary-item">
-            <span>Tax</span>
-            <span>₹0.00</span>
-          </div>
-          <div class="summary-item total">
-            <span>Total Amount</span>
-            <span>₹0.00</span>
-          </div>
-        </div>
-        <button class="btn-checkout" disabled>
-          <i class="fas fa-lock"></i> Proceed to Checkout
-        </button>
-      </div>
-      {{/if}}
-    </div>
-  </div>
-</div>
-
-
-{{#section 'scripts'}}
-<script src="/javascripts/user/cart.js" defer></script>
+{{#section 'scripts'}} 
+<script src="/javascripts/user/cart.js" defer></script> 
 {{/section}}

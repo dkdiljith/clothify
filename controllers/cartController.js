@@ -112,9 +112,7 @@ exports.cartRender = async (req, res) => {
 exports.addToCart = async (req, res) => {
   try {
     const userId = res.locals.user._id;
-    
-    // Destructuring fields (Ensure your route matches req.params, or change to req.body)
-    const { productId, variationIndex, quantity: reqQty } = req.params; 
+    const { productId, variationIndex, quantity: reqQty } = req.params;
     const changeAmount = parseInt(reqQty);
     const vIndex = parseInt(variationIndex);
 
@@ -125,12 +123,11 @@ exports.addToCart = async (req, res) => {
     }
 
     let cart = await Cart.findOne({ userId });
-
-    const existingItem = cart ? cart.items.find(item =>
+    const existingItem = cart ? cart.items.find(item => 
       item.productId.toString() === productId && item.variationIndex === vIndex
     ) : null;
 
-    //HANDLE QUANTITY DECREMENT (changeAmount is negative, e.g., -1)
+    // HANDLE QUANTITY DECREMENT (changeAmount is negative, e.g., -1)
     if (changeAmount < 0) {
       if (!existingItem) {
         return res.status(404).json({ success: false, message: 'Item not found in cart' });
@@ -138,30 +135,40 @@ exports.addToCart = async (req, res) => {
       if (existingItem.quantity <= 1) {
         return res.status(400).json({ success: false, message: 'Minimum quantity is 1' });
       }
-
+      
       existingItem.quantity += changeAmount; // Decreases the quantity safely
       await cart.save();
-
-      // Recalculate all totals/coupons
+      
+      // Recalculate all totals/coupons natively across database models
       await recalculateCartSummary(userId);
+
+      // FIX: Fetch fresh calculations after summary script processing completes
+      const updatedCart = await Cart.findOne({ userId });
+      const currentUnitProductPrice = parseFloat(check.variation.price || 0);
 
       return res.status(200).json({
         success: true,
         message: 'Quantity decreased',
-        cartCount: cart.items.reduce((acc, item) => acc + item.quantity, 0)
+        newQuantity: existingItem.quantity,
+        itemTotal: existingItem.quantity * currentUnitProductPrice,
+        cartSubtotal: updatedCart.subtotal,
+        cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+        shippingFee: updatedCart.shippingFee,
+        tax: updatedCart.tax,
+        couponDiscount: updatedCart.couponDiscount,
+        offerDiscount: updatedCart.offerDiscount,
+        totalAmount: updatedCart.totalAmount
       });
     }
-    // HANDLE QUANTITY INCREMENT / ADD NEW (changeAmount is positive)
 
+    // HANDLE QUANTITY INCREMENT / ADD NEW (changeAmount is positive)
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
 
     const currentQtyInCart = existingItem ? existingItem.quantity : 0;
     const newTotalQty = currentQtyInCart + changeAmount;
-    
-    // check.variation gives you the direct variation object from your helper!
-    const productStock = check.variation.quantity; 
+    const productStock = check.variation.quantity;
 
     // Business Logic Limits
     if (newTotalQty > 10) {
@@ -176,16 +183,30 @@ exports.addToCart = async (req, res) => {
     } else {
       cart.items.push({ productId, variationIndex: vIndex, quantity: changeAmount });
     }
-
     await cart.save();
 
-    // Updates subtotal and recalculates everything
+    // Updates subtotal and recalculates everything inside the helper script
     await recalculateCartSummary(userId);
+
+    // FIX: Fetch fresh calculations after summary script processing completes
+    const updatedCart = await Cart.findOne({ userId });
+    const currentUnitProductPrice = parseFloat(check.variation.price || 0);
+    const postSavedTargetItem = updatedCart.items.find(item => 
+      item.productId.toString() === productId && item.variationIndex === vIndex
+    );
 
     return res.status(200).json({
       success: true,
       message: existingItem ? 'Quantity updated' : `Added ${check.product.name} to cart`,
-      cartCount: cart.items.reduce((acc, item) => acc + item.quantity, 0)
+      newQuantity: postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty,
+      itemTotal: (postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty) * currentUnitProductPrice,
+      cartSubtotal: updatedCart.subtotal,
+      cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+      shippingFee: updatedCart.shippingFee,
+      tax: updatedCart.tax,
+      couponDiscount: updatedCart.couponDiscount,
+      offerDiscount: updatedCart.offerDiscount,
+      totalAmount: updatedCart.totalAmount
     });
 
   } catch (error) {
@@ -196,6 +217,7 @@ exports.addToCart = async (req, res) => {
 
 
 
+
 ////////////////////////////////////////////////////////////OPERATIONS///////////////////////////////////////////////////////////////
 
 
@@ -203,28 +225,40 @@ exports.addToCart = async (req, res) => {
 
 exports.deleteCart = async (req, res) => {
   try {
-    const userId = res.locals.user._id
+    const userId = res.locals.user._id;
     const productId = req.params.productId;
     const variationIndex = parseInt(req.params.variationIndex);
 
     const cart = await Cart.findOne({ userId });
-
-
-
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
 
-    cart.items = cart.items.filter(item =>
+    // Filter out the item matching both product ID and variation index
+    cart.items = cart.items.filter(item => 
       !(item.productId.toString() === productId && item.variationIndex === variationIndex)
     );
+
     await cart.save();
 
-    const summary = await recalculateCartSummary(userId);
+    // Recalculates subtotals, shipping, and discount rules internally
+    await recalculateCartSummary(userId);
 
+    // Fetch the updated document from the database to grab fresh calculation states
+    const updatedCart = await Cart.findOne({ userId });
 
-
-    return res.json({ success: true, message: 'Item removed successfully', ...summary });
+    // Return the explicit key naming conventions expected by your cart.js
+    return res.json({
+      success: true,
+      message: 'Item removed successfully',
+      cartSubtotal: updatedCart.subtotal,
+      cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+      shippingFee: updatedCart.shippingFee,
+      tax: updatedCart.tax,
+      couponDiscount: updatedCart.couponDiscount,
+      offerDiscount: updatedCart.offerDiscount,
+      totalAmount: updatedCart.totalAmount
+    });
 
   } catch (error) {
     console.error('Delete error:', error);
