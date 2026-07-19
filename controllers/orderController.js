@@ -171,127 +171,96 @@ exports.orderDetails = async (req, res) => {
 
 
 
-
-
 exports.orderStatusChange = async (req, res) => {
-
   const orderId = req.params.orderId;
   const itemId = req.params.itemId;
   const newStatus = req.body.status;
 
   try {
-
     const order = await Order.findById(orderId);
-
     if (!order) {
-      throw new Error("Order not found");
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     const item = order.items.id(itemId);
-
     if (!item) {
-      throw new Error("Item not found");
+      return res.status(404).json({ success: false, message: "Item not found" });
     }
 
-    //////////////////////////////////////////////////////
-    // RETURN APPROVAL
-
-    if (newStatus === "Returned") {
-
-      if (item.status === "Returned") {
-        throw new Error("Item already returned");
-      }
-
-      if (item.isRefunded) {
-        throw new Error("Refund already processed");
-      }
-
-      ////////////////////////////////////////////////////
-      // refund calculation
-
-      const refundDetails = await calculateRefund(
-        orderId,
-        itemId,
-        false // return
-      );
-
-      const refundAmount =
-        refundDetails.totalRefundableAmount;
-
-      ////////////////////////////////////////////////////
-      // wallet credit
-
-      const wallet = await Wallet.findOne({
-        userId: order.userId
+    // PREVENT LATERAL CHANGES (e.g., Cannot change a Returned/Cancelled item to Completed)
+    if (["Returned", "Cancelled"].includes(item.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change status. Item is already ${item.status}.`
       });
+    }
 
+    // RETURN PROCESSING LOGIC
+    if (newStatus === "Returned") {
+      // Refund calculation
+      const refundDetails = await calculateRefund(orderId, itemId, false);
+      let refundAmount = refundDetails.totalRefundableAmount;
+
+      //handles surplus cases
+      if (order.totalAmount - refundAmount === -1) {
+        refundAmount -= 1
+      } else if (order.totalAmount - refundAmount === 1) {
+        refundAmount += 1
+      }
+
+
+      // Wallet credit
+      const wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {
-        throw new Error("Wallet not found");
+        return res.status(404).json({ success: false, message: "Wallet not found" });
       }
 
       wallet.balance += refundAmount;
-
       wallet.transactions.push({
         type: "credit",
         amount: refundAmount,
-        description:
-          `Refund for returned item (${item.productName}) in Order #${order.orderId}`,
+        description: `Refund for returned item (${item.productName}) in Order #${order.orderId}`,
       });
-
       await wallet.save();
 
-      ////////////////////////////////////////////////////
-      // restore stock
-
-      const product = await Product.findById(
-        item.productId
-      );
-
+      // Restore stock
+      const product = await Product.findById(item.productId);
       if (product) {
-
-        const variation =
-          product.details[item.variationIndex];
-
-        if (variation) {
-
+        const variation = product.details[item.variationIndex];
+        if (variation && typeof variation.quantity === 'number') {
           variation.quantity += item.quantity;
-
           await product.save();
         }
       }
 
-      ////////////////////////////////////////////////////
-      // update item
+      // Populate return tracking fields
+      item.refundDetails.refundedAt = new Date();
+      item.refundDetails.paymentMethod = order.paymentMethod;
+      item.refundDetails.refundType = newStatus;
+      item.refundDetails.refundAmount = refundAmount;
+      item.refundDetails.refundAmountStatus = 'Refunded';
 
-      item.refundAmount = refundAmount;
-
-      item.isRefunded = true;
+      // Update financial records on order level
+      order.totalRefundAmount += refundAmount;
+      order.totalAmount -= refundAmount;
     }
 
-    //////////////////////////////////////////////////////
-    // status update
-
+    //  UNIVERSAL STATUS UPDATE (Works for Completed, Returned, Cancelled, etc.)
     item.status = newStatus;
 
-    //////////////////////////////////////////////////////
-    // payment completion check
-
+    // PAYMENT COMPLETION CHECK
     const allCompleted = order.items.every(
-      item =>
-        item.status === "Completed" ||
-        item.status === "Returned" ||
-        item.status === "Cancelled"
+      (singleItem) =>
+        singleItem.status === "Completed" ||
+        singleItem.status === "Returned" ||
+        singleItem.status === "Cancelled"
     );
 
-    if (
-      allCompleted &&
-      order.paymentMethod === "cod"
-    ) {
+    if (allCompleted && order.paymentMethod === "cod") {
       order.paymentStatus = "Completed";
     }
 
-    //////////////////////////////////////////////////////
-
+    // Save final order changes
     await order.save();
 
     return res.status(200).json({
@@ -300,12 +269,7 @@ exports.orderStatusChange = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.error(
-      "Order Status Change Error:",
-      error
-    );
-
+    console.error("Order Status Change Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Something went wrong",
@@ -319,8 +283,7 @@ exports.orderStatusChange = async (req, res) => {
 
 
 
-
-
+/////////////////////////////////////////////////////USERSIDE ORDER CANCELAND RETURNING//////////////////////////////////////////////////////
 
 
 
@@ -395,8 +358,15 @@ exports.orderCancel = async (req, res) => {
       isCancellation
     );
 
-    const refundAmount =
+    let refundAmount =
       refundDetails.totalRefundableAmount;
+
+    //handles surplus cases
+    if (order.totalAmount - refundAmount === -1) {
+      refundAmount -= 1
+    } else if (order.totalAmount - refundAmount === 1) {
+      refundAmount += 1
+    }
 
     //////////////////////////////////////////////////////
     // wallet refund
@@ -427,22 +397,39 @@ exports.orderCancel = async (req, res) => {
       });
 
       await wallet.save();
+      item.refundDetails.refundedAt = new Date()
     }
 
     //////////////////////////////////////////////////////
     // update item
 
     item.status = "Cancelled";
-
-    item.refundAmount = refundAmount;
-
-    item.isRefunded = true;
-
     item.cancellationReason.push({
       itemId: item._id,
       reason,
       cancelledAt: new Date(),
     });
+
+    //update totalAmount 
+    if (order.paymentMethod === "razorpay" || order.paymentMethod === "wallet") {
+      item.refundDetails.refundRequestedAt = new Date();
+      item.refundDetails.paymentMethod = order.paymentMethod
+      item.refundDetails.refundType = "Cancelled";
+      item.refundDetails.refundAmount = refundAmount
+      item.refundDetails.refundAmountStatus = 'Refunded'
+      item.refundDetails.refundReason = reason
+      order.totalRefundAmount += refundAmount
+      order.totalAmount -= refundAmount
+    } else if (order.paymentMethod === `cod`) {
+      item.refundDetails.refundRequestedAt = new Date();
+      item.refundDetails.paymentMethod = 'cod'
+      item.refundDetails.refundType = "Cancelled";
+      item.refundDetails.refundAmount = refundAmount
+      item.refundDetails.refundAmountStatus = 'No Refund Required'
+      item.refundDetails.refundReason = reason
+      order.totalRefundAmount += refundAmount
+      order.totalAmount -= refundAmount
+    }
 
     //////////////////////////////////////////////////////
     // update order status
@@ -542,7 +529,7 @@ exports.orderReturn = async (req, res) => {
       });
     }
     if (returnAll) {
-      
+
       const nonReturnableItems = order.items.filter(item => item.status !== 'Completed');
 
       if (nonReturnableItems.length > 0) {
@@ -569,6 +556,8 @@ exports.orderReturn = async (req, res) => {
         let item = order.items[i]
 
         item.status = "Return Requested";
+        item.refundDetails.refundRequestedAt = new Date();
+        item.refundDetails.refundReason = reason
 
         item.returnReason.push({
           itemId: item._id,
@@ -582,6 +571,8 @@ exports.orderReturn = async (req, res) => {
       // update item
 
       item.status = "Return Requested";
+      item.refundDetails.refundRequestedAt = new Date();
+      item.refundDetails.refundReason = reason
 
       item.returnReason.push({
         itemId: item._id,

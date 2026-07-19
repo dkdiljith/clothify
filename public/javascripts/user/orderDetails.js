@@ -104,6 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 await showCustomConfirm("Request Submitted", "Your cancellation request has been successfully processed.", "success");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500); // 3000 milliseconds = 3 seconds
             } else {
                 const errorData = await response.json();
                 await showCustomConfirm("Request Rejected", errorData.message || "Failed to cancel order.", "warning");
@@ -142,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `invoice-${orderId}.pdf`;
+            a.download = `invoice-clothify.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -274,6 +277,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Your return request has been submitted successfully.\nCheck your email or dashboard updates for status changes.",
                     "success"
                 );
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000); // 3000 milliseconds = 3 seconds
             } else {
                 const errorData = await response.json();
 

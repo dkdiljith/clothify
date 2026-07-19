@@ -53,156 +53,91 @@ exports.payment = async (req, res) => {
 
 
 
-
-
 exports.placeOrder = async (req, res) => {
-
   try {
     const userId = res.locals.user._id;
-    const {
-      paymentMethod,
-      addressId,
-    } = req.body;
-
+    const { paymentMethod, addressId } = req.body;
     const isRazorpayVerified = req.razorpayVerified === true;
 
-    // validation
+    // validation 
     if (!paymentMethod || !addressId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields"
-      });
+      return res.status(400).json({ success: false, message: "Missing required fields" });
     }
-
     if (paymentMethod === 'razorpay' && !isRazorpayVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Wrong Payment Info"
-      });
+      return res.status(400).json({ success: false, message: "Wrong Payment Info" });
     }
 
-    // fetch cart and address
+    // fetch cart and address 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     const address = await Address.findById(addressId);
-
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Your cart is empty."
-      });
+      return res.status(400).json({ success: false, message: "Your cart is empty." });
     }
-
     if (!address) {
-      return res.status(404).json({
-        success: false,
-        message: "Address not found"
-      });
+      return res.status(404).json({ success: false, message: "Address not found" });
     }
 
-    console.log(`this is cart ${cart} and this is address ${address}`)
-
-    // order limit
+    // order limit 
     const ORDER_LIMIT = 25000;
     if (cart.totalAmount > ORDER_LIMIT) {
-      return res.json({
-        success: false,
-        message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`
-      });
+      return res.json({ success: false, message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.` });
     }
 
-
-
-    // stock checking
+    // stock checking 
     for (const item of cart.items) {
       const product = item.productId;
       const variation = product.details[item.variationIndex];
-
       if (!variation) {
-        return res.json({
-          success: false,
-          message: `${product.name} variation not found`
-        });
+        return res.json({ success: false, message: `${product.name} variation not found` });
       }
-
       if (variation.quantity < item.quantity) {
-        return res.json({
-          success: false,
-          message: `${product.name} is out of stock`
-        });
+        return res.json({ success: false, message: `${product.name} is out of stock` });
       }
     }
 
-
-    // payment status
+    // payment status 
     let paymentStatus = "Pending";
 
-    //razorpay status update
+    // razorpay status update 
     if (paymentMethod === 'razorpay' && isRazorpayVerified) {
       paymentStatus = "Completed";
     }
 
-    // wallet payment
+    // wallet payment 
     if (paymentMethod === "wallet") {
       const wallet = await Wallet.findOne({ userId });
       if (!wallet) {
-        return res.json({
-          success: false,
-          message: "Wallet not found"
-        });
-
+        return res.json({ success: false, message: "Wallet not found" });
       }
-
       if (wallet.balance < cart.totalAmount) {
-        return res.json({
-          success: false,
-          message: "Insufficient wallet balance"
-        });
+        return res.json({ success: false, message: "Insufficient wallet balance" });
       }
-
       wallet.balance -= cart.totalAmount;
-      wallet.transactions.push({
-        type: "debit",
-        amount: cart.totalAmount,
-        description:
-          `₹${cart.totalAmount} debited for order payment`
-      });
-
+      wallet.transactions.push({ type: "debit", amount: cart.totalAmount, description: `₹${cart.totalAmount} debited for order payment` });
       const result = await wallet.save();
       if (result) {
         paymentStatus = "Completed";
       }
     }
 
-
-    // order items
+    // order items 
     const orderItems = cart.items.map((item) => ({
-
       productId: item.productId._id,
       productName: item.productId.name,
       productPrice: item.productId.details[item.variationIndex].price,
-      productImg: item.productId.images &&
-        item.productId.images.length > 0
-        ? item.productId.images[0].path
-        : null,
+      productImg: item.productId.images && item.productId.images.length > 0 ? item.productId.images[0].path : null,
       productSize: item.productId.details[item.variationIndex].size,
       variationIndex: item.variationIndex,
       quantity: item.quantity,
       status: "Pending"
-
     }));
 
     if (paymentMethod === 'wallet' && paymentStatus === "Pending") {
-      return res.status(500).json({
-        success: false,
-        message: "wallet payment failed."
-      });
+      return res.status(500).json({ success: false, message: "wallet payment failed." });
     }
 
-
-
-    // create order
+    // create order 
     const order = new Order({
-
       orderId: await orderIdGeneration(),
       userId,
       items: orderItems,
@@ -216,7 +151,6 @@ exports.placeOrder = async (req, res) => {
         country: address.country,
         phone: address.phone
       },
-
       paymentMethod,
       paymentStatus,
       subtotal: cart.subtotal,
@@ -225,59 +159,32 @@ exports.placeOrder = async (req, res) => {
       couponId: cart.couponId,
       couponDiscount: cart.couponDiscount,
       offerDiscount: cart.offerDiscount,
+      checkoutTotal:cart.totalAmount,
       totalAmount: cart.totalAmount
-
     });
 
-
-
-    // save order
+    // save order 
     await order.save();
 
-
-
-    // reduce stock only if: cod , wallet success
-    if (
-      paymentMethod === "cod" ||
-      paymentStatus === "Completed"
-    ) {
-
+    // FIX: Atomic MongoDB update eliminates ParallelSaveError and data overwriting
+    if (paymentMethod === "cod" || paymentStatus === "Completed") {
       await Promise.all(
-        cart.items.map(async (item) => {
-          const product = item.productId;
-          const vIndex = item.variationIndex;
-
-          if (
-            product &&
-            product.details &&
-            product.details[vIndex]
-          ) {
-            product.details[vIndex].quantity -= item.quantity;
-            await product.save();
-          }
+        cart.items.map((item) => {
+          return Product.findOneAndUpdate(
+            { _id: item.productId._id },
+            { $inc: { [`details.${item.variationIndex}.quantity`]: -item.quantity } }
+          );
         })
       );
 
-      // clear cart
+      // clear cart 
       await Cart.findByIdAndDelete(cart._id);
-
     }
 
-
-    return res.json({
-      success: true,
-      paymentStatus,
-      message: "Order placed successfully"
-    });
-
-
-
+    return res.json({ success: true, paymentStatus, message: "Order placed successfully" });
   } catch (error) {
     console.error("Order Placement Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to place order."
-    });
+    return res.status(500).json({ success: false, message: "Failed to place order." });
   }
 };
 
@@ -290,35 +197,23 @@ exports.placeOrder = async (req, res) => {
 
 
 exports.placeOrderFailed = async (req, res) => {
-
-  console.log("Razopray faile order is working...................................")
+  console.log("Razorpay failed order processor triggered.");
   try {
     const userId = res.locals.user._id;
     const { addressId, reason, orderId } = req.body;
-    const paymentMethod = 'razorpay'
-    let retryOrder = null
+    const paymentMethod = 'razorpay';
 
+    // FIX: Return the helper directly to avoid "Headers already sent" errors
     if (orderId) {
-      retryOrder = await Order.findOne({ orderId, userId })
-
+      const retryOrder = await Order.findOne({ orderId, userId });
       if (!retryOrder) {
-        return res.status(400).json({
-          success: false,
-          message: "Cannot Find Order"
-        });
-      } else {
-        const retryObj = await retryFailedOrderFailed(req, res, orderId) ?? null
-        return retryObj
+        return res.status(400).json({ success: false, message: "Cannot Find Order" });
       }
-
+      return await retryFailedOrderFailed(req, res, orderId);
     }
 
-    console.log(`this is userId ${userId} , and this is addressId ${addressId} and this is reason ${reason}`)
-    if (!paymentMethod || !addressId || !reason || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields"
-      });
+    if (!addressId || !reason || !userId) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     // fetch cart and address
@@ -326,77 +221,44 @@ exports.placeOrderFailed = async (req, res) => {
     const address = await Address.findById(addressId);
 
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Your cart is empty."
-      });
+      return res.status(400).json({ success: false, message: "Your cart is empty." });
     }
-
     if (!address) {
-      return res.status(404).json({
-        success: false,
-        message: "Address not found"
-      });
+      return res.status(404).json({ success: false, message: "Address not found" });
     }
 
-    console.log(`this is cart ${cart} and this is address ${address}`)
-
-    // order limit
+    // order total upper threshold validation
     const ORDER_LIMIT = 25000;
     if (cart.totalAmount > ORDER_LIMIT) {
-      return res.json({
-        success: false,
-        message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`
-      });
+      return res.status(400).json({ success: false, message: `Orders above ₹${ORDER_LIMIT} are not allowed.` });
     }
-
 
     // stock checking
     for (const item of cart.items) {
       const product = item.productId;
       const variation = product.details[item.variationIndex];
-
       if (!variation) {
-        return res.json({
-          success: false,
-          message: `${product.name} variation not found`
-        });
+        return res.status(400).json({ success: false, message: `${product.name} variation not found` });
       }
-
       if (variation.quantity < item.quantity) {
-        return res.json({
-          success: false,
-          message: `${product.name} is out of stock`
-        });
+        return res.status(400).json({ success: false, message: `${product.name} is out of stock` });
       }
     }
 
-
-    // payment status
-    let paymentStatus = "Failed";
-
-
-    // order items
+    // process failed array payload mapping
     const orderItems = cart.items.map((item) => ({
-
       productId: item.productId._id,
       productName: item.productId.name,
       productPrice: item.productId.details[item.variationIndex].price,
-      productImg: item.productId.images &&
-        item.productId.images.length > 0
-        ? item.productId.images[0].path
-        : null,
+      productImg: item.productId.images && item.productId.images.length > 0 ? item.productId.images[0].path : null,
       productSize: item.productId.details[item.variationIndex].size,
       variationIndex: item.variationIndex,
       quantity: item.quantity,
       status: "Failed"
-
     }));
 
-
-    // create order
+    // create order with systematic status tracking flags
     const order = new Order({
-
       orderId: await orderIdGeneration(),
       userId,
       items: orderItems,
@@ -410,47 +272,29 @@ exports.placeOrderFailed = async (req, res) => {
         country: address.country,
         phone: address.phone
       },
-
       paymentMethod,
-      paymentStatus,
+      paymentStatus: "Failed",
       subtotal: cart.subtotal,
       shippingFee: cart.shippingFee,
       tax: cart.tax,
       couponId: cart.couponId,
       couponDiscount: cart.couponDiscount,
       offerDiscount: cart.offerDiscount,
-      totalAmount: cart.totalAmount
-
+      checkoutTotal:cart.totalAmount,
+      totalAmount: cart.totalAmount,
+      paymentAttemptsCount: 1, // First initial attempt failed
+      paymentRetryExpiresAt: new Date(Date.now() + 30 * 60 * 1000) // Explicit 30 min window set
     });
 
-
-
-    // save order
     await order.save();
+    await Cart.findByIdAndDelete(cart._id); // Clear cart so they don't buy duplicate items
 
-    await Cart.findByIdAndDelete(cart._id);
-
-
-    return res.json({
-      success: true,
-      paymentStatus,
-      message: "Order placed successfully"
-    });
-
-
-
+    return res.status(201).json({ success: true, paymentStatus: "Failed", message: "Failed order record generated. You can retry from your dashboard.", orderId: order.orderId });
   } catch (error) {
     console.error("Order Placement Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to place order."
-    });
+    return res.status(500).json({ success: false, message: "Failed to place order." });
   }
 };
-
-
-
-
 
 
 exports.retryFailedOrder = async (req, res) => {
@@ -460,59 +304,44 @@ exports.retryFailedOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid Order ID provided" });
     }
 
-    // 1. Fetch the order document from database
+    // 1. Fetch the order document from database 
     const order = await Order.findOne({ orderId: orderId });
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // 2. Prevent reducing stock twice if the payment was already completed
+    // 2. Prevent reducing stock twice if the payment was already completed 
     if (order.paymentStatus === 'Completed') {
       return res.status(400).json({ success: false, message: "Order is already completed" });
     }
 
-    // 3. Change statuses on the order document
+    // 3. Change statuses on the order document 
     order.paymentStatus = 'Completed';
     order.items.forEach(item => {
       item.status = 'Pending';
     });
 
-    // 4. Save the updated order first
+    // 4. Save the updated order first 
     await order.save();
 
-    // 5. Your exact stock reduction logic (adapted to use order items instead of cart)
+    // FIX: Atomic MongoDB update saves processing time and ensures exact stock inventory math
     await Promise.all(
-      order.items.map(async (item) => {
-        // Fetch the populated product document to match your logic's requirements
-        const product = await Product.findById(item.productId)
-        const vIndex = item.variationIndex;
-
-        if (
-          product &&
-          product.details &&
-          product.details[vIndex]
-        ) {
-          product.details[vIndex].quantity -= item.quantity;
-          await product.save();
-        }
+      order.items.map((item) => {
+        return Product.findOneAndUpdate(
+          { _id: item.productId },
+          { $inc: { [`details.${item.variationIndex}.quantity`]: -item.quantity } }
+        );
       })
     );
 
-    // 6. Send success response back to the client
-    return res.status(200).json({
-      success: true,
-      message: "Order status updated and stock reduced successfully.",
-      order
-    });
-
+    // 6. Send success response back to the client 
+    return res.status(200).json({ success: true, message: "Order status updated and stock reduced successfully.", order });
   } catch (error) {
     console.error("Order Placement Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to retry payment."
-    });
+    return res.status(500).json({ success: false, message: "Failed to retry payment." });
   }
 };
+
 
 
 
@@ -522,52 +351,30 @@ async function retryFailedOrderFailed(req, res, orderId) {
     const retryOrder = await Order.findOne({ orderId, userId });
 
     if (!retryOrder) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot Find Order"
-      });
+      return res.status(400).json({ success: false, message: "Cannot Find Order" });
     }
 
     // 1. CHECK IF THE TIME WINDOW HAS EXPIRED
     const currentTime = new Date();
-    if (currentTime > retryOrder.paymentRetryExpiresAt) {
-      return res.status(400).json({
-        success: false,
-        message: "The 30-minute retry window has expired. Please create a new order."
-      });
+    if (retryOrder.paymentRetryExpiresAt && currentTime > retryOrder.paymentRetryExpiresAt) {
+      return res.status(400).json({ success: false, message: "The 30-minute retry window has expired. Please create a new order." });
     }
 
-    // 2. CHECK IF THE MAX ATTEMPTS ARE EXCEEDED (Max 5 attempts)
+    // 2. CHECK IF THE MAX ATTEMPTS ARE EXCEEDED (Original 1 initial + 5 retries logic kept)
     if (retryOrder.paymentAttemptsCount >= 6) {
-      return res.status(400).json({
-        success: false,
-        message: "You have reached the maximum limit of 5 payment attempts for this order."
-      });
+      return res.status(400).json({ success: false, message: "You have reached the maximum limit of 5 payment retries for this order." });
     }
 
-    // 3. INCREMENT THE ATTEMPT COUNTER
+    // 3. INCREMENT THE ATTEMPT COUNTER AND ATOMIC SAVE
     retryOrder.paymentAttemptsCount++;
-    
-
-    // 4. SAFELY SAVE THE CHANGES (Added await)
     await retryOrder.save();
 
-    return res.status(200).json({
-      success: true,
-      message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/5 used.`
-    });
-
+    return res.status(200).json({ success: true, message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/6 used.` });
   } catch (error) {
-    console.error(error); // Keep this for debugging errors in your terminal
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while updating the retry order."
-    });
+    console.error("Retry Fail Handler Error:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while updating the retry order." });
   }
 }
-
-
-
 
 
 

@@ -5,18 +5,43 @@
 
 
 
+
+
 {{!-- Header changes color if payment failed --}}
 <div class="order-header {{#ifeq order.paymentStatus 'Failed'}}payment-failed{{/ifeq}}">
     <div>
         <h2 class="order-title">
             <i class="fas fa-clipboard-list"></i> Order Details
         </h2>
-        <div class="order-number">Order #{{order.orderId}}</div>
+        <div class="order-number">
+            Order #{{order.orderId}}
+        </div>
+        <div class="order-meta mt-2">
+            <span class="badge bg-primary">
+                {{order.paymentMethod}}
+            </span>
+            {{!-- <span class="badge
+            {{#ifeq order.deliveryStatus 'Completed'}}bg-success{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Pending'}}bg-warning{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Shipped'}}bg-primary{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Cancelled'}}bg-danger{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Returned'}}bg-dark{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Return Requested'}}bg-secondary{{/ifeq}}
+            {{#ifeq order.deliveryStatus 'Return Rejected'}}bg-warning{{/ifeq}}">
+                {{order.deliveryStatus}}
+            </span> --}}
+            {{!-- <span class="badge
+            {{#ifeq order.paymentStatus 'Completed'}}bg-success{{/ifeq}}
+            {{#ifeq order.paymentStatus 'Pending'}}bg-warning{{/ifeq}}
+            {{#ifeq order.paymentStatus 'Failed'}}bg-danger{{/ifeq}}
+            {{#ifeq order.paymentStatus 'Refunded'}}bg-info{{/ifeq}}">
+                {{order.paymentStatus}}
+            </span> --}}
+        </div>
     </div>
-
     <div>
+        {{!-- Failed Payment --}}
         {{#ifeq order.paymentStatus 'Failed'}}
-
         <button id="retryPayment" class="btn-retry-payment" data-order-id="{{order.orderId}}"
             data-expires-at="{{order.paymentRetryExpiresAt}}" data-attempts-count="{{order.paymentAttemptsCount}}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -25,178 +50,393 @@
             </svg>
             Retry Payment
         </button>
-
-
-
-
-
+        {{!-- Invoice Rules --}}
         {{else}}
+        {{#if order.totalAmount}}
         <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
             Download Invoice
         </button>
-
+        {{else}}
+        <button class="btn btn-secondary" disabled>
+            Invoice Not Available
+        </button>
+        {{/if}}
         {{/ifeq}}
     </div>
-
-    <div>
-        <h15><i class="fas fa-money-bill-wave"></i> Payment Status</h15>
-        <div style="display:flex; justify-content:center;"
-            class="order-status-badge status-{{toLowerCase order.paymentStatus}}">
-            {{order.paymentStatus}}
-        </div>
-    </div>
 </div>
-
 <!-- Order Item Card -->
 <div class="order-card {{#ifeq order.paymentStatus 'Failed'}}failed-border{{/ifeq}}">
     <div class="order-card-header">
-        <div class="order-card-title">Item Details</div>
+        <div class="order-card-title">
+            Item Details
+        </div>
         <div class="order-item-status">
             <div>
-                <h10><i class="fas fa-box"></i> Shipment Status</h10>
-                <span class="status-text"
-                    style="color: {{#if (eq item.status 'Completed')}}var(--success-color){{else if (eq item.status 'Cancelled')}}var(--accent-color){{else if (eq item.status 'Returned')}}var(--accent-color){{else}}var(--secondary-color){{/if}};">
+                <h10>
+                    <i class="fas fa-box"></i>
+                    Shipment Status
+                </h10>
+                <span class="status-text" style="
+                    color:
+                    {{#if (eq item.status 'Completed')}}var(--success-color)
+                    {{else if (eq item.status 'Cancelled')}}var(--accent-color)
+                    {{else if (eq item.status 'Returned')}}var(--accent-color)
+                    {{else if (eq item.status 'Return Requested')}}#ff9800
+                    {{else if (eq item.status 'Return Rejected')}}#9c27b0
+                    {{else}}var(--secondary-color)
+                    {{/if}};
+                    ">
                     {{item.status}}
                 </span>
             </div>
         </div>
     </div>
-
     {{#ifeq order.paymentStatus 'Failed'}}
-    <div class="retry-notice" style="padding: 0 20px;">
-        <i class="fas fa-info-circle"></i> This order is Failed because the payment failed.
+    <div class="retry-notice" style="padding:0 20px;">
+        <i class="fas fa-info-circle"></i>
+        This order failed because the payment was unsuccessful.
     </div>
     {{/ifeq}}
-
     <div class="order-item">
         <div class="order-item-image">
             <img src="{{item.productImg}}" alt="{{item.productName}}">
         </div>
         <div class="order-item-details">
-            <div class="order-item-name">{{item.productName}}</div>
+            <div class="order-item-name">
+                {{item.productName}}
+            </div>
             <div class="order-item-attributes">
-                <span>Size: {{item.productSize}}</span>
-                <span>Quantity: {{item.quantity}}</span>
-                <span>Price: ₹{{ item.productPrice}}</span>
+                <span>
+                    <strong>Size:</strong>
+                    {{item.productSize}}
+                </span>
+                <span>
+                    <strong>Quantity:</strong>
+                    {{item.quantity}}
+                </span>
+                <span>
+                    <strong>Price:</strong>
+                    ₹{{item.productPrice}}
+                </span>
             </div>
             <div class="order-item-price">
-                Total: ₹{{multiply item.productPrice item.quantity}}
+                Total :
+                ₹{{multiply item.productPrice item.quantity}}
             </div>
         </div>
     </div>
+    {{!-- Refund Details --}}
+    {{#if item.refundDetails.refundType}}
+    <hr>
+    <div class="refund-details">
+        <div class="refund-title">
+            <i class="fas fa-undo"></i>
+            Refund Details
+        </div>
+        <div class="refund-grid">
+            <div class="refund-row">
+                <span>Refund Type</span>
+                <strong>
+                    {{item.refundDetails.refundType}}
+                </strong>
+            </div>
+            <div class="refund-row">
+                <span>Payment Method</span>
+                <strong>
+                    {{paymentMethod item.refundDetails.paymentMethod}}
+                </strong>
+            </div>
+            <div class="refund-row">
+                <span>Status</span>
+                <strong
+                    class="{{#ifeq item.refundDetails.refundAmountStatus 'Refunded'}}text-success{{else}}text-secondary{{/ifeq}}">
+                    {{item.refundDetails.refundAmountStatus}}
+                </strong>
+            </div>
+            <div class="refund-row">
+                <span>Refund Amount</span>
+                <strong class="text-danger">
+                    ₹{{item.refundDetails.refundAmount}}
+                </strong>
+            </div>
+            <div class="refund-row">
+                <span>Reason</span>
+                <strong>
+                    {{item.refundDetails.refundReason}}
+                </strong>
+            </div>
+            {{#if item.refundDetails.refundedAt}}
+            <div class="refund-row">
+                <span>Refunded On</span>
+                <strong>
+                    {{formatDate item.refundDetails.refundedAt}}
+                </strong>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
 </div>
-
 <!-- Delivery Address Card -->
 <div class="order-card delivery-address-card">
     <div class="order-card-header">
-        <div class="order-card-title">Delivery Address</div>
+        <div class="order-card-title">
+            Delivery Address
+        </div>
     </div>
     <div class="address-details">
-        <p><strong>{{order.deliveryAddress.name}}</strong></p>
+        <p>
+            <strong>{{order.deliveryAddress.name}}</strong>
+        </p>
         <p>{{order.deliveryAddress.streetAddress}}</p>
-        <p>Landmark: {{order.deliveryAddress.landmark}}</p>
-        <p>{{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},</p>
-        <p>{{order.deliveryAddress.state}} - {{order.deliveryAddress.zip}}</p>
+        {{#if order.deliveryAddress.landmark}}
+        <p>
+            Landmark :
+            {{order.deliveryAddress.landmark}}
+        </p>
+        {{/if}}
+        <p>
+            {{order.deliveryAddress.city}},
+            {{order.deliveryAddress.state}}
+            -
+            {{order.deliveryAddress.zip}}
+        </p>
         <p>{{order.deliveryAddress.country}}</p>
-        <p>Phone: {{order.deliveryAddress.phone}}</p>
+        <p>
+            <strong>Phone :</strong>
+            {{order.deliveryAddress.phone}}
+        </p>
     </div>
 </div>
-
-<!-- Price Details Card -->
+<!-- Payment Details -->
 <div class="order-card price-details-card">
     <div class="order-card-header">
-        <div class="order-card-title">Payment Details</div>
+        <div class="order-card-title">
+            Payment Details
+        </div>
     </div>
     <div class="price-summary">
         <div class="price-row">
-            <span class="price-label">Subtotal ({{order.totalItems}} items)</span>
-            <span class="price-value">₹{{order.subtotal}}</span>
+            <span class="price-label">
+                Subtotal
+            </span>
+            <span class="price-value">
+                ₹{{order.subtotal}}
+            </span>
         </div>
-
         <div class="price-row">
-            <span class="price-label">Shipping</span>
+            <span class="price-label">
+                Shipping
+            </span>
             {{#ifEquals order.shippingFee 0}}
-            <span class="price-value" style="color: var(--success-color);">Free</span>
+            <span class="price-value" style="color:var(--success-color);">
+                Free
+            </span>
             {{else}}
-            <span class="price-value">₹{{order.shippingFee}}</span>
+            <span class="price-value">
+                ₹{{order.shippingFee}}
+            </span>
             {{/ifEquals}}
         </div>
-
         <div class="price-row">
-            <span class="price-label">Tax</span>
-            <span class="price-value">₹{{order.tax}}</span>
+            <span class="price-label">
+                Tax
+            </span>
+            <span class="price-value">
+                ₹{{order.tax}}
+            </span>
         </div>
-
-        {{#if order.couponId}}
+        {{#if order.couponDiscount}}
         <div class="price-row">
-            <span class="price-label">Coupon Discount</span>
-            <span class="price-value" style="color: var(--success-color);">-₹{{order.couponDiscount}}</span>
+            <span class="price-label">
+                Coupon Discount
+            </span>
+            <span class="price-value" style="color:var(--success-color);">
+                - ₹{{order.couponDiscount}}
+            </span>
         </div>
         {{/if}}
-
         {{#if order.offerDiscount}}
         <div class="price-row">
-            <span class="price-label">Discount</span>
-            <span class="price-value" style="color: var(--success-color);">-₹{{order.offerDiscount}}</span>
+            <span class="price-label">
+                Offer Discount
+            </span>
+            <span class="price-value" style="color:var(--success-color);">
+                - ₹{{order.offerDiscount}}
+            </span>
+        </div>
+        {{/if}}
+        {{!-- NEW --}}
+        {{#if item.refundDetails.refundAmount}}
+        <div class="price-row">
+            <span class="price-label" style="color:#d32f2f;">
+                {{#if (eq order.paymentMethod 'cod')}}
+
+                {{#if (eq item.refundDetails.refundType 'Returned')}}
+                Refunded
+                {{else}}
+                Cancelled Amount
+                {{/if}}
+
+                {{else}}
+                Refunded
+                {{/if}}
+            </span>
+            <span class="price-value" style="color:#d32f2f;">
+                - ₹{{item.refundDetails.refundAmount}}
+            </span>
+        </div>
+        {{/if}}
+        <hr>
+        <div class="price-row">
+            <span class="price-label">
+                Checkout Total
+            </span>
+
+            <span class="price-value">
+                ₹{{order.checkoutTotal}}
+            </span>
+        </div>
+
+        {{#if order.totalRefundAmount}}
+        <div class="price-row">
+            <span class="price-label text-danger">
+                {{#if (eq order.paymentMethod 'cod')}}
+                Total Cancelled Amount
+                {{else}}
+                Total Refunded
+                {{/if}}
+            </span>
+
+            <span class="price-value text-danger">
+                - ₹{{order.totalRefundAmount}}
+            </span>
         </div>
         {{/if}}
 
-        <div class="price-row total-price">
-            <span class="price-label">
-                <strong>Amount {{#ifeq order.paymentStatus "Failed"}}To
-                    Pay{{else}}Paid{{/ifeq}}</strong>
-            </span>
-            <span class="price-value"><strong>₹{{order.totalAmount}}</strong></span>
-        </div>
+        <hr>
 
-        <div class="payment-method">
-            <span class="price-label">Payment Method:</span>
-            <span class="price-value" style="text-transform: uppercase;">{{order.paymentMethod}}</span>
+        <div class="price-row total-price">
+
+            <span class="price-label">
+
+
+                {{#if (eq order.paymentMethod 'cod')}}
+                Amount Payable
+                {{else}}
+                Final Amount Paid
+                {{/if}}
+
+            </span>
+
+            <span class="price-value">
+
+                ₹{{order.totalAmount}}
+
+            </span>
+
         </div>
+        <div class="payment-method">
+            <span class="price-label">
+                Payment Method
+            </span>
+            <span class="price-value" style="text-transform:capitalize;">
+                {{paymentMethod order.paymentMethod}}
+            </span>
+        </div>
+        {{!-- NEW --}}
+        {{#if order.totalRefundAmount}}
+        <div class="payment-method">
+            <span class="price-label">
+                Refund Destination
+            </span>
+            <span class="price-value">
+                {{#if (eq order.paymentMethod 'cod')}}
+
+                {{#if (eq item.refundDetails.refundType 'Returned')}}
+                Clothify Wallet
+                {{else}}
+                No Refund Required
+                {{/if}}
+
+                {{else}}
+                Clothify Wallet
+                {{/if}}
+            </span>
+        </div>
+        {{/if}}
     </div>
 </div>
-
 <!-- Action Buttons -->
 <div class="action-buttons">
-    {{!-- Hide Return/Cancel if payment failed --}}
+    {{!-- Failed Payment --}}
     {{#if (neq order.paymentStatus 'Failed')}}
-
+    {{!-- Pending --}}
+    {{#if (eq item.status 'Pending')}}
+    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}"
+        data-order-id="{{order._id}}" data-item-id="{{item._id}}" data-variation-index="{{item.variationIndex}}">
+        <i class="fas fa-times"></i>
+        Cancel Item
+    </button>
+    {{/if}}
+    {{!-- Completed --}}
     {{#if (eq item.status 'Completed')}}
     <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
         data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
         data-return-all="false">
-        <i class="fas fa-undo"></i> Return Item
+        <i class="fas fa-undo"></i>
+        Return Item
     </button>
     {{/if}}
-
+    {{!-- Return All --}}
     {{#if (eq order.deliveryStatus 'Completed')}}
     <button id="returnAll-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
         data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
         data-return-all="true">
-        <i class="fas fa-undo"></i> Return All
+        <i class="fas fa-undo"></i>
+        Return Entire Order
     </button>
     {{/if}}
-
-    {{#if (eq item.status 'Pending')}}
-    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}"
-        data-order-id="{{order._id}}" data-item-id="{{item._id}}" data-variation-index="{{item.variationIndex}}">
-        <i class="fas fa-times"></i> Cancel Item
+    {{!-- Cancelled Badge --}}
+    {{#if (eq item.status 'Cancelled')}}
+    <button class="btn btn-outline-danger" disabled>
+        <i class="fas fa-ban"></i>
+        Item Cancelled
     </button>
-
     {{/if}}
-
+    {{!-- Return Requested --}}
+    {{#if (eq item.status 'Return Requested')}}
+    <button class="btn btn-outline-warning" disabled>
+        <i class="fas fa-clock"></i>
+        Return Request Pending
+    </button>
     {{/if}}
-
+    {{!-- Returned --}}
+    {{#if (eq item.status 'Returned')}}
+    <button class="btn btn-outline-success" disabled>
+        <i class="fas fa-check-circle"></i>
+        Refunded Successfully
+    </button>
+    {{/if}}
+    {{!-- Return Rejected --}}
+    {{#if (eq item.status 'Return Rejected')}}
+    <button class="btn btn-outline-secondary" disabled>
+        <i class="fas fa-times-circle"></i>
+        Return Rejected
+    </button>
+    {{/if}}
+    {{/if}}
     <button class="btn btn-primary" onclick="location.href='/user/orders'">
-        <i class="fas fa-arrow-left"></i> Back to Orders
+        <i class="fas fa-arrow-left"></i>
+        Back to Orders
     </button>
 </div>
-
 {{#if (gt order.items.length 1)}}
-<!-- Other Items in Order -->
 <div class="order-card other-items-card">
     <div class="order-card-header">
-        <div class="order-card-title">Other Items in This Order</div>
+        <div class="order-card-title">
+            Other Items in This Order
+        </div>
     </div>
     {{#each order.items}}
     {{#if (neq this._id ../item._id)}}
@@ -205,7 +445,30 @@
             <img src="{{this.productImg}}" alt="{{this.productName}}">
         </div>
         <div class="other-item-name">
-            {{this.productName}} (Size: {{this.productSize}}, Qty: {{this.quantity}})
+            <div>
+                {{this.productName}}
+            </div>
+            <small>
+                Size :
+                {{this.productSize}}
+                |
+                Qty :
+                {{this.quantity}}
+            </small>
+            <br>
+            <small>
+                <span class="status-text" style="
+                        color:
+                        {{#if (eq this.status 'Completed')}}green
+                        {{else if (eq this.status 'Cancelled')}}red
+                        {{else if (eq this.status 'Returned')}}orange
+                        {{else if (eq this.status 'Return Requested')}}#ff9800
+                        {{else}}gray
+                        {{/if}};
+                        ">
+                    {{this.status}}
+                </span>
+            </small>
         </div>
         <div class="other-item-arrow">
             <i class="fas fa-chevron-right"></i>
@@ -215,10 +478,6 @@
     {{/each}}
 </div>
 {{/if}}
-
-
-
-
 <!-- Cancel Order Modal -->
 <div id="cancel-order-modal" class="modal">
     <div class="modal-content">
@@ -237,7 +496,6 @@
         </div>
     </div>
 </div>
-
 <!-- Return Order Modal -->
 <div id="return-order-modal" class="modal">
     <div class="modal-content">
@@ -258,7 +516,6 @@
         </div>
     </div>
 </div>
-
 <!-- Success Message -->
 <div id="success-message" class="success-message">
     <div class="success-icon">
@@ -269,6 +526,9 @@
     </div>
     <button id="close-success-message" class="btn btn-primary">OK</button>
 </div>
+
+
+
 
 
 {{#section 'scripts'}}

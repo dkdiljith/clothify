@@ -26,7 +26,7 @@ exports.userAuth = async (req, res, next) => {
         return res.redirect('/user/login');
       });
     }
-
+    req.session.user.showWelcomeModal = false;
     next();
   } catch (error) {
     console.error("User Auth Error:", error);

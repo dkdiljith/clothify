@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!response.ok) {
 
                     showPopupMessage(
-                        "Invoice generation failedddddddddddddddd",
+                        "Invoice generation failed",
                         "error"
                     );
 

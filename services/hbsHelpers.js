@@ -103,11 +103,11 @@ module.exports = {
     if (!date) return "-";
 
     return new Date(date).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
     });
-},
+  },
 
   //userOrderDetails
   or: function () {
@@ -116,6 +116,27 @@ module.exports = {
   },
   neq: function (a, b) {
     return a !== b;
+  },
+  paymentMethod: function (method) {
+    switch (method) {
+      case "razorpay":
+        return "Razorpay";
+
+      case "wallet":
+        return "Wallet";
+
+      case "cod":
+        return "Cash on Delivery";
+
+      default:
+        return method;
+    }
+  },
+  formatPrice: function (value) {
+    if (value === undefined || value === null) {
+      return "0";
+    }
+    return Number(value).toLocaleString("en-IN");
   },
 
   //coupon
@@ -209,18 +230,18 @@ module.exports = {
   },
 
   //referral page
- initial: function (name) {
+  initial: function (name) {
     if (!name) return "";
     return name.charAt(0).toUpperCase();
-},
+  },
 
-coinValuePreview: function (coinValue) {
+  coinValuePreview: function (coinValue) {
     if (!coinValue) return "100 Coins = ₹0";
 
     return `100 Coins = ₹${100 * Number(coinValue)}`;
-},
-coinValue: (coins, value) => {
+  },
+  coinValue: (coins, value) => {
     return (Number(coins) * Number(value)).toFixed(2);
-}
+  }
 };
 
