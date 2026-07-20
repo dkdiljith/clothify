@@ -52,11 +52,29 @@ exports.cartRender = async (req, res) => {
     //  Recalculate totals
     const summary = await recalculateCartSummary(userId);
 
-    //  Get fresh populated data
+    // Get fresh populated data
     const updatedCart = await Cart.findOne({ userId })
       .populate('items.productId')
       .populate('couponId')
       .lean();
+
+    // Patch the null productIds with an object containing the raw ID string
+    if (updatedCart && updatedCart.items && cartExists && cartExists.items) {
+      updatedCart.items.forEach((item, index) => {
+        if (item.productId === null) {
+          const originalItem = cartExists.items[index];
+          if (originalItem && originalItem.productId) {
+            // Format it as an object with an _id property to match population layout
+            item.productId = {
+              _id: originalItem.productId.toString()
+            };
+            // Add a flag so your frontend template can detect it is inactive/disabled
+            item.isInactiveProduct = true;
+          }
+        }
+      });
+    }
+
 
     // Prepare Coupons for your specific template logic
     const allCoupons = await Coupon.find({
@@ -80,7 +98,7 @@ exports.cartRender = async (req, res) => {
       })
       .map(coupon => ({
         ...coupon,
-        _id: coupon._id.toString() 
+        _id: coupon._id.toString()
       }))
       .sort((a, b) => {
         if (a._id === currentCouponId) return -1;
@@ -96,7 +114,8 @@ exports.cartRender = async (req, res) => {
       tax: summary.tax,
       totalAmount: summary.totalAmount,
       coupons: availableCoupons,
-      appliedCoupon: updatedCart.couponId 
+      appliedCoupon: updatedCart.couponId,
+      message: res.locals.message || null
     });
 
   } catch (error) {
@@ -123,7 +142,7 @@ exports.addToCart = async (req, res) => {
     }
 
     let cart = await Cart.findOne({ userId });
-    const existingItem = cart ? cart.items.find(item => 
+    const existingItem = cart ? cart.items.find(item =>
       item.productId.toString() === productId && item.variationIndex === vIndex
     ) : null;
 
@@ -135,10 +154,10 @@ exports.addToCart = async (req, res) => {
       if (existingItem.quantity <= 1) {
         return res.status(400).json({ success: false, message: 'Minimum quantity is 1' });
       }
-      
+
       existingItem.quantity += changeAmount; // Decreases the quantity safely
       await cart.save();
-      
+
       // Recalculate all totals/coupons natively across database models
       await recalculateCartSummary(userId);
 
@@ -191,7 +210,7 @@ exports.addToCart = async (req, res) => {
     // FIX: Fetch fresh calculations after summary script processing completes
     const updatedCart = await Cart.findOne({ userId });
     const currentUnitProductPrice = parseFloat(check.variation.price || 0);
-    const postSavedTargetItem = updatedCart.items.find(item => 
+    const postSavedTargetItem = updatedCart.items.find(item =>
       item.productId.toString() === productId && item.variationIndex === vIndex
     );
 
@@ -235,7 +254,7 @@ exports.deleteCart = async (req, res) => {
     }
 
     // Filter out the item matching both product ID and variation index
-    cart.items = cart.items.filter(item => 
+    cart.items = cart.items.filter(item =>
       !(item.productId.toString() === productId && item.variationIndex === variationIndex)
     );
 
@@ -292,7 +311,7 @@ exports.getAddressInCart = async (req, res) => {
 
     for (const item of cartData.items) {
       const check = await verifyProductVariation(item.productId, item.variationIndex);
-      
+
       if (check.isValid) {
         // Optional: Check if the product has run out of stock since they added it
         if (check.variation.quantity < item.quantity) {
@@ -327,10 +346,10 @@ exports.getAddressInCart = async (req, res) => {
 
       // Important: Recalculate your subtotal, tax, coupons, etc., since items were removed
       await recalculateCartSummary(userId);
-      
+
       // If no valid items are left at all, bounce them out of checkout back to the cart
       if (validItems.length === 0) {
-        return res.redirect('/user/cart'); 
+        return res.redirect('/user/cart');
       }
     }
 
@@ -339,9 +358,9 @@ exports.getAddressInCart = async (req, res) => {
       .populate('items.productId')
       .lean();
 
-    return res.render('user/addressInCheckout', { 
-      cart: finalizedCart, 
-      address: address 
+    return res.render('user/addressInCheckout', {
+      cart: finalizedCart,
+      address: address
     });
 
   } catch (error) {
@@ -349,3 +368,20 @@ exports.getAddressInCart = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+
+
+
+
+
+exports.processPaymentPage = async (req, res) => {
+
+  const { paymentMethod, addressId } = req.body;
+  console.log(`this is payemt processing `, paymentMethod, addressId)
+
+  return res.render("user/paymentProcessing", {
+    method: paymentMethod,
+    addressId
+  });
+
+}

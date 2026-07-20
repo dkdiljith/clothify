@@ -242,6 +242,12 @@ module.exports = {
   },
   coinValue: (coins, value) => {
     return (Number(coins) * Number(value)).toFixed(2);
-  }
+  },
+  hasUnavailableItems: function(items) {
+  if (!items || !Array.isArray(items)) return false;
+  // Checks if any array element explicitly carries the false flag
+  return items.some(item => item.isAvailable === false);
+}
+
 };
 

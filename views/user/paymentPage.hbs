@@ -2,23 +2,17 @@
 <title>Secure Payment | Complete Your Order</title>
 <link rel="stylesheet" type="text/css" href="/stylesheets/user/paymentPage.css">
 {{/section}}
-
-
 <div class="container">
     <div class="payment-container">
         <div class="payment-options-section">
             <div class="payment-page-header">
-
                 <h1 class="payment-page-title">
                     Select Payment Method
                 </h1>
-
                 <p class="payment-page-subtitle">
                     Choose your preferred payment option to securely complete your order.
                 </p>
-
             </div>
-
             <div class="payment-methods">
                 <div class="payment-method" data-method="cod">
                     <div class="payment-method-content">
@@ -35,7 +29,6 @@
                     </div>
                     <input type="radio" name="selectedPayment" value="cod" id="cod">
                 </div>
-
                 <div class="payment-method" data-method="razorpay">
                     <div class="payment-method-content">
                         <div class="payment-method-icon">
@@ -51,7 +44,6 @@
                     </div>
                     <input type="radio" name="selectedPayment" value="razorpay" id="razorpay">
                 </div>
-
                 <div class="payment-method" data-method="wallet" data-wallet-balance="{{wallet.balance}}">
                     <div class="payment-method-content">
                         <div class="payment-method-icon">
@@ -72,7 +64,6 @@
                     <input type="radio" name="selectedPayment" value="wallet" id="wallet">
                 </div>
             </div>
-
             <div class="payment-security">
                 <i class="fas fa-shield-alt"></i>
                 <div class="payment-security-text">
@@ -81,7 +72,6 @@
                 </div>
             </div>
         </div>
-
         <div class="order-summary-section">
             <div class="price-summary">
                 <h2>Order Summary</h2>
@@ -101,37 +91,34 @@
                     <span>Tax</span>
                     <span>₹{{cart.tax}}</span>
                 </div>
-
                 {{#if cart.couponId}}
                 <div class="summary-item">
                     <span>Coupon Discount</span>
                     <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
                 </div>
                 {{/if}}
-
                 {{#if cart.offerDiscount}}
                 <div class="summary-item">
                     <span>Discount</span>
                     <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
                 </div>
                 {{/if}}
-
                 <div class="summary-item total">
                     <span>Total Amount</span>
                     <span id="amount" name="amount">₹{{cart.totalAmount}}</span>
                 </div>
             </div>
-
-            <form id="payment-form">
+            <form id="payment-form" action="/user/payment/process" method="POST">
+                <input type="hidden" name="paymentMethod" id="paymentMethodInput">
+                <input type="hidden" name="addressId" id="addressIdInput">
                 <button class="btn-place-order" type="submit" disabled id="placeOrderBtn">
-                    <i class="fas fa-lock"></i> PLACE ORDER
+                    <i class="fas fa-lock"></i>
+                    PLACE ORDER
                 </button>
             </form>
         </div>
     </div>
 </div>
-
-
 {{#section 'scripts'}}
 <script src="/javascripts/user/paymentPage.js" defer></script>
 {{/section}}

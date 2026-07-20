@@ -89,6 +89,7 @@ router.put('/address/:id', userAuth, productValidator, addressController.editAdd
 router.delete('/address/:id', userAuth, productValidator, addressController.deleteAddress);
 router.put('/address/default/:id', userAuth, productValidator, addressController.setDefaultAddress);
 
+router.post("/payment/process", userAuth, productValidator , cartController.processPaymentPage);
 router.get('/payment', userAuth, productValidator, userOrderController.payment);
 router.post(`/placeorder`, userAuth, productValidator, userOrderController.placeOrder)
 router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)

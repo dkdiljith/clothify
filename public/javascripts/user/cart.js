@@ -67,56 +67,86 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================================================
-    // REMOVE ITEM BUTTONS (REFRESH-FREE WORKFLOW)
+    // BULLETPROOF REMOVE ITEM EVENT DELEGATION
     // =========================================================
-    document.querySelectorAll(".btn-remove").forEach((button) => {
-        button.addEventListener("click", async function () {
-            const productId = this.getAttribute("data-product-id");
-            const variationIndex = this.getAttribute("data-variation-index");
-            const itemRow = this.closest(".cart-item");
+    document.addEventListener("click", async function (event) {
+        // Catch any click on the remove button or anything nested inside it (like the trash icon)
+        const removeBtn = event.target.closest(".remove-item, .btn-remove");
+        if (!removeBtn) return;
 
-            const confirmed = await showCustomConfirm(
-                "Remove Item?",
-                "Are you sure you want to completely remove this product from your shopping cart?",
-                "danger"
-            );
+        event.preventDefault();
 
-            if (!confirmed) return;
+        const productId = removeBtn.getAttribute("data-product-id");
+        const variationIndex = removeBtn.getAttribute("data-variation-index");
+        const itemRow = removeBtn.closest(".cart-item");
 
-            try {
-                const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
-                    method: "DELETE"
-                });
-                const data = await response.json();
+        const confirmed = await showCustomConfirm(
+            "Remove Item?",
+            "Are you sure you want to completely remove this product from your shopping cart?",
+            "danger"
+        );
+        if (!confirmed) return;
 
-                if (data.success) {
-                    if (itemRow) {
-                        itemRow.style.transition = "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-                        itemRow.style.opacity = "0";
-                        itemRow.style.transform = "translate3d(-20px, 0, 0)";
+        try {
+            const response = await fetch(`/user/cart/${productId}/${variationIndex}`, { method: "DELETE" });
+            const data = await response.json();
 
-                        setTimeout(() => {
-                            itemRow.remove();
+            if (data.success) {
+                if (itemRow) {
+                    // Run slide-out animation transitions
+                    itemRow.style.transition = "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+                    itemRow.style.opacity = "0";
+                    itemRow.style.transform = "translate3d(-20px, 0, 0)";
 
-                            const remainingItems = document.querySelectorAll(".cart-item");
-                            if (remainingItems.length === 0) {
-                                location.reload(); // Reload to render Handlebars empty checkout templates cleanly
-                            } else {
-                                updateCartSummaryUI(data);
+                    setTimeout(() => {
+                        itemRow.remove();
+
+                        const remainingItems = document.querySelectorAll(".cart-item");
+                        if (remainingItems.length === 0) {
+                            location.reload(); // Reload cleanly to handle full empty screens
+                        } else {
+                            // Update financial rows with fresh data payload values
+                            updateCartSummaryUI(data);
+
+                            // Scan the screen for any remaining unavailable product items
+                            const remainingUnavailable = document.querySelectorAll(".unavailable-item-card");
+
+                            if (remainingUnavailable.length === 0) {
+                                // 1. Remove the server-rendered error message banner from the viewport
+                                const errorBanner = document.querySelector(".cart-error-banner");
+                                if (errorBanner) errorBanner.remove();
+
+                                // 2. Restore checkout controls from disabled status
+                                const checkoutBtn = document.querySelector(".btn-checkout");
+                                if (checkoutBtn) {
+                                    checkoutBtn.removeAttribute("disabled");
+                                    checkoutBtn.removeAttribute("title");
+                                    checkoutBtn.style.backgroundColor = "";
+                                    checkoutBtn.style.cursor = "";
+                                    checkoutBtn.innerHTML = `<i class="fas fa-lock"></i> Proceed to Checkout`;
+
+                                    // Bind navigation route path target action click trigger back on
+                                    checkoutBtn.onclick = function () {
+                                        location.href = '/user/addressInCart';
+                                    };
+                                }
                             }
-                        }, 300);
-                    }
-                    showPopupMessage("Item removed from cart.", "info");
-                } else {
-                    showPopupMessage(data.message || "Failed to remove item", "error");
+                        }
+                    }, 300);
                 }
-            } catch (error) {
-                console.error("Request failed:", error);
-                showPopupMessage("Failed to remove item. Please try again.", "error");
+                showPopupMessage("Item removed from cart.", "info");
+            } else {
+                showPopupMessage(data.message || "Failed to remove item", "error");
             }
-        });
+        } catch (error) {
+            console.error("Request failed:", error);
+            showPopupMessage("Failed to remove item. Please try again.", "error");
+        }
     });
-});
+
+})
+
+
 
 // =========================================================
 // INTERNALS: CART TOTAL SUMMARY UI NODE REWRITER
@@ -246,5 +276,3 @@ async function removeCoupon() {
         showPopupMessage('Failed to remove coupon. Please try again.', 'error');
     }
 }
-
-
