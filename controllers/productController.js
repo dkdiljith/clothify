@@ -1029,9 +1029,11 @@ exports.singleProductPage = async (req, res) => {
 
         if (!product) {
 
-            return res.status(404).render("error", {
-                message: "Product not found"
-            });
+            // return res.status(404).render("error", {
+            //     message: "Product not found"
+            // });
+
+             return res.render("user/singleProductPageNF");
 
         }
 
