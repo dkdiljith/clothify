@@ -457,3 +457,108 @@ th {
     }
 
 }
+
+
+.return-filter-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px 16px;
+
+    border:1px solid #d1d5db;
+    border-radius:8px;
+
+    background:#fff;
+    color:#374151;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:.2s ease;
+}
+
+.return-filter-btn:hover{
+    background:#fff7ed;
+    border-color:#fb923c;
+    color:#ea580c;
+}
+
+.return-filter-btn.active{
+    background:#fff7ed;
+    border-color:#ea580c;
+    color:#ea580c;
+}
+
+.notification-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:22px;
+    height:22px;
+
+    padding:0 6px;
+
+    border-radius:999px;
+
+    background:#dc2626;
+    color:#fff;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+
+
+/* 
+//////////////////////////statueses/////////////// */
+
+/* Pending */
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* Failed */
+.status-failed {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Shipped */
+.status-shipped {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* Completed */
+.status-completed {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* Cancelled */
+.status-cancelled {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Return Requested */
+.status-return\ requested {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+/* Return Rejected */
+.status-return\ rejected {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+/* Returned */
+.status-returned {
+    background: #efebe9;
+    color: #6d4c41;
+}
+

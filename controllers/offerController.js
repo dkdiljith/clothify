@@ -14,40 +14,99 @@ const MESSAGES = require(`../utils/constants`)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 exports.offerRender = async (req, res) => {
-   try {
-
+    try {
         const page = parseInt(req.query.page) || 1;
-        const query = req.query.query || '';
-        const result = await adminPaginationFactory({
-            page,
-            limit: 5,
-            query,
-            type: 'offer'
-        });
-        return res.render('admin/offer', {
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const query = req.query.query || "";
+        const offerType = req.query.offerType || "";
+        const discountType = req.query.discountType || "";
+        const offerStatus = req.query.offerStatus || "";
+        const filter = {};
+        // Search
+        if (query) {
+            filter.$or = [
+                {
+                    offerCode: {
+                        $regex: query,
+                        $options: "i"
+                    }
+                },
+                {
+                    offerType: {
+                        $regex: query,
+                        $options: "i"
+                    }
+                },
+                {
+                    discountType: {
+                        $regex: query,
+                        $options: "i"
+                    }
+                }
+            ];
+        }
+        // Offer Type Filter
+        if (offerType) {
+            filter.offerType = offerType;
+        }
+        // Discount Type Filter
+        if (discountType) {
+            filter.discountType = discountType;
+        }
+        // Status Filter
+        if (offerStatus === "active") {
+            filter.isActive = true;
+        }
+        if (offerStatus === "inactive") {
+            filter.isActive = false;
+        }
+        const [offer, totalDocuments] = await Promise.all([
+            Offer.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Offer.countDocuments(filter)
+        ]);
+        const totalPages = Math.ceil(totalDocuments / limit);
+        return res.render("admin/offer", {
             admin: true,
-            ...result
+            offer,
+            query,
+            offerType,
+            discountType,
+            offerStatus,
+            pagination: {
+                page,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                serialNumberStart: skip
+            }
         });
-
     } catch (error) {
-
         console.error("Error fetching offers:", error);
-        return res.render('admin/offer', {
+        return res.render("admin/offer", {
             admin: true,
             offer: [],
-            query: '',
+            query: "",
+            offerType: "",
+            discountType: "",
+            offerStatus: "",
             pagination: {
                 page: 1,
-                limit: 5,
                 totalPages: 1,
                 hasNextPage: false,
                 hasPrevPage: false,
+                nextPage: 2,
+                prevPage: 0,
                 serialNumberStart: 0
             },
-            errorMessage: "Error fetching offers. Please try again later."
+            errorMessage: "Error fetching offers."
         });
     }
 };

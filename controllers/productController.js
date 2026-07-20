@@ -962,43 +962,56 @@ exports.updateProduct = async (req, res) => {
 
 
 
-
 exports.showProducts = async (req, res) => {
     try {
         // 1. Get params from URL (e.g., /admin/products?page=1&query=shirt)
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-        const query = req.query.query || '';
-
+        const query = req.query.query || "";
+        const status = req.query.status || "";
         // 2. Build the search filter
         let filter = {};
         if (query) {
-            filter = {
-                $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { description: { $regex: query, $options: 'i' } }
-                ]
-            };
+            filter.$or = [
+                {
+                    name: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+                {
+                    description: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+            ];
         }
-
+        if (status === "active") {
+            filter.isActive = true;
+        }
+        if (status === "blocked") {
+            filter.isActive = false;
+        }
         // 3. Execute queries with 'showInactive' flag so admin sees everything
-        const [totalDocuments, products] = await Promise.all([
+        const [totalDocuments, products, categories] = await Promise.all([
             Product.countDocuments(filter),
             Product.find(filter)
                 .setOptions({ showInactive: true })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .lean()
+                .lean(),
+            Category.find({}).lean(),
         ]);
-
         const totalPages = Math.ceil(totalDocuments / limit);
-
         // 4. Render the page with data and pagination helpers
-        return res.render('admin/products', {
+        return res.render("admin/products", {
             products,
+            categories,
             query,
+            status,
             pagination: {
                 page,
                 totalPages,
@@ -1006,16 +1019,16 @@ exports.showProducts = async (req, res) => {
                 hasPrevPage: page > 1,
                 nextPage: page + 1,
                 prevPage: page - 1,
-                serialNumberStart: skip
-            }
+                serialNumberStart: skip,
+            },
         });
-
     } catch (error) {
-        console.error('Error in showProducts:', error);
-        return res.status(500).render('error', { message: 'Failed to load products' });
+        console.error("Error in showProducts:", error);
+        return res
+            .status(500)
+            .render("error", { message: "Failed to load products" });
     }
 };
-
 
 
 
@@ -1033,7 +1046,7 @@ exports.singleProductPage = async (req, res) => {
             //     message: "Product not found"
             // });
 
-             return res.render("user/singleProductPageNF");
+            return res.render("user/singleProductPageNF");
 
         }
 

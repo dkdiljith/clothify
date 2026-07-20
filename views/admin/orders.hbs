@@ -1,20 +1,77 @@
 {{#section 'head'}}
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/orders.css" />
 {{/section}}
-
 <main class="dashboard-container">
-    <div style="display:flex; justify-content:space-between;" class="orders-header">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;"
+        class="orders-header">
         <h1 class="page-title">Order Management</h1>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <form method="GET" action="/admin/orders"
+                style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div class="search-container">
+                    <input type="search" name="query" class="search-input" placeholder="Search orders..."
+                        value="{{query}}">
+                </div>
+                <select name="deliveryStatus" class="form-select" style="width:190px; height:44px;">
 
-        {{!-- serach --}}
-        <form method="GET" action='/admin/orders' role="search">
-            <div class="search-container">
-                <input type="search" name="query" class="search-input" id="search-input" placeholder="Search orders..."
-                    {{#if query}} value={{query}} {{/if}}>
-            </div>
-        </form>
+                    <option value="" {{#unless deliveryStatus}}selected{{/unless}}>
+                        All Orders
+                    </option>
+
+                    <option value="Pending" {{#ifCond deliveryStatus "==" "Pending" }}selected{{/ifCond}}>
+                        Pending
+                    </option>
+
+                    <option value="Failed" {{#ifCond deliveryStatus "==" "Failed" }}selected{{/ifCond}}>
+                        Failed
+                    </option>
+
+                    <option value="Shipped" {{#ifCond deliveryStatus "==" "Shipped" }}selected{{/ifCond}}>
+                        Shipped
+                    </option>
+
+                    <option value="Completed" {{#ifCond deliveryStatus "==" "Completed" }}selected{{/ifCond}}>
+                        Completed
+                    </option>
+
+                    <option value="Cancelled" {{#ifCond deliveryStatus "==" "Cancelled" }}selected{{/ifCond}}>
+                        Cancelled
+                    </option>
+
+                    <option value="Return Rejected" {{#ifCond deliveryStatus "==" "Return Rejected"
+                        }}selected{{/ifCond}}>
+                        Return Rejected
+                    </option>
+
+                    <option value="Returned" {{#ifCond deliveryStatus "==" "Returned" }}selected{{/ifCond}}>
+                        Returned
+                    </option>
+
+                </select>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                    Apply Filters
+                </button>
+                <a href="/admin/orders" class="btn btn-outline-secondary">
+                    Reset
+                </a>
+            </form>
+            <a href="/admin/orders?{{#if query}}query={{query}}&{{/if}}{{#if deliveryStatus}}deliveryStatus={{deliveryStatus}}&{{/if}}returnRequested={{#if returnRequested}}false{{else}}true{{/if}}"
+                class="return-filter-btn {{#if returnRequested}}active{{/if}}">
+                <svg class="action-icon warning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12.01" y2="19"></line>
+                    <line x1="12" y1="5" x2="12" y2="14"></line>
+                </svg>
+                <span>Return Requests</span>
+                {{#if pendingReturns}}
+                <span class="notification-badge">
+                    {{pendingReturns}}
+                </span>
+                {{/if}}
+            </a>
+        </div>
     </div>
-
     {{#if order.length}}
     <div class="orders-table">
         <table>
@@ -24,155 +81,93 @@
                     <th>Order Number</th>
                     <th>Client</th>
                     <th>Order Date</th>
-                    <th>Payment Status</th> {{!-- Added Column --}}
+                    <th>Delivery Status</th>
                     <th>Item Count</th>
                     <th>Total Amount</th>
                     <th>View Details</th>
                 </tr>
             </thead>
             <tbody>
-
                 {{#each order}}
-
-                <tr class="{{#ifeq this.paymentStatus 'Failed'}}payment-failed-row{{/ifeq}}">
-
+                <tr class="{{#ifeq this.deliveryStatus 'Cancelled'}}payment-failed-row{{/ifeq}}">
                     <td data-label="Sl No">
                         {{serialNumber ../pagination.serialNumberStart @index}}
                     </td>
-
                     <td>
-
                         <div class="order-info-cell">
-
                             <svg xmlns="http://w3.org" viewBox="0 0 512 512" width="100%" height="100%">
                                 <!-- Definitions for clean strokes and reusable styles -->
                                 <g fill="none" stroke="#2C3E50" stroke-width="16" stroke-linecap="round"
                                     stroke-linejoin="round">
-
                                     <!-- Inner Background / Box Depth -->
                                     <polygon points="170,180 256,135 342,180 256,225" fill="#A07845" />
-
                                     <!-- Back Flaps (Open) -->
                                     <!-- Left Back Flap -->
                                     <polygon points="170,180 90,140 180,110 256,135" fill="#F5C469" />
                                     <!-- Right Back Flap -->
                                     <polygon points="342,180 422,140 332,110 256,135" fill="#F5C469" />
-
                                     <!-- Main Box Body Front Faces -->
                                     <!-- Left Front Side -->
                                     <polygon points="120,240 256,310 256,430 120,360" fill="#F3B14E" />
                                     <!-- Right Front Side -->
                                     <polygon points="392,240 256,310 256,430 392,360" fill="#F3B14E" />
-
                                     <!-- Front Flaps (Dropped Open) -->
                                     <!-- Left Front Flap -->
                                     <polygon points="120,240 256,310 190,360 70,290" fill="#F5C469" />
                                     <!-- Right Front Flap -->
                                     <polygon points="392,240 256,310 322,360 442,290" fill="#F5C469" />
-
                                     <!-- Detail Line Accent on Left Side -->
                                     <line x1="150" y1="280" x2="150" y2="320" stroke="#2C3E50" stroke-width="14" />
-
                                 </g>
                             </svg>
-
-
                             <div class="order-number-container">
-
                                 #{{this.orderId}}
-
                                 {{#if (hasReturnRequest this.items)}}
-
                                 <span class="return-alert" title="Return Requested - Needs Attention">
-
                                     <svg class="action-icon warning-icon" xmlns="http://w3.org" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                                         stroke-linejoin="round">
                                         <line x1="12" y1="19" x2="12.01" y2="19"></line>
                                         <line x1="12" y1="5" x2="12" y2="14"></line>
                                     </svg>
-
-
                                 </span>
-
                                 {{/if}}
-
-                                {{#ifeq this.paymentStatus 'Failed'}}
-
-                                <span class="payment-alert" title="Payment Failed">
-
-                                    <svg class="dashboard-icon finance-icon" xmlns="http://w3.org" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <!-- Hand Vector Structure -->
-                                        <path d="M14 18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"></path>
-                                        <path d="M20 10l-4 4-2-2"></path>
-                                        <!-- Currency / Dollar Symbol Structure -->
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                        <path d="M12 8v4"></path>
-                                    </svg>
-
-
-                                </span>
-
-                                {{/ifeq}}
-
                             </div>
-
                         </div>
-
                     </td>
-
                     <td data-label="Client">
                         {{this.deliveryAddress.name}}
                     </td>
-
                     <td data-label="Order Date">
                         {{formatDate this.createdAt}}
                     </td>
-
-                    <td data-label="Payment Status">
-
-                        <span class="status-badge status-{{toLowerCase this.paymentStatus}}">
-                            {{this.paymentStatus}}
+                    <td data-label="Delivery Status">
+                        <span class="status-badge status-{{toLowerCase this.deliveryStatus}}">
+                            {{this.deliveryStatus}}
                         </span>
-
                     </td>
-
                     <td data-label="Item Count">
-
                         <span class="status status-success">
                             {{this.items.length}}
                         </span>
-
                     </td>
-
                     <td data-label="Total Amount">
                         ₹{{this.totalAmount}}
                     </td>
-
                     <td data-label="View Details">
-
                         <button onclick="location.href='/admin/orderDetails/{{this._id}}'" class="btn-primary">
-
                             View
-
                         </button>
-
                     </td>
-
                 </tr>
-
                 {{/each}}
-
             </tbody>
         </table>
     </div>
-
     {{#if (gt pagination.totalPages 1)}}
     <div class="pagination">
         {{#if pagination.hasPrevPage}}
-        <a href="/admin/orders?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/orders?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}{{#if deliveryStatus}}&deliveryStatus={{deliveryStatus}}{{/if}}{{#if returnRequested}}&returnRequested=true{{/if}}"
             class="pagination-button">
             <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -180,18 +175,16 @@
             </svg>
             Previous
         </a>
-
         {{/if}}
-
         <span class="pagination-info">
             Page {{pagination.page}} of {{pagination.totalPages}}
         </span>
-
         {{#if pagination.hasNextPage}}
-        <a href="/admin/orders?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/orders?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}{{#if deliveryStatus}}&deliveryStatus={{deliveryStatus}}{{/if}}{{#if returnRequested}}&returnRequested=true{{/if}}"
             class="pagination-button">
-            Next <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            Next
+            <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </a>
@@ -207,12 +200,17 @@
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
         <h2>No Orders Found</h2>
-        {{#unless query}} <p>There are currently no orders in the system.</p> {{/unless}}
+        {{#unless query}}
+        {{#unless deliveryStatus}}
+        {{#unless returnRequested}}
+        <p>There are currently no orders in the system.</p>
         <a href="/admin/orders" class="btn btn-primary">Refresh</a>
+        {{/unless}}
+        {{/unless}}
+        {{/unless}}
     </div>
     {{/if}}
 </main>
-
 {{#section 'scripts'}}
 <script src="/javascripts/admin/orders.js" defer></script>
 {{/section}}

@@ -2,19 +2,34 @@
 <title>User Management</title>
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/usersList.css">
 {{/section}}
-
 <main class="dashboard-container">
-    <div style="display:flex; justify-content:space-between;" class="users-header">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;"
+        class="users-header">
         <h1 class="page-title">User Management</h1>
-
-        <form method="GET" action='/admin/users' role="search">
+        <form method="GET" action="/admin/users" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <div class="search-container">
-                <input type="search" name="query" class="search-input" id="search-input" placeholder="Search users..."
-                    {{#if query}} value={{query}} {{/if}}>
+                <input type="search" name="query" class="search-input" placeholder="Search users..." value="{{query}}">
             </div>
+            <select name="accountStatus" class="form-select" style="width:180px; height:44px;">
+                <option value="" {{#unless accountStatus}}selected{{/unless}}>
+                    All Users
+                </option>
+                <option value="active" {{#ifCond accountStatus "==" "active" }}selected{{/ifCond}}>
+                    Active Users
+                </option>
+                <option value="blocked" {{#ifCond accountStatus "==" "blocked" }}selected{{/ifCond}}>
+                    Blocked Users
+                </option>
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i>
+                Apply
+            </button>
+            <a href="/admin/users" class="btn btn-outline-secondary">
+                Reset
+            </a>
         </form>
     </div>
-
     {{#if user.length}}
     <div class="users-table">
         <table>
@@ -30,54 +45,36 @@
                 </tr>
             </thead>
             <tbody>
-
                 {{#each user}}
-
                 <tr>
-
                     <td data-label="Sl No">
                         {{serialNumber ../pagination.serialNumberStart @index}}
                     </td>
-
                     <td>
-
                         <div class="user-info-cell">
-
                             <img src="https://i.postimg.cc/TwCBBcvg/0684456b-aa2b-4631-86f7-93ceaf33303c.jpg"
                                 class="user-avatar" alt="Avatar">
-
                             <span>{{this.name}}</span>
-
                         </div>
-
                     </td>
-
                     <td data-label="Email Address">
                         {{this.email}}
                     </td>
-
                     <td data-label="Phone Number">
-
                         {{#if this.phone}}
                         {{this.phone}}
                         {{else}}
                         <span>null</span>
                         {{/if}}
-
                     </td>
-
                     <td data-label="Verification Status">
-
                         {{#if this.isVerified}}
                         <span>✅</span>
                         {{else}}
                         <span>❌</span>
                         {{/if}}
-
                     </td>
-
                     <td data-label="Registration Date">
-
                         {{#if this.createdAt}}
                         <span id="createdAt-{{@index}}">
                             {{this.createdAt}}
@@ -85,43 +82,27 @@
                         {{else}}
                         <span>null</span>
                         {{/if}}
-
                     </td>
-
                     <td data-label="Account Management">
-
                         {{#if this.blocked}}
-
                         <button onclick="location.href='/admin/blockUser/{{this._id}}'" class="btn btn-primary">
-
                             UnBlock
-
                         </button>
-
                         {{else}}
-
                         <button onclick="location.href='/admin/blockUser/{{this._id}}'" class="btn btn-warning">
-
                             Block
-
                         </button>
-
                         {{/if}}
-
                     </td>
-
                 </tr>
-
                 {{/each}}
-
             </tbody>
         </table>
     </div>
-
     {{#if (gt pagination.totalPages 1)}}
     <div class="pagination">
         {{#if pagination.hasPrevPage}}
-        <a href="/admin/users?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/users?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}{{#if accountStatus}}&accountStatus={{accountStatus}}{{/if}}"
             class="pagination-button">
             <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -129,7 +110,6 @@
             </svg>
             Previous
         </a>
-
         {{/if}}
 
         <span class="pagination-info">
@@ -137,7 +117,7 @@
         </span>
 
         {{#if pagination.hasNextPage}}
-        <a href="/admin/users?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/users?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}{{#if accountStatus}}&accountStatus={{accountStatus}}{{/if}}"
             class="pagination-button">
             Next
             <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -145,10 +125,10 @@
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </a>
-
         {{/if}}
     </div>
     {{/if}}
+
     {{else}}
     <div class="empty-state">
         <!-- Inline SVG for "No users found" -->
@@ -158,14 +138,10 @@
                 d="M15 12c2.21 0 4-1.79 4-4S17.21 4 15 4s-4 1.79-4 4 1.79 4 4 4zm-6 0c2.21 0 4-1.79 4-4S11.21 4 9 4 5 5.79 5 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm6 0c.29 0 .62.02.97.05C18.2 14.2 20 15.21 20 17v2h4v-2c0-2.66-5.33-4-8-4z" />
         </svg>
         <h2>No Users Found</h2>
-        {{#unless query}} <p>There are currently no users in the system.</p> {{/unless}}
-        <a href="/admin/users" class="btn btn-primary">Refresh</a>
+        {{#unless query}} <p>There are currently no users in the system.</p> <a href="/admin/users" class="btn btn-primary">Refresh</a>  {{/unless}}
     </div>
     {{/if}}
 </main>
-
-
-
 {{#section 'scripts'}}
 <script src="/javascripts/admin/usersList.js" defer></script>
 {{/section}}

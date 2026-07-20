@@ -176,12 +176,14 @@ module.exports = {
     return a <= b;
   },
   //user order
-  toLowerCase: function (str) {
+toLowerCase: function (str) {
     if (str && typeof str === 'string') {
-      return str.toLowerCase();
+        return str
+            .toLowerCase()
+            .replace(/\s+/g, '-');
     }
-    return ''; // Or handle non-string values as needed
-  },
+    return '';
+},
   ifeq: function (a, b, options) {
     if (a === b) {
       return options.fn(this);

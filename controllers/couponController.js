@@ -15,43 +15,85 @@ const adminPaginationFactory = require(`../utils/pagination`);
 const MESSAGES = require(`../utils/constants`)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-
 exports.couponRender = async (req, res) => {
     try {
-
         const page = parseInt(req.query.page) || 1;
-        const query = req.query.query || '';
-        const result = await adminPaginationFactory({
-            page,
-            limit: 5,
-            query,
-            type: 'coupon'
-        });
-        return res.render('admin/coupon', {
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const query = req.query.query || "";
+        const couponStatus = req.query.couponStatus || "";
+        const filter = {};
+        // Search
+        if (query) {
+            filter.$or = [
+                {
+                    couponCode: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+                {
+                    discountType: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+            ];
+        }
+        // Status Filter
+        if (couponStatus === "active") {
+            filter.isActive = true;
+        }
+        if (couponStatus === "expired") {
+            filter.isActive = false;
+        }
+        const [coupon, totalDocuments] = await Promise.all([
+            Coupon.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Coupon.countDocuments(filter),
+        ]);
+        const totalPages = Math.ceil(totalDocuments / limit);
+        return res.render("admin/coupon", {
             admin: true,
-            ...result
+            coupon,
+            query,
+            couponStatus,
+            pagination: {
+                page,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                serialNumberStart: skip,
+            },
         });
-
     } catch (error) {
-
-        console.error(error);
-        return res.render('admin/coupon', {
-
+        console.error("Error fetching coupons:", error);
+        return res.render("admin/coupon", {
             admin: true,
             coupon: [],
-            query: '',
+            query: "",
+            couponStatus: "",
             pagination: {
                 page: 1,
-                limit: 5,
                 totalPages: 1,
                 hasNextPage: false,
                 hasPrevPage: false,
-                serialNumberStart: 0
+                nextPage: 2,
+                prevPage: 0,
+                serialNumberStart: 0,
             },
-            errorMessage: "Error fetching coupons. Please try again later."
+            errorMessage: "Error fetching coupons.",
         });
     }
 };
+
+
+
 
 
 exports.couponEditJson = async (req, res) => {

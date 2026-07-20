@@ -1,93 +1,63 @@
 const Order = require("../models/orderSchema");
-const Product = require(`../models/productSchema`)
-const Wallet = require(`../models/walletSchema`)
-const Coupon = require(`../models/couponSchema`)
+const Product = require(`../models/productSchema`);
+const Wallet = require(`../models/walletSchema`);
+const Coupon = require(`../models/couponSchema`);
 
 //pagination
 const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
-
-
+const MESSAGES = require(`../utils/constants`);
 
 /////////////////////////////////////////////////////////////
 
-
-
-
-
 async function calculateRefund(orderId, itemId, isCancellation) {
-
   const order = await Order.findById(orderId);
   if (!order) {
     throw new Error("Order not found");
   }
-  const item = order.items.find(
-    item => item._id.toString() === itemId
-  );
+  const item = order.items.find((item) => item._id.toString() === itemId);
   if (!item) {
     throw new Error("Item not found");
   }
 
   // Item Base Total
-  const itemSubtotal =
-    Number(item.productPrice) * item.quantity;
+  const itemSubtotal = Number(item.productPrice) * item.quantity;
 
   // Total Order Subtotal
   const orderSubtotal = order.items.reduce((total, currentItem) => {
-
-    return total + (
-      Number(currentItem.productPrice) *
-      currentItem.quantity
-    );
-
+    return total + Number(currentItem.productPrice) * currentItem.quantity;
   }, 0);
-
 
   // Item share percentage in order
 
   const itemSharePercentage =
-    orderSubtotal > 0
-      ? itemSubtotal / orderSubtotal
-      : 0;
-
+    orderSubtotal > 0 ? itemSubtotal / orderSubtotal : 0;
 
   // Coupon share for this item
 
-  const itemCouponShare =
-    (order.couponDiscount || 0) *
-    itemSharePercentage;
+  const itemCouponShare = (order.couponDiscount || 0) * itemSharePercentage;
 
   // Offer share for this item
 
-  const itemOfferShare =
-    (order.offerDiscount || 0) *
-    itemSharePercentage;
+  const itemOfferShare = (order.offerDiscount || 0) * itemSharePercentage;
 
   // Tax share for this item
 
-  const itemTaxShare =
-    (order.tax || 0) *
-    itemSharePercentage;
-
+  const itemTaxShare = (order.tax || 0) * itemSharePercentage;
 
   // Shipping share for this item
 
-  const itemShippingShare =
-    (order.shippingFee || 0) *
-    itemSharePercentage;
-
+  const itemShippingShare = (order.shippingFee || 0) * itemSharePercentage;
 
   // Final refundable amount
 
   let refundableAmount =
-    itemSubtotal
-    - itemCouponShare
-    - itemOfferShare
-    + itemTaxShare
-    + itemShippingShare;
-
+    itemSubtotal -
+    itemCouponShare -
+    itemOfferShare +
+    itemTaxShare +
+    itemShippingShare;
 
   // Prevent negative refund
 
@@ -103,73 +73,99 @@ async function calculateRefund(orderId, itemId, isCancellation) {
     itemShippingShare: Math.round(itemShippingShare),
     totalRefundableAmount: refundableAmount,
   };
-
 }
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
 exports.ordersRender = async (req, res) => {
   try {
-
     const page = parseInt(req.query.page) || 1;
-    const query = req.query.query || '';
-
-    const result = await adminPaginationFactory({
-      page,
-      limit: 5,
-      query,
-      type: 'order'
-    });
-    return res.render('admin/orders', {
+    const limit = 5;
+    const skip = (page - 1) * limit;
+    const query = req.query.query || "";
+    const deliveryStatus = req.query.deliveryStatus || "";
+    const returnRequested = req.query.returnRequested === "true";
+    const filter = {};
+    // Search
+    if (query) {
+      filter.$or = [
+        {
+          orderId: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+        {
+          "deliveryAddress.name": {
+            $regex: query,
+            $options: "i",
+          },
+        },
+      ];
+    }
+    // Payment Status Filter
+    if (deliveryStatus) {
+      filter.deliveryStatus = deliveryStatus;
+    }
+    // Return Request Filter
+    if (returnRequested) {
+      filter["items.status"] = "Return Requested";
+    }
+    const [totalDocuments, order, pendingReturns] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Order.countDocuments({
+        "items.status": "Return Requested",
+      }),
+    ]);
+    const totalPages = Math.ceil(totalDocuments / limit);
+    return res.render("admin/orders", {
       admin: true,
-      ...result
+      order,
+      query,
+      deliveryStatus,
+      returnRequested,
+      pendingReturns,
+      pagination: {
+        page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        serialNumberStart: skip,
+      },
     });
-
   } catch (error) {
-
     console.error("Error fetching orders:", error);
-
-    return res.render('admin/orders', {
+    return res.render("admin/orders", {
       admin: true,
       order: [],
-      query: '',
+      query: "",
+      deliveryStatus: "",
+      returnRequested: false,
+      pendingReturns: 0,
       pagination: {
         page: 1,
-        limit: 5,
         totalPages: 1,
         hasNextPage: false,
         hasPrevPage: false,
-        serialNumberStart: 0
+        nextPage: 2,
+        prevPage: 0,
+        serialNumberStart: 0,
       },
-      errorMessage: "Error fetching orders. Please try again later."
+      errorMessage: "Failed to load orders.",
     });
   }
 };
 
-
-
 exports.orderDetails = async (req, res) => {
-  const orderId = req.params.orderId
+  const orderId = req.params.orderId;
 
-  const order = await Order.findById(orderId).lean()
+  const order = await Order.findById(orderId).lean();
 
-  return res.render(`admin/orderDetails`, { order: order, admin: true })
-}
-
-
-
-
-
-
+  return res.render(`admin/orderDetails`, { order: order, admin: true });
+};
 
 exports.orderStatusChange = async (req, res) => {
   const orderId = req.params.orderId;
@@ -179,19 +175,23 @@ exports.orderStatusChange = async (req, res) => {
   try {
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     const item = order.items.id(itemId);
     if (!item) {
-      return res.status(404).json({ success: false, message: "Item not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
     }
 
     // PREVENT LATERAL CHANGES (e.g., Cannot change a Returned/Cancelled item to Completed)
     if (["Returned", "Cancelled"].includes(item.status)) {
       return res.status(400).json({
         success: false,
-        message: `Cannot change status. Item is already ${item.status}.`
+        message: `Cannot change status. Item is already ${item.status}.`,
       });
     }
 
@@ -203,16 +203,17 @@ exports.orderStatusChange = async (req, res) => {
 
       //handles surplus cases
       if (order.totalAmount - refundAmount === -1) {
-        refundAmount -= 1
+        refundAmount -= 1;
       } else if (order.totalAmount - refundAmount === 1) {
-        refundAmount += 1
+        refundAmount += 1;
       }
-
 
       // Wallet credit
       const wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {
-        return res.status(404).json({ success: false, message: "Wallet not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Wallet not found" });
       }
 
       wallet.balance += refundAmount;
@@ -227,7 +228,7 @@ exports.orderStatusChange = async (req, res) => {
       const product = await Product.findById(item.productId);
       if (product) {
         const variation = product.details[item.variationIndex];
-        if (variation && typeof variation.quantity === 'number') {
+        if (variation && typeof variation.quantity === "number") {
           variation.quantity += item.quantity;
           await product.save();
         }
@@ -238,7 +239,7 @@ exports.orderStatusChange = async (req, res) => {
       item.refundDetails.paymentMethod = order.paymentMethod;
       item.refundDetails.refundType = newStatus;
       item.refundDetails.refundAmount = refundAmount;
-      item.refundDetails.refundAmountStatus = 'Refunded';
+      item.refundDetails.refundAmountStatus = "Refunded";
 
       // Update financial records on order level
       order.totalRefundAmount += refundAmount;
@@ -253,7 +254,7 @@ exports.orderStatusChange = async (req, res) => {
       (singleItem) =>
         singleItem.status === "Completed" ||
         singleItem.status === "Returned" ||
-        singleItem.status === "Cancelled"
+        singleItem.status === "Cancelled",
     );
 
     if (allCompleted && order.paymentMethod === "cod") {
@@ -267,7 +268,6 @@ exports.orderStatusChange = async (req, res) => {
       success: true,
       message: `Item status updated to ${newStatus}`,
     });
-
   } catch (error) {
     console.error("Order Status Change Error:", error);
     return res.status(500).json({
@@ -277,23 +277,12 @@ exports.orderStatusChange = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
 /////////////////////////////////////////////////////USERSIDE ORDER CANCELAND RETURNING//////////////////////////////////////////////////////
 
-
-
-
 exports.orderCancel = async (req, res) => {
-
   const { orderId, itemId, reason } = req.body;
 
   try {
-
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -303,9 +292,7 @@ exports.orderCancel = async (req, res) => {
       });
     }
 
-    const item = order.items.find(
-      item => item._id.toString() === itemId
-    );
+    const item = order.items.find((item) => item._id.toString() === itemId);
 
     if (!item) {
       return res.status(404).json({
@@ -313,7 +300,6 @@ exports.orderCancel = async (req, res) => {
         message: "Item not found in order",
       });
     }
-
 
     // validations
 
@@ -337,11 +323,9 @@ exports.orderCancel = async (req, res) => {
     const product = await Product.findById(item.productId);
 
     if (product) {
-
       const variation = product.details[item.variationIndex];
 
       if (variation) {
-
         variation.quantity += item.quantity;
 
         await product.save();
@@ -351,21 +335,20 @@ exports.orderCancel = async (req, res) => {
     //////////////////////////////////////////////////////
     // refund calculation
 
-    const isCancellation = true
+    const isCancellation = true;
     const refundDetails = await calculateRefund(
       orderId,
       itemId,
-      isCancellation
+      isCancellation,
     );
 
-    let refundAmount =
-      refundDetails.totalRefundableAmount;
+    let refundAmount = refundDetails.totalRefundableAmount;
 
     //handles surplus cases
     if (order.totalAmount - refundAmount === -1) {
-      refundAmount -= 1
+      refundAmount -= 1;
     } else if (order.totalAmount - refundAmount === 1) {
-      refundAmount += 1
+      refundAmount += 1;
     }
 
     //////////////////////////////////////////////////////
@@ -375,9 +358,8 @@ exports.orderCancel = async (req, res) => {
       order.paymentMethod === "razorpay" ||
       order.paymentMethod === "wallet"
     ) {
-
       const wallet = await Wallet.findOne({
-        userId: order.userId
+        userId: order.userId,
       });
 
       if (!wallet) {
@@ -392,12 +374,11 @@ exports.orderCancel = async (req, res) => {
       wallet.transactions.push({
         type: "credit",
         amount: refundAmount,
-        description:
-          `Refund for cancelled item (${item.productName}) in Order #${order.orderId}`,
+        description: `Refund for cancelled item (${item.productName}) in Order #${order.orderId}`,
       });
 
       await wallet.save();
-      item.refundDetails.refundedAt = new Date()
+      item.refundDetails.refundedAt = new Date();
     }
 
     //////////////////////////////////////////////////////
@@ -410,36 +391,38 @@ exports.orderCancel = async (req, res) => {
       cancelledAt: new Date(),
     });
 
-    //update totalAmount 
-    if (order.paymentMethod === "razorpay" || order.paymentMethod === "wallet") {
+    //update totalAmount
+    if (
+      order.paymentMethod === "razorpay" ||
+      order.paymentMethod === "wallet"
+    ) {
       item.refundDetails.refundRequestedAt = new Date();
-      item.refundDetails.paymentMethod = order.paymentMethod
+      item.refundDetails.paymentMethod = order.paymentMethod;
       item.refundDetails.refundType = "Cancelled";
-      item.refundDetails.refundAmount = refundAmount
-      item.refundDetails.refundAmountStatus = 'Refunded'
-      item.refundDetails.refundReason = reason
-      order.totalRefundAmount += refundAmount
-      order.totalAmount -= refundAmount
+      item.refundDetails.refundAmount = refundAmount;
+      item.refundDetails.refundAmountStatus = "Refunded";
+      item.refundDetails.refundReason = reason;
+      order.totalRefundAmount += refundAmount;
+      order.totalAmount -= refundAmount;
     } else if (order.paymentMethod === `cod`) {
       item.refundDetails.refundRequestedAt = new Date();
-      item.refundDetails.paymentMethod = 'cod'
+      item.refundDetails.paymentMethod = "cod";
       item.refundDetails.refundType = "Cancelled";
-      item.refundDetails.refundAmount = refundAmount
-      item.refundDetails.refundAmountStatus = 'No Refund Required'
-      item.refundDetails.refundReason = reason
-      order.totalRefundAmount += refundAmount
-      order.totalAmount -= refundAmount
+      item.refundDetails.refundAmount = refundAmount;
+      item.refundDetails.refundAmountStatus = "No Refund Required";
+      item.refundDetails.refundReason = reason;
+      order.totalRefundAmount += refundAmount;
+      order.totalAmount -= refundAmount;
     }
 
     //////////////////////////////////////////////////////
     // update order status
 
     const allItemsCancelled = order.items.every(
-      item => item.status === "Cancelled"
+      (item) => item.status === "Cancelled",
     );
 
     if (allItemsCancelled) {
-
       order.status = "Cancelled";
 
       if (
@@ -459,9 +442,7 @@ exports.orderCancel = async (req, res) => {
       message: "Item cancelled successfully",
       refundAmount,
     });
-
   } catch (error) {
-
     console.error("Order Cancel Error:", error);
 
     return res.status(500).json({
@@ -471,20 +452,10 @@ exports.orderCancel = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
 exports.orderReturn = async (req, res) => {
-
   const { orderId, itemId, reason, returnAll } = req.body;
 
   try {
-
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -494,9 +465,7 @@ exports.orderReturn = async (req, res) => {
       });
     }
 
-    const item = order.items.find(
-      item => item._id.toString() === itemId
-    );
+    const item = order.items.find((item) => item._id.toString() === itemId);
 
     if (!item) {
       return res.status(404).json({
@@ -529,21 +498,26 @@ exports.orderReturn = async (req, res) => {
       });
     }
     if (returnAll) {
-
-      const nonReturnableItems = order.items.filter(item => item.status !== 'Completed');
+      const nonReturnableItems = order.items.filter(
+        (item) => item.status !== "Completed",
+      );
 
       if (nonReturnableItems.length > 0) {
-        const details = nonReturnableItems.map(item => {
-          let statusReason = "is not eligible for return";
-          if (item.status === "Returned") statusReason = "has already been returned";
-          if (item.status === "Return Requested") statusReason = "already has a pending return request";
+        const details = nonReturnableItems
+          .map((item) => {
+            let statusReason = "is not eligible for return";
+            if (item.status === "Returned")
+              statusReason = "has already been returned";
+            if (item.status === "Return Requested")
+              statusReason = "already has a pending return request";
 
-          return `${item.productName} (${statusReason})`;
-        }).join(", ");
+            return `${item.productName} (${statusReason})`;
+          })
+          .join(", ");
 
         return res.status(400).json({
           success: false,
-          message: `Cannot process bulk return. Problem items: ${details}.`
+          message: `Cannot process bulk return. Problem items: ${details}.`,
         });
       }
     }
@@ -551,13 +525,12 @@ exports.orderReturn = async (req, res) => {
     //////////////////////////////////////////////////////
 
     if (returnAll) {
-
       for (let i = 0; i < order.items.length; i++) {
-        let item = order.items[i]
+        let item = order.items[i];
 
         item.status = "Return Requested";
         item.refundDetails.refundRequestedAt = new Date();
-        item.refundDetails.refundReason = reason
+        item.refundDetails.refundReason = reason;
 
         item.returnReason.push({
           itemId: item._id,
@@ -565,21 +538,18 @@ exports.orderReturn = async (req, res) => {
           requestedAt: new Date(),
         });
       }
-
     } else {
-
       // update item
 
       item.status = "Return Requested";
       item.refundDetails.refundRequestedAt = new Date();
-      item.refundDetails.refundReason = reason
+      item.refundDetails.refundReason = reason;
 
       item.returnReason.push({
         itemId: item._id,
         reason,
         requestedAt: new Date(),
       });
-
     }
 
     //////////////////////////////////////////////////////
@@ -592,9 +562,7 @@ exports.orderReturn = async (req, res) => {
       success: true,
       message: "Return request submitted successfully",
     });
-
   } catch (error) {
-
     console.error("Order Return Error:", error);
 
     return res.status(500).json({
