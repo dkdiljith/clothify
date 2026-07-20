@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const result = await verifyRes.json();
                         if (result.success) {
-                            window.location.href = '/user/orderSuccess';
+                           window.location.href = `/user/orderSuccess?orderId=${result.orderId}`;
                         } else {
                             showPopupMessage("Verification failed: " + result.message, "error");
                         }
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await failureRes.json();
 
                     if (result.success) {
-                        window.location.href = `/user/orderFailure`;
+                        window.location.href = `/user/orderFailure?orderId=${result.orderId}`;
                     } else {
                         showPopupMessage("Could not save progress: " + result.message, "error");
                     }
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
                 if (result.success) {
-                    window.location.href = '/user/orderSuccess';
+                    window.location.href = `/user/orderSuccess?orderId=${result.orderId}`;
                 } else {
                     showPopupMessage(result.message, 'error');
                 }

@@ -104,14 +104,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         const result = await verifyRes.json();
                         if (result.success) {
-                            window.location.href = '/user/orderSuccess';
+                            window.location.href = `/user/orderSuccess?orderId=${result.orderId}`;
                         } else {
                             showPopupMessage("Verification failed: " + result.message, "error");
                         }
                     } catch (verifyErr) {
                         console.error("Verification Error:", verifyErr);
                         showPopupMessage("Something went wrong during verification", "error");
-                    }
+                    } 
                 },
                 "prefill": {
                     "name": "{{user.name}}",
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const result = await failureRes.json();
 
                     if (result.success) {
-                        window.location.href = `/user/orderFailure`;
+                       window.location.href = `/user/orderFailure?orderId=${result.orderId}`;
                     } else {
 
                         const rzpIframe = document.querySelector('.razorpay-container');

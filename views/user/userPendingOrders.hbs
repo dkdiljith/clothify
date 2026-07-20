@@ -98,7 +98,7 @@
 {{#if orders.length}}
 <div style="display: flex; justify-content: center; margin-top: 20px; padding: 15px 0;">
     {{#if pagination.hasPrevPage}}
-    <a href="/user/orders?page={{pagination.prevPage}}"
+    <a href="/user/orders?retryPendingOrder=true&page={{pagination.prevPage}}"
         style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
         <i class="fas fa-chevron-left"></i> Previous
     </a>
@@ -109,7 +109,7 @@
     </span>
 
     {{#if pagination.hasNextPage}}
-    <a href="/user/orders?page={{pagination.nextPage}}"
+    <a href="/user/orders?retryPendingOrder=true&page={{pagination.nextPage}}"
         style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
         Next <i class="fas fa-chevron-right"></i>
     </a>

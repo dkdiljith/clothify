@@ -1,42 +1,83 @@
 {{#section 'head'}}
-<title>Order Failed</title>
-<style>
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #fff5f5;
-        /* Light red background */
-        font-family: sans-serif;
-    }
-
-    .container {
-        text-align: center;
-    }
-
-    .message {
-        font-size: 2em;
-        font-weight: bold;
-        color: #dc3545;
-        /* Error red */
-        margin-bottom: 10px;
-    }
-
-    .subtext {
-        color: #666;
-        font-size: 1.1em;
-    }
-</style>
+<title>Order Payment Failed</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/orderFailure.css">
 {{/section}}
 
+<div class="receipt-card">
+  <div class="failure-header">
+    <div class="message">Payment Failed ❌</div>
+    <div class="subtext">Something went wrong with your transaction.</div>
+  </div>
 
-<div class="container">
-    <div class="message">Order Failed</div>
-    <div class="subtext">Something went wrong with your payment.</div>
+  {{#if order}}
+  <div class="meta-info">
+    <div class="meta-row">
+      <strong>Order ID:</strong>
+      <span>{{order.orderId}}</span>
+    </div>
+    <div class="meta-row">
+      <strong>Payment Status:</strong>
+      <span style="color: #dc3545; font-weight: bold;">{{order.paymentStatus}}</span>
+    </div>
+    <div class="meta-row">
+      <strong>Payment Gateway:</strong>
+      <span style="text-transform: uppercase;">{{order.paymentMethod}}</span>
+    </div>
+    <div class="meta-row">
+      <strong>Attempts Made:</strong>
+      <span>{{order.paymentAttemptsCount}} / 6</span>
+    </div>
+  </div>
+
+  <div class="item-list">
+    <strong>Items Ordered:</strong>
+    {{#each order.items}}
+    <div class="item-row">
+      {{#if this.productImg}}
+        <img class="item-img" src="{{this.productImg}}" alt="{{this.productName}}">
+      {{/if}}
+      <div class="item-details">
+        <div class="item-name">{{this.productName}}</div>
+        <div class="item-sub">Size: {{this.productSize}} | Qty: {{this.quantity}}</div>
+      </div>
+      <div>₹{{this.productPrice}}</div>
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="price-breakdown">
+    <div class="meta-row">
+      <span>Subtotal:</span>
+      <span>₹{{order.subtotal}}</span>
+    </div>
+    {{#if order.couponDiscount}}
+    <div class="meta-row" style="color: #dc3545;">
+      <span>Coupon Discount:</span>
+      <span>-₹{{order.couponDiscount}}</span>
+    </div>
+    {{/if}}
+    {{#if order.shippingFee}}
+    <div class="meta-row">
+      <span>Shipping:</span>
+      <span>₹{{order.shippingFee}}</span>
+    </div>
+    {{/if}}
+    <div class="meta-row" style="font-weight: bold; font-size: 1.1em; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee;">
+      <span>Total Amount:</span>
+      <span>₹{{order.totalAmount}}</span>
+    </div>
+  </div>
+
+  <div class="action-container">
+    <a href="/user/orders?retryPendingOrder=true" class="btn-home">View Order History</a>
+  </div>
+  {{else}}
+  <div class="action-container" style="margin-top: 20px;">
+    <p style="color: #6c757d;">We couldn't retrieve the exact order details.</p>
+    <a href="/user/home" class="btn-retry" style="background-color: #6c757d;">Back to Homepage</a>
+  </div>
+  {{/if}}
 </div>
-
 
 {{#section 'scripts'}}
 <script src="/javascripts/user/orderFailure.js" defer></script>

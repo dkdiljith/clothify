@@ -101,8 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
 
                         const result = await verifyRes.json();
-                        if (result.success) {
-                            window.location.href = '/user/orderSuccess';
+                        if (result.success) { 
+                            window.location.href = `/user/orderSuccess?orderId=${result.orderId}`;
                         } else {
                             showPopupMessage("Verification failed: " + result.message, "error");
                         }
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const result = await failureRes.json();
 
                     if (result.success) {
-                        window.location.href = `/user/orderFailure`;
+                        window.location.href = `/user/orderFailure?orderId=${result.orderId}`;
                     } else {
 
                         const rzpIframe = document.querySelector('.razorpay-container');

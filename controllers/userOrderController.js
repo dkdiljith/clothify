@@ -159,7 +159,7 @@ exports.placeOrder = async (req, res) => {
       couponId: cart.couponId,
       couponDiscount: cart.couponDiscount,
       offerDiscount: cart.offerDiscount,
-      checkoutTotal:cart.totalAmount,
+      checkoutTotal: cart.totalAmount,
       totalAmount: cart.totalAmount
     });
 
@@ -181,7 +181,7 @@ exports.placeOrder = async (req, res) => {
       await Cart.findByIdAndDelete(cart._id);
     }
 
-    return res.json({ success: true, paymentStatus, message: "Order placed successfully" });
+    return res.json({ success: true, paymentStatus, message: "Order placed successfully", orderId: order.orderId });
   } catch (error) {
     console.error("Order Placement Error:", error);
     return res.status(500).json({ success: false, message: "Failed to place order." });
@@ -280,7 +280,7 @@ exports.placeOrderFailed = async (req, res) => {
       couponId: cart.couponId,
       couponDiscount: cart.couponDiscount,
       offerDiscount: cart.offerDiscount,
-      checkoutTotal:cart.totalAmount,
+      checkoutTotal: cart.totalAmount,
       totalAmount: cart.totalAmount,
       paymentAttemptsCount: 1, // First initial attempt failed
       paymentRetryExpiresAt: new Date(Date.now() + 30 * 60 * 1000) // Explicit 30 min window set
@@ -335,7 +335,7 @@ exports.retryFailedOrder = async (req, res) => {
     );
 
     // 6. Send success response back to the client 
-    return res.status(200).json({ success: true, message: "Order status updated and stock reduced successfully.", order });
+    return res.status(200).json({ success: true, message: "Order status updated and stock reduced successfully.", orderId: order.orderId });
   } catch (error) {
     console.error("Order Placement Error:", error);
     return res.status(500).json({ success: false, message: "Failed to retry payment." });
@@ -369,24 +369,59 @@ async function retryFailedOrderFailed(req, res, orderId) {
     retryOrder.paymentAttemptsCount++;
     await retryOrder.save();
 
-    return res.status(200).json({ success: true, message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/6 used.` });
+    return res.status(200).json({ success: true, message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/6 used.`, orderId });
   } catch (error) {
     console.error("Retry Fail Handler Error:", error);
     return res.status(500).json({ success: false, message: "An error occurred while updating the retry order." });
   }
-}
+} 
 
 
 
 
+exports.orderSuccess = async (req, res) => {
+  try {
+    const { orderId } = req.query;
 
-exports.orderSuccess = (req, res) => {
-  res.render('user/orderSuccess', { plain_body: true });
-}
+    if (!orderId) {
+      return res.render('user/orderFailure', { plain_body: true });
+    }
 
-exports.orderFailed = (req, res) => {
-  res.render('user/orderFailure', { plain_body: true })
-}
+    const order = await Order.findOne({orderId}).lean()
+
+    if (!order) {
+      return res.render('user/orderSuccess', { plain_body: true });
+    }
+
+    return res.render('user/orderSuccess', { plain_body: true, order });
+  } catch (error) {
+    console.error("Order Success Route Error:", error);
+    return res.render('user/orderSuccess', { plain_body: true });
+  }
+};
+
+
+
+exports.orderFailed = async (req, res) => {
+  try {
+    const { orderId } = req.query;
+
+    if (!orderId) {
+      return res.render('user/orderFailure', { plain_body: true });
+    }
+
+    const order = await Order.findOne({orderId}).lean()
+
+    if (!order) {
+      return res.render('user/orderFailure', { plain_body: true });
+    }
+    return res.render('user/orderFailure', { plain_body: true, order });
+    
+  } catch (error) {
+    console.error("Order Failure Route Error:", error);
+    return res.render('user/orderFailure', { plain_body: true });
+  }
+};
 
 
 

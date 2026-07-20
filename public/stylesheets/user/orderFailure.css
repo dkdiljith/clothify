@@ -1,0 +1,133 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #fff5f5;
+}
+
+.receipt-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.failure-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.message {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.subtext {
+    color: #6c757d;
+    font-size: 1em;
+    margin-top: 5px;
+}
+
+.meta-info {
+    border-top: 1px solid #f8d7da;
+    border-bottom: 1px solid #f8d7da;
+    padding: 15px 0;
+    margin-bottom: 15px;
+    background: #fffdfd;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.item-list {
+    margin-bottom: 15px;
+}
+
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.item-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.item-sub {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.price-breakdown {
+    background: #fafafa;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 20px;
+}
+
+.action-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-retry {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.2s;
+}
+
+.btn-retry:hover {
+    background-color: #bd2130;
+}
+
+.btn-home {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-decoration: none;
+    display: block;
+}
+
+.btn-home:hover {
+    background-color: #5a6268;
+}
