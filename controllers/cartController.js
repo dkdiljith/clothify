@@ -166,7 +166,8 @@ exports.addToCart = async (req, res) => {
       const currentUnitProductPrice = parseFloat(check.variation.price || 0);
 
       return res.status(200).json({
-        success: true,
+        success: false,
+        info: true,
         message: 'Quantity decreased',
         newQuantity: existingItem.quantity,
         itemTotal: existingItem.quantity * currentUnitProductPrice,
@@ -215,8 +216,11 @@ exports.addToCart = async (req, res) => {
     );
 
     return res.status(200).json({
-      success: true,
+      // Conditional logic for your flags
+      success: existingItem ? false : true,
+      info: existingItem ? true : undefined, // Omitted from JSON if false, or set to existingItem ? true : false
       message: existingItem ? 'Quantity updated' : `Added ${check.product.name} to cart`,
+
       newQuantity: postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty,
       itemTotal: (postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty) * currentUnitProductPrice,
       cartSubtotal: updatedCart.subtotal,
@@ -227,6 +231,7 @@ exports.addToCart = async (req, res) => {
       offerDiscount: updatedCart.offerDiscount,
       totalAmount: updatedCart.totalAmount
     });
+
 
   } catch (error) {
     console.error("Cart Update Error:", error);
@@ -302,7 +307,7 @@ exports.getAddressInCart = async (req, res) => {
 
     // If no cart exists or it's empty, redirect them or render empty state
     if (!cartData || cartData.items.length === 0) {
-      return res.redirect('/cart');
+      return res.redirect('user/cart');
     }
 
     //  --- INTEGRATION: Loop and check every item in the cart array ---

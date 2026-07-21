@@ -1037,115 +1037,70 @@ exports.showProducts = async (req, res) => {
 exports.singleProductPage = async (req, res) => {
     try {
         // PRODUCT
-
         const product = await Product.findById(req.params.id).lean();
-
         if (!product) {
-
-            // return res.status(404).render("error", {
-            //     message: "Product not found"
-            // });
-
             return res.render("user/singleProductPageNF");
-
         }
-
         // USER
-
         const userId = res.locals.user?._id || null;
-
-
         // CATEGORY
-
-
         const categories = await Category
             .findById(product.categoryId)
             .lean();
-
-
         // =====================================================
         // RELATED PRODUCTS
         // =====================================================
-
         const relatedProducts = await Product.find({
-
             categoryId: product.categoryId,
-
-            _id: {
-                $ne: product._id
-            }
-
+            _id: { $ne: product._id }
         })
             .limit(4)
             .lean();
-
-
         const offers = await Offer.find().lean();
-
-
-        let isWishlisted = false;
+        // Default states
+        product.isWishlisted = false;
         let isInCart = false;
-
         if (userId) {
-
             const wishlist = await Wishlist
                 .findOne({ userId })
                 .lean();
-
             const cart = await Cart
                 .findOne({ userId })
                 .lean();
-
-
+            // Mark current product
             if (wishlist?.items) {
-
-                isWishlisted = wishlist.items.some(item =>
-
+                product.isWishlisted = wishlist.items.some(item =>
                     item.productId.toString() === product._id.toString()
-
                 );
-
+                // Mark related products
+                const wishlistSet = new Set(
+                    wishlist.items.map(item => item.productId.toString())
+                );
+                relatedProducts.forEach(item => {
+                    item.isWishlisted = wishlistSet.has(item._id.toString());
+                });
             }
-
-
             if (cart?.items) {
-
                 isInCart = cart.items.some(item =>
-
                     item.productId.toString() === product._id.toString()
-
                 );
-
             }
-
         }
-
         return res.render("user/singleProductPage", {
-
             product,
             relatedProducts,
             categories,
             offers,
-
-            isWishlisted,
             isInCart
-
         });
-
     }
-
     catch (err) {
-
         console.error("Error fetching product:", err);
-
         return res.status(500).render("error", {
             message: "Server Error"
         });
-
     }
-
 };
-
 
 
 
@@ -1184,39 +1139,6 @@ exports.blockProduct = async (req, res) => {
     }
 };
 
-
-exports.deleteProduct = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.productId).setOptions({ showInactive: true });
-
-        if (!product) {
-            return res.json({
-                success: true,
-                message: 'Product not found',
-            });
-        }
-
-        const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean()
-
-        if (!product.isActive && existingActive) {
-            return res.json({
-                success: false,
-                message: "Cannot Restore. An active product with this name already exists.",
-            });
-        }
-
-        product.isDeleted = !product.isDeleted;
-        await product.save();
-
-        return res.json({
-            success: true,
-            message: 'success',
-        });
-
-    } catch (error) {
-        res.redirect('back');
-    }
-};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

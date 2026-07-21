@@ -1,4 +1,5 @@
 const Product = require("../models/productSchema");
+const Wishlist = require(`../models/wishListSchema`)
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -9,6 +10,7 @@ const MESSAGES = require(`../utils/constants`)
 
 exports.collections = async (req, res) => {
   try {
+
     let { query, sort, page = 1, limit = 8 } = req.query;
 
     page = parseInt(page) || 1;
@@ -21,13 +23,14 @@ exports.collections = async (req, res) => {
     let useTextScore = false;
 
     if (query && query.trim()) {
+
       const cleanQuery = query.trim();
 
       const isShortQuery =
         cleanQuery.length <= 3 || cleanQuery.split(" ").length === 1;
 
       if (isShortQuery) {
-        // partial typing mode
+
         filter = {
           $or: [
             { name: { $regex: cleanQuery, $options: "i" } },
@@ -35,8 +38,9 @@ exports.collections = async (req, res) => {
             { gender: { $regex: cleanQuery, $options: "i" } }
           ]
         };
+
       } else {
-        // full phrase mode
+
         filter = {
           $text: { $search: cleanQuery }
         };
@@ -46,10 +50,13 @@ exports.collections = async (req, res) => {
         };
 
         useTextScore = true;
+
       }
+
     }
 
     switch (sort) {
+
       case "price-low-high":
         sortOption = { "details.price": 1 };
         break;
@@ -65,6 +72,7 @@ exports.collections = async (req, res) => {
       case "newest":
         sortOption = { createdAt: -1 };
         break;
+
     }
 
     let productQuery = Product.find(filter)
@@ -80,10 +88,35 @@ exports.collections = async (req, res) => {
       });
     }
 
-    const [products, totalProducts] = await Promise.all([
+    const userId = res.locals.user?._id || null;
+
+    const [products, totalProducts, wishlist] = await Promise.all([
+
       productQuery,
-      Product.countDocuments(filter)
+
+      Product.countDocuments(filter),
+
+      userId
+        ? Wishlist.findOne({ userId }).lean()
+        : null
+
     ]);
+
+    // =====================================================
+    // MARK WISHLISTED PRODUCTS
+    // =====================================================
+
+    if (wishlist?.items) {
+
+      const wishlistSet = new Set(
+        wishlist.items.map(item => item.productId.toString())
+      );
+
+      products.forEach(product => {
+        product.isWishlisted = wishlistSet.has(product._id.toString());
+      });
+
+    }
 
     return res.render("user/collections", {
       products,
@@ -95,11 +128,12 @@ exports.collections = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error("collections failed:", error.message);
 
     return res.status(500).render("error", {
       message: "Unable to load collections"
     });
+
   }
 };
-

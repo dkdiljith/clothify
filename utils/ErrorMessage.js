@@ -1,80 +1,125 @@
 exports.ErrorContent = async (req, res) => {
-  const htmlContent = `
+    const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>404 - Not Found | Clothify</title>
-      <style>
-        body {
-          font-family: 'Inter', sans-serif;
-          background: #f9f9f9;
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: #333;
-          margin: 0;
-        }
-        .error-container {
-          background: white;
-          padding: 2rem;
-          border-radius: 12px;
-          text-align: center;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          max-width: 600px;
-          width: 100%;
-        }
-        h1 {
-          color: #ff69b4;
-          font-size: 2rem;
-          margin-bottom: 1rem;
-        }
-        p {
-          font-size: 1rem;
-          margin-bottom: 2rem;
-          color: #666;
-        }
-        .cta-button {
-          background-color: #ff69b4;
-          color: white;
-          padding: 12px 24px;
-          border-radius: 8px;
-          text-decoration: none;
-          display: inline-block;
-          font-size: 1.1rem;
-          transition: background-color 0.3s;
-        }
-        .cta-button:hover {
-          background-color: #ff3d9e;
-        }
-        .info {
-          margin-top: 1.5rem;
-          font-size: 0.85rem;
-          color: #888;
-        }
-      </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>404 - Not Found | Clothify</title>
+        <link rel="stylesheet" href="https://googleapis.com">
+        <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #0a0a0a;
+                background-image: 
+                    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 100%, hsla(340,10%,15%,1) 0, transparent 50%);
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #ffffff;
+                overflow: hidden;
+            }
+            .canvas {
+                text-align: center;
+                max-width: 600px;
+                width: 90%;
+                padding: 2rem;
+            }
+            .brand-tag {
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.4em;
+                color: #888888;
+                margin-bottom: 2rem;
+                display: block;
+            }
+            .error-code {
+                font-size: 8.5rem;
+                font-weight: 300;
+                line-height: 1;
+                margin-bottom: 1rem;
+                letter-spacing: -0.06em;
+                background: linear-gradient(180deg, #ffffff 30%, #444444 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            h1 {
+                font-size: 1.1rem;
+                font-weight: 400;
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                color: #e5e5e5;
+                margin-bottom: 1.5rem;
+            }
+            p {
+                font-size: 0.95rem;
+                line-height: 1.7;
+                margin-bottom: 3.5rem;
+                color: #8e8e93;
+                font-weight: 300;
+            }
+            .cta-wrapper {
+                display: inline-block;
+                position: relative;
+            }
+            .cta-button {
+                background-color: #ffffff;
+                color: #000000;
+                padding: 16px 40px;
+                border-radius: 40px;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.2em;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
+            }
+            .cta-button:hover {
+                transform: translateY(-2px);
+                background-color: #f0f0f0;
+                box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+            }
+            .meta-timeline {
+                margin-top: 6rem;
+                display: flex;
+                justify-content: center;
+                gap: 2rem;
+                font-size: 0.7rem;
+                color: #444444;
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                padding-top: 2rem;
+            }
+            .meta-item span {
+                color: #666666;
+            }
+        </style>
     </head>
     <body>
-      <div class="error-container">
-        <h1>404 - Oops, we couldn’t find that!</h1>
-        <p>The item you are looking for might have been misplaced, retired, or never existed. Let's get you back on track!</p>
-
-        <a href="/user/home" class="cta-button">Go to Home</a>
-
-        <div class="info">
-          <p>${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()}</p>
-          <p>Request made from: ${req.ip}</p>
+        <div class="canvas">
+            <span class="brand-tag">Clothify Studio</span>
+            <div class="error-code">404</div>
+            <h1>The piece is missing</h1>
+            <p>The archival item or editorial collection you requested cannot be located. It may have been curated out or temporarily moved.</p>
+            <div class="cta-wrapper">
+                <a href="/user/home" class="cta-button">Return to Index</a>
+            </div>
+            <div class="meta-timeline">
+                <div class="meta-item">Loc <span>${req.ip}</span></div>
+                <div class="meta-item">Ref <span>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div>
+            </div>
         </div>
-      </div>
     </body>
-    </html>
-  `;
-  return res.status(404).send(htmlContent);
+    </html> `;
+    return res.status(404).send(htmlContent);
 };
-
-
 
 
 

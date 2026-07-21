@@ -1,229 +1,130 @@
 {{#section 'head'}}
 <title>My Wishlist | Your Favorite Products</title>
-<script src="/javascripts/user/productCard.js"></script>
 <link rel="stylesheet" type="text/css" href="/stylesheets/user/wishlist.css">
 {{/section}}
 
 
+
+
+
 <div class="wishlist-page">
-
     <div class="wishlist-container">
-
         <!-- ==========================================
              HEADER
         =========================================== -->
-
         <div class="wishlist-header">
-
             <h1 class="wishlist-title">
-
                 My Wishlist
-
             </h1>
-
             <p class="wishlist-subtitle">
-
                 Save your favourite products and move them to your cart whenever you're ready.
-
             </p>
-
             <div class="wishlist-count">
-
                 {{product.length}} items
-
             </div>
-
         </div>
-
-
-
         <!-- ==========================================
              CONTENT
         =========================================== -->
-
         <div class="wishlist-content">
-
             {{#if product.length}}
-
             <div class="featured-products-grid">
-
                 {{#each product}}
-
                 <div class="wishlist-product-wrapper">
-
                     <div class="product-card wishlist-product-card" data-product-id="{{this._id}}"
                         data-url="/user/singleproduct/{{this._id}}">
-
                         <!-- =========================================================
          BADGES
     ========================================================= -->
-
                         {{#if this.latestCollection}}
-
                         <div class="product-badge">
                             New
                         </div>
-
                         {{/if}}
-
-
                         {{#if this.details.[0].offerId}}
-
                         <div class="product-badge sale">
                             Sale
                         </div>
-
                         <div class="discount-badge">
-
                             {{calculateDiscountPercentage
                             this.details.[0].price
                             this.details.[0].offerPrice}}%
-
                             OFF
-
                         </div>
-
                         {{/if}}
-
-
-
                         <!-- =========================================================
          REMOVE FROM WISHLIST
     ========================================================= -->
-
                         <div class="wishlist-remove-container">
-
                             <button class="remove-from-wishlist" data-product-id="{{this._id}}"
                                 aria-label="Remove from Wishlist">
-
                                 <i class="fas fa-times"></i>
-
                             </button>
-
                         </div>
-
-
-
                         <!-- =========================================================
          PRODUCT IMAGE
     ========================================================= -->
-
                         <div class="product-image">
-
                             <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
-
                         </div>
-
-
-
                         <!-- =========================================================
          PRODUCT DETAILS
     ========================================================= -->
-
                         <div class="product-details">
-
                             <h3 class="product-title">
-
                                 {{this.name}}
-
                             </h3>
-
-
-
                             <!-- =====================================================
              PRICE
         ====================================================== -->
-
                             <div class="price-container">
-
                                 {{#if this.details.[0].offerId}}
-
                                 <span class="original-price">
-
                                     ₹{{this.details.[0].price}}
-
                                 </span>
-
                                 <span class="product-price">
-
                                     ₹{{this.details.[0].offerPrice}}
-
                                 </span>
-
                                 {{else}}
-
                                 <span class="product-price">
-
                                     ₹{{this.details.[0].price}}
-
                                 </span>
-
                                 {{/if}}
-
                             </div>
-
-
-
                             <!-- =====================================================
              ADD TO CART
         ====================================================== -->
-
                             <button class="wishlist-add-cart" data-product-id="{{this._id}}">
                                 <i class="fas fa-shopping-cart"></i>
                                 Add to Cart
-
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
-
                 {{/each}}
-
             </div>
-
             {{else}}
-
             <div class="empty-wishlist">
-
                 <div class="empty-wishlist-icon">
-
                     <i class="far fa-heart"></i>
-
                 </div>
-
                 <h3 class="empty-wishlist-title">
-
                     Your Wishlist is Empty
-
                 </h3>
-
                 <p class="empty-wishlist-text">
-
                     You haven't added any products to your wishlist yet.
                     Start shopping and save your favourites.
-
                 </p>
-
-                <a href="/user/products" class="btn-shop">
-
+                <a href="/user/collections" class="btn-shop">
                     <i class="fas fa-arrow-left"></i>
-
                     Continue Shopping
-
                 </a>
-
             </div>
-
             {{/if}}
-
         </div>
-
     </div>
-
 </div>
+
 
 
 

@@ -136,9 +136,9 @@
         </button>
 
         <!-- Wishlist -->
-        <button class="add-to-wishlist action-btn btn-wishlist" data-product-id="{{product._id}}"
-          data-variation-index="0">
-          <i class="far fa-heart"></i>
+        <button class="add-to-wishlist action-btn btn-wishlist {{#if product.isWishlisted}}active{{/if}}"
+          data-product-id="{{product._id}}" data-variation-index="0">
+          <i class="{{#if product.isWishlisted}}fas{{else}}far{{/if}} fa-heart"></i>
           Wishlist
         </button>
 

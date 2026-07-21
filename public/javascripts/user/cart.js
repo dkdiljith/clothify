@@ -37,28 +37,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 const data = await response.json();
 
-                if (data.success) {
-                    if (quantityInput && data.newQuantity !== undefined) {
-                        quantityInput.value = data.newQuantity;
+            if (data.success || data.info) {
+                
+                // 1. Update the row input value
+                if (quantityInput && data.newQuantity !== undefined) {
+                    quantityInput.value = data.newQuantity;
 
-                        if (decrementButton) {
-                            if (parseInt(data.newQuantity) <= 1) {
-                                decrementButton.setAttribute("disabled", "true");
-                            } else {
-                                decrementButton.removeAttribute("disabled");
-                            }
+                    // Manage disabling the minus button if quantity hits 1
+                    if (decrementButton) {
+                        if (parseInt(data.newQuantity, 10) <= 1) {
+                            decrementButton.setAttribute("disabled", "true");
+                        } else {
+                            decrementButton.removeAttribute("disabled");
                         }
                     }
-
-                    if (itemTotalElement && data.itemTotal !== undefined) {
-                        itemTotalElement.innerHTML = `Total: ₹${parseFloat(data.itemTotal).toFixed(2)}`;
-                    }
-
-                    updateCartSummaryUI(data);
-                    showPopupMessage(data.message || "Cart updated successfully", "success");
-                } else {
-                    showPopupMessage(data.message || "Operation failed", "error");
                 }
+
+                if (itemTotalElement && data.itemTotal !== undefined) {
+                    itemTotalElement.innerHTML = `Total: ₹${parseFloat(data.itemTotal).toFixed(2)}`;
+                }
+
+                updateCartSummaryUI(data);
+                showPopupMessage(data.message || "Cart updated successfully", "info");
+
+            } else {
+        
+                showPopupMessage(data.message || "Operation failed", "error");
+            }
             } catch (error) {
                 console.error("Request failed:", error);
                 showPopupMessage("Something went wrong. Please try again.", "error");
@@ -135,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }, 300);
                 }
                 showPopupMessage("Item removed from cart.", "info");
+                 ClothifyCounterManager.update('cart', 'decrement');
             } else {
                 showPopupMessage(data.message || "Failed to remove item", "error");
             }

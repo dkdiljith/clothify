@@ -1,268 +1,146 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    /* =========================================
-       CARD CLICK NAVIGATION
-    ========================================= */
-
+    /* ==========================================================
+       PRODUCT CARD NAVIGATION
+    ========================================================== */
     document.querySelectorAll('.product-card').forEach(card => {
-
         card.addEventListener('click', (e) => {
-
-            // prevent redirect on wishlist click
-            if (e.target.closest('.wishlist-btn')) return;
-
-            const url = card.dataset.url;
-
-            if (url) {
-                window.location.assign(url);
+            // Ignore clicks coming from interactive elements
+            if (
+                e.target.closest('.wishlist-btn') ||
+                e.target.closest('button') ||
+                e.target.closest('a')
+            ) {
+                return;
             }
-
+            const url = card.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
         });
-
     });
-
-
-
-    /* =========================================
-       WISHLIST TOGGLE
-    ========================================= */
-
+    /* ==========================================================
+       HELPER : SEND WISHLIST REQUEST
+    ========================================================== */
+    async function sendWishlistRequest(url, method) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.json();
+    }
+    /* ==========================================================
+       HELPER : UPDATE WISHLIST BUTTON
+    ========================================================== */
+    function setWishlistButtonState(button, isActive) {
+        button.classList.toggle('active', isActive);
+    }
+    /* ==========================================================
+       WISHLIST BUTTONS
+    ========================================================== */
     document.querySelectorAll('.wishlist-btn').forEach(button => {
-
         button.addEventListener('click', async (e) => {
-
             e.preventDefault();
-
+            e.stopPropagation();
+            /* ==================================================
+               PREVENT MULTIPLE CLICKS
+            ================================================== */
+            if (button.disabled) return;
+            button.disabled = true;
             const productId =
                 button.dataset.productId;
-
             const variationIndex =
                 button.dataset.variationIndex || 0;
-
-            const isCurrentlyActive =
+            const wasWishlisted =
                 button.classList.contains('active');
-
-
-            // optimistic UI
-            button.classList.toggle('active');
-
-
+            // Optimistic UI
+            setWishlistButtonState(
+                button,
+                !wasWishlisted
+            );
             try {
-
-                let response;
-
-
-                /* =========================
+                let data;
+                                /* ==============================================
                    REMOVE FROM WISHLIST
-                ========================= */
-
-                if (isCurrentlyActive) {
-
-                    response = await fetch(
+                ============================================== */
+                if (wasWishlisted) {
+                    data = await sendWishlistRequest(
                         `/user/removeFromWishlist/${productId}`,
-                        {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }
+                        'DELETE'
                     );
-
                 }
-
-
-                /* =========================
+                /* ==============================================
                    ADD TO WISHLIST
-                ========================= */
-
+                ============================================== */
                 else {
-
-                    response = await fetch(
+                    data = await sendWishlistRequest(
                         `/user/addtowishlist/${productId}/${variationIndex}`,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }
+                        'POST'
                     );
-
                 }
-
-
-                const data = await response.json();
-
-
-                /* =========================
+                /* ==============================================
                    REQUEST FAILED
-                ========================= */
-
+                ============================================== */
                 if (!data.success) {
-
-                    // rollback UI
-                    button.classList.toggle('active');
-
+                    // Rollback optimistic UI
+                    setWishlistButtonState(
+                        button,
+                        wasWishlisted
+                    );
                     showPopupMessage(
-                        data.message || 'Something went wrong',
+                        data.message || 'Something went wrong.',
                         'error'
                     );
-
                     return;
-
                 }
-
-
-                /* =========================
-                   SUCCESS POPUP
-                ========================= */
-
-                // showPopupMessage(
-                //     data.message,
-                //     'success'
-                // );
-
-
-                /* =========================
-                   UPDATE HEADER BADGE
-                ========================= */
-
-                if (
-                    typeof updateWishlistIcon ===
-                    'function'
-                ) {
-
-                    updateWishlistIcon();
-
-                }
-
-
-                /* =========================
-                   WISHLIST PAGE REMOVE
-                ========================= */
-
-                const wishlistPage =
-                    document.querySelector(
-                        '.wishlist-page'
+                /* ==============================================
+                   UPDATE HEADER COUNTER
+                ============================================== */
+                if (wasWishlisted) {
+                    ClothifyCounterManager.update(
+                        'wishlist',
+                        'decrement'
                     );
-
-
-                if (
-                    wishlistPage &&
-                    isCurrentlyActive
-                ) {
-
-                    const card =
-                        button.closest(
-                            '.wishlist-product-wrapper'
-                        );
-
-
-                    if (card) {
-
-                        card.style.transition =
-                            'all 0.25s ease';
-
-                        card.style.opacity = '0';
-
-                        card.style.transform =
-                            'scale(0.95)';
-
-
-                        setTimeout(() => {
-
-                            card.remove();
-
-
-                            const remainingCards =
-                                document.querySelectorAll(
-                                    '.wishlist-product-wrapper'
-                                );
-
-
-                            const countElement =
-                                document.querySelector(
-                                    '.wishlist-count'
-                                );
-
-
-                            if (countElement) {
-
-                                countElement.textContent =
-                                    `${remainingCards.length} items`;
-
-                            }
-
-
-                            /* =========================
-                               EMPTY WISHLIST
-                            ========================= */
-
-                            if (
-                                remainingCards.length === 0
-                            ) {
-
-                                const wishlistContent =
-                                    document.querySelector(
-                                        '.wishlist-content'
-                                    );
-
-
-                                if (wishlistContent) {
-
-                                    wishlistContent.innerHTML = `
-                                        <div class="empty-wishlist">
-
-                                            <div class="empty-wishlist-icon">
-                                                <i class="far fa-heart"></i>
-                                            </div>
-
-                                            <h3 class="empty-wishlist-title">
-                                                Your Wishlist is Empty
-                                            </h3>
-
-                                            <p class="empty-wishlist-text">
-                                                You haven't added any products to your wishlist yet.
-                                            </p>
-
-                                            <a href="/user/home" class="btn-shop">
-                                                <i class="fas fa-arrow-left"></i>
-                                                Continue Shopping
-                                            </a>
-
-                                        </div>
-                                    `;
-
-                                }
-
-                            }
-
-                        }, 220);
-
-                    }
-
                 }
-
+                else {
+                    ClothifyCounterManager.update(
+                        'wishlist',
+                        'increment'
+                    );
+                }
+                /* ==============================================
+                   SUCCESS POPUP
+                ============================================== */
+                showPopupMessage(
+                    data.message,
+                    'success'
+                );
             }
-
+            /* ==================================================
+               REQUEST ERROR
+            ================================================== */
             catch (error) {
-
                 console.error(
                     'Wishlist Error:',
                     error
                 );
-
-                // rollback UI
-                button.classList.toggle('active');
-
+                // Restore previous UI state
+                setWishlistButtonState(
+                    button,
+                    wasWishlisted
+                );
                 showPopupMessage(
                     'Something went wrong. Please try again.',
                     'error'
                 );
-
             }
-
+            /* ==================================================
+               ALWAYS RE-ENABLE BUTTON
+            ================================================== */
+            finally {
+                button.disabled = false;
+            }
         });
-
     });
-
-});
+    });

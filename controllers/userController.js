@@ -2,6 +2,7 @@ const User = require("../models/userSchema");
 const Product = require(`../models/productSchema`)
 const Wallet = require(`../models/walletSchema`)
 const Settings = require(`../models/settingSchema`)
+const Wishlist = require(`../models/wishListSchema`)
 
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -72,24 +73,33 @@ const generateVerificationCode = () => {
 
 // ======================================================================================================
 
-
 exports.homeRender = async (req, res) => {
   try {
-
-    const [product, settings] = await Promise.all([
-
+    const userId = res.locals.user?._id || null;
+    const [products, settings, wishlist] = await Promise.all([
       Product.find().limit(8).lean(),
       Settings.findOne({
         settingsType: "global_settings",
       }).lean(),
-
+      userId
+        ? Wishlist.findOne({ userId }).lean()
+        : null,
     ]);
-
+    // =====================================================
+    // MARK WISHLISTED PRODUCTS
+    // =====================================================
+    if (wishlist?.items) {
+      const wishlistSet = new Set(
+        wishlist.items.map(item => item.productId.toString())
+      );
+      products.forEach(product => {
+        product.isWishlisted = wishlistSet.has(product._id.toString());
+      });
+    }
     const showModal = !!(
       req.session.user &&
       req.session.user.showWelcomeModal === true
     );
-
     const referralSettings = settings?.referralSettings || {
       coinValue: "0.010",
       referrerReward: 300,
@@ -97,18 +107,15 @@ exports.homeRender = async (req, res) => {
       signupBonus: 1000,
       referralHoldingPeriodDays: 7,
     };
-
     return res.render("user/home", {
-      product,
+      product: products,
       showWelcomeModal: showModal,
       referralSettings,
     });
-
   } catch (error) {
     console.error(error);
   }
 };
-
 
 
 // Display reset password form (with token verification)
