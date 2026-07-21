@@ -45,8 +45,12 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
 
 
 exports.loginRender = async (req, res) => {
+  if(req.session.admin){
+    return res.redirect(`admin/dashboard`)
+  }
   return res.render(`admin/login`, { plain_body: true })
 }
+
 exports.registerRender = async (req, res) => {
   return res.render(`admin/register`, { plain_body: true })
 }

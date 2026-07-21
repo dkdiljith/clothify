@@ -2,7 +2,6 @@
 <title>Category Management</title>
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/category.css" />
 {{/section}}
-
 <div class="category-management-layout">
     <!-- Left Column - Categories List -->
     <div class="categories-list-container">
@@ -13,7 +12,6 @@
                 <span>{{categories.length}} {{#if (eq categories.length 1)}}category{{else}}categories{{/if}}</span>
             </div>
         </div>
-
         <div class="categories-table-wrapper">
             <table class="categories-table">
                 <thead>
@@ -25,88 +23,48 @@
                     </tr>
                 </thead>
                 <tbody>
-
                     {{#each categories}}
-
                     <tr>
-
                         <td data-label="Sl No">
                             {{serialNumber ../pagination.serialNumberStart @index}}
                         </td>
-
                         <td data-label="Category">
-
                             <div class="category-name">
-
                                 <span class="category-icon">📁</span>
-
                                 {{this.name}}
-
                             </div>
-
                         </td>
-
                         <td data-label="Subcategories">
-
                             {{#if this.subcategories.length}}
-
                             <ul class="subcategories-list">
-
                                 {{#each this.subcategories}}
-
                                 <li>
-
                                     <span class="subcategory-icon">📄</span>
-
                                     {{this.name}}
-
                                 </li>
-
                                 {{/each}}
-
                             </ul>
-
                             {{else}}
-
                             <span class="no-subcategories">
-
                                 No subcategories
-
                             </span>
-
                             {{/if}}
-
                         </td>
-
                         <td data-label="Actions">
-
                             <div class="action-buttons">
-
                                 <button onclick="location.href='/admin/category/{{this._id}}'"
                                     class="btn btn-sm btn-edit" data-category-id="{{this.id}}">
-
                                     <span class="icon">✏️</span>
-
                                     Edit
-
                                 </button>
-
                                 <button class="btn btn-sm btn-delete" data-id="{{this._id}}">
-
                                     <span class="icon">🗑️</span>
-
                                     Delete
-
                                 </button>
-
                             </div>
-
                         </td>
-
                     </tr>
-
                     {{/each}}
-
                 </tbody>
             </table>
         </div>
@@ -117,7 +75,6 @@
             <p>Get started by adding your first category</p>
         </div>
         {{/if}}
-
         {{#if (gt pagination.totalPages 1)}}
         <div class="pagination">
             {{#if pagination.hasPrevPage}}
@@ -128,11 +85,9 @@
                 </svg> Previous
             </a>
             {{/if}}
-
             <span class="pagination-info">
                 Page {{pagination.page}} of {{pagination.totalPages}}
             </span>
-
             {{#if pagination.hasNextPage}}
             <a href="/admin/category?page={{pagination.nextPage}}" class="pagination-button">
                 Next <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
@@ -144,17 +99,16 @@
         </div>
         {{/if}}
     </div>
-
     <!-- Right Column - Add Category Form -->
     <div class="add-category-container">
         <div class="add-category-card">
             <h3 class="page-title">Add New Category</h3>
-            <form id="addCategoryForm" action="/admin/category" method="POST" novalidate>
+            <form id="addCategoryForm" novalidate>
                 <div class="form-group">
                     <label for="categoryName" class="form-label">Category Name</label>
                     <input type="text" class="form-control" id="categoryName" name="name"
                         placeholder="e.g. Electronics, Clothing" required minlength="6">
-                    <div id="categoryNameError" class="error-message">
+                    <div id="categoryNameError" class="error-message" style="display: none;">
                         Category name must be at least 6 characters long
                     </div>
                 </div>
@@ -176,7 +130,6 @@
         </div>
     </div>
 </div>
-
 {{#section 'scripts'}}
 <script src="/javascripts/admin/category.js" defer></script>
 {{/section}}

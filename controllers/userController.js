@@ -161,14 +161,23 @@ exports.resetPasswordRender = async (req, res) => {
 
 
 exports.registerRender = async (req, res) => {
+  if (req.session.user) {
+    return res.redirect(`/user/home`)
+  }
   return res.render("user/register", { plain_body: true });
 };
 
 exports.loginRender = async (req, res) => {
+  if (req.session.user) {
+    return res.redirect(`/user/home`)
+  }
   return res.render("user/login", { plain_body: true });
 };
 
 exports.forgetPasswordRender = async (req, res) => {
+  if (req.session.user) {
+    return res.redirect(`/user/home`)
+  }
   return res.render("user/forgetPassword", { plain_body: true });
 };
 
@@ -586,84 +595,84 @@ exports.resetPassword = async (req, res) => {
 
 
 exports.showUsers = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const skip = (page - 1) * limit;
-        const query = req.query.query || "";
-        const accountStatus = req.query.accountStatus || "";
-        const filter = {};
-        if (query) {
-            filter.$or = [
-                {
-                    name: {
-                        $regex: query,
-                        $options: "i"
-                    }
-                },
-                {
-                    email: {
-                        $regex: query,
-                        $options: "i"
-                    }
-                },
-                {
-                    phone: {
-                        $regex: query,
-                        $options: "i"
-                    }
-                }
-            ];
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+    const query = req.query.query || "";
+    const accountStatus = req.query.accountStatus || "";
+    const filter = {};
+    if (query) {
+      filter.$or = [
+        {
+          name: {
+            $regex: query,
+            $options: "i"
+          }
+        },
+        {
+          email: {
+            $regex: query,
+            $options: "i"
+          }
+        },
+        {
+          phone: {
+            $regex: query,
+            $options: "i"
+          }
         }
-        if (accountStatus === "blocked") {
-            filter.blocked = true;
-        }
-        if (accountStatus === "active") {
-            filter.blocked = false;
-        }
-        const [user, totalDocuments] = await Promise.all([
-            User.find(filter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            User.countDocuments(filter)
-        ]);
-        const totalPages = Math.ceil(totalDocuments / limit);
-        return res.render("admin/usersList", {
-            admin: true,
-            user,
-            query,
-            accountStatus,
-            pagination: {
-                page,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-                nextPage: page + 1,
-                prevPage: page - 1,
-                serialNumberStart: skip
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        return res.render("admin/usersList", {
-            admin: true,
-            user: [],
-            query: "",
-            accountStatus: "",
-            pagination: {
-                page: 1,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false,
-                nextPage: 2,
-                prevPage: 0,
-                serialNumberStart: 0
-            },
-            errorMessage: "Error fetching users."
-        });
+      ];
     }
+    if (accountStatus === "blocked") {
+      filter.blocked = true;
+    }
+    if (accountStatus === "active") {
+      filter.blocked = false;
+    }
+    const [user, totalDocuments] = await Promise.all([
+      User.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(filter)
+    ]);
+    const totalPages = Math.ceil(totalDocuments / limit);
+    return res.render("admin/usersList", {
+      admin: true,
+      user,
+      query,
+      accountStatus,
+      pagination: {
+        page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        serialNumberStart: skip
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.render("admin/usersList", {
+      admin: true,
+      user: [],
+      query: "",
+      accountStatus: "",
+      pagination: {
+        page: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        nextPage: 2,
+        prevPage: 0,
+        serialNumberStart: 0
+      },
+      errorMessage: "Error fetching users."
+    });
+  }
 };
 
 

@@ -136,18 +136,36 @@ exports.editCategoryRender = async (req, res) => {
 
 // create new Category
 exports.addCategory = async (req, res) => {
-  const { name, parentCategory } = req.body;
+    try {
+        const { name, parentCategory } = req.body;
 
-  const existingCategory = await Category.findOne({ name });
-  if (existingCategory) {
-    return res.status(400).json({ message: "Category already exists!" });
-  }
+        if (!name || name.trim() === "") {
+            return res.status(400).json({ message: "Category name is required!" });
+        }
 
-  const newCategory = new Category({ name, parentCategory: parentCategory || null });
-  await newCategory.save();
+        const formattedName = name
+            .trim()                                     
+            .replace(/\s+/g, ' ')                       
+            .toLowerCase()                               
+            .replace(/(^\w|\s\w)/g, m => m.toUpperCase()); 
 
-  return res.redirect('back');
-}
+        const existingCategory = await Category.findOne({ name: formattedName });
+        if (existingCategory) {
+            return res.status(400).json({ message: "Category already exists!" });
+        }
+
+        const newCategory = new Category({ 
+            name: formattedName, 
+            parentCategory: parentCategory || null 
+        });
+        
+        await newCategory.save();
+        return res.status(201).json({ message: "Category created successfully!" });
+
+    } catch (error) {
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+    }
+};
 
 
 
