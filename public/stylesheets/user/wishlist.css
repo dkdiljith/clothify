@@ -1187,3 +1187,22 @@
     }
 
 }
+
+.unavailable-product{
+    border:2px dashed #ddd;
+    opacity:.8;
+}
+
+.unavailable-image{
+    height:240px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:4rem;
+    color:#bbb;
+}
+
+.unavailable-text{
+    color:#777;
+    margin:12px 0;
+}

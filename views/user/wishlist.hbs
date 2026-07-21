@@ -2,11 +2,6 @@
 <title>My Wishlist | Your Favorite Products</title>
 <link rel="stylesheet" type="text/css" href="/stylesheets/user/wishlist.css">
 {{/section}}
-
-
-
-
-
 <div class="wishlist-page">
     <div class="wishlist-container">
         <!-- ==========================================
@@ -31,11 +26,13 @@
             <div class="featured-products-grid">
                 {{#each product}}
                 <div class="wishlist-product-wrapper">
-                    <div class="product-card wishlist-product-card" data-product-id="{{this._id}}"
+                    {{#ifCond this.status "==" "active"}}
+                    <div class="product-card wishlist-product-card"
+                        data-product-id="{{this._id}}"
                         data-url="/user/singleproduct/{{this._id}}">
                         <!-- =========================================================
-         BADGES
-    ========================================================= -->
+                             BADGES
+                        ========================================================= -->
                         {{#if this.latestCollection}}
                         <div class="product-badge">
                             New
@@ -53,30 +50,32 @@
                         </div>
                         {{/if}}
                         <!-- =========================================================
-         REMOVE FROM WISHLIST
-    ========================================================= -->
+                             REMOVE BUTTON
+                        ========================================================= -->
                         <div class="wishlist-remove-container">
-                            <button class="remove-from-wishlist" data-product-id="{{this._id}}"
+                            <button
+                                class="remove-from-wishlist"
+                                data-product-id="{{this._id}}"
                                 aria-label="Remove from Wishlist">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                         <!-- =========================================================
-         PRODUCT IMAGE
-    ========================================================= -->
+                             PRODUCT IMAGE
+                        ========================================================= -->
                         <div class="product-image">
-                            <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="product-img">
+                            <img
+                                src="{{this.images.[0].path}}"
+                                alt="{{this.name}}"
+                                class="product-img">
                         </div>
                         <!-- =========================================================
-         PRODUCT DETAILS
-    ========================================================= -->
+                             PRODUCT DETAILS
+                        ========================================================= -->
                         <div class="product-details">
                             <h3 class="product-title">
                                 {{this.name}}
                             </h3>
-                            <!-- =====================================================
-             PRICE
-        ====================================================== -->
                             <div class="price-container">
                                 {{#if this.details.[0].offerId}}
                                 <span class="original-price">
@@ -91,19 +90,45 @@
                                 </span>
                                 {{/if}}
                             </div>
-                            <!-- =====================================================
-             ADD TO CART
-        ====================================================== -->
-                            <button class="wishlist-add-cart" data-product-id="{{this._id}}">
+                            <button
+                                class="wishlist-add-cart"
+                                data-product-id="{{this._id}}">
                                 <i class="fas fa-shopping-cart"></i>
                                 Add to Cart
                             </button>
                         </div>
                     </div>
+                    {{else}}
+                    <!-- =========================================================
+                         PRODUCT NOT AVAILABLE
+                    ========================================================= -->
+                    <div class="wishlist-product-card unavailable-product">
+                        <div class="product-image unavailable-image">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">
+                                Product No Longer Available
+                            </h3>
+                            <p class="unavailable-text">
+                                This product has been removed from our catalogue.
+                            </p>
+                            <button
+                                class="remove-from-wishlist"
+                                data-product-id="{{this._id}}">
+                                <i class="fas fa-trash"></i>
+                                {{!-- Remove from Wishlist --}}
+                            </button>
+                        </div>
+                    </div>
+                    {{/ifCond}}
                 </div>
                 {{/each}}
             </div>
             {{else}}
+            <!-- ==========================================
+                 EMPTY WISHLIST
+            =========================================== -->
             <div class="empty-wishlist">
                 <div class="empty-wishlist-icon">
                     <i class="far fa-heart"></i>
@@ -124,10 +149,6 @@
         </div>
     </div>
 </div>
-
-
-
-
 {{#section 'scripts'}}
 <script src="/javascripts/user/wishlist.js"></script>
 {{/section}}

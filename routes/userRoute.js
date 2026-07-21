@@ -79,7 +79,7 @@ router.get(`/wishlistDataIcon`, userAuth, wishlistController.wishlistDataIcon)
 
 //ADD TO CART
 router.get(`/cart`, userAuth, productValidator, cartController.cartRender)
-router.post('/cart/:productId/:variationIndex/:quantity', userAuth, productValidator, cartController.addToCart)
+router.post('/cart/:productId/:variationIndex/:quantity', userAuth, cartController.addToCart)
 router.delete('/cart/:productId/:variationIndex', userAuth, cartController.deleteCart)
 router.get(`/addressInCart`, userAuth, productValidator, cartController.getAddressInCart)
 
@@ -91,7 +91,7 @@ router.put('/address/default/:id', userAuth, productValidator, addressController
 
 router.post("/payment/process", userAuth, productValidator , cartController.processPaymentPage);
 router.get('/payment', userAuth, productValidator, userOrderController.payment);
-router.post(`/placeorder`, userAuth, productValidator, userOrderController.placeOrder)
+router.post(`/placeorder`, userAuth, userOrderController.placeOrder)
 router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)
 router.get(`/orderSuccess`, userAuth, userOrderController.orderSuccess)
 router.get(`/orderFailure`, userAuth, userOrderController.orderFailed)
@@ -101,7 +101,7 @@ router.post(`/cart/apply-coupon`, userAuth, couponController.applyCoupon)
 router.delete(`/cart/remove-coupon`, userAuth, couponController.removeCoupon)
 
 //WIshlist
-router.get(`/wishlist`, userAuth, productValidator, wishlistController.wishlistRender)
+router.get(`/wishlist`, userAuth, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex`, userAuth, wishlistController.addToWishlist)
 router.post(`/cart/wishlist/:productId`, userAuth, wishlistController.addToCartFromWishlist)
 router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFromWishlist)

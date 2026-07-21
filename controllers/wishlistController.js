@@ -32,17 +32,14 @@ exports.wishlistDataIcon = async (req, res) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.wishlistRender = async (req, res) => {
-    const userId = res.locals.user._id
-
+    const userId = res.locals.user._id;
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
-    const limit = 12; // 12 products per page
-
+    const limit = 12;
     try {
-        const wishlist = await Wishlist.findOne({ userId: userId }).lean();
-
+        const wishlist = await Wishlist.findOne({ userId }).lean();
         if (!wishlist || !wishlist.items || wishlist.items.length === 0) {
-            return res.render('user/wishlist', {
+            return res.render("user/wishlist", {
                 product: [],
                 pagination: {
                     page: 1,
@@ -53,20 +50,40 @@ exports.wishlistRender = async (req, res) => {
                 }
             });
         }
-
         const productIds = wishlist.items.map(item => item.productId);
         const totalProducts = productIds.length;
         const totalPages = Math.ceil(totalProducts / limit);
-
-        // Get paginated product IDs
+        // Pagination
         const startIndex = (page - 1) * limit;
-        const paginatedProductIds = productIds.slice(startIndex, startIndex + limit);
-
-        const products = await Product.find({ _id: { $in: paginatedProductIds } })
-            .select('name images details latestCollection bestSeller') // Include necessary fields for badges
+        const paginatedProductIds =
+            productIds.slice(startIndex, startIndex + limit);
+        // Fetch available products
+        const foundProducts = await Product.find({
+            _id: { $in: paginatedProductIds }
+        })
+            .select("name images details latestCollection bestSeller")
             .lean();
-
-        return res.render('user/wishlist', {
+        // Fast lookup
+        const productMap = new Map(
+            foundProducts.map(product => [
+                product._id.toString(),
+                product
+            ])
+        );
+        // Preserve original wishlist order
+        const products = paginatedProductIds.map(id => {
+            const product = productMap.get(id.toString());
+            if (product) {
+                product.status = "active";
+                return product;
+            }
+            // Product no longer exists
+            return {
+                _id: id,
+                status: "deleted"
+            };
+        });
+        return res.render("user/wishlist", {
             product: products,
             pagination: {
                 page,
@@ -78,10 +95,10 @@ exports.wishlistRender = async (req, res) => {
                 hasPrevPage: page > 1
             }
         });
-
-    } catch (error) {
-        console.error('Error rendering wishlist:', error);
-        return res.status(500).render('user/wishlist', {
+    }
+    catch (error) {
+        console.error("Error rendering wishlist:", error);
+        return res.status(500).render("user/wishlist", {
             product: [],
             pagination: {
                 page: 1,
@@ -93,7 +110,6 @@ exports.wishlistRender = async (req, res) => {
         });
     }
 };
-
 
 
 
