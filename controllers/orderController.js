@@ -11,6 +11,9 @@ const MESSAGES = require(`../utils/constants`);
 
 /////////////////////////////////////////////////////////////
 
+
+
+
 async function calculateRefund(orderId, itemId, isCancellation) {
   const order = await Order.findById(orderId);
   if (!order) {
@@ -76,6 +79,9 @@ async function calculateRefund(orderId, itemId, isCancellation) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 exports.ordersRender = async (req, res) => {
   try {
@@ -159,6 +165,10 @@ exports.ordersRender = async (req, res) => {
   }
 };
 
+
+
+
+
 exports.orderDetails = async (req, res) => {
   const orderId = req.params.orderId;
 
@@ -167,12 +177,26 @@ exports.orderDetails = async (req, res) => {
   return res.render(`admin/orderDetails`, { order: order, admin: true });
 };
 
+
+
+
+
 exports.orderStatusChange = async (req, res) => {
   const orderId = req.params.orderId;
   const itemId = req.params.itemId;
   const newStatus = req.body.status;
 
   try {
+
+    if (newStatus === "Cancelled") {
+      const cancellationResult = await processItemCancellation(orderId, itemId, "item is out of stock");
+
+      // Destructure status out, send the rest as JSON response
+      const { status, ...responseBody } = cancellationResult;
+      return res.status(status).json(responseBody);
+    }
+
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res
@@ -278,6 +302,10 @@ exports.orderStatusChange = async (req, res) => {
 };
 
 /////////////////////////////////////////////////////USERSIDE ORDER CANCELAND RETURNING//////////////////////////////////////////////////////
+
+
+
+
 
 exports.orderCancel = async (req, res) => {
   const { orderId, itemId, reason } = req.body;
@@ -452,6 +480,10 @@ exports.orderCancel = async (req, res) => {
   }
 };
 
+
+
+
+
 exports.orderReturn = async (req, res) => {
   const { orderId, itemId, reason, returnAll } = req.body;
 
@@ -569,5 +601,141 @@ exports.orderReturn = async (req, res) => {
       success: false,
       message: "Something went wrong",
     });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+async function processItemCancellation(orderId, itemId, reason) {
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return { status: 404, success: false, message: "Order not found" };
+    }
+    const item = order.items.find((item) => item._id.toString() === itemId);
+    if (!item) {
+      return { status: 404, success: false, message: "Item not found in order" };
+    }
+    // validations
+    if (item.status === "Cancelled") {
+      return { status: 400, success: false, message: "Item already cancelled" };
+    }
+    if (item.status !== "Pending") {
+      return { status: 400, success: false, message: "Only pending items can be cancelled" };
+    }
+    //////////////////////////////////////////////////////
+    // restore stock
+    const product = await Product.findById(item.productId);
+    if (product) {
+      const variation = product.details[item.variationIndex];
+      if (variation) {
+        variation.quantity += item.quantity;
+        await product.save();
+      }
+    }
+    //////////////////////////////////////////////////////
+    // refund calculation
+    const isCancellation = true;
+    const refundDetails = await calculateRefund(
+      orderId,
+      itemId,
+      isCancellation,
+    );
+    let refundAmount = refundDetails.totalRefundableAmount;
+    //handles surplus cases
+    if (order.totalAmount - refundAmount === -1) {
+      refundAmount -= 1;
+    } else if (order.totalAmount - refundAmount === 1) {
+      refundAmount += 1;
+    }
+    //////////////////////////////////////////////////////
+    // wallet refund
+    if (
+      order.paymentMethod === "razorpay" ||
+      order.paymentMethod === "wallet"
+    ) {
+      const wallet = await Wallet.findOne({
+        userId: order.userId,
+      });
+      if (!wallet) {
+        return { status: 404, success: false, message: "Wallet not found" };
+      }
+      wallet.balance += refundAmount;
+      wallet.transactions.push({
+        type: "credit",
+        amount: refundAmount,
+        description: `Refund for cancelled item (${item.productName}) in Order #${order.orderId}`,
+      });
+      await wallet.save();
+      item.refundDetails.refundedAt = new Date();
+    }
+    //////////////////////////////////////////////////////
+    // update item
+    item.status = "Cancelled";
+    item.cancellationReason.push({
+      itemId: item._id,
+      reason,
+      cancelledAt: new Date(),
+    });
+    //update totalAmount
+    if (
+      order.paymentMethod === "razorpay" ||
+      order.paymentMethod === "wallet"
+    ) {
+      item.refundDetails.refundRequestedAt = new Date();
+      item.refundDetails.paymentMethod = order.paymentMethod;
+      item.refundDetails.refundType = "Cancelled";
+      item.refundDetails.refundAmount = refundAmount;
+      item.refundDetails.refundAmountStatus = "Refunded";
+      item.refundDetails.refundReason = reason;
+      order.totalRefundAmount += refundAmount;
+      order.totalAmount -= refundAmount;
+    } else if (order.paymentMethod === `cod`) {
+      item.refundDetails.refundRequestedAt = new Date();
+      item.refundDetails.paymentMethod = "cod";
+      item.refundDetails.refundType = "Cancelled";
+      item.refundDetails.refundAmount = refundAmount;
+      item.refundDetails.refundAmountStatus = "No Refund Required";
+      item.refundDetails.refundReason = reason;
+      order.totalRefundAmount += refundAmount;
+      order.totalAmount -= refundAmount;
+    }
+    //////////////////////////////////////////////////////
+    // update order status
+    const allItemsCancelled = order.items.every(
+      (item) => item.status === "Cancelled",
+    );
+    if (allItemsCancelled) {
+      order.status = "Cancelled";
+      if (
+        order.paymentMethod === "razorpay" ||
+        order.paymentMethod === "wallet"
+      ) {
+        order.paymentStatus = "Refunded";
+      }
+    }
+    await order.save();
+    //////////////////////////////////////////////////////
+    return {
+      status: 200,
+      success: true,
+      message: "Item cancelled successfully",
+      refundAmount,
+    };
+  } catch (error) {
+    console.error("Order Cancel Error:", error);
+    return {
+      status: 500,
+      success: false,
+      message: "Something went wrong during cancellation processing",
+    };
   }
 };

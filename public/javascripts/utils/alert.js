@@ -1,10 +1,4 @@
-/**
- * Professional Center Confirmation Alert Modal
- * @param {string} title - The main heading/warning title
- * @param {string} message - Detailed multi-line context or awareness text
- * @param {string} type - 'danger' (red), 'warning' (yellow), 'info' (blue), 'success' (green)
- * @returns {Promise<boolean>} - Resolves to true if OK/Confirm is clicked, false if Cancel is clicked.
- */
+
 function showCustomConfirm(title, message, type = "danger") {
   return new Promise((resolve) => {
     // FIX: Remove any existing custom modals instantly to prevent stacking bugs

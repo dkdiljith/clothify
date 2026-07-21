@@ -176,14 +176,14 @@ module.exports = {
     return a <= b;
   },
   //user order
-toLowerCase: function (str) {
+  toLowerCase: function (str) {
     if (str && typeof str === 'string') {
-        return str
-            .toLowerCase()
-            .replace(/\s+/g, '-');
+      return str
+        .toLowerCase()
+        .replace(/\s+/g, '-');
     }
     return '';
-},
+  },
   ifeq: function (a, b, options) {
     if (a === b) {
       return options.fn(this);
@@ -245,11 +245,15 @@ toLowerCase: function (str) {
   coinValue: (coins, value) => {
     return (Number(coins) * Number(value)).toFixed(2);
   },
-  hasUnavailableItems: function(items) {
-  if (!items || !Array.isArray(items)) return false;
-  // Checks if any array element explicitly carries the false flag
-  return items.some(item => item.isAvailable === false);
-}
+  hasUnavailableItems: function (items) {
+    if (!items || !Array.isArray(items)) return false;
+    // Checks if any array element explicitly carries the false flag
+    return items.some(item => item.isAvailable === false);
+  },
+  //ADMIN ORDER DETAILS
+  not: function (value) {
+    return !value;
+  },
 
 };
 
