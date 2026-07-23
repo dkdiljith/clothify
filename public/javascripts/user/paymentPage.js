@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const paymentForm = document.getElementById("payment-form");
     const paymentMethods = document.querySelectorAll(".payment-method");
@@ -12,15 +11,45 @@ document.addEventListener("DOMContentLoaded", () => {
     // Default payment method
     let paymentMethod = "razorpay";
     // ------------------------------
+    // URL Parameter Checking (COD Limit Alert)
+    // ------------------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("error") === "cod_limit") {
+        showPopupMessage(
+            "Cash on Delivery is not available for orders above ₹1000",
+            "error"
+        );
+    }
+    // ------------------------------
+    // COD Validation
+    // ------------------------------
+    const codMethod = document.querySelector(
+        '.payment-method[data-method="cod"]'
+    );
+    if (codMethod && totalAmount > 1000) {
+        codMethod.classList.add("disabled-method");
+        codMethod.style.opacity = "0.5";
+        codMethod.style.cursor = "not-allowed";
+        const codLimitLabel = codMethod.querySelector(".cod-limit");
+        if (codLimitLabel) {
+            codLimitLabel.style.display = "block";
+        }
+        if (paymentMethod === "cod") {
+            paymentMethod = "razorpay";
+        }
+    }
+    // ------------------------------
     // Wallet Validation
     // ------------------------------
     const walletMethod = document.querySelector(
-        '.payment-method[data-method="wallet"]',
+        '.payment-method[data-method="wallet"]'
     );
     if (walletMethod) {
-        const walletBalance = parseFloat(walletMethod.dataset.walletBalance);
+        const walletBalance = parseFloat(
+            walletMethod.dataset.walletBalance
+        );
         const insufficientLabel = walletMethod.querySelector(
-            ".insufficient-balance",
+            ".insufficient-balance"
         );
         if (walletBalance < totalAmount) {
             walletMethod.classList.add("disabled-method");
@@ -38,9 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Default Selection
     // ------------------------------
     const defaultMethod = document.querySelector(
-        `.payment-method[data-method="${paymentMethod}"]`,
+        `.payment-method[data-method="${paymentMethod}"]`
     );
-    if (defaultMethod && !defaultMethod.classList.contains("disabled-method")) {
+    if (
+        defaultMethod &&
+        !defaultMethod.classList.contains("disabled-method")
+    ) {
         defaultMethod.classList.add("selected");
         placeOrderBtn.disabled = false;
         placeOrderBtn.style.cursor = "pointer";
@@ -68,17 +100,26 @@ document.addEventListener("DOMContentLoaded", () => {
     paymentForm.addEventListener("submit", (e) => {
         if (!paymentMethod) {
             e.preventDefault();
-            showPopupMessage("Select any payment method", "error");
+            showPopupMessage(
+                "Select any payment method",
+                "error"
+            );
             return;
         }
-        const urlParams = new URLSearchParams(window.location.search);
-        const addressId = urlParams.get("selectedAddressId");
+        const currentUrlParams = new URLSearchParams(
+            window.location.search
+        );
+        const addressId = currentUrlParams.get(
+            "selectedAddressId"
+        );
         if (!addressId) {
             e.preventDefault();
-            showPopupMessage("Address not selected", "error");
+            showPopupMessage(
+                "Address not selected",
+                "error"
+            );
             return;
         }
-        // Set hidden inputs
         paymentMethodInput.value = paymentMethod;
         addressIdInput.value = addressId;
     });

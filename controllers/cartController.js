@@ -380,13 +380,24 @@ exports.getAddressInCart = async (req, res) => {
 
 
 exports.processPaymentPage = async (req, res) => {
+    try {
+        const { paymentMethod, addressId } = req.body;
 
-  const { paymentMethod, addressId } = req.body;
-  console.log(`this is payemt processing `, paymentMethod, addressId)
+        if (paymentMethod === 'cod') {
+            const userId = res.locals.user._id;
+            const cart = await Cart.findOne({ userId }).lean();
 
-  return res.render("user/paymentProcessing", {
-    method: paymentMethod,
-    addressId
-  });
+            if (cart && cart.totalAmount > 1000) {
+                console.log(`COD limit exceeded by user ${userId}`);
+                
+                return res.redirect(`/user/payment?selectedAddressId=${addressId}&error=cod_limit`);
+            }
+        }
 
-}
+        return res.render("user/paymentProcessing", { method: paymentMethod, addressId });
+
+    } catch (error) {
+        console.error("Error in processPaymentPage:", error);
+        return res.status(500).send("Internal Server Error");
+    }
+};
