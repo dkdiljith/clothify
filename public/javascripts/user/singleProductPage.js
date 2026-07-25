@@ -232,10 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await response.json();
       if (data.success) {
         showPopupMessage(data.message, "success");
-
-        for (let i = 0; i < quantity; i++) {
-          ClothifyCounterManager.update("cart", "increment");
-        }
+        ClothifyCounterManager.update("cart", "increment");
       } else if (data.info) {
         showPopupMessage(data.message, "info");
       } else {
@@ -259,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
     icon.classList.toggle("fas", isWishlisted);
     icon.classList.toggle("far", !isWishlisted);
 
-}
+  }
 
 
 
@@ -302,8 +299,8 @@ document.addEventListener("DOMContentLoaded", function () {
       showPopupMessage(data.message, "success");
     } catch (error) {
       console.error(error);
-     updateWishlistButton(button, wasWishlisted);
-      showPopupMessage("Something went wrong.", "error");
+      updateWishlistButton(button, wasWishlisted);
+      showPopupMessage("Login First :)", "error");
     } finally {
       button.disabled = false;
     }

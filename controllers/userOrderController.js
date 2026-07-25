@@ -25,6 +25,48 @@ const orderIdGeneration = async () => {
 };
 
 
+
+
+
+async function itemAmountCalculate(order, item) {
+  if (!order) {
+    throw new Error("Order not found");
+  }
+  if (!item) {
+    throw new Error("Item not found");
+  }
+  // Item Base Total
+  const itemSubtotal = Number(item.productPrice) * item.quantity;
+  // Total Order Subtotal
+  const orderSubtotal = order.items.reduce((total, currentItem) => {
+    return total + Number(currentItem.productPrice) * currentItem.quantity;
+  }, 0);
+  // Item share percentage in order
+  const itemSharePercentage =
+    orderSubtotal > 0 ? itemSubtotal / orderSubtotal : 0;
+  // Coupon share for this item
+  const itemCouponShare = (order.couponDiscount || 0) * itemSharePercentage;
+  // Offer share for this item
+  const itemOfferShare = (order.offerDiscount || 0) * itemSharePercentage;
+  // Tax share for this item
+  const itemTaxShare = (order.tax || 0) * itemSharePercentage;
+  // Shipping share for this item
+  const itemShippingShare = (order.shippingFee || 0) * itemSharePercentage;
+  // Final refundable amount
+  let refundableAmount =
+    itemSubtotal -
+    itemCouponShare -
+    itemOfferShare +
+    itemTaxShare +
+    itemShippingShare;
+  // Prevent negative refund
+  refundableAmount = Math.max(0, Math.round(refundableAmount));
+  //////////////////////////////////////////////////////
+  return refundableAmount
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -163,6 +205,28 @@ exports.placeOrder = async (req, res) => {
       totalAmount: cart.totalAmount
     });
 
+    //adding variation amount
+    {
+      let itemTotal = 0;
+
+      for (let i = 0; i < order.items.length; i++) {
+        const item = order.items[i];
+        // Calculate individual amount
+        const amount = await itemAmountCalculate(order, item);
+        item.amount = amount;
+        itemTotal += amount;
+      }
+      // Handling surplus or deficit money directly
+      const variationAmount = order.totalAmount - itemTotal;
+
+      if (variationAmount !== 0 && order.items.length > 0) {
+        order.items[0].amount += variationAmount;
+
+        if (order.items[0].amount < 0) {
+          order.items[0].amount = 0;
+        }
+      }
+    }
     // save order 
     await order.save();
 
@@ -286,6 +350,31 @@ exports.placeOrderFailed = async (req, res) => {
       paymentRetryExpiresAt: new Date(Date.now() + 30 * 60 * 1000) // Explicit 30 min window set
     });
 
+
+
+    //adding variation amount
+    {
+      let itemTotal = 0;
+
+      for (let i = 0; i < order.items.length; i++) {
+        const item = order.items[i];
+        // Calculate individual amount
+        const amount = await itemAmountCalculate(order, item);
+        item.amount = amount;
+        itemTotal += amount;
+      }
+      // Handling surplus or deficit money directly
+      const variationAmount = order.totalAmount - itemTotal;
+
+      if (variationAmount !== 0 && order.items.length > 0) {
+        order.items[0].amount += variationAmount;
+
+        if (order.items[0].amount < 0) {
+          order.items[0].amount = 0;
+        }
+      }
+    }
+
     await order.save();
     await Cart.findByIdAndDelete(cart._id); // Clear cart so they don't buy duplicate items
 
@@ -374,7 +463,7 @@ async function retryFailedOrderFailed(req, res, orderId) {
     console.error("Retry Fail Handler Error:", error);
     return res.status(500).json({ success: false, message: "An error occurred while updating the retry order." });
   }
-} 
+}
 
 
 
@@ -387,7 +476,7 @@ exports.orderSuccess = async (req, res) => {
       return res.render('user/orderFailure', { plain_body: true });
     }
 
-    const order = await Order.findOne({orderId}).lean()
+    const order = await Order.findOne({ orderId }).lean()
 
     if (!order) {
       return res.render('user/orderSuccess', { plain_body: true });
@@ -410,13 +499,13 @@ exports.orderFailed = async (req, res) => {
       return res.render('user/orderFailure', { plain_body: true });
     }
 
-    const order = await Order.findOne({orderId}).lean()
+    const order = await Order.findOne({ orderId }).lean()
 
     if (!order) {
       return res.render('user/orderFailure', { plain_body: true });
     }
     return res.render('user/orderFailure', { plain_body: true, order });
-    
+
   } catch (error) {
     console.error("Order Failure Route Error:", error);
     return res.render('user/orderFailure', { plain_body: true });

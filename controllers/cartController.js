@@ -219,7 +219,7 @@ exports.addToCart = async (req, res) => {
       // Conditional logic for your flags
       success: existingItem ? false : true,
       info: existingItem ? true : undefined, // Omitted from JSON if false, or set to existingItem ? true : false
-      message: existingItem ? 'Quantity updated' : `Added ${check.product.name} to cart`,
+      message: existingItem ? 'Quantity updated' : `Item Added to cart`,
 
       newQuantity: postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty,
       itemTotal: (postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty) * currentUnitProductPrice,

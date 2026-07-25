@@ -14,8 +14,8 @@ const MESSAGES = require(`../utils/constants`);
 
 
 
-async function calculateRefund(orderId, itemId, isCancellation) {
-  const order = await Order.findById(orderId);
+async function calculateRefund(order, itemId) {
+
   if (!order) {
     throw new Error("Order not found");
   }
@@ -222,7 +222,7 @@ exports.orderStatusChange = async (req, res) => {
     // RETURN PROCESSING LOGIC
     if (newStatus === "Returned") {
       // Refund calculation
-      const refundDetails = await calculateRefund(orderId, itemId, false);
+      const refundDetails = await calculateRefund(order, itemId);
       let refundAmount = refundDetails.totalRefundableAmount;
 
       //handles surplus cases
@@ -272,6 +272,9 @@ exports.orderStatusChange = async (req, res) => {
 
     //  UNIVERSAL STATUS UPDATE (Works for Completed, Returned, Cancelled, etc.)
     item.status = newStatus;
+    if (item.status === `Completed`) {
+      item.completionDate = new Date()
+    }
 
     // PAYMENT COMPLETION CHECK
     const allCompleted = order.items.every(
@@ -363,11 +366,9 @@ exports.orderCancel = async (req, res) => {
     //////////////////////////////////////////////////////
     // refund calculation
 
-    const isCancellation = true;
     const refundDetails = await calculateRefund(
-      orderId,
+      order,
       itemId,
-      isCancellation,
     );
 
     let refundAmount = refundDetails.totalRefundableAmount;
@@ -643,11 +644,10 @@ async function processItemCancellation(orderId, itemId, reason) {
     }
     //////////////////////////////////////////////////////
     // refund calculation
-    const isCancellation = true;
+
     const refundDetails = await calculateRefund(
-      orderId,
+      order,
       itemId,
-      isCancellation,
     );
     let refundAmount = refundDetails.totalRefundableAmount;
     //handles surplus cases

@@ -45,14 +45,15 @@ const orderSchema = new mongoose.Schema({
       reason: { type: String, required: true }
     }],
     refundDetails: {
-      refundType: { type: String, enum: ["Cancelled","Returned"] },
-      paymentMethod: {type:String , enum: ['razorpay', 'wallet', 'cod']},
+      refundType: { type: String, enum: ["Cancelled", "Returned"] },
+      paymentMethod: { type: String, enum: ['razorpay', 'wallet', 'cod'] },
       refundAmount: { type: Number },
-      refundAmountStatus:{type:String , enum:['Refunded', 'No Refund Required']},
-      refundReason:{ type: String },
-      refundRequestedAt: { type: Date},
+      refundAmountStatus: { type: String, enum: ['Refunded', 'No Refund Required'] },
+      refundReason: { type: String },
+      refundRequestedAt: { type: Date },
       refundedAt: { type: Date }
-    }
+    },
+    amount: { type: Number, default: 0, min: 0 },
   }],
   deliveryAddress: { type: Object },
   deliveryStatus: {
@@ -62,7 +63,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: { type: String, required: true, enum: ['razorpay', 'wallet', 'cod'] },
   paymentStatus: { type: String, default: "Pending", enum: ['Failed', 'Completed', 'Pending', 'Refunded'] },
-  totalRefundAmount: { type: Number , default:0},
+  totalRefundAmount: { type: Number, default: 0 },
 
   paymentAttemptsCount: {
     type: Number,
@@ -84,7 +85,7 @@ const orderSchema = new mongoose.Schema({
   couponId: { type: mongoose.Schema.Types.ObjectId, default: null },
   couponDiscount: { type: Number, default: 0, min: 0 },
   offerDiscount: { type: Number, default: 0, min: 0 },
-  checkoutTotal:{ type: Number, default: 0, min: 0 },
+  checkoutTotal: { type: Number, default: 0, min: 0 },
   totalAmount: { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
 
@@ -102,7 +103,7 @@ orderSchema.pre("save", function (next) {
   // 2. Exact match check (All items share the exact same status)
   if (uniqueStatuses.length === 1) {
     this.deliveryStatus = uniqueStatuses[0];
-  } 
+  }
   // 3. Mixed status logic
   else {
     // Check if every item is either "Cancelled" or "Returned"

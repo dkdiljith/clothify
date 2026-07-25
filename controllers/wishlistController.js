@@ -147,7 +147,7 @@ exports.addToWishlist = async (req, res) => {
         await wishlist.save();
         return res.status(200).json({ 
             success: true, 
-            message: `Added ${check.product.name} (${check.variation.size}) to wishlist!` 
+            message: `Item Added to wishlist!` 
         });
     } catch (error) {
         console.error("Error adding to wishlist:", error);
@@ -179,7 +179,7 @@ exports.removeFromWishlist = async (req, res) => {
 
         await wishlist.save();
 
-        return res.json({ success: true, message: 'Item removed from wishlist successfully' });
+        return res.json({ success: true, message: 'Item removed from wishlist' });
 
     } catch (error) {
         console.error('Wishlist remove error:', error);

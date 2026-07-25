@@ -54,9 +54,7 @@ exports.loginRender = async (req, res) => {
 exports.registerRender = async (req, res) => {
   return res.render(`admin/register`, { plain_body: true })
 }
-exports.dashboardRender = async (req, res) => {
-  return res.render(`admin/dashboard`)
-}
+
 exports.activityLogRender = async (req, res) => {
   return res.render(`admin/activity-log`)
 }

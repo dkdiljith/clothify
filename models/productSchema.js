@@ -48,7 +48,6 @@ productSchema.pre(/^find/, function (next) {
 productSchema.index({ name: 'text', description: 'text', gender: 'text' });
 productSchema.index({ 'details.price': 1 });
 productSchema.index({ createdAt: -1 });
-productSchema.index({ salesCount: -1 });
 
 
 const Product = mongoose.model("Product", productSchema);

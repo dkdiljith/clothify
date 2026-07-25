@@ -4,6 +4,12 @@ const Coupon = require(`../models/couponSchema`)
 
 
 
+// const TAX_RATE = 0.06;  //6% tax
+//   const SHIPPING_THRESHOLD = 2000;
+//   const FLAT_SHIPPING_FEE = 80;
+
+
+
 async function recalculateCartSummary(userId) {
   const cart = await Cart.findOne({ userId })
     .populate('items.productId')
@@ -43,7 +49,7 @@ async function recalculateCartSummary(userId) {
     offerDiscount += (basePrice - sellingPrice);
   });
 
-   let couponDiscount = 0;
+  let couponDiscount = 0;
   if (cart.couponId) {
     const coupon = cart.couponId;
     const discValue = Number(coupon.discountValue) || 0;
@@ -54,16 +60,16 @@ async function recalculateCartSummary(userId) {
 
     if (isSubtotalTooLow || isDiscountTooHigh) {
       console.log("Removing coupon: Requirements no longer met.");
-      cart.couponId = null; 
+      cart.couponId = null;
       cart.couponDiscount = 0;
-  
+
     } else {
       if (coupon.discountType === 'price') {
         couponDiscount = discValue;
       } else {
         couponDiscount = offerAmount * (discValue / 100);
       }
-      
+
       // Safety cap to prevent negative totals
       couponDiscount = Math.min(couponDiscount, offerAmount);
       offerAmount -= couponDiscount;

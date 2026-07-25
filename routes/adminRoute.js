@@ -8,12 +8,13 @@ router.use((req, res, next) => {
 
 //session for user
 router.use((req, res, next) => {
-  res.locals.admin = req.session.admin || null;
-  next();
+    res.locals.admin = req.session.admin || null;
+    next();
 });
 
 //controllers
 const adminController = require('../controllers/adminController')
+const dashboardController = require(`../controllers/dashboardController`)
 const userController = require('../controllers/userController')
 const productController = require(`../controllers/productController`)
 const orderController = require(`../controllers/orderController`)
@@ -43,7 +44,8 @@ router.get(`/logout`, adminController.logout)
 
 
 ///DASHBOARD SIDE///
-router.get(`/dashboard`, adminAuth, adminController.dashboardRender)
+router.get(`/dashboard`, adminAuth, dashboardController.dashboardRender)
+router.get("/dashboard/data", adminAuth, dashboardController.getDashboardData);
 router.get(`/activity-log`, adminAuth, adminController.activityLogRender)
 
 
@@ -116,13 +118,13 @@ router.route(`/offer/:offerId`)
     .get(adminAuth, offerController.offerEditJson)
     .put(adminAuth, offerController.editOffer)
     .delete(adminAuth, offerController.offerDelete);
-    
+
 ///SETTINGS MANAGEMENT///
-router.get(`/settings` ,adminAuth, settingController.landingPage)
+router.get(`/settings`, adminAuth, settingController.landingPage)
 
 router.route(`/settings/referral`)
-.get(adminAuth, settingController.referralSettingsRender )
-.post(adminAuth, settingController.referralSettings)
+    .get(adminAuth, settingController.referralSettingsRender)
+    .post(adminAuth, settingController.referralSettings)
 
 
 module.exports = router
