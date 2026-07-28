@@ -4,6 +4,7 @@ const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 const Address = require(`../models/addressSchema`)
 const Product = require(`../models/productSchema`)
+const mongoose = require("mongoose");
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -12,14 +13,13 @@ const MESSAGES = require(`../utils/constants`)
 
 
 //OrderId - creation
-const orderIdGeneration = async () => {
-  const crypto = require(`crypto`)
+const orderIdGeneration = async (session) => {
+  const crypto = require("crypto");
   const randomNumber = crypto.randomInt(100000, 1000000);
   const orderId = `ORD-${randomNumber}`;
-  const order = await Order.findOne({ orderId });
-
+  const order = await Order.findOne({ orderId }).session(session);
   if (order) {
-    return await orderIdGeneration();
+    return await orderIdGeneration(session);
   }
   return orderId;
 };
@@ -95,92 +95,124 @@ exports.payment = async (req, res) => {
 
 
 
+
 exports.placeOrder = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const userId = res.locals.user._id;
     const { paymentMethod, addressId } = req.body;
     const isRazorpayVerified = req.razorpayVerified === true;
-
-    // validation 
+    // VALIDATION
     if (!paymentMethod || !addressId) {
-      return res.status(400).json({ success: false, message: "Missing required fields" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
     }
-    if (paymentMethod === 'razorpay' && !isRazorpayVerified) {
-      return res.status(400).json({ success: false, message: "Wrong Payment Info" });
+    if (paymentMethod === "razorpay" && !isRazorpayVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Wrong Payment Info",
+      });
     }
-
-    // fetch cart and address 
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
-    const address = await Address.findById(addressId);
+    // FETCH CART
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: "Your cart is empty." });
+      return res.status(400).json({
+        success: false,
+        message: "Your cart is empty.",
+      });
     }
+    // FETCH ADDRESS
+    const address = await Address.findById(addressId);
     if (!address) {
-      return res.status(404).json({ success: false, message: "Address not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
     }
-
-    // order limit 
+    // ORDER LIMIT
     const ORDER_LIMIT = 25000;
     if (cart.totalAmount > ORDER_LIMIT) {
-      return res.json({ success: false, message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.` });
+      return res.json({
+        success: false,
+        message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`,
+      });
     }
-
-    // stock checking 
+    // STOCK VALIDATION
     for (const item of cart.items) {
       const product = item.productId;
       const variation = product.details[item.variationIndex];
       if (!variation) {
-        return res.json({ success: false, message: `${product.name} variation not found` });
+        return res.json({
+          success: false,
+          message: `${product.name} variation not found`,
+        });
       }
       if (variation.quantity < item.quantity) {
-        return res.json({ success: false, message: `${product.name} is out of stock` });
+        return res.json({
+          success: false,
+          message: `${product.name} is out of stock`,
+        });
       }
     }
-
-    // payment status 
+    // PAYMENT STATUS
     let paymentStatus = "Pending";
-
-    // razorpay status update 
-    if (paymentMethod === 'razorpay' && isRazorpayVerified) {
+    if (paymentMethod === "razorpay" && isRazorpayVerified) {
       paymentStatus = "Completed";
     }
-
-    // wallet payment 
+    // START TRANSACTION
+    session.startTransaction();
+    // WALLET PAYMENT
     if (paymentMethod === "wallet") {
-      const wallet = await Wallet.findOne({ userId });
+      const wallet = await Wallet.findOne({ userId }).session(session);
       if (!wallet) {
-        return res.json({ success: false, message: "Wallet not found" });
+        await session.abortTransaction();
+        return res.json({
+          success: false,
+          message: "Wallet not found",
+        });
       }
       if (wallet.balance < cart.totalAmount) {
-        return res.json({ success: false, message: "Insufficient wallet balance" });
+        await session.abortTransaction();
+        return res.json({
+          success: false,
+          message: "Insufficient wallet balance",
+        });
       }
       wallet.balance -= cart.totalAmount;
-      wallet.transactions.push({ type: "debit", amount: cart.totalAmount, description: `₹${cart.totalAmount} debited for order payment` });
-      const result = await wallet.save();
-      if (result) {
-        paymentStatus = "Completed";
-      }
+      wallet.transactions.push({
+        type: "debit",
+        amount: cart.totalAmount,
+        description: `₹${cart.totalAmount} debited for order payment`,
+      });
+      await wallet.save({ session });
+      paymentStatus = "Completed";
     }
-
-    // order items 
+    if (paymentMethod === "wallet" && paymentStatus === "Pending") {
+      await session.abortTransaction();
+      return res.status(500).json({
+        success: false,
+        message: "Wallet payment failed.",
+      });
+    }
+    // ORDER ITEMS
     const orderItems = cart.items.map((item) => ({
       productId: item.productId._id,
       productName: item.productId.name,
       productPrice: item.productId.details[item.variationIndex].price,
-      productImg: item.productId.images && item.productId.images.length > 0 ? item.productId.images[0].path : null,
+      productImg:
+        item.productId.images && item.productId.images.length > 0
+          ? item.productId.images[0].path
+          : null,
       productSize: item.productId.details[item.variationIndex].size,
       variationIndex: item.variationIndex,
       quantity: item.quantity,
-      status: "Pending"
+      status: "Pending",
     }));
-
-    if (paymentMethod === 'wallet' && paymentStatus === "Pending") {
-      return res.status(500).json({ success: false, message: "wallet payment failed." });
-    }
-
-    // create order 
+    // CREATE ORDER
     const order = new Order({
-      orderId: await orderIdGeneration(),
+      orderId: await orderIdGeneration(session),
       userId,
       items: orderItems,
       deliveryAddress: {
@@ -191,7 +223,7 @@ exports.placeOrder = async (req, res) => {
         state: address.state,
         zip: address.zip,
         country: address.country,
-        phone: address.phone
+        phone: address.phone,
       },
       paymentMethod,
       paymentStatus,
@@ -202,53 +234,72 @@ exports.placeOrder = async (req, res) => {
       couponDiscount: cart.couponDiscount,
       offerDiscount: cart.offerDiscount,
       checkoutTotal: cart.totalAmount,
-      totalAmount: cart.totalAmount
+      totalAmount: cart.totalAmount,
     });
-
-    //adding variation amount
-    {
-      let itemTotal = 0;
-
-      for (let i = 0; i < order.items.length; i++) {
-        const item = order.items[i];
-        // Calculate individual amount
-        const amount = await itemAmountCalculate(order, item);
-        item.amount = amount;
-        itemTotal += amount;
+    // ITEM AMOUNT CALCULATION
+    let itemTotal = 0;
+    for (const item of order.items) {
+      const amount = await itemAmountCalculate(order, item);
+      item.amount = amount;
+      itemTotal += amount;
+    }
+    const variationAmount = order.totalAmount - itemTotal;
+    if (variationAmount !== 0 && order.items.length > 0) {
+      order.items[0].amount += variationAmount;
+      if (order.items[0].amount < 0) {
+        order.items[0].amount = 0;
       }
-      // Handling surplus or deficit money directly
-      const variationAmount = order.totalAmount - itemTotal;
-
-      if (variationAmount !== 0 && order.items.length > 0) {
-        order.items[0].amount += variationAmount;
-
-        if (order.items[0].amount < 0) {
-          order.items[0].amount = 0;
+    }
+    // SAVE ORDER
+    await order.save({ session });
+    // UPDATE PRODUCT STOCK
+    if (paymentMethod === "cod" || paymentStatus === "Completed") {
+      for (const item of cart.items) {
+        const updateResult = await Product.findOneAndUpdate(
+          {
+            _id: item.productId._id,
+            [`details.${item.variationIndex}.quantity`]: {
+              $gte: item.quantity,
+            },
+          },
+          {
+            $inc: {
+              [`details.${item.variationIndex}.quantity`]: -item.quantity,
+            },
+          },
+          {
+            session,
+            new: true,
+          },
+        );
+        if (!updateResult) {
+          throw new Error(
+            `${item.productId.name} went out of stock while placing the order.`,
+          );
         }
       }
+
+      // CLEAR CART
+
+      await Cart.findByIdAndDelete(cart._id, { session });
     }
-    // save order 
-    await order.save();
-
-    // FIX: Atomic MongoDB update eliminates ParallelSaveError and data overwriting
-    if (paymentMethod === "cod" || paymentStatus === "Completed") {
-      await Promise.all(
-        cart.items.map((item) => {
-          return Product.findOneAndUpdate(
-            { _id: item.productId._id },
-            { $inc: { [`details.${item.variationIndex}.quantity`]: -item.quantity } }
-          );
-        })
-      );
-
-      // clear cart 
-      await Cart.findByIdAndDelete(cart._id);
-    }
-
-    return res.json({ success: true, paymentStatus, message: "Order placed successfully", orderId: order.orderId });
+    // COMMIT TRANSACTION
+    await session.commitTransaction();
+    return res.json({
+      success: true,
+      paymentStatus,
+      message: "Order placed successfully",
+      orderId: order.orderId,
+    });
   } catch (error) {
+    await session.abortTransaction();
     console.error("Order Placement Error:", error);
-    return res.status(500).json({ success: false, message: "Failed to place order." });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to place order.",
+    });
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -385,51 +436,83 @@ exports.placeOrderFailed = async (req, res) => {
   }
 };
 
-
 exports.retryFailedOrder = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const { orderId } = req.body;
     if (!orderId) {
-      return res.status(400).json({ success: false, message: "Invalid Order ID provided" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Order ID provided",
+      });
     }
-
-    // 1. Fetch the order document from database 
-    const order = await Order.findOne({ orderId: orderId });
+    session.startTransaction();
+    // Fetch order inside transaction
+    const order = await Order.findOne({ orderId }).session(session);
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
     }
-
-    // 2. Prevent reducing stock twice if the payment was already completed 
-    if (order.paymentStatus === 'Completed') {
-      return res.status(400).json({ success: false, message: "Order is already completed" });
+    // Prevent duplicate retry
+    if (order.paymentStatus === "Completed") {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: "Order is already completed",
+      });
     }
-
-    // 3. Change statuses on the order document 
-    order.paymentStatus = 'Completed';
-    order.items.forEach(item => {
-      item.status = 'Pending';
+    // Update payment status
+    order.paymentStatus = "Completed";
+    order.items.forEach((item) => {
+      item.status = "Pending";
     });
-
-    // 4. Save the updated order first 
-    await order.save();
-
-    // FIX: Atomic MongoDB update saves processing time and ensures exact stock inventory math
-    await Promise.all(
-      order.items.map((item) => {
-        return Product.findOneAndUpdate(
-          { _id: item.productId },
-          { $inc: { [`details.${item.variationIndex}.quantity`]: -item.quantity } }
-        );
-      })
-    );
-
-    // 6. Send success response back to the client 
-    return res.status(200).json({ success: true, message: "Order status updated and stock reduced successfully.", orderId: order.orderId });
+    // Save updated order
+    await order.save({ session });
+    // Reduce stock
+    for (const item of order.items) {
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          [`details.${item.variationIndex}.quantity`]: {
+            $gte: item.quantity,
+          },
+        },
+        {
+          $inc: {
+            [`details.${item.variationIndex}.quantity`]: -item.quantity,
+          },
+        },
+        {
+          session,
+          new: true,
+        },
+      );
+      if (!updatedProduct) {
+        throw new Error(`Insufficient stock for one or more products.`);
+      }
+    }
+    await session.commitTransaction();
+    return res.status(200).json({
+      success: true,
+      message: "Order status updated and stock reduced successfully.",
+      orderId: order.orderId,
+    });
   } catch (error) {
-    console.error("Order Placement Error:", error);
-    return res.status(500).json({ success: false, message: "Failed to retry payment." });
+    await session.abortTransaction();
+    console.error("Retry Payment Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to retry payment.",
+    });
+  } finally {
+    await session.endSession();
   }
 };
+
+
 
 
 
