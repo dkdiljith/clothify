@@ -36,9 +36,7 @@
     gap: 2rem;
     margin-bottom: 2rem;
 }
-.chart-container:last-child {
-    grid-template-columns: 1fr;
-}
+
 .chart-card {
     background: var(--surface);
     padding: 1.5rem;

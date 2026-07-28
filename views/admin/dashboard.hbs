@@ -73,11 +73,21 @@
     <div class="chart-container">
         <!-- Revenue -->
         <div class="chart-card" id="revenueChartCard">
+            
             <div class="chart-header">
                 <h3 class="page-title">
                     Revenue Analytics
                 </h3>
+
+
+<small id="lastUpdated" class="text-muted">
+    Updated just now
+</small>
+
+                
                 <select id="chartFilter" class="chart-filter">
+
+                    
                     <option value="today">
                         Today
                     </option>
@@ -112,13 +122,22 @@
                    Products 
     =========================================== -->
     <div class="chart-container">
-        <div class="chart-card" id="productChartCard">
+        <div class="chart-card">
             <h3 class="page-title">
                 Top 10 Selling Products
             </h3>
             <canvas id="productChart"></canvas>
             <p class="chart-empty d-none" id="productEmpty">
                 No product sales available.
+            </p>
+        </div>
+        <div class="chart-card">
+            <h3 class="page-title">
+                Payment Methods
+            </h3>
+            <canvas id="paymentChart"></canvas>
+            <p class="chart-empty d-none" id="paymentEmpty">
+                No payment data available.
             </p>
         </div>
     </div>

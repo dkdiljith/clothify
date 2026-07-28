@@ -29,12 +29,13 @@ exports.getDashboardData = async (req, res) => {
             ? req.query.filter
             : "month";
 
-        const [statistics, revenueChart, topProducts, topCategories] =
+        const [statistics, revenueChart, topProducts, topCategories, paymentMethods] =
             await Promise.all([
                 getStatistics(filter),
                 getRevenueChart(filter),
                 getTopProducts(filter),
                 getTopCategories(filter),
+                getPaymentMethods(filter),
             ]);
         return res.json({
             success: true,
@@ -42,6 +43,7 @@ exports.getDashboardData = async (req, res) => {
             revenueChart,
             products: topProducts,
             categories: topCategories,
+            paymentMethods
         });
     } catch (error) {
         console.error("Dashboard Data Error:", error);
@@ -398,5 +400,40 @@ async function getTopCategories(filter) {
         {
             $limit: 10,
         },
+    ]);
+}
+
+
+
+async function getPaymentMethods(filter) {
+    const { startDate, endDate } = getDateFilter(filter);
+    return await Order.aggregate([
+        {
+            $unwind: "$items"
+        },
+        {
+            $match: {
+                "items.status": {
+                    $in: SUCCESS_STATUSES
+                },
+                "items.completionDate": {
+                    $gte: startDate,
+                    $lte: endDate
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$paymentMethod",
+                revenue: {
+                    $sum: "$items.amount"
+                }
+            }
+        },
+        {
+            $sort: {
+                revenue: -1
+            }
+        }
     ]);
 }
