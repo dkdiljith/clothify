@@ -3,10 +3,9 @@ const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 const User = require("../models/userSchema");
 
-const SUCCESS_STATUSES = ["Completed", "Return Rejected"];
+const ANALYTICS_STATUSES = ["Pending", "Shipped", "Completed", 'Return Requested', "Return Rejected"];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 exports.dashboardRender = async (req, res) => {
     try {
         return res.render("admin/dashboard");
@@ -88,50 +87,57 @@ function getDateFilter(filter) {
 
 
 
-
 async function getStatistics(filter) {
     const { startDate, endDate } = getDateFilter(filter);
+
     const orders = await Order.find({
+        createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+        },
         items: {
             $elemMatch: {
                 status: {
-                    $in: SUCCESS_STATUSES,
-                },
-                completionDate: {
-                    $gte: startDate,
-                    $lte: endDate,
+                    $in: ["Returned", "Cancelled", ...ANALYTICS_STATUSES],
                 },
             },
         },
     }).lean();
+
     let totalRevenue = 0;
     let totalOrders = 0;
+
     for (const order of orders) {
         let hasCompletedItem = false;
         for (const item of order.items) {
-            if (
-                SUCCESS_STATUSES.includes(item.status) &&
-                item.completionDate &&
-                item.completionDate >= startDate &&
-                item.completionDate <= endDate
-            ) {
+            if (isValidAnalyticsItem(order, item)) {
                 totalRevenue += item.amount;
                 hasCompletedItem = true;
             }
         }
-        if (hasCompletedItem) {
+
+        // Check if the payment method is COD (case-insensitive)
+        const isCod = order.paymentMethod?.toLowerCase() === "cod";
+
+        // Check if EVERY item inside this specific order has a "Pending" status
+        const areAllItemsPending = order.items.every(item => item.status === "Pending");
+
+        // Skip counting this order if it is COD and all its items are pending
+        if (isCod && areAllItemsPending) {
+            continue;
+        }
+
+        // Count every order except orders whose all items are Failed
+        if (order.items.some(item => item.status !== "Failed")) {
             totalOrders++;
         }
     }
+
     const [users, products] = await Promise.all([
-        User.countDocuments({
-            blocked: false,
-            isActive: true,
-        }),
-        Product.countDocuments({
-            isActive: true,
-        }),
+        User.countDocuments({ blocked: false, isActive: true }),
+        Product.countDocuments({ isActive: true }),
     ]);
+
     return {
         revenue: Math.round(totalRevenue),
         orders: totalOrders,
@@ -139,7 +145,6 @@ async function getStatistics(filter) {
         products,
     };
 }
-
 
 
 
@@ -152,7 +157,7 @@ async function getRevenueChart(filter) {
         case "today":
             groupId = {
                 $hour: {
-                    date: "$items.completionDate",
+                    date: "$createdAt",
                     timezone: "Asia/Kolkata"
                 }
             };
@@ -166,7 +171,7 @@ async function getRevenueChart(filter) {
             groupId = {
                 $dateToString: {
                     format: "%Y-%m-%d",
-                    date: "$items.completionDate",
+                    date: "$createdAt",
                     timezone: "Asia/Kolkata"
                 }
             };
@@ -184,7 +189,7 @@ async function getRevenueChart(filter) {
         case "year":
             groupId = {
                 $month: {
-                    date: "$items.completionDate",
+                    date: "$createdAt",
                     timezone: "Asia/Kolkata"
                 }
             };
@@ -208,7 +213,7 @@ async function getRevenueChart(filter) {
         default:
             groupId = {
                 $dayOfMonth: {
-                    date: "$items.completionDate",
+                    date: "$createdAt",
                     timezone: "Asia/Kolkata"
                 }
             };
@@ -227,14 +232,25 @@ async function getRevenueChart(filter) {
         },
         {
             $match: {
-                "items.status": {
-                    $in: SUCCESS_STATUSES,
-                },
-                "items.completionDate": {
-                    $gte: startDate,
-                    $lte: endDate,
-                },
-            },
+                $or: [
+                    // Razorpay & Wallet
+                    {
+                        paymentMethod: {
+                            $in: ["razorpay", "wallet"],
+                        },
+                        "items.status": {
+                            $in: ANALYTICS_STATUSES,
+                        },
+                    },
+                    // COD
+                    {
+                        paymentMethod: "cod",
+                        "items.status": {
+                            $in: ["Completed", "Return Requested", "Return Rejected"],
+                        },
+                    },
+                ]
+            }
         },
         {
             $group: {
@@ -258,9 +274,9 @@ async function getRevenueChart(filter) {
             break;
         case "week":
             revenue.forEach((item) => {
-                const completedDate = new Date(item._id);
+                const orderDate = new Date(item._id);
                 const difference = Math.floor(
-                    (completedDate - startDate) / (1000 * 60 * 60 * 24),
+                    (orderDate - startDate) / (1000 * 60 * 60 * 24),
                 );
                 if (difference >= 0 && difference < 7) {
                     data[difference] = item.revenue;
@@ -296,15 +312,27 @@ async function getTopProducts(filter) {
         },
         {
             $match: {
-                "items.status": {
-                    $in: SUCCESS_STATUSES,
-                },
-                "items.completionDate": {
-                    $gte: startDate,
-                    $lte: endDate,
-                },
-            },
+                $or: [
+                    // Razorpay & Wallet
+                    {
+                        paymentMethod: {
+                            $in: ["razorpay", "wallet"],
+                        },
+                        "items.status": {
+                            $in: ANALYTICS_STATUSES,
+                        },
+                    },
+                    // COD
+                    {
+                        paymentMethod: "cod",
+                        "items.status": {
+                            $in: ["Completed", "Return Requested", "Return Rejected"],
+                        },
+                    },
+                ]
+            }
         },
+
         {
             $group: {
                 _id: "$items.productId",
@@ -344,14 +372,25 @@ async function getTopCategories(filter) {
         },
         {
             $match: {
-                "items.status": {
-                    $in: SUCCESS_STATUSES,
-                },
-                "items.completionDate": {
-                    $gte: startDate,
-                    $lte: endDate,
-                },
-            },
+                $or: [
+                    // Razorpay & Wallet
+                    {
+                        paymentMethod: {
+                            $in: ["razorpay", "wallet"],
+                        },
+                        "items.status": {
+                            $in: ANALYTICS_STATUSES,
+                        },
+                    },
+                    // COD
+                    {
+                        paymentMethod: "cod",
+                        "items.status": {
+                            $in: ["Completed", "Return Requested", "Return Rejected"],
+                        },
+                    },
+                ]
+            }
         },
         {
             $lookup: {
@@ -413,13 +452,24 @@ async function getPaymentMethods(filter) {
         },
         {
             $match: {
-                "items.status": {
-                    $in: SUCCESS_STATUSES
-                },
-                "items.completionDate": {
-                    $gte: startDate,
-                    $lte: endDate
-                }
+                $or: [
+                    // Razorpay & Wallet
+                    {
+                        paymentMethod: {
+                            $in: ["razorpay", "wallet"],
+                        },
+                        "items.status": {
+                            $in: ANALYTICS_STATUSES,
+                        },
+                    },
+                    // COD
+                    {
+                        paymentMethod: "cod",
+                        "items.status": {
+                            $in: ["Completed", "Return Requested", "Return Rejected"],
+                        },
+                    },
+                ]
             }
         },
         {
@@ -436,4 +486,21 @@ async function getPaymentMethods(filter) {
             }
         }
     ]);
+}
+
+
+
+
+
+function isValidAnalyticsItem(order, item) {
+    if (!ANALYTICS_STATUSES.includes(item.status)) {
+        return false;
+    }
+    if (
+        order.paymentMethod === "cod" &&
+        !["Completed", "Return Requested", "Return Rejected"].includes(item.status)
+    ) {
+        return false;
+    }
+    return true;
 }
