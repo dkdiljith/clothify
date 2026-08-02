@@ -1,331 +1,257 @@
-document.addEventListener("DOMContentLoaded", function () {
-    // Elements
-    const cancelButton = document.getElementById("cancel-order-button");
-    const returnButton = document.getElementById("return-order-button");
-    const returnAllButton = document.getElementById("returnAll-order-button");
-    let activeReturnContext = null;
-    let returnAll = false;
-
+document.addEventListener("DOMContentLoaded", () => {
+    /* ==========================================
+         ELEMENTS
+      ========================================== */
+    const retryForm = document.getElementById("retry-payment-form");
+    const invoiceBtn = document.getElementById("download-invoice-button");
     const cancelModal = document.getElementById("cancel-order-modal");
     const returnModal = document.getElementById("return-order-modal");
-    const successMessage = document.getElementById("success-message");
-
-    const orderStatus = cancelButton ? cancelButton.dataset.orderStatus : "";
-    const completionDate = returnButton ? new Date(returnButton.dataset.completionDate) : null;
-
-    const retryPaymentBtn = document.getElementById("retryPayment");
-
-    if (retryPaymentBtn) {
-        retryPaymentBtn.addEventListener("click", function () {
-            const orderId = this.dataset.orderId;
-
-            if (orderId) {
-                startRazorpayPayment(orderId);
+    const successPopup = document.getElementById("success-message");
+    let activeItem = null;
+    /* ==========================================
+         REFUND DETAIS TOGGLE
+      ========================================== */
+    const refundToggle = document.querySelector(".refund-toggle");
+    const refundContent = document.querySelector(".refund-content");
+    const refundArrow = document.querySelector(".refund-arrow");
+    refundToggle?.addEventListener("click", () => {
+        refundContent.classList.toggle("open");
+        refundArrow.classList.toggle("rotate");
+    });
+    /* ==========================================
+      RETRY PAYMENT
+   ========================================== */
+    function cleanUpExpiredButtons() {
+        const retryButtons = document.querySelectorAll(".btn-retry-payment");
+        const currentTime = Date.now();
+        retryButtons.forEach(button => {
+            const expiresAtRaw = button.dataset.expiresAt;
+            const expiresTime = new Date(expiresAtRaw).getTime();
+            const attemptsCount = Number(button.dataset.attemptsCount);
+            if (
+                !expiresTime ||
+                isNaN(expiresTime) ||
+                expiresTime < currentTime ||
+                attemptsCount >= 6
+            ) {
+                button.remove();
             } else {
-                console.error("Order ID is missing from the button attributes.");
+                button.classList.add("is-valid");
             }
         });
     }
-
-    // Cancel Button Logic
-    if (cancelButton) {
-        if (orderStatus !== "Pending") {
-            cancelButton.disabled = true;
-        } else {
-            cancelButton.addEventListener("click", function () {
-                cancelModal.style.display = "flex";
-            });
-        }
-    }
-
-    // Close Cancel Modal
-    document.querySelector("#cancel-order-modal .close-modal")?.addEventListener("click", function () {
-        cancelModal.style.display = "none";
-    });
-
-    document.getElementById("cancel-modal-button")?.addEventListener("click", function () {
-        cancelModal.style.display = "none";
-    });
-
-    // Submit Cancellation
-    // Submit Cancellation
-    document.getElementById("submit-cancellation")?.addEventListener("click", async function () {
-        const reason = document.getElementById("cancellation-reason").value.trim();
-
-        // 1. Check validation first
-        if (!reason) {
-            // Hide the reason modal immediately so the alert is completely clean
-            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
-
-            await showCustomConfirm("Reason Required", "Please provide a reason for cancellation.", "warning");
-
-            // Re-open it if they need to fix their mistake
-            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "flex";
+    // Initial validation
+    cleanUpExpiredButtons();
+    // Recheck every 10 seconds
+    setInterval(cleanUpExpiredButtons, 10000);
+    // Retry Payment Click
+    document.addEventListener("click", async function (event) {
+        const retryBtn = event.target.closest(".btn-retry-payment");
+        if (!retryBtn) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const expiresAtRaw = retryBtn.dataset.expiresAt;
+        const expiresTime = new Date(expiresAtRaw).getTime();
+        const attemptsCount = Number(retryBtn.dataset.attemptsCount);
+        const currentTime = Date.now();
+        if (
+            !expiresTime ||
+            isNaN(expiresTime) ||
+            expiresTime < currentTime ||
+            attemptsCount >= 6
+        ) {
+            showPopupMessage("This payment session has expired.", "error");
+            retryBtn.remove();
             return;
         }
-
-        const cancelBtn = document.getElementById("cancel-order-button");
-        if (!cancelBtn) {
-            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
-            await showCustomConfirm("System Error", "Error: Cancel button context not found.", "danger");
-            return;
-        }
-
-        // 2. CLOSE THE REASON MODAL HERE (Before the confirmation await pause!)
-        if (typeof cancelModal !== 'undefined') cancelModal.style.display = "none";
-
-        // 3. Now fire the confirmation alert over a clean screen
-        const dynamicProceedConfirm = await showCustomConfirm(
-            "Confirm Cancellation",
-            "Are you absolutely sure you want to request cancellation for this item?\nThis choice cannot be undone.",
-            "danger"
-        );
-
-        // If they click "Cancel" on your alert, re-open the reason modal so they don't lose their text
-        if (!dynamicProceedConfirm) {
-            if (typeof cancelModal !== 'undefined') cancelModal.style.display = "flex";
-            return;
-        }
-
-        // 4. Proceed with Network Fetch safely...
-        const data = {
-            orderId: cancelBtn.dataset.orderId,
-            itemId: cancelBtn.dataset.itemId,
-            variationIndex: cancelBtn.dataset.variationIndex,
-            reason: reason
-        };
-
-        try {
-            const response = await fetch("/user/cancel-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (response.ok) {
-                await showCustomConfirm("Request Submitted", "Your cancellation request has been successfully processed.", "success");
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500); // 3000 milliseconds = 3 seconds
-            } else {
-                const errorData = await response.json();
-                await showCustomConfirm("Request Rejected", errorData.message || "Failed to cancel order.", "warning");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            await showCustomConfirm("Network Error", "An unexpected error occurred. Please try again.", "danger");
-        }
-    });
-
-
-    // Download Invoice
-    document.getElementById("download-invoice-button")?.addEventListener("click", async function () {
-        const orderId = this.dataset.orderId;
-
+        const orderId = retryBtn.dataset.orderId;
         if (!orderId) {
-            showPopupMessage("Order reference missing", "error");
+            console.error("Order ID not found.");
             return;
         }
-
+        await startRazorpayPayment(orderId);
+    });
+    /* ==========================================
+         DOWNLOAD INVOICE
+      ========================================== */
+    invoiceBtn?.addEventListener("click", async function () {
+        if (this.disabled) return;
         try {
             const response = await fetch("/user/download-invoice", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ orderId: orderId })
+                body: JSON.stringify({
+                    orderId: this.dataset.orderId,
+                }),
             });
-
             if (!response.ok) {
-                showPopupMessage("Invoice generation failed", "error");
-                return;
+                throw new Error();
             }
-
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `invoice-clothify.pdf`;
+            a.download = "invoice.pdf";
             document.body.appendChild(a);
             a.click();
             a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error(error);
-            showPopupMessage("Invoice could not be generated", "error");
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            showPopupMessage("Unable to download invoice.", "error");
         }
     });
-
-
-    //  Return Button Initialization Logic
-    if (orderStatus === "Completed" && completionDate && !isNaN(completionDate)) {
-        const currentDate = new Date();
-        const returnEndDate = new Date(completionDate);
-        returnEndDate.setDate(returnEndDate.getDate() + 7);
-
-        if (currentDate > returnEndDate) {
-            if (returnButton) returnButton.disabled = true;
-            if (returnAllButton) returnAllButton.disabled = true;
-        } else {
-            returnButton?.addEventListener("click", function () {
-                returnAll = false; // FIX: Reset state flag for single items explicitly
-                returnModal.style.display = "flex";
-            });
-            returnAllButton?.addEventListener("click", function () {
-                returnAll = true; // Set state flag for full returns
-                returnModal.style.display = "flex";
-            });
-        }
-    } else {
-        // If item status is already modified, fallback lets user press button or disables gracefully
-        returnButton?.addEventListener("click", function () {
-            returnAll = false;
-            returnModal.style.display = "flex";
+    /* ==========================================
+         CANCEL ITEM
+      ========================================== */
+    document.querySelectorAll(".cancel-item-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+            activeItem = {
+                orderId: this.dataset.orderId,
+                itemId: this.dataset.itemId,
+                variationIndex: this.dataset.variationIndex,
+            };
+            cancelModal.style.display = "flex";
         });
-        returnAllButton?.addEventListener("click", function () {
-            returnAll = true;
-            returnModal.style.display = "flex";
-        });
-    }
-
-    // Close Return Modal
-    document.querySelector("#return-order-modal .close-modal")?.addEventListener("click", function () {
-        returnAll = false;
-        returnModal.style.display = "none";
     });
-
-    document.getElementById("cancel-return-modal-button")?.addEventListener("click", function () {
-        returnAll = false;
-        returnModal.style.display = "none";
-    });
-
-
-    // Track opening via "Return Item" button
-    document.getElementById("return-order-button")?.addEventListener("click", function () {
-        activeReturnContext = this.dataset;
-    });
-
-    // Track opening via "Return All" button
-    document.getElementById("returnAll-order-button")?.addEventListener("click", function () {
-        activeReturnContext = this.dataset;
-    });
-
-    // Submit Return Listener
-    // Submit Return Listener
-    document.getElementById("submit-return")?.addEventListener("click", async function () {
-        const reason = document.getElementById("return-reason").value.trim();
-        const errorElement = document.getElementById("return-reason-error");
-
-        // 1. Local DOM validation error handling (Keeps the modal open)
-        if (!reason) {
-            if (errorElement) errorElement.style.display = "block";
-            return;
-        }
-
-        if (errorElement) errorElement.style.display = "none";
-
-        // 2. Validate state variables
-        if (!activeReturnContext) {
-            // Clear the typing modal out of the way before firing the custom alert
-            if (typeof returnModal !== 'undefined') returnModal.style.display = "none";
-
-            await showCustomConfirm(
-                "Return Context Missing",
-                "We couldn't retrieve the reference for this item.\nPlease reload the page and try again.",
-                "danger"
-            );
-            return;
-        }
-
-        // 3. CLOSE THE RETURN TYPING MODAL HERE (Before the confirmation await pause!)
-        if (typeof returnModal !== 'undefined') returnModal.style.display = "none";
-
-        // 4. Now display the clear screen custom confirmation prompt safely
-        const confirmReturn = await showCustomConfirm(
-            "Confirm Return Request",
-            "Are you sure you want to initiate a return request for this order?\nOur team will review your reason for approval.",
-            "warning"
-        );
-
-        // User opted out or canceled the choice -> Re-open the typing modal cleanly
-        if (!confirmReturn) {
-            if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
-            return;
-        }
-
-        // Map your payload cleanly using dataset variables
-        const data = {
-            orderId: activeReturnContext.orderId,
-            itemId: activeReturnContext.itemId,
-            returnAll: activeReturnContext.returnAll === "true",
-            reason: reason
-        };
-
-        try {
-            const response = await fetch("/user/return-order", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (response.ok) {
-                // Typing modal was already hidden earlier, show clean success state
-                await showCustomConfirm(
-                    "Return Initiated",
-                    "Your return request has been submitted successfully.\nCheck your email or dashboard updates for status changes.",
-                    "success"
-                );
-                setTimeout(() => {
-                    window.location.reload();
-                }, 3000); // 3000 milliseconds = 3 seconds
-            } else {
-                const errorData = await response.json();
-
-                // Rejection processing alert
-                await showCustomConfirm(
-                    "Submission Refused",
-                    errorData.message || "Failed to process order return. Please try again.",
-                    "warning"
-                );
-
-                // Re-open the input window so they don't lose their data on network refusal
-                if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
+    document
+        .getElementById("submit-cancellation")
+        ?.addEventListener("click", async function () {
+            const reason = document
+                .getElementById("cancellation-reason")
+                .value.trim();
+            if (!reason) {
+                showPopupMessage("Please enter a cancellation reason.", "error");
+                return;
             }
-        } catch (error) {
-            console.error("Error:", error);
-
-            // Critical exception alert
-            await showCustomConfirm(
-                "Network Connection Timeout",
-                "An unexpected infrastructure error occurred.\nPlease verify link status and try again.",
-                "danger"
-            );
-
-            // Re-open the window on hard breakdown drops as a defensive measure
-            if (typeof returnModal !== 'undefined') returnModal.style.display = "flex";
+            try {
+                const response = await fetch("/user/order/cancel-item", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        orderId: activeItem.orderId,
+                        itemId: activeItem.itemId,
+                        variationIndex: activeItem.variationIndex,
+                        reason,
+                    }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showSuccessPopup("Item cancelled successfully.");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1200);
+                } else {
+                    showPopupMessage(result.message, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showPopupMessage("Unable to cancel item.", "error");
+            }
+        });
+    /* ==========================================
+         RETURN ITEM
+      ========================================== */
+    document.querySelectorAll(".return-item-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+            activeItem = {
+                orderId: this.dataset.orderId,
+                itemId: this.dataset.itemId,
+            };
+            returnModal.style.display = "flex";
+        });
+    });
+    document
+        .getElementById("submit-return")
+        ?.addEventListener("click", async function () {
+            const reason = document.getElementById("return-reason").value.trim();
+            const error = document.getElementById("return-reason-error");
+            if (!reason) {
+                error.style.display = "block";
+                return;
+            }
+            error.style.display = "none";
+            try {
+                const response = await fetch("/user/order/return-item", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        orderId: activeItem.orderId,
+                        itemId: activeItem.itemId,
+                        reason,
+                    }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showSuccessPopup("Return request submitted.");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1200);
+                } else {
+                    showPopupMessage(result.message, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showPopupMessage("Unable to submit return request.", "error");
+            }
+        });
+    /* ==========================================
+         MODAL HELPERS
+      ========================================== */
+    document.querySelectorAll(".close-modal").forEach((button) => {
+        button.addEventListener("click", closeAllModals);
+    });
+    document
+        .getElementById("cancel-modal-button")
+        ?.addEventListener("click", closeAllModals);
+    document
+        .getElementById("cancel-return-modal-button")
+        ?.addEventListener("click", closeAllModals);
+    function closeAllModals() {
+        cancelModal.style.display = "none";
+        returnModal.style.display = "none";
+    }
+    window.addEventListener("click", function (e) {
+        if (e.target === cancelModal) {
+            closeAllModals();
+        }
+        if (e.target === returnModal) {
+            closeAllModals();
+        }
+    });
+    /* ==========================================
+         SUCCESS POPUP
+      ========================================== */
+    function showSuccessPopup(message) {
+        successPopup.querySelector(".success-text").innerText = message;
+        successPopup.style.display = "block";
+    }
+    document
+        .getElementById("close-success-message")
+        ?.addEventListener("click", function () {
+            successPopup.style.display = "none";
+        });
+    /* ==========================================
+         ESC KEY SUPPORT
+      ========================================== */
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeAllModals();
         }
     });
 
-    // Close Success Message
-    document.getElementById("close-success-message")?.addEventListener("click", function () {
-        successMessage.style.display = "none";
-        window.location.reload();
-    });
 
-    // Close modals when clicking outside
-    window.addEventListener("click", function (event) {
-        if (event.target === cancelModal) {
-            cancelModal.style.display = "none";
-        }
-        if (event.target === returnModal) {
-            returnModal.style.display = "none";
-            returnAll = false;
-        }
-    });
 
-    // Razorpay Specific Logic
+
+
+    // =========================================================================
+    // 3. RAZORPAY MASTER ROUTINE
+    // =========================================================================
     async function startRazorpayPayment(orderId) {
         try {
             // 1. Create the order on your server
@@ -362,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 razorpay_signature: response.razorpay_signature,
                                 orderId
                             })
-                        }); 
+                        });
 
                         const result = await verifyRes.json();
                         if (result.success) {
@@ -391,10 +317,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             };
 
-            // 3. Initialize Razorpay
             const rzp = new Razorpay(options);
 
-            // 4. Handle Explicit Payment Failures (e.g., Bank decline, wrong OTP)
+            // 4. Handle Explicit Payment Failures
             rzp.on('payment.failed', async function (response) {
                 console.log("Payment Failed Event Triggered");
 
@@ -403,7 +328,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            razorpayOrderId: order.id, // Razorpay order ID
+                            razorpayOrderId: order.id,
                             reason: response.error.description,
                             errorCode: response.error.code,
                             paymentId: response.error.metadata.payment_id,
@@ -414,21 +339,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     const result = await failureRes.json();
 
                     if (result.success) {
-                       window.location.href = `/user/orderFailure?orderId=${result.orderId}`;
+                        window.location.href = `/user/orderFailure?orderId=${result.orderId}`;
                     } else {
 
                         const rzpIframe = document.querySelector('.razorpay-container');
                         if (rzpIframe) {
                             rzpIframe.remove();
                         }
-                        // Restore page scrolling if Razorpay locked it
+
                         document.body.style.overflow = 'auto';
                         showPopupMessage("Could not save progress: " + result.message, "error");
 
                         setTimeout(function () {
                             window.location.reload();
                         }, 3000);
-
                     }
 
                 } catch (err) {
@@ -445,67 +369,4 @@ document.addEventListener("DOMContentLoaded", function () {
             showPopupMessage("Payment failed to initialize", "error");
         }
     }
-});
-
-
-
-
-
-
-
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    // FUNCTION TO CHECK AND REMOVE EXPIRED BUTTONS
-    function cleanUpExpiredButtons() {
-        const retryButtons = document.querySelectorAll(".btn-retry-payment");
-        const currentTime = Date.now();
-
-        retryButtons.forEach(button => {
-            const expiresAtRaw = button.getAttribute("data-expires-at");
-            const expiresTime = new Date(expiresAtRaw).getTime();
-            const attemptsCount = Number(button.getAttribute("data-attempts-count"));
-
-            // 1. If it fails validation, remove it immediately 
-            if (!expiresTime || isNaN(expiresTime) || expiresTime < currentTime || attemptsCount >= 5) {
-                button.remove();
-            } else {
-                // 2. If it is fully valid, show it cleanly without flickering
-                button.classList.add("is-valid");
-            }
-        });
-    }
-
-
-    // STEP 1: Run immediately when the page finishes loading
-    cleanUpExpiredButtons();
-
-    // Optional: Check every 10 seconds in case a user is sitting idle on the page
-    setInterval(cleanUpExpiredButtons, 10000);
-
-    // STEP 2: The Click Event Listener (Your existing working logic)
-    document.addEventListener("click", async function (event) {
-        const retryBtn = event.target.closest("#retryPayment");
-        if (!retryBtn) return;
-
-        event.preventDefault();
-
-        const expiresAtRaw = retryBtn.getAttribute("data-expires-at");
-        const expiresTime = new Date(expiresAtRaw).getTime();
-        const attemptsCount = Number(retryBtn.getAttribute("data-attempts-count"));
-        const currentTime = Date.now();
-
-        // Double-check logic at the exact millisecond of clicking
-        if (!expiresTime || isNaN(expiresTime) || expiresTime < currentTime || attemptsCount >= 6) {
-            showPopupMessage("This payment session has expired.", "error");
-            retryBtn.remove(); // Remove it immediately upon failed click
-            return;
-        }
-
-        // Proceed to Razorpay if completely valid
-        const orderId = retryBtn.getAttribute("data-order-id");
-        await startRazorpayPayment(orderId);
-    });
-});
+})

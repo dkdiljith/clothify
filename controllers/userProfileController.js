@@ -261,16 +261,10 @@ exports.userOrders = async (req, res) => {
 exports.userOrderDetails = async (req, res) => {
 
     const orderId = req.params.orderId;
-    const itemId = req.params.itemId;
 
     const order = await Order.findById(orderId).lean();
 
-    const item = await order.items.find((item) =>
-        item._id.toString() === itemId
-    )
-
-
-    return res.render(`user/orderDetails`, { order: order, item: item, user_sidebar: true })
+    return res.render(`user/orderDetails`, { order: order,  user_sidebar: true })
 }
 
 

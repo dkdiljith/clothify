@@ -1,536 +1,460 @@
 {{#section 'head'}}
 <title>Order Details | Clothify</title>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/orderDetails.css">
+<link rel="stylesheet" href="/stylesheets/user/orderDetails.css">
 {{/section}}
-
-
-
-
-
-{{!-- Header changes color if payment failed --}}
-<div class="order-header {{#ifeq order.paymentStatus 'Failed'}}payment-failed{{/ifeq}}">
-    <div>
-        <h2 class="order-title">
-            <i class="fas fa-clipboard-list"></i> Order Details
-        </h2>
-        <div class="order-number">
-            Order #{{order.orderId}}
-        </div>
-        <div class="order-meta mt-2">
-            <span class="badge bg-primary">
-                {{order.paymentMethod}}
-            </span>
-            {{!-- <span class="badge
-            {{#ifeq order.deliveryStatus 'Completed'}}bg-success{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Pending'}}bg-warning{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Shipped'}}bg-primary{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Cancelled'}}bg-danger{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Returned'}}bg-dark{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Return Requested'}}bg-secondary{{/ifeq}}
-            {{#ifeq order.deliveryStatus 'Return Rejected'}}bg-warning{{/ifeq}}">
-                {{order.deliveryStatus}}
-            </span> --}}
-            {{!-- <span class="badge
-            {{#ifeq order.paymentStatus 'Completed'}}bg-success{{/ifeq}}
-            {{#ifeq order.paymentStatus 'Pending'}}bg-warning{{/ifeq}}
-            {{#ifeq order.paymentStatus 'Failed'}}bg-danger{{/ifeq}}
-            {{#ifeq order.paymentStatus 'Refunded'}}bg-info{{/ifeq}}">
-                {{order.paymentStatus}}
-            </span> --}}
-        </div>
-    </div>
-    <div>
-        {{!-- Failed Payment --}}
-        {{#ifeq order.paymentStatus 'Failed'}}
-        <button id="retryPayment" class="btn-retry-payment" data-order-id="{{order.orderId}}"
-            data-expires-at="{{order.paymentRetryExpiresAt}}" data-attempts-count="{{order.paymentAttemptsCount}}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            Retry Payment
-        </button>
-        {{!-- Invoice Rules --}}
-        {{else}}
-        {{#if order.totalAmount}}
-        <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
-            Download Invoice
-        </button>
-        {{else}}
-        <button class="btn btn-secondary" disabled>
-            Invoice Not Available
-        </button>
-        {{/if}}
-        {{/ifeq}}
-    </div>
-</div>
-<!-- Order Item Card -->
-<div class="order-card {{#ifeq order.paymentStatus 'Failed'}}failed-border{{/ifeq}}">
-    <div class="order-card-header">
-        <div class="order-card-title">
-            Item Details
-        </div>
-        <div class="order-item-status">
+<div class="order-details-page">
+    <!-- ========================= -->
+    <!-- PAGE HEADER -->
+    <!-- ========================= -->
+    <div class="page-header">
+        <a href="/user/orders" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Orders
+        </a>
+        <div class="header-main">
             <div>
-                <h10>
-                    <i class="fas fa-box"></i>
-                    Shipment Status
-                </h10>
-                <span class="status-text" style="
-                    color:
-                    {{#if (eq item.status 'Completed')}}var(--success-color)
-                    {{else if (eq item.status 'Cancelled')}}var(--accent-color)
-                    {{else if (eq item.status 'Returned')}}var(--accent-color)
-                    {{else if (eq item.status 'Return Requested')}}#ff9800
-                    {{else if (eq item.status 'Return Rejected')}}#9c27b0
-                    {{else}}var(--secondary-color)
-                    {{/if}};
-                    ">
-                    {{item.status}}
+                <h2 class="page-title">
+                    Order #{{order.orderId}}
+                </h2>
+                <p class="order-date">
+                    Ordered on
+                    {{formatDate order.createdAt "MMMM D, YYYY • hh:mm A"}}
+                </p>
+            </div>
+            <div class="header-status">
+                <span class="delivery-status status-{{toLowerCase order.deliveryStatus}}">
+                    <svg xmlns="http://w3.org" viewBox="0 0 16 16" width="16" height="16">
+                        <!-- Small-scale fast delivery truck -->
+                        <path d="M1 4h7v6H1V4zm7 2h3.5L14 8.5V10H8V6z" fill="none" stroke="#0F172A" stroke-width="1.25"
+                            stroke-linejoin="round" />
+                        <path d="M10 6.5H12.5L13.5 8H10V6.5z" fill="#38BDF8" opacity="0.3" />
+                        <circle cx="3.5" cy="12.5" r="1.25" fill="#0F172A" />
+                        <circle cx="10.5" cy="12.5" r="1.25" fill="#0F172A" />
+                        <path d="M1 11h1M13 11h2" stroke="#0F172A" stroke-width="1.25" stroke-linecap="round" />
+                    </svg>
+                    Delivery
+                    {{order.deliveryStatus}}
                 </span>
+                <span class="payment-status payment-{{toLowerCase order.paymentStatus}}">
+                    <svg xmlns="http://w3.org" viewBox="0 0 16 16" width="16" height="16">
+                        <!-- Small-scale cash banknote with success check -->
+                        <rect x="1" y="3.5" width="14" height="9" rx="1.5" fill="none" stroke="#0F172A"
+                            stroke-width="1.25" />
+                        <circle cx="8" cy="8" r="2" fill="none" stroke="#10B981" stroke-width="1.25" />
+                        <circle cx="3.5" cy="8" r="0.75" fill="#0F172A" />
+                        <circle cx="12.5" cy="8" r="0.75" fill="#0F172A" />
+                        <!-- Status indicator badge -->
+                        <circle cx="12.5" cy="3.5" r="2.25" fill="#10B981" />
+                        <path d="M11.5 3.5l.5.5 1-1" fill="none" stroke="#FFFFFF" stroke-width="0.75"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Payment
+                    {{order.paymentStatus}}
+                </span>
+                <div class="header-actions">
+                    {{#ifeq order.paymentStatus "Failed"}}
+                    <button class="btn btn-primary btn-retry-payment" data-order-id="{{order.orderId}}"
+                        data-expires-at="{{order.paymentRetryExpiresAt}}"
+                        data-attempts-count="{{order.paymentAttemptsCount}}">
+                        <i class="fas fa-lock"></i>
+                        Retry Payment
+                    </button>
+                    {{else}}
+                    <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}"
+                        {{#ifEquals order.totalAmount 0}}disabled{{/ifEquals}}>
+                        <i class="fas fa-file-download"></i>
+                        Download Invoice
+                    </button>
+                    {{/ifeq}}
+                </div>
             </div>
         </div>
     </div>
-    {{#ifeq order.paymentStatus 'Failed'}}
-    <div class="retry-notice" style="padding:0 20px;">
-        <i class="fas fa-info-circle"></i>
-        This order failed because the payment was unsuccessful.
+    <!-- ========================= -->
+    <!-- QUICK OVERVIEW -->
+    <!-- ========================= -->
+    <div class="overview-grid">
+        <div class="overview-card">
+            <div class="overview-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div>
+                <small>Payment Method</small>
+                <h4 style="text-transform:capitalize;">
+                    {{paymentMethod order.paymentMethod}}
+                </h4>
+            </div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div>
+                <small>Total Amount</small>
+                <h4>
+                    ₹{{order.totalAmount}}
+                </h4>
+            </div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div>
+                <small>Total Items</small>
+                <h4>
+                    {{order.items.length}}
+                </h4>
+            </div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <small>Payment Status</small>
+                <h4>
+                    {{order.paymentStatus}}
+                </h4>
+            </div>
+        </div>
     </div>
-    {{/ifeq}}
-    <div class="order-item">
-        <div class="order-item-image">
-            <img src="{{item.productImg}}" alt="{{item.productName}}">
+    <!-- ========================= -->
+    <!-- ORDER ITEMS -->
+    <!-- ========================= -->
+    <div class="card-section">
+        <div class="section-title">
+            <i class="fas fa-box-open"></i>
+            Ordered Items
         </div>
-        <div class="order-item-details">
-            <div class="order-item-name">
-                {{item.productName}}
+        <div class="ordered-items">
+            {{#each order.items}}
+            <div class="ordered-item">
+                <div class="item-image">
+                    <img src="{{this.productImg}}" alt="{{this.productName}}">
+                </div>
+                <div class="item-content">
+                    <h4>
+                        {{this.productName}}
+                    </h4>
+                    <div class="item-meta">
+                        <span>
+                            <strong>Size</strong>
+                            {{this.productSize}}
+                        </span>
+                        <span>
+                            <strong>Qty</strong>
+                            {{this.quantity}}
+                        </span>
+                    </div>
+                    <div class="item-price">
+                        ₹{{this.productPrice}}
+                        ×
+                        {{this.quantity}}
+                    </div>
+                </div>
+                <div class="item-right">
+                    <span class="status-badge status-{{toLowerCase this.status}}">
+                        {{this.status}}
+                    </span>
+                    <div class="item-total">
+                       ₹{{formatPrice (multiply this.productPrice this.quantity)}}
+                    </div>
+                    <div class="item-actions">
+                        {{!-- Pending --}}
+                        {{#ifeq this.status "Pending"}}
+                        <button class="btn btn-outline-danger cancel-item-btn" data-order-id="{{../order._id}}"
+                            data-item-id="{{this._id}}" data-variation-index="{{this.variationIndex}}">
+                            Cancel
+                        </button>
+                        {{/ifeq}}
+                        {{!-- Completed --}}
+                        {{#ifeq this.status "Completed"}}
+                        <button class="btn btn-outline-primary return-item-btn" data-order-id="{{../order._id}}"
+                            data-item-id="{{this._id}}">
+                            Return
+                        </button>
+                        {{/ifeq}}
+                    </div>
+                </div>
             </div>
-            <div class="order-item-attributes">
-                <span>
-                    <strong>Size:</strong>
-                    {{item.productSize}}
-                </span>
-                <span>
-                    <strong>Quantity:</strong>
-                    {{item.quantity}}
-                </span>
-                <span>
-                    <strong>Price:</strong>
-                    ₹{{item.productPrice}}
-                </span>
-            </div>
-            <div class="order-item-price">
-                Total :
-                ₹{{multiply item.productPrice item.quantity}}
-            </div>
+            {{/each}}
         </div>
     </div>
-    {{!-- Refund Details --}}
-    {{#if item.refundDetails.refundType}}
-    <hr>
-    <div class="refund-details">
-        <div class="refund-title">
-            <i class="fas fa-undo"></i>
-            Refund Details
+    <!-- ========================= -->
+    <!-- SHIPPING ADDRESS -->
+    <!-- ========================= -->
+    <div class="card-section">
+        <div class="section-title">
+            <i class="fas fa-map-marker-alt"></i>
+            Shipping Address
         </div>
-        <div class="refund-grid">
-            <div class="refund-row">
-                <span>Refund Type</span>
+        <div class="address-card">
+            <h4>
+                {{order.deliveryAddress.name}}
+            </h4>
+            <p>
+                {{order.deliveryAddress.streetAddress}}
+            </p>
+            {{#if order.deliveryAddress.landmark}}
+            <p>
+                Landmark :
+                {{order.deliveryAddress.landmark}}
+            </p>
+            {{/if}}
+            <p>
+                {{order.deliveryAddress.city}},
+                {{order.deliveryAddress.state}}
+                -
+                {{order.deliveryAddress.zip}}
+            </p>
+            <p>
+                {{order.deliveryAddress.country}}
+            </p>
+            <p>
                 <strong>
-                    {{item.refundDetails.refundType}}
+                    Phone
                 </strong>
+                :
+                {{order.deliveryAddress.phone}}
+            </p>
+        </div>
+    </div>
+    <!-- ========================= -->
+    <!-- PAYMENT SUMMARY -->
+    <!-- ========================= -->
+    <div class="card-section">
+        <div class="section-title">
+            <i class="fas fa-file-invoice-dollar"></i>
+            Payment Summary
+        </div>
+        <div class="summary-table">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <strong>₹{{order.subtotal}}</strong>
             </div>
-            <div class="refund-row">
-                <span>Payment Method</span>
+            <div class="summary-row">
+                <span>Shipping Fee</span>
+                {{#ifEquals order.shippingFee 0}}
+                <strong class="text-success">
+                    FREE
+                </strong>
+                {{else}}
                 <strong>
-                    {{paymentMethod item.refundDetails.paymentMethod}}
+                    ₹{{order.shippingFee}}
                 </strong>
+                {{/ifEquals}}
             </div>
-            <div class="refund-row">
-                <span>Status</span>
-                <strong
-                    class="{{#ifeq item.refundDetails.refundAmountStatus 'Refunded'}}text-success{{else}}text-secondary{{/ifeq}}">
-                    {{item.refundDetails.refundAmountStatus}}
-                </strong>
-            </div>
-            <div class="refund-row">
-                <span>Refund Amount</span>
-                <strong class="text-danger">
-                    ₹{{item.refundDetails.refundAmount}}
-                </strong>
-            </div>
-            <div class="refund-row">
-                <span>Reason</span>
+            <div class="summary-row">
+                <span>Tax</span>
                 <strong>
-                    {{item.refundDetails.refundReason}}
+                    ₹{{order.tax}}
                 </strong>
             </div>
-            {{#if item.refundDetails.refundedAt}}
-            <div class="refund-row">
-                <span>Refunded On</span>
+            {{#if order.couponDiscount}}
+            <div class="summary-row discount">
+                <span>
+                    Coupon Discount
+                </span>
                 <strong>
-                    {{formatDate item.refundDetails.refundedAt}}
+                    - ₹{{order.couponDiscount}}
                 </strong>
             </div>
             {{/if}}
-        </div>
-    </div>
-    {{/if}}
-</div>
-<!-- Delivery Address Card -->
-<div class="order-card delivery-address-card">
-    <div class="order-card-header">
-        <div class="order-card-title">
-            Delivery Address
-        </div>
-    </div>
-    <div class="address-details">
-        <p>
-            <strong>{{order.deliveryAddress.name}}</strong>
-        </p>
-        <p>{{order.deliveryAddress.streetAddress}}</p>
-        {{#if order.deliveryAddress.landmark}}
-        <p>
-            Landmark :
-            {{order.deliveryAddress.landmark}}
-        </p>
-        {{/if}}
-        <p>
-            {{order.deliveryAddress.city}},
-            {{order.deliveryAddress.state}}
-            -
-            {{order.deliveryAddress.zip}}
-        </p>
-        <p>{{order.deliveryAddress.country}}</p>
-        <p>
-            <strong>Phone :</strong>
-            {{order.deliveryAddress.phone}}
-        </p>
-    </div>
-</div>
-<!-- Payment Details -->
-<div class="order-card price-details-card">
-    <div class="order-card-header">
-        <div class="order-card-title">
-            Payment Details
-        </div>
-    </div>
-    <div class="price-summary">
-        <div class="price-row">
-            <span class="price-label">
-                Subtotal
-            </span>
-            <span class="price-value">
-                ₹{{order.subtotal}}
-            </span>
-        </div>
-        <div class="price-row">
-            <span class="price-label">
-                Shipping
-            </span>
-            {{#ifEquals order.shippingFee 0}}
-            <span class="price-value" style="color:var(--success-color);">
-                Free
-            </span>
-            {{else}}
-            <span class="price-value">
-                ₹{{order.shippingFee}}
-            </span>
-            {{/ifEquals}}
-        </div>
-        <div class="price-row">
-            <span class="price-label">
-                Tax
-            </span>
-            <span class="price-value">
-                ₹{{order.tax}}
-            </span>
-        </div>
-        {{#if order.couponDiscount}}
-        <div class="price-row">
-            <span class="price-label">
-                Coupon Discount
-            </span>
-            <span class="price-value" style="color:var(--success-color);">
-                - ₹{{order.couponDiscount}}
-            </span>
-        </div>
-        {{/if}}
-        {{#if order.offerDiscount}}
-        <div class="price-row">
-            <span class="price-label">
-                Offer Discount
-            </span>
-            <span class="price-value" style="color:var(--success-color);">
-                - ₹{{order.offerDiscount}}
-            </span>
-        </div>
-        {{/if}}
-        {{!-- NEW --}}
-        {{#if item.refundDetails.refundAmount}}
-        <div class="price-row">
-            <span class="price-label" style="color:#d32f2f;">
-                {{#if (eq order.paymentMethod 'cod')}}
-
-                {{#if (eq item.refundDetails.refundType 'Returned')}}
-                Refunded
-                {{else}}
-                Cancelled Amount
-                {{/if}}
-
-                {{else}}
-                Refunded
-                {{/if}}
-            </span>
-            <span class="price-value" style="color:#d32f2f;">
-                - ₹{{item.refundDetails.refundAmount}}
-            </span>
-        </div>
-        {{/if}}
-        <hr>
-        <div class="price-row">
-            <span class="price-label">
-                Checkout Total
-            </span>
-
-            <span class="price-value">
-                ₹{{order.checkoutTotal}}
-            </span>
-        </div>
-
-        {{#if order.totalRefundAmount}}
-        <div class="price-row">
-            <span class="price-label text-danger">
-                {{#if (eq order.paymentMethod 'cod')}}
-                Total Cancelled Amount
-                {{else}}
-                Total Refunded
-                {{/if}}
-            </span>
-
-            <span class="price-value text-danger">
-                - ₹{{order.totalRefundAmount}}
-            </span>
-        </div>
-        {{/if}}
-
-        <hr>
-
-        <div class="price-row total-price">
-
-            <span class="price-label">
-
-
-                {{#if (eq order.paymentMethod 'cod')}}
-                Amount Payable
-                {{else}}
-                Final Amount Paid
-                {{/if}}
-
-            </span>
-
-            <span class="price-value">
-
-                ₹{{order.totalAmount}}
-
-            </span>
-
-        </div>
-        <div class="payment-method">
-            <span class="price-label">
-                Payment Method
-            </span>
-            <span class="price-value" style="text-transform:capitalize;">
-                {{paymentMethod order.paymentMethod}}
-            </span>
-        </div>
-        {{!-- NEW --}}
-        {{#if order.totalRefundAmount}}
-        <div class="payment-method">
-            <span class="price-label">
-                Refund Destination
-            </span>
-            <span class="price-value">
-                {{#if (eq order.paymentMethod 'cod')}}
-
-                {{#if (eq item.refundDetails.refundType 'Returned')}}
-                Clothify Wallet
-                {{else}}
-                No Refund Required
-                {{/if}}
-
-                {{else}}
-                Clothify Wallet
-                {{/if}}
-            </span>
-        </div>
-        {{/if}}
-    </div>
-</div>
-<!-- Action Buttons -->
-<div class="action-buttons">
-    {{!-- Failed Payment --}}
-    {{#if (neq order.paymentStatus 'Failed')}}
-    {{!-- Pending --}}
-    {{#if (eq item.status 'Pending')}}
-    <button id="cancel-order-button" class="btn btn-secondary" data-order-status="{{item.status}}"
-        data-order-id="{{order._id}}" data-item-id="{{item._id}}" data-variation-index="{{item.variationIndex}}">
-        <i class="fas fa-times"></i>
-        Cancel Item
-    </button>
-    {{/if}}
-    {{!-- Completed --}}
-    {{#if (eq item.status 'Completed')}}
-    <button id="return-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
-        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
-        data-return-all="false">
-        <i class="fas fa-undo"></i>
-        Return Item
-    </button>
-    {{/if}}
-    {{!-- Return All --}}
-    {{#if (eq order.deliveryStatus 'Completed')}}
-    <button id="returnAll-order-button" class="btn btn-danger" data-order-status="{{item.status}}"
-        data-completion-date="{{order.completionDate}}" data-order-id="{{order._id}}" data-item-id="{{item._id}}"
-        data-return-all="true">
-        <i class="fas fa-undo"></i>
-        Return Entire Order
-    </button>
-    {{/if}}
-    {{!-- Cancelled Badge --}}
-    {{#if (eq item.status 'Cancelled')}}
-    <button class="btn btn-outline-danger" disabled>
-        <i class="fas fa-ban"></i>
-        Item Cancelled
-    </button>
-    {{/if}}
-    {{!-- Return Requested --}}
-    {{#if (eq item.status 'Return Requested')}}
-    <button class="btn btn-outline-warning" disabled>
-        <i class="fas fa-clock"></i>
-        Return Request Pending
-    </button>
-    {{/if}}
-    {{!-- Returned --}}
-    {{#if (eq item.status 'Returned')}}
-    <button class="btn btn-outline-success" disabled>
-        <i class="fas fa-check-circle"></i>
-        Refunded Successfully
-    </button>
-    {{/if}}
-    {{!-- Return Rejected --}}
-    {{#if (eq item.status 'Return Rejected')}}
-    <button class="btn btn-outline-secondary" disabled>
-        <i class="fas fa-times-circle"></i>
-        Return Rejected
-    </button>
-    {{/if}}
-    {{/if}}
-    <button class="btn btn-primary" onclick="location.href='/user/orders'">
-        <i class="fas fa-arrow-left"></i>
-        Back to Orders
-    </button>
-</div>
-{{#if (gt order.items.length 1)}}
-<div class="order-card other-items-card">
-    <div class="order-card-header">
-        <div class="order-card-title">
-            Other Items in This Order
-        </div>
-    </div>
-    {{#each order.items}}
-    {{#if (neq this._id ../item._id)}}
-    <a href="/user/orderDetails/{{../order._id}}/{{this._id}}" class="other-item">
-        <div class="other-item-image">
-            <img src="{{this.productImg}}" alt="{{this.productName}}">
-        </div>
-        <div class="other-item-name">
-            <div>
-                {{this.productName}}
-            </div>
-            <small>
-                Size :
-                {{this.productSize}}
-                |
-                Qty :
-                {{this.quantity}}
-            </small>
-            <br>
-            <small>
-                <span class="status-text" style="
-                        color:
-                        {{#if (eq this.status 'Completed')}}green
-                        {{else if (eq this.status 'Cancelled')}}red
-                        {{else if (eq this.status 'Returned')}}orange
-                        {{else if (eq this.status 'Return Requested')}}#ff9800
-                        {{else}}gray
-                        {{/if}};
-                        ">
-                    {{this.status}}
+            {{#if order.offerDiscount}}
+            <div class="summary-row discount">
+                <span>
+                    Offer Discount
                 </span>
-            </small>
-        </div>
-        <div class="other-item-arrow">
-            <i class="fas fa-chevron-right"></i>
-        </div>
-    </a>
-    {{/if}}
-    {{/each}}
-</div>
-{{/if}}
-<!-- Cancel Order Modal -->
-<div id="cancel-order-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Cancel Order Item</h3>
-            <button class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p>Please provide a reason for cancellation:</p>
-            <textarea id="cancellation-reason" class="modal-textarea"
-                placeholder="Enter reason for cancellation..."></textarea>
-        </div>
-        <div class="modal-footer">
-            <button id="cancel-modal-button" class="btn btn-secondary">Close</button>
-            <button id="submit-cancellation" class="btn btn-primary">Submit</button>
-        </div>
-    </div>
-</div>
-<!-- Return Order Modal -->
-<div id="return-order-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Return Order Item</h3>
-            <button class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p>Please provide a reason for return:</p>
-            <textarea id="return-reason" class="modal-textarea" placeholder="Enter reason for return..."></textarea>
-            <div id="return-reason-error" style="color: var(--accent-color); margin-top: 10px; display: none;">
-                Please provide a reason for return.
+                <strong>
+                    - ₹{{order.offerDiscount}}
+                </strong>
+            </div>
+            {{/if}}
+            <hr>
+            <div class="summary-row">
+                <span>
+                    Checkout Total
+                </span>
+                <strong>
+                    ₹{{order.checkoutTotal}}
+                </strong>
+            </div>
+            {{#if order.totalRefundAmount}}
+            <div class="summary-row refund">
+                <span>
+                    Total Refund
+                </span>
+                <strong>
+                    - ₹{{order.totalRefundAmount}}
+                </strong>
+            </div>
+            {{/if}}
+            <hr>
+            <div class="summary-row grand-total">
+                <span>
+                    Final Amount
+                </span>
+                <strong>
+                    ₹{{order.totalAmount}}
+                </strong>
             </div>
         </div>
-        <div class="modal-footer">
-            <button id="cancel-return-modal-button" class="btn btn-secondary">Close</button>
-            <button id="submit-return" class="btn btn-primary">Submit</button>
+    </div>
+    <!-- ========================= -->
+    <!-- REFUND DETAILS -->
+    <!-- ========================= -->
+    {{#if order.totalRefundAmount}}
+    <div class="card-section">
+        <div class="section-title refund-toggle">
+            <div class="refund-title">
+                <i class="fas fa-wallet"></i>
+                <span>Refund Details</span>
+            </div>
+            <div class="refund-summary">
+                ₹{{order.totalRefundAmount}} Refunded
+                <i class="fas fa-chevron-down refund-arrow"></i>
+            </div>
+        </div>
+        <div class="refund-content">
+            <div class="refund-list">
+                {{#each order.items}}
+                {{#if this.refundDetails.refundType}}
+                <div class="refund-card">
+                    <div class="refund-product-info">
+                        <h5 class="refund-product-name">
+                            {{this.productName}}
+                        </h5>
+                        <div class="refund-product-meta">
+                            <span>
+                                <strong>Size:</strong>
+                                {{this.productSize}}
+                            </span>
+                            <span>
+                                <strong>Qty:</strong>
+                                {{this.quantity}}
+                            </span>
+                        </div>
+                        <small class="refund-type">
+                            {{this.refundDetails.refundType}}
+                        </small>
+                    </div>
+                    <div class="refund-amount">
+                        <strong>
+                            ₹{{this.refundDetails.refundAmount}}
+                        </strong>
+                    </div>
+                </div>
+                <div class="refund-grid">
+                    <div>
+                        <span>Status</span>
+                        <strong>
+                            {{this.refundDetails.refundAmountStatus}}
+                        </strong>
+                    </div>
+                    <div>
+                        <span>Reason</span>
+                        <strong>
+                            {{this.refundDetails.refundReason}}
+                        </strong>
+                    </div>
+                    {{#if this.refundDetails.refundedAt}}
+                    <div>
+                        <span>Refunded On</span>
+                        <strong>
+                            {{formatDate this.refundDetails.refundedAt}}
+                        </strong>
+                    </div>
+                    {{/if}}
+                </div>
+                {{#unless @last}}
+                <hr>
+                {{/unless}}
+                {{/if}}
+                {{/each}}
+            </div>
         </div>
     </div>
-</div>
-<!-- Success Message -->
-<div id="success-message" class="success-message">
-    <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
+    {{/if}}
+    <!-- ========================= -->
+    <!-- ORDER ACTIONS -->
+    <!-- ========================= -->
+    <div class="order-actions">
+        <a href="/user/orders" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Back to Orders
+        </a>
     </div>
-    <div class="success-text">
-        Your request has been submitted successfully!
+    <!-- ========================= -->
+    <!-- CANCEL MODAL -->
+    <!-- ========================= -->
+    <div id="cancel-order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    Cancel Item
+                </h3>
+                <button class="close-modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="cancellation-reason" placeholder="Tell us why you're cancelling this item..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-modal-button" class="btn btn-outline">
+                    Close
+                </button>
+                <button id="submit-cancellation" class="btn btn-danger">
+                    Submit
+                </button>
+            </div>
+        </div>
     </div>
-    <button id="close-success-message" class="btn btn-primary">OK</button>
+    <!-- ========================= -->
+    <!-- RETURN MODAL -->
+    <!-- ========================= -->
+    <div id="return-order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    Return Item
+                </h3>
+                <button class="close-modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="return-reason" placeholder="Tell us why you're returning this item..."></textarea>
+                <div id="return-reason-error" class="validation-error">
+                    Please enter a return reason.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-return-modal-button" class="btn btn-outline">
+                    Close
+                </button>
+                <button id="submit-return" class="btn btn-primary">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- ========================= -->
+    <!-- SUCCESS POPUP -->
+    <!-- ========================= -->
+    <div id="success-message" class="success-message">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="success-text">
+            Success
+        </div>
+        <button id="close-success-message" class="btn btn-primary">
+            OK
+        </button>
+    </div>
 </div>
-
-
-
-
-
 {{#section 'scripts'}}
 <script src="/javascripts/user/orderDetails.js" defer></script>
 {{/section}}
