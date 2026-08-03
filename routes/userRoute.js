@@ -14,6 +14,11 @@ router.use((req, res, next) => {
   next();
 });
 
+//HEADER BADGES
+const headerBadge = require(`../middlewares/headerBadge`)
+router.use(headerBadge)
+
+
 //RAZORPAY integration//
 const razorpay = require(`../services/razorpay`)
 

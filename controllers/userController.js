@@ -294,7 +294,8 @@ exports.login = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      phone: user.phone || null
+      phone: user.phone || null,
+      blocked: user.blocked
     };
 
     // Create wallet if needed
@@ -345,7 +346,8 @@ exports.emailVerification = async (req, res) => {
           _id: user._id,
           name: user.name,
           email: user.email,
-          phone: user.phone || null
+          phone: user.phone || null,
+          blocked: user.blocked
         };
 
         //session for showing modal for newely registered users
@@ -692,7 +694,8 @@ exports.blockUser = async (req, res) => {
     );
 
 
-    return res.redirect('back');
+    const referer = req.get('Referer') || req.get('referrer') || '/admin/users';
+    return res.redirect(referer);
   } catch (error) {
     console.error("Error in blocking user:", error);
     return res.status(500).json({ message: "Internal Server Error" });

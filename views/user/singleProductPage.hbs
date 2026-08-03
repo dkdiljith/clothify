@@ -39,13 +39,15 @@
       {{/if}}
 
       <div class="main-image-container">
-        <img id="main-image" src="{{product.images.[0].path}}" alt="{{product.images.[0].altText}}" />
+        <img id="main-image" src="{{product.images.[0].path}}" alt="{{product.images.[0].altText}}" fetchpriority="high"
+          decoding="async" />
         <div class="magnifier"></div>
       </div>
 
       <div class="thumbnail-gallery">
         {{#each product.images}}
-        <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail{{#if @first}} active{{/if}}" />
+        <img src="{{this.path}}" alt="{{this.altText}}" class="thumbnail{{#if @first}} active{{/if}}" loading="lazy"
+          decoding="async" />
         {{/each}}
       </div>
 
@@ -206,7 +208,8 @@
     <div class="related-products-grid">
       {{#each relatedProducts}}
       <div class="related-product-card">
-        <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="related-product-image">
+        <img src="{{this.images.[0].path}}" alt="{{this.name}}" class="related-product-image" loading="lazy"
+          decoding="async">
         <div class="related-product-info">
           <h3 class="related-product-title">{{this.name}}</h3>
           <div class="related-product-price">₹{{this.details.[0].price}}</div>

@@ -99,7 +99,8 @@ const googleCallback = (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone || null
+        phone: user.phone || null,
+        blocked: user.blocked
       };
 
       if (user.isNewRegistration) {
