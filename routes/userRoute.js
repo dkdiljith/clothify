@@ -113,7 +113,11 @@ router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFrom
 
 //USER PROFILE
 router.get(`/profile`, userAuth, userProfileController.profileRender)
-router.get(`/profileedit`, userAuth, userProfileController.profileEditRender)
+router.post(`/profile/update`, userAuth, userProfileController.profileEdit)
+router.post(`/profile/verify-password` , userAuth , userController.verifyPassword)
+router.post(`/profile/request-email-change` , userAuth, userController.verifyEmail)
+router.post(`/profile/verify-email-otp`, userAuth , userController.resetEmail)
+
 router.get(`/address`, userAuth, userProfileController.addressRender)
 router.get(`/setdefaultaddress/:id`, userAuth, userProfileController.setDefaultAddress)
 router.get(`/deleteaddress/:id`, userAuth, userProfileController.deleteAddress)
@@ -134,7 +138,6 @@ router.post(`/referral/cancel`, userAuth, referralController.cancelReferral)
 
 router.post('/order/cancel-item', userAuth, orderController.orderCancel)
 router.post('/order/return-item', userAuth, orderController.orderReturn)
-router.post(`/profileedit`, userAuth, userProfileController.profileEdit)
 router.post(`/addaddress`, userAuth, userProfileController.addAddress)
 router.post(`/editaddress/:id`, userAuth, userProfileController.editAddress)
 

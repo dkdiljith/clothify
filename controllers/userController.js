@@ -3,6 +3,7 @@ const Product = require(`../models/productSchema`)
 const Wallet = require(`../models/walletSchema`)
 const Settings = require(`../models/settingSchema`)
 const Wishlist = require(`../models/wishListSchema`)
+const Otp = require(`../models/otpSchema`)
 
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -36,6 +37,30 @@ const securePassword = async (password) => {
   }
 };
 
+const hashOtp = (otp) => {
+  const OTP_PEPPER = process.env.OTP_HASH_SECRET;
+  return crypto
+    .createHmac('sha256', OTP_PEPPER)
+    .update(otp)
+    .digest('hex');
+};
+
+
+// check otp
+const verifyOtp = (otp, storedOtp) => {
+  const submittedHash = hashOtp(otp);
+
+  const submittedBuffer = Buffer.from(submittedHash, 'hex');
+  const storedBuffer = Buffer.from(storedOtp, 'hex');
+
+  if (submittedBuffer.length !== storedBuffer.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(submittedBuffer, storedBuffer);
+};
+
+
+
 //phone number validation
 const validatePhoneStartsWithPlus91 = async (phone) => {
   try {
@@ -62,6 +87,40 @@ const validatePhoneStartsWithPlus91 = async (phone) => {
   }
 };
 
+
+const validateAndCleanEmail = (email) => {
+  // 1. Basic Presence Check
+  if (!email || typeof email !== 'string') return null;
+
+  // 2. Clean up structural noise
+  let cleanEmail = email.trim().toLowerCase();
+
+  // 3. Strict RFC-compliant Syntax Check (Regex)
+  // This verifies characters, single '@', and valid structure without ReDoS vulnerabilities
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(cleanEmail)) return null;
+
+  // 4. Strict Domain Verification Block
+  const parts = cleanEmail.split('@');
+  if (parts.length !== 2) return null; // Safeguard against multiple '@' signs
+
+  const domain = parts[1];
+
+  // Ensure the domain itself doesn't start or end with a hyphen or dot
+  if (domain.startsWith('.') || domain.endsWith('.') || domain.startsWith('-') || domain.endsWith('-')) {
+    return null;
+  }
+  // Ensure the top-level domain (TLD) like .com or .org exists and is valid
+  const domainParts = domain.split('.');
+  if (domainParts.length < 2) return null; // Blocks formats like "user@localhost"
+
+  const tld = domainParts[domainParts.length - 1];
+  if (tld.length < 2) return null; // Blocks invalid extensions like "user@domain.c"
+
+  return cleanEmail;
+};
+
+
 // Email verification code generator
 const generateVerificationCode = () => {
   const verificationToken = crypto.randomInt(100000, 1000000).toString();
@@ -70,6 +129,11 @@ const generateVerificationCode = () => {
   return { verificationToken, tokenExpiration };
 };
 
+
+const generateOtp = () => {
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  return { otp };
+};
 
 // ======================================================================================================
 
@@ -699,5 +763,188 @@ exports.blockUser = async (req, res) => {
   } catch (error) {
     console.error("Error in blocking user:", error);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+exports.verifyPassword = async (req, res) => {
+  try {
+    const { password } = req.body
+    if (!password) {
+      return res.status(401).json({ message: "Password Not found" });
+    }
+    const userId = res.locals.user._id
+    const user = await User.findById(userId).lean()
+    if (!user.password && user.googleId) {
+      return res.status(401).json({ message: "Google Login Detected, Create Password First" });
+    }
+    const result = await bcrypt.compare(password, user.password)
+    if (!result) {
+      return res.status(401).json({ message: "Password is incorrect" });
+    }
+    return res.json({
+      success: true,
+      message: 'Password Verified Successfully'
+    });
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: "Password is Not Verified" });
+  }
+}
+
+
+
+
+
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body
+    const userId = res.locals.user._id
+    const validatedEmail = validateAndCleanEmail(email)
+
+    if (!validatedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address 2."
+      });
+    }
+    const currentPurpose = "RESET_EMAIL";
+    const existingOtp = await Otp.findOne({ userId, purpose: currentPurpose }).lean();
+
+    if (existingOtp?.resendCount > 3) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP Resend Limit Exceeded, Try again Tomorrow"
+      });
+    }
+    const user = await User.findById(userId).lean()
+    const anyone = await User.findOne({ email: validatedEmail }).lean()
+    if (anyone) {
+      return res.status(409).json({
+        success: false,
+        message: "This email address is already registered to another account."
+      });
+    }
+    const { otp } = generateOtp()
+
+    if (existingOtp) {
+      await Otp.updateOne(
+        { _id: existingOtp._id }, // Locate by unique ID for optimal indexing
+        {
+          $set: {
+            otpHash: hashOtp(otp),
+            attempts: 0, // Reset incorrect guesses back to 0 because a fresh code was sent
+            expiresAt: new Date(Date.now() + (5 * 60 * 1000)) // Extend window by 5 mins
+          },
+          $inc: {
+            resendCount: 1 // Atomically increment the request rate counter by 1
+          }
+        }
+      );
+    } else {
+      const verificationDocument = new Otp({
+        userId,
+        purpose: "RESET_EMAIL",
+        otpHash: hashOtp(otp),
+        resendCount: 0,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + (5 * 60 * 1000)) // 5-minute instance
+      });
+
+      await verificationDocument.save();
+    }
+
+    const emailSend = await verificationEmailSend(validatedEmail, otp);
+    return res.status(200).json({
+      success: true,
+      message: 'Verification code sent to your email inbox successfully.'
+    });
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      success: false,
+      message: "Email is not Verified"
+    });
+  }
+}
+
+
+
+
+
+
+exports.resetEmail = async (req, res) => {
+  try {
+    const { otp, email } = req.body;
+
+    // 1. Input Validation
+    const validatedEmail = validateAndCleanEmail(email);
+    if (!validatedEmail) {
+      return res.status(400).json({ success: false, message: "Please enter a valid email address." });
+    }
+
+    if (!otp) {
+      return res.status(400).json({ success: false, message: "No OTP detected." });
+    }
+
+    const userId = res.locals.user._id;
+    const currentPurpose = "RESET_EMAIL";
+
+    // 2. Fetch Stored OTP Document
+    const existingOtp = await Otp.findOne({ userId, purpose: currentPurpose }).lean();
+
+    if (!existingOtp) {
+      return res.status(404).json({ success: false, message: "No active OTP request found. Please request a new code." });
+    }
+
+    // 3. Expiration Check (Uncommented and fixed comparison logic)
+    if (Date.now() > existingOtp.expiresAt) {
+      return res.status(410).json({ success: false, message: "OTP has timed out. Please generate another OTP." });
+    }
+
+    // 4. Rate Limiting Check
+    if (existingOtp.attempts >= 3) {
+      return res.status(429).json({ success: false, message: "Maximum OTP attempts reached. Please generate another OTP." });
+    }
+
+    // 5. Secure Cryptographic Verification
+    const isMatch = verifyOtp(otp, existingOtp.otpHash);
+
+    if (!isMatch) {
+      // Increment attempt counter atomically on failure
+      await Otp.updateOne(
+        { _id: existingOtp._id },
+        { $inc: { attempts: 1 } }
+      );
+      return res.status(401).json({ success: false, message: "Invalid OTP code." });
+    }
+
+    // 6. Action Execution (Update User Email)
+    await User.updateOne(
+      { _id: userId },
+      { $set: { email: validatedEmail } }
+    );
+
+    // 7. Cleanup 
+    await Otp.updateOne(
+      { _id: existingOtp._id },
+      {
+        $set: {
+          otpHash: "",
+          attempts: 4,
+          resendCount: 4,
+        }
+      }
+    );
+
+    // 8. Success Response
+    return res.status(200).json({ success: true, message: "Email updated successfully!" });
+
+  } catch (error) {
+    console.error("Reset Email Error:", error);
+    return res.status(500).json({ success: false, message: "Email reset failed due to a server error." });
   }
 };

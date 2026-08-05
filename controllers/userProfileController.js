@@ -18,14 +18,9 @@ exports.profileRender = async (req, res) => {
     const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
     const address = await Address.findOne({ userId: userId, isDefault: true }).lean();
-    return res.render(`user/profileView`, { userData: userData, address: address, user_sidebar: true })
+    return res.render(`user/profile`, { userData: userData, address: address, user_sidebar: true })
 }
 
-exports.profileEditRender = async (req, res) => {
-    const userId = res.locals.user._id
-    const userData = await User.findById(userId).lean()
-    return res.render(`user/profileEdit`, { userData: userData, user_sidebar: true })
-}
 
 exports.addressRender = async (req, res) => {
     try {
@@ -65,6 +60,128 @@ exports.securityRender = async (req, res) => {
 
     return res.render(`user/security`, { token, user: user1, user_sidebar: true })
 }
+
+
+
+
+exports.profileEdit = async (req, res) => {
+    try {
+        let { name, phone, gender, dob } = req.body;
+        const userId = res.locals.user._id;
+        // SANITIZE
+        name = name?.trim();
+        phone = phone?.trim();
+        gender = gender?.trim();
+        // NAME
+        const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Name is required.",
+            });
+        }
+        if (name.length < 3 || name.length > 50) {
+            return res.status(400).json({
+                success: false,
+                message: "Name must be between 3 and 50 characters.",
+            });
+        }
+        if (!nameRegex.test(name)) {
+            return res.status(400).json({
+                success: false,
+                message: "Name can contain only letters and single spaces.",
+            });
+        }
+        // PHONE
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid mobile number.",
+            });
+        }
+        // GENDER
+        const allowedGenders = ["Male", "Female", "Other"];
+        if (!allowedGenders.includes(gender)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid gender selected.",
+            });
+        }
+        // DOB
+        if (!dob) {
+            return res.status(400).json({
+                success: false,
+                message: "Date of birth is required.",
+            });
+        }
+        const dobDate = new Date(dob);
+        if (isNaN(dobDate.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date of birth.",
+            });
+        }
+        const today = new Date();
+        if (dobDate > today) {
+            return res.status(400).json({
+                success: false,
+                message: "Date of birth cannot be in the future.",
+            });
+        }
+        let age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < dobDate.getDate())
+        ) {
+            age--;
+        }
+        if (age < 13) {
+            return res.status(400).json({
+                success: false,
+                message: "Minimum age is 13 years.",
+            });
+        }
+        if (age > 120) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date of birth.",
+            });
+        }
+        // UPDATE
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                name,
+                phone,
+                gender,
+                dateOfBirth: dob,
+            },
+            {
+                new: true,
+                runValidators: true,
+            },
+        );
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully.",
+        });
+    } catch (error) {
+        console.error("Profile Edit Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again.",
+        });
+    }
+};
+
 
 
 
@@ -264,43 +381,13 @@ exports.userOrderDetails = async (req, res) => {
 
     const order = await Order.findById(orderId).lean();
 
-    return res.render(`user/orderDetails`, { order: order,  user_sidebar: true })
+    return res.render(`user/orderDetails`, { order: order, user_sidebar: true })
 }
 
 
 
 
 
-
-exports.profileEdit = async (req, res) => {
-
-    try {
-        const { name, phone, gender, dateOfBirth } = req.body;
-        const userId = res.locals.user._id
-
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            {
-                name,
-                phone,
-                gender,
-                dateOfBirth,
-            },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const user = await User.findById(userId).lean()
-
-        return res.render('user/profileView', { userData: user, user_sidebar: true });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
-    }
-}
 
 exports.addAddress = async (req, res) => {
     try {
