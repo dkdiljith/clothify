@@ -437,16 +437,18 @@ const generateUniqueCode = async () => {
 
 
 // Referral Creator
-exports.createReferral = async (userId) => {
+exports.createReferral = async (userId, session = null) => {
   try {
-    const existingReferral = await Referral.findOne({ userId }).lean();
+    const existingReferralQuery = Referral.findOne({ userId }).lean();
+    if (session) {
+      existingReferralQuery.session(session);
+    }
+    const existingReferral = await existingReferralQuery;
     if (existingReferral) {
       return existingReferral;
     }
-
     const { signupBonus } = await getReferralSettings();
     const referralCode = await generateUniqueCode();
-
     const newReferral = new Referral({
       userId,
       referralCode,
@@ -454,17 +456,25 @@ exports.createReferral = async (userId) => {
       referrer: null,
       status: "Pending",
     });
-
-    await ReferralHistory.create({
-      userId,
-      coins: signupBonus,
-      description: `Signup Bonus +${signupBonus} Coins`,
-    });
-
-    const savedReferral = await newReferral.save();
+    if (session) {
+      await ReferralHistory.create([{
+        userId,
+        coins: signupBonus,
+        description: `Signup Bonus +${signupBonus} Coins`,
+      }], { session });
+    } else {
+      await ReferralHistory.create({
+        userId,
+        coins: signupBonus,
+        description: `Signup Bonus +${signupBonus} Coins`,
+      });
+    }
+    const savedReferral = session
+      ? await newReferral.save({ session })
+      : await newReferral.save();
     return savedReferral;
   } catch (error) {
-    console.log(error, `Referral Creation Error`);
+    console.error(error, "Referral Creation Error");
   }
 };
 

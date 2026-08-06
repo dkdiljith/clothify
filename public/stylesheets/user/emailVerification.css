@@ -1,3 +1,6 @@
+/* ======================================================
+   Logo
+====================================================== */
 .website-logo {
   position: absolute;
   top: -60px;
@@ -7,96 +10,100 @@
   z-index: 10;
 }
 
+/* ======================================================
+   Card
+====================================================== */
 .login-card {
-  background: white;
+  background: #fff;
   border-radius: 15px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   padding: 3rem;
   text-align: center;
-  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, .1);
+  transition: .3s ease;
 }
 
 .login-card:focus-within {
-  box-shadow: 0 6px 30px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 6px 30px rgba(0, 123, 255, .15);
 }
 
-.form-control {
+/* ======================================================
+   Form
+====================================================== */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+/* ======================================================
+   Inputs
+====================================================== */
+#emailVerificationForm .form-control {
+  width: 100%;
+  height: 50px;
   border: 1px solid #ced4da;
   border-radius: 50px;
-  padding: 12px 45px;
-  transition: all 0.3s ease-in-out;
   font-size: 1rem;
-  line-height: 1.5;
-  height: 48px;
-  position: relative;
+  padding-left: 60px;
+  padding-right: 20px;
+  transition: .25s;
 }
 
-.form-control:focus {
+#emailVerificationForm .form-control::placeholder {
+  color: #6c757d;
+}
+
+#emailVerificationForm .form-control:focus {
   border-color: #fdd49e;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 5px rgba(0, 123, 255, .2);
+  outline: none;
 }
 
-.form-group {
-  position: relative;
-  margin-bottom: 2rem;
-  /* Adjusted for validation message spacing */
-}
-
-.form-group i.fas:not(.password-toggle) {
+/* ======================================================
+   Icons
+====================================================== */
+.input-wrapper i.fas {
   position: absolute;
-  left: 20px;
+  left: 22px;
   top: 50%;
   transform: translateY(-50%);
-  color: #aaa;
-  z-index: 1;
+  color: #9aa0a6;
   font-size: 16px;
   pointer-events: none;
 }
 
-.btn-primary {
-  background: #f48c06 !important;
-  border: none !important;
-  padding: 0.75rem 2.5rem;
-  font-size: 1.2rem;
-  color: white !important;
-  border-radius: 5px;
-  transition: all 0.3s ease-in-out;
+/* ======================================================
+   OTP Status
+====================================================== */
+.otp-status {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid #ececec;
+  font-size: .95rem;
 }
 
-.btn-primary:hover {
-  background: #c76000 !important;
-  box-shadow: 0 6px 20px rgba(146, 82, 4, 0.3);
-  transform: scale(1.05);
+.otp-status strong {
+  color: #dc143c;
+  font-size: 1rem;
 }
 
-.btn-primary:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  background: #f48c06 !important;
-}
-
-.btn-disabled {
-  background: #d1d1d1;
-  color: #aaa;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
+/* ======================================================
+   Error Message
+====================================================== */
 .error-message {
-  position: absolute;
-  bottom: -25px;
-  left: 0;
-  color: #e74c3c;
-  font-size: 0.875rem;
-  font-weight: 500;
-  width: 100%;
+  display: block;
+  min-height: 20px;
+  margin-top: 6px;
+  padding-left: 10px;
+  font-size: .82rem;
+  color: #dc3545;
   text-align: left;
-  margin-top: 0.5rem;
-  padding: 0 5px;
-  background-color: #f8d7da;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   visibility: hidden;
+  opacity: 0;
+  transition: opacity .2s;
 }
 
 .error-message.visible {
@@ -104,18 +111,77 @@
   opacity: 1;
 }
 
+.error-message.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* ======================================================
+   Button
+====================================================== */
+.btn-primary-red {
+  background: #dc143c !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px;
+  padding: .8rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: .25s;
+}
+
+.btn-primary-red:hover {
+  background: #b22222 !important;
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(220, 20, 60, .25);
+}
+
+.btn-primary-red:disabled {
+  opacity: .75;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ======================================================
+   Spinner
+====================================================== */
+.spinner-border-sm {
+  vertical-align: -0.15em;
+}
+
+/* ======================================================
+   Resend Section
+====================================================== */
+#resendButton {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+#resendButton:disabled {
+  color: #888 !important;
+  cursor: not-allowed;
+}
+
+#resendTimer {
+  margin-top: 5px;
+  font-size: .9rem;
+  color: #dc143c;
+  font-weight: 600;
+}
+
+/* ======================================================
+   Links
+====================================================== */
 .custom-links {
   margin-top: 1.5rem;
-  text-align: center;
 }
 
 .custom-links a {
-  font-size: 0.9rem;
-  font-weight: bold;
-  margin: 0 10px;
-  text-decoration: none;
   color: #007bff;
-  transition: color 0.3s ease;
+  text-decoration: none;
+  font-size: .9rem;
+  font-weight: 600;
+  transition: .2s;
 }
 
 .custom-links a:hover {
@@ -123,36 +189,27 @@
   text-decoration: underline;
 }
 
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 15px;
-  border-radius: 4px;
-  color: white;
-  z-index: 1000;
-  animation: fadeIn 0.3s;
-}
-
-.toast.success {
-  background-color: #28a745;
-}
-
-.toast.error {
-  background-color: #dc3545;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+/* ======================================================
+   Responsive
+====================================================== */
+@media(max-width:768px) {
+  .login-card {
+    padding: 2rem;
   }
 
-  to {
-    opacity: 1;
+  .website-logo {
+    width: 180px;
+    top: 20px;
+    left: 20px;
   }
 }
 
-#resendTimer {
-  font-weight: bold;
-  color: #ff5722;
+@media(max-width:576px) {
+  .login-card {
+    padding: 1.5rem;
+  }
+
+  #emailVerificationForm .form-control {
+    padding-left: 55px;
+  }
 }

@@ -1,124 +1,245 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const emailVerificationForm = document.getElementById("emailVerificationForm");
-  const verificationCodeInput = document.getElementById("verificationCode");
-  const verificationCodeErrorDiv = document.getElementById("verificationCodeError");
+document.addEventListener("DOMContentLoaded", () => {
+  /* =====================================================
+       Elements
+    ===================================================== */
+  const form = document.getElementById("emailVerificationForm");
+  const otpInput = document.getElementById("verificationCode");
+  const otpError = document.getElementById("verificationCodeError");
   const verifyButton = document.getElementById("verifyButton");
-
   const resendButton = document.getElementById("resendButton");
   const resendTimer = document.getElementById("resendTimer");
-  const csrfToken = emailVerificationForm.querySelector('input[name="_csrf"]').value;
-  const serverVerificationTimeInput = document.getElementById("serverVerificationTime");
-
-  let timerInterval;
-
-  function startResendTimer(remainingSeconds) {
-    // Clear any active intervals to prevent overlapping multiple intervals
-    clearInterval(timerInterval); 
-    
-    resendButton.disabled = true;
-    resendTimer.style.display = "inline";
-
-    timerInterval = setInterval(() => {
-      if (remainingSeconds <= 0) {
-        clearInterval(timerInterval);
-        resendButton.disabled = false;
-        resendTimer.style.display = "none";
-      } else {
-        resendTimer.textContent = `(${remainingSeconds}s)`;
-        remainingSeconds--;
+  const verificationCountdown = document.getElementById(
+    "verificationCountdown",
+  );
+  const verificationTimerInput = document.getElementById(
+    "verificationTimerValue",
+  );
+  const resendTimerInput = document.getElementById("resendTimerValue");
+  /* =====================================================
+       State
+    ===================================================== */
+  let verificationTimerValue = verificationTimerInput.value;
+  let resendTimerValue = resendTimerInput.value;
+  let verificationInterval = null;
+  let resendInterval = null;
+  let verifyInProgress = false;
+  let resendInProgress = false;
+  /* =====================================================
+       Helpers
+    ===================================================== */
+  function showError(message) {
+    otpError.textContent = message;
+    otpError.classList.remove("hidden");
+    otpError.classList.add("visible");
+  }
+  function clearError() {
+    otpError.textContent = "";
+    otpError.classList.remove("visible");
+    otpError.classList.add("hidden");
+  }
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(
+      remainingSeconds,
+    ).padStart(2, "0")}`;
+  }
+  function getRemainingSeconds(targetIso) {
+    if (!targetIso) return 0;
+    const targetTime = new Date(targetIso).getTime();
+    return Math.max(Math.floor((targetTime - Date.now()) / 1000), 0);
+  }
+  /* =====================================================
+       Verification Countdown
+    ===================================================== */
+  function startVerificationCountdown() {
+    clearInterval(verificationInterval);
+    let remaining = getRemainingSeconds(verificationTimerValue);
+    verificationCountdown.textContent = formatTime(remaining);
+    verificationInterval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(verificationInterval);
+        verificationCountdown.textContent = "Expired";
+        otpInput.disabled = true;
+        verifyButton.disabled = true;
+        showError("Your verification code has expired.");
+        return;
       }
+      verificationCountdown.textContent = formatTime(remaining);
     }, 1000);
   }
-
-  function calculateRemainingTime(targetTimeIsoString) {
-    if (!targetTimeIsoString) return 0;
-    const serverTime = new Date(targetTimeIsoString).getTime();
-    const now = Date.now();
-    const remainingMillis = serverTime - now;
-    return Math.max(Math.floor(remainingMillis / 1000), 0);
-  }
-
-  // Initial startup execution based on template variable data
-  startResendTimer(calculateRemainingTime(serverVerificationTimeInput.value));
-
-  // Resend code logic
-  resendButton.addEventListener("click", async () => {
-    try {
-      resendButton.disabled = true; // Avoid double submission clicks
-
-      const response = await fetch('/user/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        }
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Fix 1 & 2: Update field storage and read the matched field signature name
-        serverVerificationTimeInput.value = data.newTimer; 
-        
-        const remainingSeconds = calculateRemainingTime(data.newTimer);
-        // Fallback protection guarantees fallback layout if clock drifts
-        startResendTimer(remainingSeconds > 0 ? remainingSeconds : 60);
-
-        // OPTIONAL: Added a smooth feedback modal letting the user know it was sent successfully
-        await showCustomConfirm("Code Resent", "A fresh verification code has been dispatched to your email inbox.", "success");
-      } else {
-        // CHANGED: Using your custom alert system for errors instead of window.alert
-        await showCustomConfirm("Resend Failed", data.error || "We could not resend your code at this time.", "warning");
-        resendButton.disabled = false;
-      }
-    } catch (error) {
-      console.error("Error resending verification code:", error);
-      await showCustomConfirm("Network Error", "Unable to reach the server.\nPlease verify your network connection and try again.", "danger");
+  /* =====================================================
+       Resend Countdown
+    ===================================================== */
+  function startResendCountdown() {
+    clearInterval(resendInterval);
+    let remaining = getRemainingSeconds(resendTimerValue);
+    if (remaining <= 0) {
       resendButton.disabled = false;
+      resendTimer.textContent = "";
+      return;
+    }
+    resendButton.disabled = true;
+    resendTimer.textContent = `Available in ${remaining}s`;
+    resendInterval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(resendInterval);
+        resendButton.disabled = false;
+        resendTimer.textContent = "";
+        return;
+      }
+      resendTimer.textContent = `Available in ${remaining}s`;
+    }, 1000);
+  }
+  /* =====================================================
+       Update Timers
+    ===================================================== */
+  function updateTimers(newVerificationTimer, newResendTimer) {
+    verificationTimerValue = newVerificationTimer;
+    resendTimerValue = newResendTimer;
+    verificationTimerInput.value = verificationTimerValue;
+    resendTimerInput.value = resendTimerValue;
+    otpInput.disabled = false;
+    verifyButton.disabled = false;
+    startVerificationCountdown();
+    startResendCountdown();
+  }
+  /* =====================================================
+       OTP Input
+    ===================================================== */
+  otpInput.addEventListener("input", () => {
+    clearError();
+    otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+  });
+  /* =====================================================
+       Button Helpers
+    ===================================================== */
+  function lockVerifyButton() {
+    verifyButton.disabled = true;
+    verifyButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Verifying...
+        `;
+  }
+  function unlockVerifyButton() {
+    verifyButton.disabled = false;
+    verifyButton.textContent = "Verify Email";
+  }
+  function lockResendButton() {
+    resendButton.disabled = true;
+    resendButton.textContent = "Sending...";
+  }
+  function unlockResendButton() {
+    resendButton.disabled = false;
+    resendButton.textContent = "Resend Verification Code";
+  }
+  /* =====================================================
+       Initialize
+    ===================================================== */
+  startVerificationCountdown();
+  startResendCountdown();
+  /* =====================================================
+       OTP Validation
+    ===================================================== */
+  function validateOtp() {
+    clearError();
+    const otp = otpInput.value.trim();
+    if (!otp) {
+      showError("Please enter the verification code.");
+      return false;
+    }
+    if (!/^\d{6}$/.test(otp)) {
+      showError("Verification code must contain exactly 6 digits.");
+      return false;
+    }
+    return true;
+  }
+  /* =====================================================
+       Verify Email
+    ===================================================== */
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (verifyInProgress) return;
+    if (!validateOtp()) return;
+    verifyInProgress = true;
+    lockVerifyButton();
+    try {
+      const response = await fetch("/user/emailverification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          verificationCode: otpInput.value.trim(),
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        showPopupMessage("Email verified successfully!", "success");
+        window.location.href = "/user/home?welcome=true";
+        return;
+      }
+      showError(data.error || "Invalid verification code.");
+    } catch (error) {
+      console.error(error);
+      showError("Unable to verify your email. Please try again.");
+    } finally {
+      verifyInProgress = false;
+      unlockVerifyButton();
     }
   });
-
-  // Verify form submission logic
-  emailVerificationForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const verificationCode = verificationCodeInput.value.trim();
-
-    verificationCodeErrorDiv.textContent = "";
-    verificationCodeErrorDiv.classList.remove("visible");
-    
-    // Fix 3: Lock down UI button targets while network transmission executes
-    verifyButton.disabled = true;
-
-    fetch('/user/emailverification', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({ verificationCode: verificationCode })
-    })
-    .then(response => response.json())
-    .then(async data => {
-      if (data.success) {
-        window.location.href = '/user/home?welcome=true';
-      } else {
-        verifyButton.disabled = false; // Release input hold state lock
-        verificationCodeErrorDiv.textContent = data.error;
-        verificationCodeErrorDiv.classList.add("visible");
-        
-        // OPTIONAL: Keeps critical interaction errors completely visible in an explicit alert
-        await showCustomConfirm("Verification Failed", data.error, "danger");
+  /* =====================================================
+       Submit with Enter
+    ===================================================== */
+  otpInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    form.requestSubmit();
+  });
+  /* =====================================================
+       Resend Verification Code
+    ===================================================== */
+  resendButton.addEventListener("click", async () => {
+    if (resendInProgress) return;
+    resendInProgress = true;
+    lockResendButton();
+    clearError();
+    try {
+      const response = await fetch("/user/resend-email-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        showError(data.error || "Unable to resend verification code.");
+         resendButton.textContent = "Resend Verification Code";
+        return;
       }
-    })
-    .catch(async error => {
-      console.error("Error verifying email:", error);
-      verifyButton.disabled = false;
-      verificationCodeErrorDiv.textContent = "An unexpected error occurred. Please try again.";
-      verificationCodeErrorDiv.classList.add("visible");
+      /* ==========================================
+               Update Timers
+            ========================================== */
+      updateTimers(data.verificationTimer, data.resendTimer);
+      /* ==========================================
+               Reset OTP Field
+            ========================================== */
+      otpInput.value = "";
+      otpInput.focus();
+      clearError();
+      showPopupMessage(
+        data.message || "A new verification code has been sent.",
+        "success",
+      );
+        resendButton.textContent = "Resend Verification Code";
 
-      // CHANGED: Replaced unexpected stream crash drops with error component
-      await showCustomConfirm("Server Error", "An unexpected error occurred. Please try again.", "danger");
-    });
+    } catch (error) {
+      console.error(error);
+      showError("Unable to connect to the server.");
+    } finally {
+      resendInProgress = false;
+    }
   });
 });

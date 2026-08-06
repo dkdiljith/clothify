@@ -59,6 +59,12 @@ router.route(`/register`)
   .get(userController.registerRender)
   .post(userController.register)
 
+router.route(`/emailVerification`)
+  .get(userController.emailVerificationRender)
+  .post(userController.emailVerification)
+
+router.post(`/resend-email-verification`, userController.resendEmailVerification)
+
 router.route(`/forgetpassword`)
   .get(userController.forgetPasswordRender)
   .post(userController.forgetPassword)
@@ -66,8 +72,7 @@ router.route(`/forgetpassword`)
 router.get('/resetpassword/:token', userController.resetPasswordRender)
 router.get(`/logout`, userController.userLogout)
 
-router.post(`/emailverification`, userController.emailVerification)
-router.post(`/resend-verification`, userController.resendEmailVerification)
+
 router.post(`/resend-reset-email`, userController.resendResetEmail)
 router.post(`/resetpassword`, userController.resetPassword)
 
@@ -94,7 +99,7 @@ router.put('/address/:id', userAuth, productValidator, addressController.editAdd
 router.delete('/address/:id', userAuth, productValidator, addressController.deleteAddress);
 router.put('/address/default/:id', userAuth, productValidator, addressController.setDefaultAddress);
 
-router.post("/payment/process", userAuth, productValidator , cartController.processPaymentPage);
+router.post("/payment/process", userAuth, productValidator, cartController.processPaymentPage);
 router.get('/payment', userAuth, productValidator, userOrderController.payment);
 router.post(`/placeorder`, userAuth, userOrderController.placeOrder)
 router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)
@@ -114,9 +119,9 @@ router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFrom
 //USER PROFILE
 router.get(`/profile`, userAuth, userProfileController.profileRender)
 router.post(`/profile/update`, userAuth, userProfileController.profileEdit)
-router.post(`/profile/verify-password` , userAuth , userController.verifyPassword)
-router.post(`/profile/request-email-change` , userAuth, userController.verifyEmail)
-router.post(`/profile/verify-email-otp`, userAuth , userController.resetEmail)
+router.post(`/profile/verify-password`, userAuth, userController.verifyPassword)
+router.post(`/profile/request-email-change`, userAuth, userController.verifyEmail)
+router.post(`/profile/verify-email-otp`, userAuth, userController.resetEmail)
 
 router.get(`/address`, userAuth, userProfileController.addressRender)
 router.get(`/setdefaultaddress/:id`, userAuth, userProfileController.setDefaultAddress)

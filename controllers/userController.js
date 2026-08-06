@@ -4,6 +4,7 @@ const Wallet = require(`../models/walletSchema`)
 const Settings = require(`../models/settingSchema`)
 const Wishlist = require(`../models/wishListSchema`)
 const Otp = require(`../models/otpSchema`)
+const mongoose = require("mongoose")
 
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -60,32 +61,6 @@ const verifyOtp = (otp, storedOtp) => {
 };
 
 
-
-//phone number validation
-const validatePhoneStartsWithPlus91 = async (phone) => {
-  try {
-    if (typeof phone !== "string") {
-      throw new Error("Invalid input: phone number must be a string.");
-    }
-
-    phone = phone.trim();
-
-    if (!phone.startsWith("+91")) {
-      if (phone.startsWith("91")) {
-        phone = `+${phone}`;
-      } else if (phone.startsWith("0")) {
-        phone = `+91${phone.slice(1)}`;
-      } else {
-        phone = `+91${phone}`;
-      }
-    }
-
-    return phone;
-  } catch (err) {
-    console.error("Error while validating the phone number:", err);
-    throw err;
-  }
-};
 
 
 const validateAndCleanEmail = (email) => {
@@ -218,12 +193,6 @@ exports.resetPasswordRender = async (req, res) => {
 
 
 
-
-
-
-
-
-
 exports.registerRender = async (req, res) => {
   if (req.session.user) {
     return res.redirect(`/user/home`)
@@ -252,74 +221,6 @@ exports.userLogout = (req, res) => {
     if (err) return res.status(500).send("Error");
     res.redirect("/user/login");
   });
-};
-
-//========================================================================================================
-//POST METHODS
-
-
-exports.register = async (req, res) => {
-  try {
-    // 1. Secure inputs first inside the try block
-    const passwordHash = await securePassword(req.body.password);
-    const validatePhone = await validatePhoneStartsWithPlus91(req.body.phone);
-    const { verificationToken, tokenExpiration } = generateVerificationCode();
-
-    const existingUser = await User.findOne({ email: req.body.email });
-
-    if (existingUser) {
-      // Scenario A: User is already fully registered
-      if (existingUser.isVerified) {
-        return res.render('user/register', { message: "Email is already registered", plain_body: true });
-      }
-
-      // Scenario B: User exists but is unverified (Overwrite old token and let them try verifying again)
-      existingUser.password = passwordHash; // Update to latest password choice
-      existingUser.phone = validatePhone;
-      existingUser.name = req.body.name;
-      existingUser.verificationToken = verificationToken;
-      existingUser.verificationTokenExpires = tokenExpiration;
-      existingUser.verificationAttempts += 1;
-      existingUser.verificationTimer = Date.now() + 60000; // 1 minute timer
-
-      await existingUser.save();
-      await verificationEmailSend(req.body.email, verificationToken);
-
-      req.session.unknown_user = { _id: existingUser._id, email: existingUser.email };
-
-      return res.render("user/emailVerification", {
-        plain_body: true,
-        verificationTimer: existingUser.verificationTimer,
-        verificationAttempts: existingUser.verificationAttempts
-      });
-    }
-
-    const user = new User({
-      name: req.body.name,
-      phone: validatePhone,
-      email: req.body.email,
-      password: passwordHash,
-      verificationToken: verificationToken,
-      verificationTokenExpires: tokenExpiration,
-      verificationAttempts: 1,
-      verificationTimer: Date.now() + 60000
-    });
-
-    await user.save();
-    await verificationEmailSend(req.body.email, verificationToken);
-
-    req.session.unknown_user = { _id: user._id, email: user.email };
-
-    return res.render("user/emailVerification", {
-      plain_body: true,
-      verificationTimer: user.verificationTimer,
-      verificationAttempts: user.verificationAttempts
-    });
-
-  } catch (error) {
-    console.error("Error during registration:", error);
-    return res.render('user/register', { message: "Error during registration", plain_body: true });
-  }
 };
 
 
@@ -376,126 +277,382 @@ exports.login = async (req, res) => {
 
 
 
-exports.emailVerification = async (req, res) => {
+
+exports.register = async (req, res) => {
   try {
-    const userId = req.session.unknown_user?._id; // Safe navigation operator
-    if (!userId) {
-      return res.status(401).json({ success: false, error: "Session expired. Please log in again." });
+    const { name, email, password, confirmPassword } = req.body;
+    // Basic Validation
+    if (!name || !email || !password || !confirmPassword) {
+      return res.render("user/register", { message: "All fields are required.", plain_body: true });
     }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
+    if (password !== confirmPassword) {
+      return res.render("user/register", { message: "Passwords do not match.", plain_body: true });
     }
-
-    // 1. Rate Limiting Check
-    if (user.verificationAttempts >= 5) { // Recommended >= instead of >
-      user.verificationTimer = new Date(Date.now() + 86400000); // 24 hours
-      user.verificationAttempts = 0;
-      await user.save(); // Fix 1: Added await
-      return res.status(429).json({ success: false, error: "Maximum attempts reached. Try again in 24 hours." }); // 429 is best for rate-limiting
+    // Normalize Email
+    const validatedEmail = validateAndCleanEmail(email);
+    const otpPurpose = "EMAIL_VERIFICATION";
+    // Check Existing User
+    let user = await User.findOne({ email: validatedEmail }).lean();
+    if (user?.isVerified) {
+      return res.render("user/register", { message: "Email is already registered. Please login.", plain_body: true });
     }
-
-    // 2. Token Matching Logic
-    if (user.verificationToken === req.body.verificationCode) {
-      if (user.verificationTokenExpires > Date.now()) {
-        user.isVerified = true;
-        user.verificationToken = null;
-        user.verificationTokenExpires = null;
-        user.verificationAttempts = 0;
-        user.verificationTimer = null;
-        await user.save();
-
-        req.session.user = {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone || null,
-          blocked: user.blocked
-        };
-
-        //session for showing modal for newely registered users
-        req.session.user.showWelcomeModal = true;
-
-        // Clean up temporary user tracking session token context memory
-        delete req.session.unknown_user;
-
-        // Safely call wallet creation (ensure this handles async internally if needed)
-        await createWallet(user._id);
-        await createReferral(user._id);
-
-        return res.json({ success: true, message: "Email verified successfully" });
-      } else {
-        // Fix 2: Increment failure count even on expired tokens
-        user.verificationAttempts += 1;
-        await user.save();
-        console.log("verification code expired");
-        return res.json({ success: false, error: "Verification code expired" });
+    // Prevent Rapid OTP Requests (5 Second Lock)
+    if (user) {
+      const existingOtp = await Otp.findOne({ userId: user._id, purpose: otpPurpose }).lean();
+      if (existingOtp?.resendCount >= 3) {
+        return res.render("user/register", {
+          plain_body: true,
+          message: "OTP Resend Limit Exceeded, Try again Tomorrow"
+        });
       }
-    } else {
-      // Fix 2: Increment tracking count on incorrect entries
-      user.verificationAttempts += 1;
-      await user.save();
-      console.log("invalid verification code");
-      return res.json({ success: false, error: "Invalid verification code" });
+      if (existingOtp && (Date.now() - existingOtp.updatedAt.getTime() < 5000)) {
+        return res.render("user/register", {
+          message: "A verification email was just sent. Please wait 5 seconds before trying again.",
+          plain_body: true
+        });
+      }
     }
+    // Expensive Operations
+    const passwordHash = await securePassword(password);
+    const { otp } = generateOtp();
+    const otpHash = hashOtp(otp);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    // Create User (If New)
+    if (!user) {
+      user = await User.findOneAndUpdate(
+        { email: validatedEmail },
+        {
+          $setOnInsert: {
+            name: name.trim(),
+            email: validatedEmail,
+            password: passwordHash,
+            isVerified: false
+          }
+        },
+        { upsert: true, new: true, lean: true }
+      );
+    }
+    // --- FIX: Separated paths to avoid MongoServerError Path Conflict ---
+    // Try updating an existing document first
+    const updateResult = await Otp.updateOne(
+      { userId: user._id, purpose: otpPurpose },
+      {
+        $set: { otpHash, attempts: 0, expiresAt },
+        $inc: { resendCount: 1 }
+      },
+      { upsert: false } // Do not upsert here
+    );
+    // If no document matched, it means it's a new registration creation event
+    if (updateResult.matchedCount === 0) {
+      await Otp.updateOne(
+        { userId: user._id, purpose: otpPurpose },
+        {
+          $set: { otpHash, attempts: 0, expiresAt },
+          $setOnInsert: { resendCount: 0 } // Sets it strictly to 0 on initial creation
+        },
+        { upsert: true }
+      );
+    }
+    // ------------------------------------------------------------------
+    // Send Verification Email
+    await verificationEmailSend(validatedEmail, otp);
+    // Store Session
+    req.session.unknown_user = {
+      _id: user._id.toString(),
+      email: validatedEmail,
+      otpExpiresAt: expiresAt.toISOString(),
+      resendAvailableAt: new Date(
+        Date.now() + 60000
+      ).toISOString()
+    };
+    // Render Verification Page
+    return res.redirect("/user/emailverification");
   } catch (error) {
-    console.error("Error during email verification:", error);
-    return res.status(500).json({ success: false, error: "An error occurred during verification" });
+    console.error("Registration Error:", error);
+    return res.render("user/register", { message: "Something went wrong. Please try again.", plain_body: true });
   }
 };
+
+
+
+
+
+
+
+exports.emailVerificationRender = (req, res) => {
+  const sessionUser = req.session.unknown_user;
+
+  if (!sessionUser) {
+    return res.redirect("/user/register");
+  }
+  res.render("user/emailVerification", {
+    plain_body: true,
+    verificationTimer: sessionUser.otpExpiresAt,
+    resendTimer: sessionUser.resendAvailableAt
+  });
+};
+
+
+
 
 
 
 
 exports.resendEmailVerification = async (req, res) => {
   try {
-    // 1. Safe Session Check (Prevents server crashes)
-    if (!req.session || !req.session.unknown_user) {
-      return res.status(401).json({ success: false, error: "Session expired. Please log in again." });
-    }
-
-    const userId = req.session.unknown_user._id;
-    const userEmail = req.session.unknown_user.email;
-
-    // 2. Database Fetch
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
-
-    // 3. Timer Check
-    const currentTime = Date.now();
-    if (user.verificationTimer > currentTime) {
-      return res.json({
+    const otpPurpose = "EMAIL_VERIFICATION";
+    //  Session Validation
+    const sessionUser = req.session.unknown_user;
+    if (!sessionUser?._id) {
+      return res.status(401).json({
         success: false,
-        newTimer: user.verificationTimer,
-        error: "Please wait 1 minute before requesting a new code."
+        error: "Session expired. Please register again."
       });
     }
-
-    // 4. Generate & Assign New Token Data
-    const { verificationToken, tokenExpiration } = generateVerificationCode();
-
-    user.verificationToken = verificationToken;
-    user.verificationTokenExpires = new Date(tokenExpiration); // Ensure it saves as ISODate
-    user.verificationAttempts += 1;
-    user.verificationTimer = new Date(currentTime + 60000); // 1 minute from now
-
-    // 5. Save to Database First
-    await user.save();
-
-    // 6. Send Email Safely
-    const emailResult = await verificationEmailSend(userEmail, verificationToken);
-
-    // 7. Proper response delivery
-    return res.json({ success: true, newTimer: user.verificationTimer });
-
+    const validatedEmail = validateAndCleanEmail(sessionUser.email);
+    const user = await User.findById(sessionUser._id).lean();
+    if (!user) {
+      req.session.unknown_user = null;
+      return res.status(401).json({
+        success: false,
+        error: "Session expired. Please register again."
+      });
+    }
+    //  Existing OTP
+    const existingOtp = await Otp.findOne({
+      userId: user._id,
+      purpose: otpPurpose
+    }).lean();
+    if (!existingOtp) {
+      return res.status(404).json({
+        success: false,
+        error: "Verification session not found."
+      });
+    }
+    //  Resend Limit
+    if (existingOtp.resendCount >= 3) {
+      return res.status(429).json({
+        success: false,
+        error: "OTP resend limit exceeded. Please try again tomorrow."
+      });
+    }
+    //  Rapid Click Protection
+    if (Date.now() - existingOtp.updatedAt.getTime() < 5000) {
+      return res.status(429).json({
+        success: false,
+        error: "Please wait a few seconds before requesting another OTP."
+      });
+    }
+    //  Generate New OTP
+    const { otp } = generateOtp();
+    const otpHash = hashOtp(otp);
+    const expiresAt = new Date(Date.now() + (15 * 60 * 1000));
+    const resendAvailableAt = new Date(Date.now() + (60 * 1000));
+    //  Update OTP
+    await Otp.updateOne(
+      {
+        userId: user._id,
+        purpose: otpPurpose
+      },
+      {
+        $set: {
+          otpHash,
+          attempts: 0,
+          expiresAt
+        },
+        $inc: {
+          resendCount: 1
+        }
+      }
+    );
+    //  Send Email
+    await verificationEmailSend(validatedEmail, otp);
+    //  Update Session Timers
+    req.session.unknown_user.otpExpiresAt =
+      expiresAt.toISOString();
+    req.session.unknown_user.resendAvailableAt =
+      resendAvailableAt.toISOString();
+    //  Success
+    return res.status(200).json({
+      success: true,
+      message: "Verification code sent successfully.",
+      verificationTimer: expiresAt.toISOString(),
+      resendTimer: resendAvailableAt.toISOString()
+    });
   } catch (error) {
-    console.error("Resend Email Error:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
+    console.error("Resend Email Verification:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Something went wrong. Please try again."
+    });
   }
 };
+
+
+
+
+
+
+exports.emailVerification = async (req, res) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const { verificationCode } = req.body;
+    const otpPurpose = "EMAIL_VERIFICATION";
+    //  Session Validation
+    const sessionUser = req.session.unknown_user;
+    if (!sessionUser?._id) {
+      await session.abortTransaction();
+      return res.status(401).json({
+        success: false,
+        error: "Session expired. Please register again.",
+      });
+    }
+    if (!verificationCode) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        error: "Please enter the verification code.",
+      });
+    }
+    const userId = sessionUser._id;
+    //  Fetch User
+    const user = await User.findById(userId)
+      .select("_id name email blocked isVerified")
+      .lean()
+      .session(session);
+    if (!user) {
+      await session.abortTransaction();
+      delete req.session.unknown_user;
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
+    }
+    if (user.isVerified) {
+      await session.abortTransaction();
+      delete req.session.unknown_user;
+      return res.status(400).json({
+        success: false,
+        error: "Email is already verified.",
+      });
+    }
+    //  Fetch OTP
+    const existingOtp = await Otp.findOne({
+      userId,
+      purpose: otpPurpose,
+    })
+      .lean()
+      .session(session);
+    if (!existingOtp) {
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        error: "No active verification request found.",
+      });
+    }
+    //  OTP Expiry Check
+    if (Date.now() > existingOtp.expiresAt.getTime()) {
+      await session.abortTransaction();
+      return res.status(410).json({
+        success: false,
+        error: "Verification code has expired.",
+      });
+    }
+    //  OTP Attempt Limit
+    if (existingOtp.attempts >= 5) {
+      await session.abortTransaction();
+      return res.status(429).json({
+        success: false,
+        error:
+          "Maximum verification attempts reached. Please request another OTP.",
+      });
+    }
+    //  Verify OTP
+    const isMatch = verifyOtp(verificationCode, existingOtp.otpHash);
+    if (!isMatch) {
+      await Otp.updateOne(
+        { _id: existingOtp._id },
+        {
+          $inc: {
+            attempts: 1,
+          },
+        },
+      ).session(session);
+      await session.commitTransaction();
+      return res.status(401).json({
+        success: false,
+        error: "Invalid verification code.",
+      });
+    }
+    //  Verify User
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          isVerified: true,
+        },
+      },
+    ).session(session);
+    //  Delete OTP
+    await Otp.deleteOne({
+      _id: existingOtp._id,
+    }).session(session);
+    //  Create Wallet
+    const wallet = await createWallet(userId, session);
+    if (!wallet) {
+      await session.abortTransaction();
+      delete req.session.unknown_user;
+      return res.status(500).json({
+        success: false,
+        error: "Unable to create wallet.",
+      });
+    }
+    //  Create Referral
+    const referral = await createReferral(userId, session);
+    if (!referral) {
+      await session.abortTransaction();
+      delete req.session.unknown_user;
+      return res.status(500).json({
+        success: false,
+        error: "Unable to create referral.",
+      });
+    }
+    //  Commit Transaction
+    await session.commitTransaction();
+    //  Login Session
+    req.session.user = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      blocked: user.blocked,
+      showWelcomeModal: true,
+    };
+    delete req.session.unknown_user;
+    //  Success
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully.",
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("Email Verification Error:", error);
+    delete req.session.unknown_user;
+    return res.status(500).json({
+      success: false,
+      error: "An unexpected error occurred.",
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+
+
+
+
+
+
 
 
 
@@ -794,9 +951,9 @@ exports.verifyPassword = async (req, res) => {
 }
 
 
-
-
-
+//////////////////////////////
+///      RESET EMAIL      ///
+////////////////////////////
 
 exports.verifyEmail = async (req, res) => {
   try {
@@ -813,7 +970,7 @@ exports.verifyEmail = async (req, res) => {
     const currentPurpose = "RESET_EMAIL";
     const existingOtp = await Otp.findOne({ userId, purpose: currentPurpose }).lean();
 
-    if (existingOtp?.resendCount > 3) {
+    if (existingOtp?.resendCount >= 3) {
       return res.status(400).json({
         success: false,
         message: "OTP Resend Limit Exceeded, Try again Tomorrow"
@@ -836,7 +993,7 @@ exports.verifyEmail = async (req, res) => {
           $set: {
             otpHash: hashOtp(otp),
             attempts: 0, // Reset incorrect guesses back to 0 because a fresh code was sent
-            expiresAt: new Date(Date.now() + (5 * 60 * 1000)) // Extend window by 5 mins
+            expiresAt: new Date(Date.now() + (15 * 60 * 1000)) // Extend window by 15 mins
           },
           $inc: {
             resendCount: 1 // Atomically increment the request rate counter by 1
@@ -906,7 +1063,7 @@ exports.resetEmail = async (req, res) => {
     }
 
     // 4. Rate Limiting Check
-    if (existingOtp.attempts >= 3) {
+    if (existingOtp.attempts >= 5) {
       return res.status(429).json({ success: false, message: "Maximum OTP attempts reached. Please generate another OTP." });
     }
 
