@@ -4,53 +4,47 @@
 <div class="dashboard-container">
     <div class="header">
         <h1 class="page-title">Product Management</h1>
-      <div style="display:flex; align-items:center; gap:15px;">
+        <div style="display:flex; align-items:center; gap:15px;">
 
-    <form method="GET" action="/admin/products"
-        style="display:flex; align-items:center; gap:10px;">
+            <form method="GET" action="/admin/products" style="display:flex; align-items:center; gap:10px;">
 
-        <div class="search-container">
-            <input
-                type="search"
-                name="query"
-                class="search-input"
-                id="search-input"
-                placeholder="Search products..."
-                value="{{query}}">
+                <div class="search-container">
+                    <input type="search" name="query" class="search-input" id="search-input"
+                        placeholder="Search products..." value="{{query}}">
+                </div>
+
+                <select name="status" class="form-select" style="width:170px; height:44px;">
+
+                    <option value="" {{#unless status}}selected{{/unless}}>
+                        All Products
+                    </option>
+
+                    <option value="active" {{#ifCond status "==" "active" }}selected{{/ifCond}}>
+                        Active Products
+                    </option>
+
+                    <option value="blocked" {{#ifCond status "==" "blocked" }}selected{{/ifCond}}>
+                        Blocked Products
+                    </option>
+
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+
+                <a href="/admin/products" class="btn btn-outline-secondary">
+                    Reset
+                </a>
+
+            </form>
+
+            <button onclick="location.href='/admin/addProducts'" class="add-product-btn">
+                + Add Product
+            </button>
+
         </div>
-
-        <select name="status" class="form-select" style="width:170px; height:44px;">
-
-            <option value="" {{#unless status}}selected{{/unless}}>
-                All Products
-            </option>
-
-            <option value="active" {{#ifCond status "==" "active"}}selected{{/ifCond}}>
-                Active Products
-            </option>
-
-            <option value="blocked" {{#ifCond status "==" "blocked"}}selected{{/ifCond}}>
-                Blocked Products
-            </option>
-
-        </select>
-
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-search"></i>
-            Search
-        </button>
-
-        <a href="/admin/products" class="btn btn-outline-secondary">
-            Reset
-        </a>
-
-    </form>
-
-    <button onclick="location.href='/admin/addProducts'" class="add-product-btn">
-        + Add Product
-    </button>
-
-</div>
     </div>
     {{#if products.length}}
     <div class="orders-table">
@@ -104,10 +98,10 @@
                         {{/if}}
                     </td>
                     <td data-label="Category">
-                        {{getCategoryName this.categoryId ../categories}}  
+                        {{getCategoryName this.categoryId ../categories}}
                     </td>
                     <td data-label="Inventory">
-                        {{this.details.[0].quantity}}
+                        {{this.totalStock}}
                     </td>
                     <td data-label="Offer Code">
                         {{#if this.currentOfferCode}}
@@ -224,7 +218,7 @@
             There are currently no products in your store.
             Add your first product to get started!
         </p>
-         <button onclick="window.location.href='/admin/products'" class="add-product-btn empty-state-btn">
+        <button onclick="window.location.href='/admin/products'" class="add-product-btn empty-state-btn">
             Refresh
         </button>
         {{/unless}}

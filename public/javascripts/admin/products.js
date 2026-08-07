@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Await confirmation directly from the standalone alert modal script file
             const confirmed = await showCustomConfirm(
                 `${actionText} Product?`,
-                `Are you sure you want to ${actionText.toLowerCase()} this product layout?\nThis updates store-front catalog visibility configurations instantly.`,
+                `Are you sure you want to ${actionText.toLowerCase()} this product ?`,
                 modalType
             );
 

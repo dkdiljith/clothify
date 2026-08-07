@@ -1005,6 +1005,13 @@ exports.showProducts = async (req, res) => {
                 .lean(),
             Category.find({}).lean(),
         ]);
+
+        products.forEach(product => {
+            product.totalStock = product.details.reduce(
+                (sum, detail) => sum + (detail.quantity || 0),
+                0
+            );
+        });
         const totalPages = Math.ceil(totalDocuments / limit);
         // 4. Render the page with data and pagination helpers
         return res.render("admin/products", {
