@@ -1,127 +1,126 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('forgotPasswordForm');
-  const emailInput = document.getElementById('email');
-  const emailError = document.getElementById('emailError');
-  const sendButton = document.getElementById('sendButton');
-  const sentMessage = document.getElementById('sentMessage');
-  const resendText = document.getElementById('resendText');
-  const serverTimer = document.getElementById('serverResetTimer');
-  let timerInterval;
-
-  // Initialize timer if exists
-  if (serverTimer) {
-    startCountdown(calculateRemainingTime(serverTimer.value));
+document.addEventListener("DOMContentLoaded", () => {
+  /* ==========================================
+       Elements
+    ========================================== */
+  const form = document.getElementById("forgotPasswordForm");
+  const emailInput = document.getElementById("email");
+  const emailError = document.getElementById("emailError");
+  const sendButton = document.getElementById("sendButton");
+  /* ==========================================
+       State
+    ========================================== */
+  let requestInProgress = false;
+  /* ==========================================
+       Helpers
+    ========================================== */
+  function showError(message) {
+    emailError.textContent = message;
+    emailError.classList.remove("hidden");
+    emailError.classList.add("visible");
   }
-
-  function calculateRemainingTime(serverTime) {
-    const serverTimeMs = new Date(serverTime).getTime();
-    const now = Date.now();
-    const remainingMillis = serverTimeMs - now;
-    return Math.max(Math.floor(remainingMillis / 1000), 0);
+  function clearError() {
+    emailError.textContent = "";
+    emailError.classList.remove("visible");
+    emailError.classList.add("hidden");
   }
-
-  function startCountdown(seconds) {
-    form.style.display = 'none';
-    sentMessage.style.display = 'block';
-    
-    let remaining = seconds;
-    updateResendText(remaining);
-    
-    timerInterval = setInterval(() => {
-      remaining--;
-      updateResendText(remaining);
-      
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        resendText.style.color = '#007bff';
-        resendText.addEventListener('click', handleResend);
-      }
-    }, 1000);
-  }
-
-  function updateResendText(seconds) {
-    resendText.textContent = seconds;
-    resendText.style.color = seconds > 0 ? '#595959' : '#007bff';
-  }
-
   function validateEmail() {
-    const email = emailInput.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+    clearError();
+    emailInput.value = emailInput.value.trim().toLowerCase();
+    const email = emailInput.value;
     if (!email) {
-      emailError.textContent = 'Email is required';
+      showError("Please enter your email address.");
       return false;
-    } else if (!emailRegex.test(email)) {
-      emailError.textContent = 'Please enter a valid email address';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showError("Please enter a valid email address.");
       return false;
-    } else {
-      emailError.textContent = '';
-      return true;
     }
+    return true;
   }
-
-  async function handleResend() {
-    if (!validateEmail()) return;
-    
-    try {
-      sendButton.disabled = true;
-      sendButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
-      
-      const response = await fetch('/user/resend-reset-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('input[name="_csrf"]').value
-        },
-        body: JSON.stringify({ email: emailInput.value.trim() })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        startCountdown(calculateRemainingTime(data.newResetTimer));
-      } else {
-        emailError.textContent = data.error || 'Failed to resend email';
-      }
-    } catch (error) {
-      emailError.textContent = 'Network error. Please try again.';
-    } finally {
-      sendButton.disabled = false;
-      sendButton.textContent = 'Send Email';
-    }
+  /* ==========================================
+       Button Helpers
+    ========================================== */
+  function lockButton() {
+    sendButton.disabled = true;
+    sendButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Sending...
+        `;
   }
-
-  form.addEventListener('submit', async function(e) {
+  function unlockButton() {
+    sendButton.disabled = false;
+    sendButton.textContent = "Send Verification Code";
+  }
+  /* ==========================================
+       Live Validation
+    ========================================== */
+  emailInput.addEventListener("input", () => {
+    clearError();
+    emailInput.value = emailInput.value.replace(/\s/g, "").toLowerCase();
+  });
+  emailInput.addEventListener("blur", validateEmail);
+  /* ==========================================
+       Submit
+    ========================================== */
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+    if (requestInProgress) return;
     if (!validateEmail()) return;
-    
+    requestInProgress = true;
+    lockButton();
     try {
-      sendButton.disabled = true;
-      sendButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
-      
-      const response = await fetch('/user/forgetpassword', {
-        method: 'POST',
+      const response = await fetch("/user/forgetPassword", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('input[name="_csrf"]').value
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: emailInput.value.trim() })
+        body: JSON.stringify({
+          email: emailInput.value,
+        }),
       });
-      
       const data = await response.json();
-      if (data.success) {
-        startCountdown(calculateRemainingTime(data.resetTimer));
-      } else {
-        emailError.textContent = data.error || 'Failed to send reset email';
+      if (!response.ok || !data.success) {
+        showError(data.error || "Unable to send verification code.");
+        return;
       }
+      showPopupMessage(data.message, "success");
+
+      setTimeout(() => {
+        location.reload();
+      }, 3000);
     } catch (error) {
-      emailError.textContent = 'Network error. Please try again.';
+      console.error(error);
+      showError("Unable to connect to the server.");
     } finally {
-      sendButton.disabled = false;
-      sendButton.textContent = 'Send Email';
+      requestInProgress = false;
+      unlockButton();
     }
   });
-
-  emailInput.addEventListener('input', validateEmail);
-  emailInput.addEventListener('blur', validateEmail);
+  const errorCode = document.getElementById("errorCode")?.value;
+  if (errorCode) {
+    const errors = {
+      sessionExpired:
+        "Your password reset session has expired. Please try again.",
+      invalidLink:
+        "This password reset link is invalid.",
+      otpExpired:
+        "Your password reset link has expired. Please request another one.",
+      maxAttempts:
+        "Maximum verification attempts reached. Please request another reset email.",
+      userNotFound:
+        "User account not found.",
+      serverError:
+        "Something went wrong. Please try again."
+    };
+    showError(errors[errorCode] || "Something went wrong.");
+  }
+  /* ==========================================
+       Submit with Enter
+    ========================================== */
+  emailInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    form.requestSubmit();
+  });
 });

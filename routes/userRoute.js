@@ -14,6 +14,11 @@ router.use((req, res, next) => {
   next();
 });
 
+//HEADER BADGES
+const headerBadge = require(`../middlewares/headerBadge`)
+router.use(headerBadge)
+
+
 //RAZORPAY integration//
 const razorpay = require(`../services/razorpay`)
 
@@ -29,6 +34,7 @@ const walletController = require(`../controllers/walletController`)
 const couponController = require(`../controllers/couponController`)
 const searchController = require(`../controllers/searchController`)
 const addressController = require(`../controllers/addressController`)
+const referralController = require(`../controllers/referralController`)
 
 //usetAuth (session) 
 const userAuth = require(`../middlewares/auth`).userAuth
@@ -53,17 +59,18 @@ router.route(`/register`)
   .get(userController.registerRender)
   .post(userController.register)
 
-router.route(`/forgetpassword`)
+router.route(`/emailVerification`)
+  .get(userController.emailVerificationRender)
+  .post(userController.emailVerification)
+router.post(`/resend-email-verification`, userController.resendEmailVerification)
+
+router.route(`/forgetPassword`)
   .get(userController.forgetPasswordRender)
   .post(userController.forgetPassword)
-
 router.get('/resetpassword/:token', userController.resetPasswordRender)
-router.get(`/logout`, userController.userLogout)
-
-router.post(`/emailverification`, userController.emailVerification)
-router.post(`/resend-verification`, userController.resendEmailVerification)
-router.post(`/resend-reset-email`, userController.resendResetEmail)
 router.post(`/resetpassword`, userController.resetPassword)
+
+router.get(`/logout`, userController.userLogout)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -72,24 +79,22 @@ router.get(`/home`, userController.homeRender)
 router.get('/collections', searchController.collections);
 router.get('/singleproduct/:id', productController.singleProductPage)
 
-//for Header Icon
-router.get(`/cartDataIcon`, userAuth, cartController.cartDataIcon)
-router.get(`/wishlistDataIcon`, userAuth, wishlistController.wishlistDataIcon)
 
 //ADD TO CART
-router.get(`/cart`, userAuth,productValidator, cartController.cartRender)
-router.post('/cart/:productId/:variationIndex/:quantity', userAuth,productValidator, cartController.addToCart)
+router.get(`/cart`, userAuth, productValidator, cartController.cartRender)
+router.post('/cart/:productId/:variationIndex/:quantity', userAuth, cartController.addToCart)
 router.delete('/cart/:productId/:variationIndex', userAuth, cartController.deleteCart)
-router.get(`/addressInCart`, userAuth,productValidator, cartController.getAddressInCart)
+router.get(`/addressInCart`, userAuth, productValidator, cartController.getAddressInCart)
 
-router.get('/address/:id', userAuth,productValidator, addressController.renderEditForm)
-router.post('/postAddressInCart', userAuth,productValidator, addressController.addAddress);
-router.put('/address/:id', userAuth,productValidator, addressController.editAddress);
-router.delete('/address/:id', userAuth,productValidator, addressController.deleteAddress);
-router.put('/address/default/:id', userAuth,productValidator, addressController.setDefaultAddress);
+router.get('/address/:id', userAuth, productValidator, addressController.renderEditForm)
+router.post('/postAddressInCart', userAuth, productValidator, addressController.addAddress);
+router.put('/address/:id', userAuth, productValidator, addressController.editAddress);
+router.delete('/address/:id', userAuth, productValidator, addressController.deleteAddress);
+router.put('/address/default/:id', userAuth, productValidator, addressController.setDefaultAddress);
 
-router.get('/payment', userAuth,productValidator, userOrderController.payment);
-router.post(`/placeorder`, userAuth,productValidator, userOrderController.placeOrder)
+router.post("/payment/process", userAuth, productValidator, cartController.processPaymentPage);
+router.get('/payment', userAuth, productValidator, userOrderController.payment);
+router.post(`/placeorder`, userAuth, userOrderController.placeOrder)
 router.post(`/payment/failure`, userAuth, userOrderController.placeOrderFailed)
 router.get(`/orderSuccess`, userAuth, userOrderController.orderSuccess)
 router.get(`/orderFailure`, userAuth, userOrderController.orderFailed)
@@ -99,13 +104,18 @@ router.post(`/cart/apply-coupon`, userAuth, couponController.applyCoupon)
 router.delete(`/cart/remove-coupon`, userAuth, couponController.removeCoupon)
 
 //WIshlist
-router.get(`/wishlist`, userAuth,productValidator, wishlistController.wishlistRender)
+router.get(`/wishlist`, userAuth, wishlistController.wishlistRender)
 router.post(`/addtowishlist/:id/:variationIndex`, userAuth, wishlistController.addToWishlist)
+router.post(`/cart/wishlist/:productId`, userAuth, wishlistController.addToCartFromWishlist)
 router.delete(`/removeFromWishlist/:id`, userAuth, wishlistController.removeFromWishlist)
 
 //USER PROFILE
 router.get(`/profile`, userAuth, userProfileController.profileRender)
-router.get(`/profileedit`, userAuth, userProfileController.profileEditRender)
+router.post(`/profile/update`, userAuth, userProfileController.profileEdit)
+router.post(`/profile/verify-password`, userAuth, userController.verifyPassword)
+router.post(`/profile/request-email-change`, userAuth, userController.verifyEmail)
+router.post(`/profile/verify-email-otp`, userAuth, userController.resetEmail)
+
 router.get(`/address`, userAuth, userProfileController.addressRender)
 router.get(`/setdefaultaddress/:id`, userAuth, userProfileController.setDefaultAddress)
 router.get(`/deleteaddress/:id`, userAuth, userProfileController.deleteAddress)
@@ -114,13 +124,18 @@ router.get(`/editaddress/:id`, userAuth, userProfileController.editAddressRender
 router.get(`/deleteuser`, userAuth, userProfileController.deleteUserRender)
 router.post(`/deleteuseraccount`, userAuth, userProfileController.deleteUser)
 router.get(`/orders`, userAuth, userProfileController.userOrders)
-router.get(`/orderDetails/:orderId/:itemId`, userAuth, userProfileController.userOrderDetails)
+router.get(`/orderDetails/:orderId`, userAuth, userProfileController.userOrderDetails)
 router.post(`/download-invoice`, userAuth, downloadInvoice)
 router.get(`/security`, userAuth, userProfileController.securityRender)
 
-router.post('/cancel-order', userAuth, orderController.orderCancel)
-router.post('/return-order', userAuth, orderController.orderReturn)
-router.post(`/profileedit`, userAuth, userProfileController.profileEdit)
+router.route(`/referral`)
+  .get(userAuth, referralController.referral)
+  .post(userAuth, referralController.applyReferral)
+router.post(`/referral/reedeem`, userAuth, referralController.redeemCoin)
+router.post(`/referral/cancel`, userAuth, referralController.cancelReferral)
+
+router.post('/order/cancel-item', userAuth, orderController.orderCancel)
+router.post('/order/return-item', userAuth, orderController.orderReturn)
 router.post(`/addaddress`, userAuth, userProfileController.addAddress)
 router.post(`/editaddress/:id`, userAuth, userProfileController.editAddress)
 

@@ -1,0 +1,380 @@
+{{#section "head"}}
+<title>Referral Settings</title>
+<link rel="stylesheet" href="/stylesheets/admin/settings/referralSettings.css">
+{{/section}}
+
+
+<section class="settings-content">
+
+    <!-- =======================================================
+        Header
+    ======================================================== -->
+
+    <div class="settings-card-header">
+
+        <div>
+
+            <h2>
+
+                Referral Program
+
+            </h2>
+
+            <p>
+
+                Configure the referral rewards and coin system for Clothify.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =======================================================
+        Form
+    ======================================================== -->
+
+    <form
+        id="referralSettingsForm"
+        class="settings-form"
+        novalidate>
+
+        <div class="settings-body">
+
+            <!-- ===================================================
+                LEFT
+            ==================================================== -->
+
+            <div class="settings-fields">
+
+                <!-- Coin Value -->
+
+                <div class="form-group">
+
+                    <label for="coinValue">
+
+                        Coin Value
+
+                    </label>
+
+                    <input
+
+                        id="coinValue"
+
+                        name="coinValue"
+
+                        type="text"
+
+                        step="0.00001"
+
+                        min="0.00001"
+
+                        max="1"
+
+                        autocomplete="off"
+
+                        inputmode="decimal"
+
+                        value="{{settings.referralSettings.coinValue}}">
+
+                    <div
+                        class="input-error-msg"
+                        id="coinValueError">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Signup Bonus -->
+
+                <div class="form-group">
+
+                    <label for="signupBonus">
+
+                        Signup Bonus
+
+                    </label>
+
+                    <input
+
+                        id="signupBonus"
+
+                        name="signupBonus"
+
+                        type="text"
+
+                        min="0"
+
+                        max="10000"
+
+                        inputmode="numeric"
+
+                        value="{{settings.referralSettings.signupBonus}}">
+
+                    <div
+                        class="input-error-msg"
+                        id="signupBonusError">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Referrer Reward -->
+
+                <div class="form-group">
+
+                    <label for="referrerReward">
+
+                        Referrer Reward
+
+                    </label>
+
+                    <input
+
+                        id="referrerReward"
+
+                        name="referrerReward"
+
+                        type="text"
+
+                        min="0"
+
+                        max="10000"
+
+                        inputmode="numeric"
+
+                        value="{{settings.referralSettings.referrerReward}}">
+
+                    <div
+                        class="input-error-msg"
+                        id="referrerRewardError">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Referee Reward -->
+
+                <div class="form-group">
+
+                    <label for="refereeReward">
+
+                        Referee Reward
+
+                    </label>
+
+                    <input
+
+                        id="refereeReward"
+
+                        name="refereeReward"
+
+                        type="text"
+
+                        min="0"
+
+                        max="10000"
+
+                        inputmode="numeric"
+
+                        value="{{settings.referralSettings.refereeReward}}">
+
+                    <div
+                        class="input-error-msg"
+                        id="refereeRewardError">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Holding Period -->
+
+                <div class="form-group">
+
+                    <label for="referralHoldingPeriodDays">
+
+                        Referral Holding Period
+
+                    </label>
+
+                    <div class="inline-input">
+
+                        <input
+
+                            id="referralHoldingPeriodDays"
+
+                            name="referralHoldingPeriodDays"
+
+                            type="text"
+
+                            min="1"
+
+                            max="30"
+
+                            inputmode="numeric"
+
+                            value="{{settings.referralSettings.referralHoldingPeriodDays}}">
+
+                        <span>
+
+                            Days
+
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="input-error-msg"
+                        id="holdingPeriodError">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ===================================================
+                RIGHT
+            ==================================================== -->
+
+            <div class="settings-summary">
+
+                <h3>
+
+                    Configuration Summary
+
+                </h3>
+
+                <ul>
+
+                    <li>
+
+                        <span>
+
+                            100 Coins Value
+
+                        </span>
+
+                        <strong id="previewCoinValue">
+
+                            ₹{{multiply 100 settings.referralSettings.coinValue}}
+
+                        </strong>
+
+                    </li>
+
+                    <li>
+
+                        <span>
+
+                            Referrer Reward
+
+                        </span>
+
+                        <strong id="previewReferrer">
+
+                            {{settings.referralSettings.referrerReward}} Coins
+
+                        </strong>
+
+                    </li>
+
+                    <li>
+
+                        <span>
+
+                            Referee Reward
+
+                        </span>
+
+                        <strong id="previewReferee">
+
+                            {{settings.referralSettings.refereeReward}} Coins
+
+                        </strong>
+
+                    </li>
+
+                    <li>
+
+                        <span>
+
+                            Signup Bonus
+
+                        </span>
+
+                        <strong id="previewSignup">
+
+                            {{settings.referralSettings.signupBonus}} Coins
+
+                        </strong>
+
+                    </li>
+
+                    <li>
+
+                        <span>
+
+                            Holding Period
+
+                        </span>
+
+                        <strong id="previewHolding">
+
+                            {{settings.referralSettings.referralHoldingPeriodDays}} Days
+
+                        </strong>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ===================================================
+            Footer
+        ==================================================== -->
+
+        <div class="settings-footer">
+
+            <button
+
+                id="saveReferralSettings"
+
+                type="submit"
+
+                class="btn-primary">
+
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Save Changes
+
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+
+
+{{#section "scripts"}}
+<script src="/javascripts/admin/settings/referralSettings.js"></script>
+{{/section}}

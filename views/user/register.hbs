@@ -1,64 +1,80 @@
-<head>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/register.css">
-</head>
-
-<body
+{{#section "head"}}
+<link rel="stylesheet" href="/stylesheets/user/register.css" />
+{{/section}}
+<div class="register-background"
   style="background: url('https://i.postimg.cc/GptyXvpN/pexels-badun-17097094.jpg') no-repeat center center fixed; background-size: cover; position: relative;">
-  <!-- Website logo in the top-left corner -->
+  <!-- Website Logo -->
   <img src="https://i.postimg.cc/Njc59RgL/Clothify-logo-white.png" alt="Clothify Logo" class="website-logo" />
-
   <section class="d-flex justify-content-center align-items-center vh-100">
     <div class="container">
       <div class="row justify-content-end">
         <div class="col-md-6 col-lg-5">
           <div class="registration-card">
-            <form id="registrationForm" method="post" action="/user/register" novalidate>
-              <h3 class="text-center">Register</h3>
-              <p class="userController-error-message">{{message}}</p>
-              <div class="form-group mb-4">
-                <i class="fas fa-user"></i>
-                <input type="text" name="name" id="name" class="form-control" placeholder="Enter Your Full Name"
-                  minlength="5" maxlength="20" data-required="true" />
-                <small class="error-message" id="nameError"></small>
+            <form id="registrationForm" action="/user/register" method="POST" novalidate autocomplete="on">
+              <h3 class="text-center mb-4">
+                Create Your Account
+              </h3>
+              {{#if message}}
+              <div class="userController-error-message">
+                {{message}}
               </div>
-
-              <!-- Phone -->
-              <div class="form-group mb-4">
-                <i class="fas fa-phone"></i>
-                <input type="tel" name="phone" id="phone" class="form-control" placeholder="Enter Your Phone Number"
-                  minlength="10" maxlength="13" data-required="true" />
-                <small class="error-message" id="phoneError"></small>
-              </div>
-
-              <!-- Email -->
-              <div class="form-group mb-4">
-                <i class="fas fa-envelope"></i>
-                <input name="email" id="email" class="form-control" placeholder="Enter Your Email Address" minlength="5"
-                  maxlength="50" data-required="true" />
-                <small class="error-message" id="emailError"></small>
-              </div>
-
-              <!-- Password -->
-              <div class="form-group mb-3">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" id="password" class="form-control"
-                  placeholder="Create Your Password" minlength="8" maxlength="20" data-required="true" />
-                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
-                <small class="error-message" id="passwordError"></small>
-              </div>
-
-              <div class="text-center text-lg-start mt-4 pt-2">
-                <button type="submit" class="btn btn-primary-red btn-lg w-100">
-                  Sign up
-                </button>
-                <div class="custom-links d-flex justify-content-center mt-2">
-                  <p class="small fw-bold mb-0">
-                    <a href="/user/login" class="btn-register">
-                      Back to Login
-                      <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                  </p>
+              {{/if}}
+              <!-- Full Name -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <i class="fas fa-user"></i>
+                  <input type="text" id="name" name="name" class="form-control" placeholder="Full Name"
+                    autocomplete="name" minlength="5" maxlength="20" required />
                 </div>
+                <small id="nameError" class="error-message hidden" aria-live="polite">
+                </small>
+              </div>
+              <!-- Email -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <i class="fas fa-envelope"></i>
+                  <input type="email" id="email" name="email" class="form-control" placeholder="Email Address"
+                    autocomplete="email" spellcheck="false" maxlength="50" required />
+                </div>
+                <small id="emailError" class="error-message hidden" aria-live="polite">
+                </small>
+              </div>
+              <!-- Password -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <i class="fas fa-lock"></i>
+                  <input type="password" id="password" name="password" class="form-control"
+                    placeholder="Create Password" autocomplete="new-password" minlength="8" maxlength="20" required />
+                  <i id="togglePassword" class="fas fa-eye password-toggle" aria-label="Show password" role="button"
+                    tabindex="0">
+                  </i>
+                </div>
+                <small id="passwordError" class="error-message hidden" aria-live="polite">
+                </small>
+              </div>
+              <!-- Confirm Password -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <i class="fas fa-lock"></i>
+                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                    placeholder="Confirm Password" autocomplete="new-password" minlength="8" maxlength="20" required />
+                  {{!-- <i id="toggleConfirmPassword" class="fas fa-eye password-toggle" aria-label="Show confirm password"
+                    role="button" tabindex="0">
+                  </i> --}}
+                </div>
+                <small id="confirmPasswordError" class="error-message hidden" aria-live="polite">
+                </small>
+              </div>
+              <!-- Register Button -->
+              <button type="submit" class="btn btn-primary-red btn-lg w-100">
+                Sign Up
+              </button>
+              <!-- Login Link -->
+              <div class="custom-links">
+                <a href="/user/login">
+                  <i class="fas fa-arrow-left me-2"></i>
+                  Back to Login
+                </a>
               </div>
             </form>
           </div>
@@ -66,6 +82,7 @@
       </div>
     </div>
   </section>
-
-  <script src="/javascripts/user/register.js" defer></script>
-</body>
+</div>
+{{#section "scripts"}}
+<script src="/javascripts/user/register.js" defer></script>
+{{/section}}

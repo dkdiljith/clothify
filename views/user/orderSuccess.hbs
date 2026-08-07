@@ -1,30 +1,73 @@
-<head>
-    <title>Order Confirmed</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
+{{#section 'head'}}
+<title>Order Confirmed</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/orderSuccess.css">
+{{/section}}
 
-        .message {
-            font-size: 2em;
-            font-weight: bold;
-            color: #28a745;
-        }
-    </style>
-</head>
+<div class="receipt-card">
+  <div class="success-header">
+    <div class="message">Order Confirmed! 🎉</div>
+    <div class="redirect-notice">Redirecting to home in 7 seconds...</div>
+  </div>
 
-<body>
-    <div class="message">Order Confirmed!</div>
+  {{#if order}}
+  <div class="meta-info">
+    <div class="meta-row">
+      <strong>Order ID:</strong>
+      <span>{{order.orderId}}</span>
+    </div>
+    <div class="meta-row">
+      <strong>Payment Method:</strong>
+      <span style="text-transform: uppercase;">{{order.paymentMethod}}</span>
+    </div>
+    <div class="meta-row">
+      <strong>Payment Status:</strong>
+      <span>{{order.paymentStatus}}</span>
+    </div>
+  </div>
 
-    <script>
-        setTimeout(function () {
-            window.location.href = '/user/home';
-        }, 3000);
-    </script>
+  <div class="item-list">
+    <strong>Items Ordered:</strong>
+    {{#each order.items}}
+    <div class="item-row">
+      {{#if this.productImg}}
+        <img class="item-img" src="{{this.productImg}}" alt="{{this.productName}}">
+      {{/if}}
+      <div class="item-details">
+        <div class="item-name">{{this.productName}}</div>
+        <div class="item-sub">Size: {{this.productSize}} | Qty: {{this.quantity}}</div>
+      </div>
+      <div>₹{{this.productPrice}}</div>
+    </div>
+    {{/each}}
+  </div>
 
-</body>
+  <div class="price-breakdown">
+    <div class="meta-row">
+      <span>Subtotal:</span>
+      <span>₹{{order.subtotal}}</span>
+    </div>
+    {{#if order.couponDiscount}}
+    <div class="meta-row" style="color: #dc3545;">
+      <span>Coupon Discount:</span>
+      <span>-₹{{order.couponDiscount}}</span>
+    </div>
+    {{/if}}
+    {{#if order.shippingFee}}
+    <div class="meta-row">
+      <span>Shipping:</span>
+      <span>₹{{order.shippingFee}}</span>
+    </div>
+    {{/if}}
+    <div class="meta-row" style="font-weight: bold; font-size: 1.1em; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee;">
+      <span>Total Paid:</span>
+      <span>₹{{order.totalAmount}}</span>
+    </div>
+  </div>
+  {{else}}
+  <p style="text-align: center; color: #6c757d;">Thank you for your purchase.</p>
+  {{/if}}
+</div>
+
+{{#section 'scripts'}}
+<script src="/javascripts/user/orderSuccess.js" defer></script>
+{{/section}}

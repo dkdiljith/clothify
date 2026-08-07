@@ -1,206 +1,104 @@
-<head>
-    <title>Edit Address | Clothify</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/editAddress.css">
-</head>
+{{#section 'head'}}
+<title>Edit Address | Clothify</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/editAddress.css">
+{{/section}}
 
-<body>
-    <div class="container" style="margin-top:20px;">
-        <div class="profile-header">
-        </div>
 
-        <div class="profile-container">
-            <div class="profile-sidebar">
-                <ul>
-                    <li onclick="location.href='/user/profile'">
-                        <i class="fas fa-user"></i> Profile
-                    </li>
-                    <li onclick="location.href='/user/security'">
-                        <i class="fas fa-lock"></i> Security & Password
-                    </li>
-                    <li onclick="location.href='/user/wallet'">
-                        <i class="fas fa-wallet"></i> Wallet
-                    </li>
-                    <li onclick="location.href='/user/orders'">
-                        <i class="fas fa-shopping-bag"></i> Orders
-                    </li>
-                    <li class="active" onclick="location.href='/user/address'">
-                        <i class="fas fa-map-marker-alt"></i> Addresses
-                    </li>
-                    <li onclick="location.href='/user/deleteuser'">
-                        <i class="fas fa-trash-alt"></i> Delete Account
-                    </li>
-                </ul>
-            </div>
+<div class="address-header">
+    <h2 class="address-title">
+        <i class="fas fa-edit"></i> Edit Address
+    </h2>
+    <a href="/user/address" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Addresses
+    </a>
+</div>
 
-            <div class="profile-content">
-                <div class="address-header">
-                    <h2 class="address-title">
-                        <i class="fas fa-edit"></i> Edit Address
-                    </h2>
-                    <a href="/user/address" class="back-button">
-                        <i class="fas fa-arrow-left"></i> Back to Addresses
-                    </a>
-                </div>
-
-                <form id="addressForm" method="POST" action="/user/editaddress/{{address._id}}" class="address-form"
-                    novalidate>
-                    <div class="form-group">
-                        <label for="name" class="form-label">Address Name</label>
-                        <input type="text" id="name" name="name" class="form-control" value="{{address.name}}" required>
-                        <div id="nameError" class="error-message">Please enter a name for this address</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="streetAddress" class="form-label">Street Address</label>
-                        <input type="text" id="streetAddress" name="streetAddress" class="form-control"
-                            value="{{address.streetAddress}}" required>
-                        <div id="streetAddressError" class="error-message">Please enter your street address</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="landmark" class="form-label">Landmark (Optional)</label>
-                        <input type="text" id="landmark" name="landmark" class="form-control"
-                            value="{{address.landmark}}">
-                        <div id="landmarkError" class="error-message"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="city" class="form-label">City</label>
-                        <select id="city" name="city" class="form-control form-select" required>
-                            <option value="{{address.city}}" selected>{{address.city}}</option>
-                            <option value="" disabled>Select City</option>
-                            <option value="Kasaragod">Kasaragod</option>
-                            <option value="Kannur">Kannur</option>
-                            <option value="Wayanad">Wayanad</option>
-                            <option value="Kozhikode">Kozhikode</option>
-                            <option value="Malappuram">Malappuram</option>
-                            <option value="Palakkad">Palakkad</option>
-                            <option value="Thrissur">Thrissur</option>
-                            <option value="Ernakulam">Ernakulam</option>
-                            <option value="Idukki">Idukki</option>
-                            <option value="Kottayam">Kottayam</option>
-                            <option value="Alappuzha">Alappuzha</option>
-                            <option value="Pathanamthitta">Pathanamthitta</option>
-                            <option value="Kollam">Kollam</option>
-                            <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-                        </select>
-                        <div id="cityError" class="error-message">Please select a city</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="state" class="form-label">State/Province</label>
-                        <select id="state" name="state" class="form-control form-select" required>
-                            <option value="{{address.state}}" selected>{{address.state}}</option>
-                            <option value="" disabled>Select State</option>
-                            <option value="Kerala">Kerala</option>
-                        </select>
-                        <div id="stateError" class="error-message">Please select a state</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="zip" class="form-label">Postal/Zip Code</label>
-                        <input type="text" id="zip" name="zip" class="form-control" value="{{address.zip}}" required>
-                        <div id="zipError" class="error-message">Please enter a valid postal code</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="country" class="form-label">Country</label>
-                        <select id="country" name="country" class="form-control form-select" required>
-                            <option value="{{address.country}}" selected>{{address.country}}</option>
-                            <option value="" disabled>Select Country</option>
-                            <option value="India">India</option>
-                        </select>
-                        <div id="countryError" class="error-message">Please select a country</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" value="{{address.phone}}"
-                            required>
-                        <div id="phoneError" class="error-message">Please enter a valid phone number</div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" onclick="location.href='/user/address'" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Update Address
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<form id="addressForm" method="POST" action="/user/editaddress/{{address._id}}" class="address-form" novalidate>
+    <div class="form-group">
+        <label for="name" class="form-label">Address Name</label>
+        <input type="text" id="name" name="name" class="form-control" value="{{address.name}}" required>
+        <div id="nameError" class="error-message">Please enter a name for this address</div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('addressForm');
-            const inputs = form.querySelectorAll('input, select');
+    <div class="form-group">
+        <label for="streetAddress" class="form-label">Street Address</label>
+        <input type="text" id="streetAddress" name="streetAddress" class="form-control"
+            value="{{address.streetAddress}}" required>
+        <div id="streetAddressError" class="error-message">Please enter your street address</div>
+    </div>
 
-            // Real-time validation
-            inputs.forEach(input => {
-                input.addEventListener('input', function () {
-                    validateField(this);
-                });
+    <div class="form-group">
+        <label for="landmark" class="form-label">Landmark (Optional)</label>
+        <input type="text" id="landmark" name="landmark" class="form-control" value="{{address.landmark}}">
+        <div id="landmarkError" class="error-message"></div>
+    </div>
 
-                input.addEventListener('blur', function () {
-                    validateField(this);
-                });
-            });
+    <div class="form-group">
+        <label for="city" class="form-label">City</label>
+        <select id="city" name="city" class="form-control form-select" required>
+            <option value="{{address.city}}" selected>{{address.city}}</option>
+            <option value="" disabled>Select City</option>
+            <option value="Kasaragod">Kasaragod</option>
+            <option value="Kannur">Kannur</option>
+            <option value="Wayanad">Wayanad</option>
+            <option value="Kozhikode">Kozhikode</option>
+            <option value="Malappuram">Malappuram</option>
+            <option value="Palakkad">Palakkad</option>
+            <option value="Thrissur">Thrissur</option>
+            <option value="Ernakulam">Ernakulam</option>
+            <option value="Idukki">Idukki</option>
+            <option value="Kottayam">Kottayam</option>
+            <option value="Alappuzha">Alappuzha</option>
+            <option value="Pathanamthitta">Pathanamthitta</option>
+            <option value="Kollam">Kollam</option>
+            <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+        </select>
+        <div id="cityError" class="error-message">Please select a city</div>
+    </div>
 
-            // Form submission
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
+    <div class="form-group">
+        <label for="state" class="form-label">State/Province</label>
+        <select id="state" name="state" class="form-control form-select" required>
+            <option value="{{address.state}}" selected>{{address.state}}</option>
+            <option value="" disabled>Select State</option>
+            <option value="Kerala">Kerala</option>
+        </select>
+        <div id="stateError" class="error-message">Please select a state</div>
+    </div>
 
-                let isValid = true;
-                inputs.forEach(input => {
-                    if (!validateField(input)) {
-                        isValid = false;
-                    }
-                });
+    <div class="form-group">
+        <label for="zip" class="form-label">Postal/Zip Code</label>
+        <input type="text" id="zip" name="zip" class="form-control" value="{{address.zip}}" required>
+        <div id="zipError" class="error-message">Please enter a valid postal code</div>
+    </div>
 
-                if (isValid) {
-                    // Submit the form if all fields are valid
-                    form.submit();
-                }
-            });
+    <div class="form-group">
+        <label for="country" class="form-label">Country</label>
+        <select id="country" name="country" class="form-control form-select" required>
+            <option value="{{address.country}}" selected>{{address.country}}</option>
+            <option value="" disabled>Select Country</option>
+            <option value="India">India</option>
+        </select>
+        <div id="countryError" class="error-message">Please select a country</div>
+    </div>
 
-            // Field validation function
-            function validateField(field) {
-                const errorElement = document.getElementById(`${field.id}Error`);
+    <div class="form-group">
+        <label for="phone" class="form-label">Phone Number</label>
+        <input type="tel" id="phone" name="phone" class="form-control" value="{{address.phone}}" required>
+        <div id="phoneError" class="error-message">Please enter a valid phone number</div>
+    </div>
 
-                if (field.required && !field.value.trim()) {
-                    field.classList.add('invalid');
-                    field.classList.remove('valid');
-                    errorElement.style.display = 'block';
-                    errorElement.textContent = `${field.labels[0].textContent.replace(':', '')} is required`;
-                    return false;
-                }
+    <div class="form-actions">
+        <button type="button" onclick="location.href='/user/address'" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Update Address
+        </button>
+    </div>
+</form>
 
-                // Specific validations
-                if (field.id === 'zip' && field.value.trim() && !/^\d{6}$/.test(field.value.trim())) {
-                    field.classList.add('invalid');
-                    field.classList.remove('valid');
-                    errorElement.style.display = 'block';
-                    errorElement.textContent = 'Please enter a valid 6-digit postal code';
-                    return false;
-                }
 
-                if (field.id === 'phone' && field.value.trim() && !/^\d{10}$/.test(field.value.trim())) {
-                    field.classList.add('invalid');
-                    field.classList.remove('valid');
-                    errorElement.style.display = 'block';
-                    errorElement.textContent = 'Please enter a valid 10-digit phone number';
-                    return false;
-                }
-
-                // If field is valid
-                field.classList.remove('invalid');
-                field.classList.add('valid');
-                errorElement.style.display = 'none';
-                return true;
-            }
-        });
-    </script>
-</body>
+{{#section 'scripts'}}
+<script src="/javascripts/user/editAddress.js" defer></script>
+{{/section}}

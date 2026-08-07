@@ -1,256 +1,154 @@
+{{#section 'head'}}
 <title>My Wishlist | Your Favorite Products</title>
-<script src="/javascripts/user/productCard.js"></script>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/productCard.css">
 <link rel="stylesheet" type="text/css" href="/stylesheets/user/wishlist.css">
-
-
-
-
+{{/section}}
 <div class="wishlist-page">
-
     <div class="wishlist-container">
-
-
-        <!-- =========================================================
-                 HEADER
-            ========================================================= -->
-
+        <!-- ==========================================
+             HEADER
+        =========================================== -->
         <div class="wishlist-header">
-
             <h1 class="wishlist-title">
                 My Wishlist
             </h1>
-
+            <p class="wishlist-subtitle">
+                Save your favourite products and move them to your cart whenever you're ready.
+            </p>
             <div class="wishlist-count">
-
                 {{product.length}} items
-
             </div>
-
         </div>
-
-
-
-        <!-- =========================================================
-                 CONTENT
-            ========================================================= -->
-
+        <!-- ==========================================
+             CONTENT
+        =========================================== -->
         <div class="wishlist-content">
-
-
-            {{#if (isEmpty product)}}
-
-            <!-- EMPTY WISHLIST -->
-            <div class="empty-wishlist">
-
-                <div class="empty-wishlist-icon">
-
-                    <i class="far fa-heart"></i>
-
+            {{#if product.length}}
+            <div class="featured-products-grid">
+                {{#each product}}
+                <div class="wishlist-product-wrapper">
+                    {{#ifCond this.status "==" "active"}}
+                    <div class="product-card wishlist-product-card"
+                        data-product-id="{{this._id}}"
+                        data-url="/user/singleproduct/{{this._id}}">
+                        <!-- =========================================================
+                             BADGES
+                        ========================================================= -->
+                        {{#if this.latestCollection}}
+                        <div class="product-badge">
+                            New
+                        </div>
+                        {{/if}}
+                        {{#if this.details.[0].offerId}}
+                        <div class="product-badge sale">
+                            Sale
+                        </div>
+                        <div class="discount-badge">
+                            {{calculateDiscountPercentage
+                            this.details.[0].price
+                            this.details.[0].offerPrice}}%
+                            OFF
+                        </div>
+                        {{/if}}
+                        <!-- =========================================================
+                             REMOVE BUTTON
+                        ========================================================= -->
+                        <div class="wishlist-remove-container">
+                            <button
+                                class="remove-from-wishlist"
+                                data-product-id="{{this._id}}"
+                                aria-label="Remove from Wishlist">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- =========================================================
+                             PRODUCT IMAGE
+                        ========================================================= -->
+                        <div class="product-image">
+                            <img
+                                src="{{this.images.[0].path}}"
+                                alt="{{this.name}}"
+                                class="product-img">
+                        </div>
+                        <!-- =========================================================
+                             PRODUCT DETAILS
+                        ========================================================= -->
+                        <div class="product-details">
+                            <h3 class="product-title">
+                                {{this.name}}
+                            </h3>
+                            <div class="price-container">
+                                {{#if this.details.[0].offerId}}
+                                <span class="original-price">
+                                    ₹{{this.details.[0].price}}
+                                </span>
+                                <span class="product-price">
+                                    ₹{{this.details.[0].offerPrice}}
+                                </span>
+                                {{else}}
+                                <span class="product-price">
+                                    ₹{{this.details.[0].price}}
+                                </span>
+                                {{/if}}
+                            </div>
+                            <button
+                                class="wishlist-add-cart"
+                                data-product-id="{{this._id}}">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    {{else}}
+                    <!-- =========================================================
+                         PRODUCT NOT AVAILABLE
+                    ========================================================= -->
+                    <div class="wishlist-product-card unavailable-product">
+                        <div class="product-image unavailable-image">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">
+                                Product No Longer Available
+                            </h3>
+                            <p class="unavailable-text">
+                                This product has been removed from our catalogue.
+                            </p>
+                            <button
+                                class="remove-from-wishlist"
+                                data-product-id="{{this._id}}">
+                                <i class="fas fa-trash"></i>
+                                {{!-- Remove from Wishlist --}}
+                            </button>
+                        </div>
+                    </div>
+                    {{/ifCond}}
                 </div>
-
+                {{/each}}
+            </div>
+            {{else}}
+            <!-- ==========================================
+                 EMPTY WISHLIST
+            =========================================== -->
+            <div class="empty-wishlist">
+                <div class="empty-wishlist-icon">
+                    <i class="far fa-heart"></i>
+                </div>
                 <h3 class="empty-wishlist-title">
                     Your Wishlist is Empty
                 </h3>
-
                 <p class="empty-wishlist-text">
-
                     You haven't added any products to your wishlist yet.
-                    Start shopping to add your favorite items!
-
+                    Start shopping and save your favourites.
                 </p>
-
-                <a href="/user/home" class="btn-shop">
-
+                <a href="/user/collections" class="btn-shop">
                     <i class="fas fa-arrow-left"></i>
-
                     Continue Shopping
-
                 </a>
-
             </div>
-
-
-            {{else}}
-
-
-            <!-- =========================================================
-                     PRODUCT GRID
-                ========================================================= -->
-
-            <div class="featured-products-grid">
-
-                {{#each product}}
-
-                <div class="wishlist-product-wrapper">
-
-                    {{> user/productCard this}}
-
-                </div>
-
-                {{/each}}
-
-            </div>
-
-
             {{/if}}
-
-
-
-            <!-- =========================================================
-                     PAGINATION
-                ========================================================= -->
-
-            {{#if (gt pagination.totalPages 1)}}
-
-            <div class="pagination">
-
-                {{#if pagination.hasPrevPage}}
-
-                <a href="/user/wishlist?page={{pagination.prevPage}}" class="pagination-button">
-
-                    <i class="fas fa-chevron-left"></i>
-
-                    Previous
-
-                </a>
-
-                {{/if}}
-
-
-                <span class="pagination-info">
-
-                    Page
-                    {{pagination.page}}
-                    of
-                    {{pagination.totalPages}}
-
-                </span>
-
-
-                {{#if pagination.hasNextPage}}
-
-                <a href="/user/wishlist?page={{pagination.nextPage}}" class="pagination-button">
-
-                    Next
-
-                    <i class="fas fa-chevron-right"></i>
-
-                </a>
-
-                {{/if}}
-
-            </div>
-
-            {{/if}}
-
         </div>
-
     </div>
-
 </div>
-
-
-
-
-<script>
-    async function removeFromWishlist(productId) {
-        try {
-            const response = await fetch(`/user/removeFromWishlist/${productId}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-            const data = await response.json();
-
-            showPopupMessage(data.message, data.success ? "success" : "error");
-
-            if (data.success) {
-                const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-                if (productCard) {
-                    productCard.remove();
-                    updateWishlistCount();
-                }
-            }
-        } catch (error) {
-            console.error("Error removing from wishlist:", error);
-            showPopupMessage("Something went wrong. Please try again.", "error");
-        }
-    }
-
-    function updateWishlistCount() {
-        const productCards = document.querySelectorAll('.product-card');
-        const countElement = document.querySelector('.wishlist-count');
-        if (countElement) {
-            countElement.textContent = `${productCards.length} items`;
-        }
-
-        if (productCards.length === 0) {
-            const wishlistContent = document.querySelector('.wishlist-content');
-            wishlistContent.innerHTML = `
-                    <div class="empty-wishlist">
-                        <div class="empty-wishlist-icon">
-                            <i class="far fa-heart"></i>
-                        </div>
-                        <h3 class="empty-wishlist-title">Your Wishlist is Empty</h3>
-                        <p class="empty-wishlist-text">You haven't added any products to your wishlist yet. Start shopping to add your favorite items!</p>
-                        <a href="/products" class="btn-shop">
-                            <i class="fas fa-arrow-left"></i> Continue Shopping
-                        </a>
-                    </div>
-                `;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const removeFromWishlistButtons = document.querySelectorAll('.remove-from-wishlist');
-
-        removeFromWishlistButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const productId = event.currentTarget.getAttribute('data-product-id');
-                removeFromWishlist(productId);
-            });
-        });
-    });
-
-    async function addToCart(productId, productDetailsId, quantity) {
-        if (productId && productDetailsId && quantity) {
-            try {
-                const response = await fetch(`/user/cart/${productId}/${productDetailsId}/${quantity}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                showPopupMessage(data.message, data.success ? "success" : "error");
-
-                if (data.success) {
-                    removeFromWishlist(productId);
-
-                    if (data.cartCount) {
-                        updateCartCount(data.cartCount);
-                    }
-                }
-            } catch (error) {
-                console.error("Error adding to cart:", error);
-                showPopupMessage("Something went wrong. Please try again.", "error");
-            }
-        } else {
-            showPopupMessage("Please select a valid product", "error");
-        }
-    }
-
-    function updateCartCount(count) {
-        const cartCountElement = document.getElementById('cart-count');
-        if (cartCountElement) {
-            cartCountElement.textContent = count;
-        }
-    }
-</script>
+{{#section 'scripts'}}
+<script src="/javascripts/user/wishlist.js"></script>
+{{/section}}

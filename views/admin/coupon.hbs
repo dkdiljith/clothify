@@ -1,34 +1,45 @@
 {{#section 'head'}}
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/coupon.css">
 {{/section}}
-
-
 <div class="coupon-management-layout">
     <!-- Coupons List -->
     <div class="coupons-list-container">
-
         <div class="coupons-table-header">
             <h1 class="page-title">Coupon Management</h1>
-
             <div style="display:flex;">
-
-                <form method="GET" action='/admin/coupons' role="search">
+                <form method="GET" action="/admin/coupons"
+                    style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <div class="search-container">
-                        <input type="search" name="query" class="search-input" id="search-input"
-                            placeholder="Search by name or discount" {{#if query}} value={{query}} {{/if}}>
+                        <input type="search" name="query" class="search-input" placeholder="Search by coupon code..."
+                            value="{{query}}">
                     </div>
+                    <select name="couponStatus" class="form-select" style="width:170px; height:44px;">
+                        <option value="" {{#unless couponStatus}}selected{{/unless}}>
+                            All Coupons
+                        </option>
+                        <option value="active" {{#ifCond couponStatus "==" "active" }}selected{{/ifCond}}>
+                            Active
+                        </option>
+                        <option value="expired" {{#ifCond couponStatus "==" "expired" }}selected{{/ifCond}}>
+                            Expired
+                        </option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        Apply Filters
+                    </button>
+                    <a href="/admin/coupons" class="btn btn-outline-secondary">
+                        Reset
+                    </a>
                 </form>
                 <button id="toggleCouponForm" class="btn btn-primary" style="margin-left:15px;">
                     + Add Coupon
                 </button>
-
             </div>
         </div>
-
         {{#if coupon.length}}
         <div class="coupons-table-wrapper">
             <table class="coupons-table">
-
                 <thead>
                     <tr>
                         <th></th>
@@ -40,103 +51,55 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                     {{#each coupon}}
-
                     <tr>
-
                         <td data-label="Sl No">
                             {{serialNumber ../pagination.serialNumberStart @index}}
                         </td>
-
                         <td data-label="Coupon Code">
-
                             <div class="coupon-code">
-
                                 <span class="coupon-icon">🎟️</span>
-
                                 {{this.couponCode}}
-
                             </div>
-
                         </td>
-
                         <td data-label="Discount">
-
                             {{this.discountValue}}
-
                             {{#if (eq this.discountType "percentage")}}
-
                             %
-
                             {{else}}
-
                             ₹
-
                             {{/if}}
-
                         </td>
-
                         <td data-label="Starts From">
-
                             {{formatDate this.startDate}}
-
                         </td>
-
                         <td data-label="Ends In">
-
                             {{formatDate this.endDate}}
-
                         </td>
-
                         <td data-label="Status">
-
                             <span class="status-badge {{#if this.isActive}}active{{else}}expired{{/if}}">
-
                                 {{#if this.isActive}}
-
                                 Active
-
                                 {{else}}
-
                                 Expired
-
                                 {{/if}}
-
                             </span>
-
                         </td>
-
                         <td data-label="Actions">
-
                             <div class="action-buttons">
-
                                 <button class="btn btn-sm btn-edit" data-coupon-id="{{this._id}}">
-
                                     <span class="icon">✏️</span>
-
                                     Edit
-
                                 </button>
-
                                 <button class="btn btn-sm btn-delete" data-coupon-id="{{this._id}}">
-
                                     <span class="icon">🗑️</span>
-
                                     Delete
-
                                 </button>
-
                             </div>
-
                         </td>
-
                     </tr>
-
                     {{/each}}
-
                 </tbody>
             </table>
         </div>
@@ -149,20 +112,25 @@
                     d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
             </svg>
             <h2>No Coupons Found</h2>
+            {{#unless query}}
+            {{#unless couponStatus}}
             <p>There are currently no coupons in the system.</p>
             <a href="/admin/coupons" class="btn btn-primary">Refresh</a>
+            {{/unless}}
+            {{/unless}}
+            
         </div>
         {{/if}}
-
         {{#if (gt pagination.totalPages 1)}}
         <div class="pagination">
             {{#if pagination.hasPrevPage}}
-            <a href="/admin/coupons?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/coupons?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}{{#if couponStatus}}&couponStatus={{couponStatus}}{{/if}}"
                 class="pagination-button">
                 <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>Previous
+                </svg>
+                Previous
             </a>
             {{/if}}
 
@@ -171,23 +139,23 @@
             </span>
 
             {{#if pagination.hasNextPage}}
-            <a href="/admin/coupons?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+            <a href="/admin/coupons?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}{{#if couponStatus}}&couponStatus={{couponStatus}}{{/if}}"
                 class="pagination-button">
-                Next <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                Next
+                <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </a>
             {{/if}}
         </div>
         {{/if}}
-    </div>
 
+    </div>
     <!-- Add Coupon Form (Initially hidden) -->
     <div id="addCouponOverlay" class="add-coupon-overlay">
         <div class="add-coupon-card">
             <div style="display:flex; justify-content:center" class="form-header">
-
                 <h1 class="page-title" id="couponModalTitle">Create New Coupon</h1>
                 <button id="closeFormBtn" class="btn btn-icon">
                     <svg class="status-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -195,27 +163,30 @@
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-
                 </button>
-
             </div>
             <br><br>
             <form id="couponForm" method="post" action="/admin/coupon/addCoupon" novalidate>
+                <div class="form-group">
+                    <label for="couponCode" class="form-label">Coupon Code</label>
+                    <input type="text" name="couponCode" id="couponCode" maxlength="6" class="form-control"
+                        placeholder="e.g. SUMMER20" required />
+                    <div class="error-message" id="code-error"></div>
+                </div>
                 <div class="form-columns">
-                    <div class="form-group">
-                        <label for="couponCode" class="form-label">Coupon Code</label>
-                        <input type="text" name="couponCode" id="couponCode" maxlength="6" class="form-control"
-                            placeholder="e.g. SUMMER20" required />
-                        <div class="error-message" id="code-error"></div>
-                    </div>
                     <div class="form-group">
                         <label for="minimumPurchaseAmount" class="form-label">Minimum Purchase (₹)</label>
                         <input type="number" name="minimumPurchaseAmount" id="minimumPurchaseAmount"
                             class="form-control" placeholder="e.g. 500" required />
                         <div class="error-message" id="minPurchase-error"></div>
                     </div>
+                    <div>
+                        <label for="maximumPurchaseAmount" class="form-label">Maximum Purchase (₹)</label>
+                        <input type="number" name="maximumPurchaseAmount" id="maximumPurchaseAmount"
+                            class="form-control" placeholder="e.g. 500" required />
+                        <div class="error-message" id="maxPurchase-error"></div>
+                    </div>
                 </div>
-
                 <div class="form-columns">
                     <div class="form-group">
                         <label for="discountType" class="form-label">Discount Type</label>
@@ -226,7 +197,6 @@
                         </select>
                         <div class="error-message" id="type-error"></div>
                     </div>
-
                     <div class="form-group">
                         <label for="discountValue" class="form-label">Discount Value</label>
                         <input type="number" name="discountValue" id="discountValue" class="form-control"
@@ -234,7 +204,6 @@
                         <div class="error-message" id="value-error"></div>
                     </div>
                 </div>
-
                 <div class="form-columns">
                     <div class="form-group">
                         <label for="startDate" class="form-label">Start Date</label>
@@ -247,7 +216,6 @@
                         <div class="error-message" id="date-error"></div>
                     </div>
                 </div>
-
                 <div class="form-actions">
                     <button type="submit" class="btnForm btn-primary">
                         <span class="icon">💾</span>Submit
@@ -257,12 +225,8 @@
         </div>
     </div>
 </div>
-
-
 {{!-- Edit Coupon Essential --}}
 <input type="hidden" id="editCouponId" value="">
-
-
 {{#section 'scripts'}}
 <script src="/javascripts/admin/coupon.js" defer></script>
 {{/section}}

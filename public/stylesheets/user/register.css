@@ -203,3 +203,13 @@
 /* [data-required="true"]:invalid {
    border-color: red;
    } */
+
+   .form-control {
+    padding-left: 50px !important;
+    padding-right: 50px !important;
+}
+
+.btn-primary-red:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}

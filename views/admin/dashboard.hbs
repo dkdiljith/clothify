@@ -1,37 +1,151 @@
-
-
-{{#section 'head'}}
+{{#section "head"}}
+<title>Dashboard | Clothify Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/dashboard.css">
 {{/section}}
 
 
-<!-- Metrics Grid -->
-<div class="metrics-grid">
-    <div class="metric-card">
-        <h3 class="page-title ">Total Revenue</h3>
-        <div class="metric-value">$24,500</div>
-        <span class="text-success">↑ 12% from last month</span>
+
+
+<div class="dashboard-wrapper">
+    <!-- ==========================================
+                    LOADING OVERLAY
+    =========================================== -->
+    <div class="dashboard-loading" id="dashboardLoading">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">
+                Loading...
+            </span>
+        </div>
     </div>
-    <div class="metric-card">
-        <h3 class="page-title ">Active Users</h3>
-        <div class="metric-value">1,234</div>
-        <span class="text-warning">↓ 3% from last week</span>
+    <!-- ==========================================
+                    METRIC CARDS
+    =========================================== -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3 class="page-title">
+                Total Revenue
+            </h3>
+            <div class="metric-value" id="totalRevenue">
+                ₹0
+            </div>
+            <span class="metric-subtitle" id="metricPeriodRevenue">
+                This Month
+            </span>
+        </div>
+        <div class="metric-card">
+            <h3 class="page-title">
+                Total Orders
+            </h3>
+            <div class="metric-value" id="totalOrders">
+                0
+            </div>
+            <span class="metric-subtitle" id="metricPeriodOrders">
+                This Month
+            </span>
+        </div>
+        <div class="metric-card">
+            <h3 class="page-title">
+                Customers
+            </h3>
+            <div class="metric-value" id="totalUsers">
+                0
+            </div>
+            <span class="metric-subtitle" id="metricPeriodUsers">
+                Active Customers
+            </span>
+        </div>
+        <div class="metric-card">
+            <h3 class="page-title">
+                Products
+            </h3>
+            <div class="metric-value" id="totalProducts">
+                0
+            </div>
+            <span class="metric-subtitle" id="metricPeriodProducts">
+                Active Products
+            </span>
+        </div>
     </div>
-    <div class="metric-card">
-        <h3 class="page-title ">Conversion Rate</h3>
-        <div class="metric-value">3.8%</div>
-        <span class="text-success">↑ 2.1% from yesterday</span>
+    <!-- ==========================================
+                    CHARTS
+    =========================================== -->
+    <div class="chart-container">
+        <!-- Revenue -->
+        <div class="chart-card" id="revenueChartCard">
+            
+            <div class="chart-header">
+                <h3 class="page-title">
+                    Revenue Analytics
+                </h3>
+
+
+<small id="lastUpdated" class="text-muted">
+    Updated just now
+</small>
+
+                
+                <select id="chartFilter" class="chart-filter">
+
+                    
+                    <option value="today">
+                        Today
+                    </option>
+                    <option value="week">
+                        This Week
+                    </option>
+                    <option value="month" selected>
+                        This Month
+                    </option>
+                    <option value="year">
+                        This Year
+                    </option>
+                </select>
+            </div>
+            <canvas id="revenueChart"></canvas>
+            <p class="chart-empty d-none" id="revenueEmpty">
+                No revenue data available.
+            </p>
+        </div>
+        <!-- CATEGORIES -->
+        <div class="chart-card" id="categoryChartCard">
+            <h3 class="page-title">
+                Top 10 Selling Categories
+            </h3>
+            <canvas id="categoryChart"></canvas>
+            <p class="chart-empty d-none" id="categoryEmpty">
+                No category sales available.
+            </p>
+        </div>
+    </div>
+    <!-- ==========================================
+                   Products 
+    =========================================== -->
+    <div class="chart-container">
+        <div class="chart-card">
+            <h3 class="page-title">
+                Top 10 Selling Products
+            </h3>
+            <canvas id="productChart"></canvas>
+            <p class="chart-empty d-none" id="productEmpty">
+                No product sales available.
+            </p>
+        </div>
+        <div class="chart-card">
+            <h3 class="page-title">
+                Payment Methods
+            </h3>
+            <canvas id="paymentChart"></canvas>
+            <p class="chart-empty d-none" id="paymentEmpty">
+                No payment data available.
+            </p>
+        </div>
     </div>
 </div>
 
-<!-- Charts Section -->
-<div class="chart-container">
-    <div class="chart-card">
-        <h3 class="page-title ">Sales Overview</h3>
-        <canvas id="salesChart"></canvas>
-    </div>
-    <div class="chart-card">
-        <h3 class="page-title ">Traffic Sources</h3>
-        <canvas id="trafficChart"></canvas>
-    </div>
-</div>
+
+
+
+{{#section "scripts"}}
+<script src="/javascripts/admin/dashboard.js" defer></script>
+{{/section}}

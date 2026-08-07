@@ -22,7 +22,8 @@ const cartSchema = new mongoose.Schema({
             required: true,
             min: 1,
             default: 1
-        }
+        },
+        isAvailable: { type: Boolean, default: true }
     }], // Close the array definition here
     subtotal: { type: Number, default: 0, min: 0 },
     shippingFee: { type: Number, default: 0, min: 0 },
@@ -33,13 +34,6 @@ const cartSchema = new mongoose.Schema({
     totalAmount: { type: Number, default: 0, min: 0 }
 }, { timestamps: true });
 
-// Middleware to update updatedAt on every save
-cartSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
-    next();
-});
-
 
 const Cart = mongoose.model('Cart', cartSchema);
-
 module.exports = Cart;

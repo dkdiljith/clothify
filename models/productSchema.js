@@ -22,7 +22,6 @@ const productSchema = new mongoose.Schema({
         altText: String
     }],
     isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean, default: false },
     latestCollection: { type: Boolean, default: false },
     bestSeller: { type: Boolean, default: false },
 }, { timestamps: true });
@@ -33,11 +32,6 @@ const productSchema = new mongoose.Schema({
 // Automatically filter out blocked products for any 'find' operation
 productSchema.pre(/^find/, function (next) {
     const options = this.getOptions();
-
-    // 1. Handle Deletion Filter (Hide deleted by default unless showDeleted is true)
-    if (!options.showDeleted) {
-        this.find({ isDeleted: false }); // FIX: Fetch non-deleted items
-    }
 
     // 2. Handle Inactive Filter (Hide inactive by default unless showInactive is true)
     if (!options.showInactive) {
@@ -54,7 +48,6 @@ productSchema.pre(/^find/, function (next) {
 productSchema.index({ name: 'text', description: 'text', gender: 'text' });
 productSchema.index({ 'details.price': 1 });
 productSchema.index({ createdAt: -1 });
-productSchema.index({ salesCount: -1 });
 
 
 const Product = mongoose.model("Product", productSchema);

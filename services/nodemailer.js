@@ -1,17 +1,20 @@
-const nodemailer = require(`nodemailer`)
-const user = process.env.MAIL_USER
-const pass = process.env.MAIL_PASS
+const nodemailer = require(`nodemailer`);
+const user = process.env.MAIL_USER;
+const pass = process.env.MAIL_PASS;
+const host = process.env.MAIL_HOST;
+const port = process.env.MAIL_PORT;
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+const MESSAGES = require(`../utils/constants`);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.verificationEmailSend = async (email, verificationToken) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user, pass }
+      host,
+      port,
+      auth: { user, pass },
     });
 
     const htmlContent = `
@@ -68,60 +71,58 @@ exports.verificationEmailSend = async (email, verificationToken) => {
     const mailOptions = {
       from: '"Clothify Fashion Team" <clothifyfashionshop@gmail.com>',
       to: email,
-      subject: 'Clothify Account Verification Code (Valid for 15 minutes)',
-      replyTo: 'no-reply@clothify.com',
+      subject: "Clothify Account Verification Code (Valid for 15 minutes)",
+      replyTo: "no-reply@clothify.com",
       headers: {
-        'X-Entity-RefID': 'CLOTHIFY_VERIFICATION_1.0',
-        'List-Unsubscribe': '<mailto:unsubscribe@clothify.com>, <https://clothify.com/unsubscribe>',
-        'X-Mailer': 'ClothifyVerificationSystem/1.0'
+        "X-Entity-RefID": "CLOTHIFY_VERIFICATION_1.0",
+        "List-Unsubscribe":
+          "<mailto:unsubscribe@clothify.com>, <https://clothify.com/unsubscribe>",
+        "X-Mailer": "ClothifyVerificationSystem/1.0",
       },
       html: htmlContent,
       text: `Your Clothify verification code is: ${verificationToken}\n\nThis code expires in 15 minutes.\n\nNeed help? Contact support@clothify.com`,
-      priority: 'high',
+      priority: "high",
       list: {
         unsubscribe: {
-          url: 'https://clothify.com/unsubscribe',
-          comment: 'Unsubscribe from verification emails'
-        }
-      }
+          url: "https://clothify.com/unsubscribe",
+          comment: "Unsubscribe from verification emails",
+        },
+      },
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(verificationToken)
+    console.log(verificationToken);
     return { success: true, message: "Verification email sent successfully" };
   } catch (error) {
     console.error("Error sending email:", error);
     return {
       success: false,
       message: "Failed to send verification email",
-      error: error.message // Return only error message for security
+      error: error.message, // Return only error message for security
     };
   }
 };
 
-
-
-
-
-
 exports.passwordResetEmailSend = async (email, resetToken) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host,
+      port,
       auth: { user, pass },
     });
 
     // Updated reset link with /user/resetPassword path
-    const resetLink = `${process.env.BASE_URL || 'http://localhost:3000'}/user/resetpassword/${resetToken}`;
+    const resetLink = `${process.env.BASE_URL || "http://localhost:3000"}/user/resetpassword/${resetToken}`;
 
     const mailOptions = {
       from: "Clothify Fashion <clothifyfashionshop@gmail.com>",
       to: email,
       subject: "Password Reset Request - Clothify",
-      text: `You requested a password reset for your Clothify account.\n\n`
-        + `Please click the following link to reset your password:\n${resetLink}\n\n`
-        + `This link will expire in 1 hour.\n\n`
-        + `If you didn't request this, please ignore this email.`,
+      text:
+        `You requested a password reset for your Clothify account.\n\n` +
+        `Please click the following link to reset your password:\n${resetLink}\n\n` +
+        `This link will expire in 1 hour.\n\n` +
+        `If you didn't request this, please ignore this email.`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
           <div style="text-align: center; margin-bottom: 20px;">
@@ -157,7 +158,7 @@ exports.passwordResetEmailSend = async (email, resetToken) => {
             <p>Clothify Fashion Shop, 123 Fashion Street, Style City</p>
           </div>
         </div>
-      `
+      `,
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -165,28 +166,29 @@ exports.passwordResetEmailSend = async (email, resetToken) => {
     return { success: true, message: "Password reset email sent successfully" };
   } catch (error) {
     console.error("Error sending password reset email:", error);
-    return { success: false, message: "Failed to send password reset email", error };
+    return {
+      success: false,
+      message: "Failed to send password reset email",
+      error,
+    };
   }
 };
 
 // utils/emailSender.js
 const sendPasswordChangedEmail = async (email) => {
-
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
+    host,
+    port,
+    auth: { user, pass },
   });
 
   const mailOptions = {
     to: email,
-    subject: 'Your Clothify Password Was Changed',
+    subject: "Your Clothify Password Was Changed",
     html: `
           <p>Your password was successfully updated.</p>
           <p>If you didn't make this change, please contact support.</p>
-      `
+      `,
   };
   await transporter.sendMail(mailOptions);
 };

@@ -1,114 +1,182 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('resetForm');
-  const newPasswordInput = document.getElementById('newPassword');
-  const confirmPasswordInput = document.getElementById('confirmPassword');
-  const togglePassword = document.getElementById('togglePassword');
-  const newPasswordError = document.getElementById('newPasswordError');
-  const confirmPasswordError = document.getElementById('confirmPasswordError');
-  const submitButton = form.querySelector('button[type="submit"]');
-
-
-  // Toggle password visibility
-  togglePassword.addEventListener('click', function() {
-    const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    newPasswordInput.setAttribute('type', type);
-    this.classList.toggle('fa-eye-slash');
-  });
-
-  // Validate new password
-  function validateNewPassword() {
+document.addEventListener("DOMContentLoaded", () => {
+  /* ==========================================
+     Elements
+  ========================================== */
+  const form = document.getElementById("resetPasswordForm");
+  const newPasswordInput = document.getElementById("newPassword");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const newPasswordError = document.getElementById("newPasswordError");
+  const confirmPasswordError = document.getElementById("confirmPasswordError");
+  const toggleNewPassword = document.getElementById("toggleNewPassword");
+  const toggleConfirmPassword = document.getElementById(
+    "toggleConfirmPassword",
+  );
+  const resetButton = document.getElementById("resetButton");
+  let resetInProgress = false;
+  /* ==========================================
+     Helpers
+  ========================================== */
+  function showError(element, message) {
+    element.textContent = message;
+    element.classList.remove("hidden");
+    element.classList.add("visible");
+  }
+  function clearError(element) {
+    element.textContent = "";
+    element.classList.remove("visible");
+    element.classList.add("hidden");
+  }
+  /* ==========================================
+     Password Validation
+  ========================================== */
+  function validatePassword() {
+    clearError(newPasswordError);
+    newPasswordInput.value = newPasswordInput.value.replace(/\s/g, "");
     const password = newPasswordInput.value;
-    let isValid = true;
-    newPasswordError.textContent = '';
-    
     if (!password) {
-      newPasswordError.textContent = 'Password is required';
-      isValid = false;
-    } else if (password.length < 8) {
-      newPasswordError.textContent = 'Password must be at least 8 characters';
-      isValid = false;
-    } else if (!/[A-Z]/.test(password)) {
-      newPasswordError.textContent = 'Password must contain at least one uppercase letter';
-      isValid = false;
-    } else if (!/[0-9]/.test(password)) {
-      newPasswordError.textContent = 'Password must contain at least one number';
-      isValid = false;
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      newPasswordError.textContent = 'Password must contain at least one special character';
-      isValid = false;
+      showError(newPasswordError, "Password is required.");
+      return false;
     }
-    
-    return isValid;
+    if (password.length < 8 || password.length > 20) {
+      showError(
+        newPasswordError,
+        "Password must be between 8 and 20 characters.",
+      );
+      return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+      showError(newPasswordError, "Include at least one uppercase letter.");
+      return false;
+    }
+    if (!/[a-z]/.test(password)) {
+      showError(newPasswordError, "Include at least one lowercase letter.");
+      return false;
+    }
+    if (!/[0-9]/.test(password)) {
+      showError(newPasswordError, "Include at least one number.");
+      return false;
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+      showError(newPasswordError, "Include at least one special character.");
+      return false;
+    }
+    return true;
   }
-
-  // Validate password confirmation
+  /* ==========================================
+     Confirm Password Validation
+  ========================================== */
   function validateConfirmPassword() {
-    const password = newPasswordInput.value;
+    clearError(confirmPasswordError);
+    confirmPasswordInput.value = confirmPasswordInput.value.replace(/\s/g, "");
     const confirmPassword = confirmPasswordInput.value;
-    let isValid = true;
-    confirmPasswordError.textContent = '';
-    
     if (!confirmPassword) {
-      confirmPasswordError.textContent = 'Please confirm your password';
-      isValid = false;
-    } else if (password !== confirmPassword) {
-      confirmPasswordError.textContent = 'Passwords do not match';
-      isValid = false;
+      showError(confirmPasswordError, "Please confirm your password.");
+      return false;
     }
-    
-    return isValid;
+    if (confirmPassword !== newPasswordInput.value) {
+      showError(confirmPasswordError, "Passwords do not match.");
+      return false;
+    }
+    return true;
   }
-
-  // Form submission handler
-  form.addEventListener('submit', async function(e) {
+  /* ==========================================
+     Live Validation
+  ========================================== */
+  newPasswordInput.addEventListener("input", () => {
+    validatePassword();
+    if (confirmPasswordInput.value) {
+      validateConfirmPassword();
+    }
+  });
+  confirmPasswordInput.addEventListener("input", validateConfirmPassword);
+  /* ==========================================
+   Password Visibility
+========================================== */
+  function togglePassword(input, icon) {
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    icon.classList.toggle("fa-eye");
+    icon.classList.toggle("fa-eye-slash");
+  }
+  toggleNewPassword.addEventListener("click", () => {
+    togglePassword(newPasswordInput, toggleNewPassword);
+  });
+  // toggleConfirmPassword.addEventListener("click", () => {
+  //   togglePassword(confirmPasswordInput, toggleConfirmPassword);
+  // });
+  /* ==========================================
+     Button Helpers
+  ========================================== */
+  function lockButton() {
+    resetButton.disabled = true;
+    resetButton.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Resetting...
+    `;
+  }
+  function unlockButton() {
+    resetButton.disabled = false;
+    resetButton.textContent = "Reset Password";
+  }
+  /* ==========================================
+     Submit Form
+  ========================================== */
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
-    const isNewPasswordValid = validateNewPassword();
-    const isConfirmPasswordValid = validateConfirmPassword();
-    
-    if (!isNewPasswordValid || !isConfirmPasswordValid) {
+    if (resetInProgress) {
       return;
     }
-
-    // Disable submit button during request
-    submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-
+    const passwordValid = validatePassword();
+    const confirmValid = validateConfirmPassword();
+    if (!passwordValid || !confirmValid) {
+      return;
+    }
+    resetInProgress = true;
+    lockButton();
+    clearError(newPasswordError);
+    clearError(confirmPasswordError);
     try {
-      const response = await fetch(`/user/resetpassword`, {
-        method: 'POST',
+      const response = await fetch("/user/resetpassword", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          newPassword: newPasswordInput.value,
-          confirmPassword: confirmPasswordInput.value,
-          token: token.value,
-        })
+          newPassword: newPasswordInput.value.trim(),
+          confirmPassword: confirmPasswordInput.value.trim(),
+        }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to reset password');
+      if (!response.ok || !data.success) {
+        showError(newPasswordError, data.error || "Unable to reset password.");
+        return;
       }
-
-      // Success - redirect to login with success message
-      window.location.href = '/user/login?message=Password reset successfully';
-      
+      showPopupMessage(
+        data.message || "Password changed successfully.",
+        "success",
+      );
+      setTimeout(() => {
+        window.location.href = "/user/login";
+      }, 800);
     } catch (error) {
-      console.error('Password reset error:', error);
-      newPasswordError.textContent = error.message;
+      console.error(error);
+      showError(newPasswordError, "Unable to connect to the server.");
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = 'Reset Password';
+      resetInProgress = false;
+      unlockButton();
     }
   });
-
-  // Real-time validation
-  newPasswordInput.addEventListener('input', validateNewPassword);
-  newPasswordInput.addEventListener('blur', validateNewPassword);
-  confirmPasswordInput.addEventListener('input', validateConfirmPassword);
-  confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
+  /* ==========================================
+     Submit Using Enter
+  ========================================== */
+  newPasswordInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    form.requestSubmit();
+  });
+  confirmPasswordInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    form.requestSubmit();
+  });
 });

@@ -8,12 +8,13 @@ router.use((req, res, next) => {
 
 //session for user
 router.use((req, res, next) => {
-  res.locals.admin = req.session.admin || null;
-  next();
+    res.locals.admin = req.session.admin || null;
+    next();
 });
 
 //controllers
 const adminController = require('../controllers/adminController')
+const dashboardController = require(`../controllers/dashboardController`)
 const userController = require('../controllers/userController')
 const productController = require(`../controllers/productController`)
 const orderController = require(`../controllers/orderController`)
@@ -21,6 +22,7 @@ const categoryController = require('../controllers/categoryController')
 const couponController = require(`../controllers/couponController`)
 const offerController = require(`../controllers/offerController`)
 const salesController = require(`../controllers/salesController`)
+const settingController = require(`../controllers/settingController`)
 
 //adminAuth (session)
 const adminAuth = require("../middlewares/auth").adminAuth
@@ -42,7 +44,8 @@ router.get(`/logout`, adminController.logout)
 
 
 ///DASHBOARD SIDE///
-router.get(`/dashboard`, adminAuth, adminController.dashboardRender)
+router.get(`/dashboard`, adminAuth, dashboardController.dashboardRender)
+router.get("/dashboard/data", adminAuth, dashboardController.getDashboardData);
 router.get(`/activity-log`, adminAuth, adminController.activityLogRender)
 
 
@@ -59,7 +62,6 @@ router.get(`/salesReport/csv`, adminAuth, salesController.downloadSalesReportCsv
 router.get(`/products`, adminAuth, productController.showProducts)
 router.get(`/addproducts`, adminAuth, productController.addProductsRender)
 router.get(`/editproducts/:id`, adminAuth, productController.editProductsRender)
-router.get('/deleteProduct/:productId', adminAuth, productController.deleteProduct)
 router.get(`/blockProduct/:productId`, adminAuth, productController.blockProduct)
 router.post(`/addproducts`, adminAuth, productController.addProducts)
 router.post("/updateproduct/:id", adminAuth, productController.updateProduct);
@@ -117,6 +119,12 @@ router.route(`/offer/:offerId`)
     .put(adminAuth, offerController.editOffer)
     .delete(adminAuth, offerController.offerDelete);
 
+///SETTINGS MANAGEMENT///
+router.get(`/settings`, adminAuth, settingController.landingPage)
+
+router.route(`/settings/referral`)
+    .get(adminAuth, settingController.referralSettingsRender)
+    .post(adminAuth, settingController.referralSettings)
 
 
 module.exports = router

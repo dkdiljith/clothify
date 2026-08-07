@@ -18,20 +18,15 @@ exports.profileRender = async (req, res) => {
     const userId = res.locals.user._id
     const userData = await User.findById(userId).lean()
     const address = await Address.findOne({ userId: userId, isDefault: true }).lean();
-    return res.render(`user/profileView`, { userData: userData, address: address })
+    return res.render(`user/profile`, { userData: userData, address: address, user_sidebar: true })
 }
 
-exports.profileEditRender = async (req, res) => {
-    const userId = res.locals.user._id
-    const userData = await User.findById(userId).lean()
-    return res.render(`user/profileEdit`, { userData: userData, })
-}
 
 exports.addressRender = async (req, res) => {
     try {
         const userId = res.locals.user._id
         const addresses = await Address.find({ userId }).lean();
-        return res.render('user/address', { addresses: addresses, });
+        return res.render('user/address', { addresses: addresses, user_sidebar: true });
     } catch (error) {
         console.error(error);
         return res.status(500).send('Internal Server Error');
@@ -41,30 +36,152 @@ exports.addressRender = async (req, res) => {
 exports.editAddressRender = async (req, res) => {
     const addressId = req.params.id
     const address = await Address.findById(addressId).lean()
-    return res.render(`user/editAddress`, { address: address })
+    return res.render(`user/editAddress`, { address: address, user_sidebar: true })
 }
 
 
 
 exports.securityRender = async (req, res) => {
-    const userId = res.locals.user._id
-    const user = await User.findOne({ _id: userId })
+  try {
 
-    const now = Date.now();
+    const hasPassword = !!(
+      await User.findById(res.locals.user._id)
+        .select("password")
+        .lean()
+    )?.password;
 
-    // Generate token
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(now + 3600000); // 1 hour
+    return res.render("user/security", {
+      user_sidebar: true,
+      hasPassword
+    });
 
-    // Update user
-    user.resetToken = token;
-    user.resetTokenExpires = tokenExpires;
-    await user.save();
+  } catch (error) {
+    console.error("Security Render Error:", error);
+    return res.redirect("/user/profile");
+  }
+};
 
-    const user1 = await User.findOne({ _id: userId })
 
-    return res.render(`user/security`, { token, user: user1 })
-}
+
+
+exports.profileEdit = async (req, res) => {
+    try {
+        let { name, phone, gender, dob } = req.body;
+        const userId = res.locals.user._id;
+        // SANITIZE
+        name = name?.trim();
+        phone = phone?.trim();
+        gender = gender?.trim();
+        // NAME
+        const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Name is required.",
+            });
+        }
+        if (name.length < 3 || name.length > 50) {
+            return res.status(400).json({
+                success: false,
+                message: "Name must be between 3 and 50 characters.",
+            });
+        }
+        if (!nameRegex.test(name)) {
+            return res.status(400).json({
+                success: false,
+                message: "Name can contain only letters and single spaces.",
+            });
+        }
+        // PHONE
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid mobile number.",
+            });
+        }
+        // GENDER
+        const allowedGenders = ["Male", "Female", "Other"];
+        if (!allowedGenders.includes(gender)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid gender selected.",
+            });
+        }
+        // DOB
+        if (!dob) {
+            return res.status(400).json({
+                success: false,
+                message: "Date of birth is required.",
+            });
+        }
+        const dobDate = new Date(dob);
+        if (isNaN(dobDate.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date of birth.",
+            });
+        }
+        const today = new Date();
+        if (dobDate > today) {
+            return res.status(400).json({
+                success: false,
+                message: "Date of birth cannot be in the future.",
+            });
+        }
+        let age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < dobDate.getDate())
+        ) {
+            age--;
+        }
+        if (age < 13) {
+            return res.status(400).json({
+                success: false,
+                message: "Minimum age is 13 years.",
+            });
+        }
+        if (age > 120) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date of birth.",
+            });
+        }
+        // UPDATE
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                name,
+                phone,
+                gender,
+                dateOfBirth: dob,
+            },
+            {
+                new: true,
+                runValidators: true,
+            },
+        );
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully.",
+        });
+    } catch (error) {
+        console.error("Profile Edit Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again.",
+        });
+    }
+};
+
 
 
 
@@ -124,11 +241,11 @@ exports.editAddress = async (req, res) => {
 
 
 exports.addAddressRender = async (req, res) => {
-    return res.render(`user/addAddress`,)
+    return res.render(`user/addAddress`, { user_sidebar: true })
 }
 
 exports.deleteUserRender = async (req, res) => {
-    return res.render(`user/deleteAccount`)
+    return res.render(`user/deleteAccount`, { user_sidebar: true })
 }
 
 exports.deleteUser = async (req, res) => {
@@ -171,132 +288,106 @@ exports.deleteUser = async (req, res) => {
 };
 
 
-exports.userOrders = async (req, res) => {
-    const userId = res.locals.user._id
 
-    // Pagination parameters
+exports.userOrders = async (req, res) => {
+    const userId = res.locals.user._id;
     const page = parseInt(req.query.page) || 1;
-    const limit = 2; // 2 orders per page
+    const limit = 2;
 
     try {
-        // Get total count of orders
-        const totalOrders = await Order.countDocuments({ userId });
-        const totalPages = Math.ceil(totalOrders / limit);
+        const isRetryPendingOrder = req.query.retryPendingOrder === 'true';
+        const currentTime = new Date();
 
-        // Get paginated orders (latest first)
-        const orders = await Order.find({ userId })
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+        let totalOrders = 0;
+        let orders = [];
 
-        return res.render('user/userOrders', {
+        if (isRetryPendingOrder) {
+            // POOL 1: Only failed orders where RETRY IS ELIGIBLE (Both conditions must be healthy)
+            const eligibleQuery = {
+                userId,
+                paymentStatus: "Failed",
+                paymentRetryExpiresAt: { $gt: currentTime }, // Must not be expired yet
+                paymentAttemptsCount: { $lt: 6 }             // Must have attempts remaining
+            };
+
+            totalOrders = await Order.countDocuments(eligibleQuery);
+            orders = await Order.find(eligibleQuery)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+
+        } else {
+            // POOL 2: Every order that is completed, pending, OR failed but retry limits exceeded
+            const regularPoolQuery = {
+                userId,
+                $or: [
+                    { paymentStatus: { $in: ['Completed', 'Pending', 'Refunded'] } },
+                    {
+                        paymentStatus: "Failed",
+                        $or: [
+                            { paymentRetryExpiresAt: { $lte: currentTime } }, // Limit 1 exceeded: Time up
+                            { paymentAttemptsCount: { $gte: 6 } }             // Limit 2 exceeded: Max attempts
+                        ]
+                    }
+                ]
+            };
+
+            totalOrders = await Order.countDocuments(regularPoolQuery);
+            orders = await Order.find(regularPoolQuery)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean();
+        }
+
+        const totalPages = Math.ceil(totalOrders / limit) || 1;
+        const viewName = isRetryPendingOrder ? 'user/userPendingOrders' : 'user/userOrders';
+
+        return res.render(viewName, {
             orders,
+            isRetryPendingOrder,
             pagination: {
-                currentPage: page,
+                page,
                 limit,
                 totalPages,
                 hasNextPage: page < totalPages,
-                hasPrevPage: page > 1
-            }
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1
+            },
+            user_sidebar: true
         });
+
     } catch (error) {
         console.error('Error fetching orders:', error);
         return res.render('user/userOrders', {
             orders: [],
-            pagination: {
-                currentPage: 1,
-                limit,
-                totalPages: 1,
-                hasNextPage: false,
-                hasPrevPage: false
-            }
+            isRetryPendingOrder: false,
+            pagination: { page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false, nextPage: 1, prevPage: 1 },
+            user_sidebar: true,
         });
     }
-}; exports.userOrders = async (req, res) => {
-    const userId = res.locals.user._id
-
-    // Pagination variables
-    const page = parseInt(req.query.page) || 1;
-    const limit = 2; // 2 orders per page
-    let orders = await Order.find({ userId }).lean();
-    let totalPages = 0;
-
-    if (orders.length > 0) {
-        // Reverse orders to show latest first
-        const reversedOrders = orders.reverse();
-
-        // Calculate total pages
-        totalPages = Math.ceil(reversedOrders.length / limit);
-
-        // Get orders for current page
-        const startIndex = (page - 1) * limit;
-        orders = reversedOrders.slice(startIndex, startIndex + limit);
-    }
-
-    return res.render('user/userOrders', {
-        orders,
-        pagination: {
-            page,
-            limit,
-            totalPages,
-            nextPage: page + 1,
-            prevPage: page - 1,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1
-        }
-    });
 };
+
+
+
+
+
 
 exports.userOrderDetails = async (req, res) => {
 
     const orderId = req.params.orderId;
-    const itemId = req.params.itemId;
 
     const order = await Order.findById(orderId).lean();
 
-    const item = await order.items.find((item) =>
-        item._id.toString() === itemId
-    )
-
-
-    return res.render(`user/orderDetails`, { order: order, item: item })
+    return res.render(`user/orderDetails`, { order: order, user_sidebar: true })
 }
 
 
 
 
 
-
-exports.profileEdit = async (req, res) => {
-
-    try {
-        const { name, phone, gender, dateOfBirth } = req.body;
-        const userId = res.locals.user._id
-
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            {
-                name,
-                phone,
-                gender,
-                dateOfBirth,
-            },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const user = await User.findById(userId).lean()
-
-        return res.render('user/profileView', { userData: user, });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
-    }
-}
 
 exports.addAddress = async (req, res) => {
     try {
@@ -322,7 +413,7 @@ exports.addAddress = async (req, res) => {
         await newAddress.save();
         const address = await Address.find({ userId: userId }).lean()
 
-        return res.render('user/address', { addresses: address });
+        return res.render('user/address', { addresses: address, user_sidebar: true });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Server error' });

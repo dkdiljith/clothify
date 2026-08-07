@@ -1,0 +1,263 @@
+{{#section 'head'}}
+<title>My Profile | Clothify</title>
+<link rel="stylesheet" href="/stylesheets/user/profile.css">
+{{/section}}
+<div class="profile-page">
+    <!-- ===========================
+            PROFILE HEADER
+    ============================ -->
+    <div class="profile-header-card">
+        <div class="profile-avatar">
+            <img src="https://i.postimg.cc/2S8QdqmM/blue-circle-with-white-user-78370-4707.jpg" alt="Profile">
+        </div>
+        <div class="profile-header-content">
+            <h2>
+                {{#if userData.name}}
+                {{userData.name}}
+                {{else}}
+                User
+                {{/if}}
+            </h2>
+            <div class="profile-email-row">
+                <span class="profile-email">
+                    {{userData.email}}
+                </span>
+                <button class="icon-btn" id="changeEmailBtn" title="Change Email">
+                    <i class="fas fa-pen"></i>
+                </button>
+            </div>
+            <p class="member-since">
+                <i class="far fa-calendar-alt"></i>
+                Member Since
+                {{formatDate userData.createdAt "MMMM YYYY"}}
+            </p>
+        </div>
+    </div>
+    <!-- ===========================
+            STATS
+    ============================ -->
+    <div class="profile-stats">
+        <a href="/user/orders" class="stat-card">
+            <i class="fas fa-box"></i>
+            <h3>{{orderCount}}</h3>
+            <span>Orders</span>
+        </a>
+        <a href="/user/wishlist" class="stat-card">
+            <i class="fas fa-heart"></i>
+            <h3>{{wishlistCount}}</h3>
+            <span>Wishlist</span>
+        </a>
+        <a href="/user/address" class="stat-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>{{addressCount}}</h3>
+            <span>Addresses</span>
+        </a>
+    </div>
+    <!-- ===========================
+        PERSONAL INFORMATION
+    ============================ -->
+    <div class="profile-card">
+        <div class="card-title">
+            <h3>
+                <i class="fas fa-user"></i>
+                Personal Information
+            </h3>
+            <button class="icon-btn" id="editProfileBtn">
+                <i class="fas fa-pen"></i>
+            </button>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Full Name</label>
+                <span>
+                    {{#if userData.name}}
+                    {{userData.name}}
+                    {{else}}
+                    Not Added
+                    {{/if}}
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Phone Number</label>
+                <span>
+                    {{#if userData.phone}}
+                    {{userData.phone}}
+                    {{else}}
+                    Not Added
+                    {{/if}}
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Gender</label>
+                <span>
+                    {{#if userData.gender}}
+                    {{userData.gender}}
+                    {{else}}
+                    Not Added
+                    {{/if}}
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Date of Birth</label>
+                <span>
+                    {{#if userData.dateOfBirth}}
+                    {{formatDate userData.dateOfBirth "DD MMM YYYY"}}
+                    {{else}}
+                    Not Added
+                    {{/if}}
+                </span>
+            </div>
+        </div>
+    </div>
+    <!-- ===========================
+            DEFAULT ADDRESS
+    ============================ -->
+    <div class="profile-card">
+        <div class="card-title">
+            <h3>
+                <i class="fas fa-home"></i>
+                Default Address
+            </h3>
+        </div>
+        {{#if address}}
+        <div class="address-card">
+            <h4>{{address.name}}</h4>
+            <p>{{address.streetAddress}}</p>
+            {{#if address.landmark}}
+            <p>{{address.landmark}}</p>
+            {{/if}}
+            <p>
+                {{address.city}},
+                {{address.state}}
+                {{address.zip}}
+            </p>
+            <p>
+                <i class="fas fa-phone"></i>
+                {{address.phone}}
+            </p>
+        </div>
+        {{else}}
+        <div class="empty-address">
+            <i class="fas fa-map-marked-alt"></i>
+            <h4>No Default Address</h4>
+            <p>Add an address to make checkout faster.</p>
+            <a href="/user/address" class="btn-primary">
+                Add Address
+            </a>
+        </div>
+        {{/if}}
+    </div>
+</div>
+<!-- =====================================================
+                CHANGE EMAIL MODAL
+====================================================== -->
+<div class="profile-modal" id="changeEmailModal">
+    <div class="profile-modal-content">
+        <button type="button" class="close-modal" aria-label="Close">
+            &times;
+        </button>
+        <h2>Change Email</h2>
+        <!-- STEP 1 -->
+        <div class="email-step" id="emailPasswordStep">
+            <div class="form-group">
+                <label for="currentPassword">Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter Password" autocomplete="current-password"
+                    aria-describedby="passwordError">
+                <small class="input-error" id="passwordError"></small>
+            </div>
+            <button type="button" class="btn-primary" id="verifyPasswordBtn">
+                Verify Password
+            </button>
+        </div>
+        <!-- STEP 2 -->
+         <div class="verification-success collapsed" id="passwordVerifiedMessage">
+        <i class="fas fa-circle-check"></i>
+        Password verified successfully. Now enter your new email.
+    </div>
+        <div class="email-step collapsed" id="emailInputStep">
+            <div class="form-group">
+                {{!-- <label for="newEmail">New Email</label> --}}
+                <input type="email" id="newEmail" placeholder="Enter New Email" autocomplete="email"
+                    aria-describedby="emailError">
+                <small class="input-error" id="emailError"></small>
+            </div>
+            <button type="button" class="btn-primary" id="requestOtpBtn">
+                Send OTP
+            </button>
+            
+        </div>
+
+
+        <!-- STEP 3 -->
+        <div class="email-step collapsed" id="otpInstructionMessage">
+    Enter the 6-digit OTP sent to your email address.
+</div>
+        <div class="email-step collapsed" id="emailOtpStep">
+            <div class="form-group">
+                {{!-- <label for="emailOtp">OTP</label> --}}
+                <input type="text" id="emailOtp" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+                    placeholder="Enter OTP" aria-describedby="otpError">
+                <small class="input-error" id="otpError"></small>
+            </div>
+            <button type="button" class="btn-primary" id="verifyOtpBtn">
+                Verify OTP
+            </button>
+        </div>
+    </div>
+</div>
+<!-- =====================================================
+                    PROFILE EDIT MODAL
+====================================================== -->
+<div class="profile-modal" id="editProfileModal">
+    <div class="profile-modal-content">
+        <button type="button" class="close-modal" aria-label="Close">
+            &times;
+        </button>
+        <h2>Edit Personal Information</h2>
+        <form id="profileForm" novalidate>
+            <div class="form-group">
+                <label for="editName">Full Name</label>
+                <input type="text" id="editName" value="{{userData.name}}" maxlength="50" autocomplete="name"
+                    aria-describedby="nameError">
+                <small class="input-error" id="nameError"></small>
+            </div>
+            <div class="form-group">
+                <label for="editPhone">Phone Number</label>
+                <input type="tel" id="editPhone" value="{{userData.phone}}" maxlength="10" inputmode="numeric"
+                    autocomplete="tel" aria-describedby="phoneError">
+                <small class="input-error" id="phoneError"></small>
+            </div>
+            <div class="form-group">
+                <label for="editGender">Gender</label>
+                <select id="editGender" aria-describedby="genderError">
+                    <option value="">Select Gender</option>
+                    <option value="Male" {{#if (eq userData.gender "Male" )}}selected{{/if}}>
+                        Male
+                    </option>
+                    <option value="Female" {{#if (eq userData.gender "Female" )}}selected{{/if}}>
+                        Female
+                    </option>
+                    <option value="Other" {{#if (eq userData.gender "Other" )}}selected{{/if}}>
+                        Other
+                    </option>
+                </select>
+                <small class="input-error" id="genderError"></small>
+            </div>
+            <div class="form-group">
+                <label for="editDob">Date of Birth</label>
+                <input
+    type="date"
+    id="editDob"
+    value="{{formatDateInput userData.dateOfBirth}}"
+    aria-describedby="dobError">
+                <small class="input-error" id="dobError"></small>
+            </div>
+            <button class="btn-primary" type="submit">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{{#section 'scripts'}}
+<script src="/javascripts/user/profile.js" defer></script>
+{{/section}}

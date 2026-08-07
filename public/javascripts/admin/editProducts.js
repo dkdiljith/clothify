@@ -563,12 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
             file.type
           )
         ) {
-
-          setError(
-            imageErrorDiv,
-            `${file.name} is not supported.`
-          );
-
+          showPopupMessage( `${file.name} is not supported.`, `error`)
           return;
         }
 

@@ -2,7 +2,6 @@
 <title>Order #{{order.orderId}} | Admin Dashboard</title>
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/orderDetails.css">
 {{/section}}
-
 <main class="dashboard-container" style="background:#F2F2F2;">
     <div class="container-fluid py-4">
         <!-- Order Header -->
@@ -25,10 +24,9 @@
                 </div>
             </div>
             <div>
-                <button id="download-invoice-button" class="btn btn-secondary">
+                <button id="download-invoice-button" class="btn btn-secondary" data-order-id="{{order._id}}">
                     Download Invoice
                 </button>
-
                 <a href="/admin/orders" class="btn btn-outline-secondary">
                     <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +38,6 @@
                 </a>
             </div>
         </div>
-
         <div class="row">
             <!-- Left Column -->
             <div class="col-lg-8">
@@ -67,207 +64,149 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-
                                     {{#each order.items}}
-
                                     <tr class="{{#if (eq this.status 'Return Requested')}}alert-row{{/if}}">
-
                                         <td data-label="Item">
-
                                             <div class="product-img-container">
-
                                                 <img src="{{this.productImg}}" alt="{{this.productName}}"
                                                     class="product-img">
-
                                                 {{#if (eq this.status 'Return Requested')}}
-
                                                 <div class="attention-required"
                                                     title="Return Request - Requires Action">
-
                                                     <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24"
                                                         fill="none" stroke="currentColor" stroke-width="2.5"
                                                         stroke-linecap="round" stroke-linejoin="round">
-
                                                         <circle cx="12" cy="12" r="10"></circle>
-
                                                         <line x1="12" y1="8" x2="12" y2="12"></line>
-
                                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
-
                                                     </svg>
-
                                                 </div>
-
                                                 {{/if}}
-
                                             </div>
-
                                         </td>
-
                                         <td data-label="Product Details">
-
                                             <div class="d-flex flex-column">
-
                                                 <strong>
                                                     {{this.productName}}
                                                 </strong>
-
                                                 <small class="text-muted mb-1">
-
                                                     ₹{{this.productPrice}}
                                                     ×
                                                     {{this.quantity}}
-
                                                     |
-
                                                     Size:
                                                     {{this.productSize}}
-
                                                 </small>
-
-                                                {{#if this.returnReason.length}}
-
-                                                <div class="return-reason-box">
-
-                                                    <strong class="d-block mb-1">
-
-                                                        Return Reason
-
-                                                    </strong>
-
-                                                    <p class="mb-0 small">
-
-                                                        {{this.returnReason.[0].reason}}
-
-                                                    </p>
-
+                                                {{#if this.refundDetails.refundType}}
+                                                <div class="mt-2 small">
+                                                    <div>
+                                                        {{#ifEquals this.refundDetails.refundType "Returned"}}
+                                                        <span class="text-success">
+                                                            ↩ Returned
+                                                        </span>
+                                                        {{else}}
+                                                        <span class="text-danger">
+                                                            ✖ Cancelled
+                                                        </span>
+                                                        {{/ifEquals}}
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        {{#ifEquals this.refundDetails.refundAmountStatus "Refunded"}}
+                                                        Refunded :
+                                                        <strong>
+                                                            ₹{{this.refundDetails.refundAmount}}
+                                                        </strong>
+                                                        {{else}}
+                                                        No Refund Required
+                                                        {{/ifEquals}}
+                                                    </div>
                                                 </div>
-
                                                 {{/if}}
-
+                                                {{#if this.returnReason.length}}
+                                                <div class="return-reason-box">
+                                                    <strong class="d-block mb-1">
+                                                        Return Reason
+                                                    </strong>
+                                                    <p class="mb-0 small">
+                                                        {{this.returnReason.[0].reason}}
+                                                    </p>
+                                                </div>
+                                                {{/if}}
                                             </div>
-
                                         </td>
-
                                         <td data-label="Status">
-
                                             <div class="d-flex flex-column">
-
                                                 {{#if (eq ../order.paymentStatus "Failed")}}
-
                                                 <select class="form-select form-select-sm mb-2" disabled>
-
-                                                    <option selected>
-
-                                                        Cancelled
-
-                                                    </option>
-
+                                                    <option selected>Cancelled</option>
                                                 </select>
-
                                                 <span class="status-badge bg-danger text-white align-self-start">
-
-                                                    Payment Failed
-
-                                                </span>
-
+                                                    Payment Failed </span>
                                                 {{else}}
-
-                                                {{#if (or
-                                                (eq this.status "Return Requested")
-                                                (eq this.status "Return Accepted")
-                                                (eq this.status "Return Rejected")
-                                                )}}
-
-                                                <select class="form-select form-select-sm mb-2"
-                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
-                                                    (eq this.status "Returned" ) (eq this.status "Cancelled" ) ) }}
-                                                    disabled {{/if}}>
-
-                                                    <option value="" disabled selected>
-
-                                                        Accept or Reject Return
-
-                                                    </option>
-
+                                                {{#if (or (eq this.status "Return Requested") (eq this.status "Return
+                                                Accepted") (eq this.status "Return Rejected") (eq this.status
+                                                "Returned") )}}
+                                                <!-- First Dropdown: Return Processing Workflow -->
+                                                <select class="form-select form-select-sm mb-2 status-dropdown"
+                                                    data-item-id="{{this._id}}" data-order-id="{{../order._id}}" {{#if
+                                                    (or (eq this.status "Returned" ) (eq this.status "Cancelled" ) (eq
+                                                    this.status "Return Rejected" ) ) }} disabled {{/if}}>
+                                                    <!-- FIX: Only show/select the empty placeholder if the status is NOT "Returned" or "Return Rejected" -->
+                                                    {{#if (and (not (eq this.status "Returned")) (not (eq this.status
+                                                    "Return Rejected")))}}
+                                                    <option value="" disabled selected>Accept or Reject Return</option>
+                                                    {{/if}}
                                                     <option value="Return Rejected" {{#ifEquals
-                                                        this.status "Return Rejected" }} selected {{/ifEquals}}>
-
-                                                        Reject Return
-
-                                                    </option>
-
+                                                        this.status "Return Rejected" }} selected {{/ifEquals}}>Reject
+                                                        Return</option>
                                                     <option value="Returned" {{#ifEquals this.status "Returned" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Accept Return
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Accept Return</option>
                                                 </select>
-
                                                 {{else}}
-
-                                                <select class="form-select form-select-sm mb-2"
-                                                    onchange="updateItemStatus('{{this._id}}', this.value)" {{#if (or
-                                                    (eq this.status "Completed" ) (eq this.status "Returned" ) (eq
-                                                    this.status "Cancelled" ) ) }} disabled {{/if}}>
-
-                                                    <option value="Pending" {{#ifEquals this.status "Pending" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Pending
-
-                                                    </option>
-
+                                                <!-- Second Dropdown: Standard Delivery Workflow -->
+                                                <select class="form-select form-select-sm mb-2 status-dropdown"
+                                                    data-item-id="{{this._id}}" data-order-id="{{../order._id}}" {{#if
+                                                    (or (eq this.status "Completed" ) (eq this.status "Returned" ) (eq
+                                                    this.status "Cancelled" ) (eq this.status "Return Rejected" ) ) }}
+                                                    disabled {{/if}}>
+                                                    <!-- Pending Option -->
+                                                    {{#ifEquals this.status "Pending"}}
+                                                    <option value="Pending" selected>Pending</option>
+                                                    {{/ifEquals}}
+                                                    <!-- Shipped Option -->
+                                                    {{#if (or (eq this.status "Pending") (eq this.status "Shipped"))}}
                                                     <option value="Shipped" {{#ifEquals this.status "Shipped" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Shipped
-
-                                                    </option>
-
-                                                    <option value="Completed" {{#ifEquals this.status "Completed" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Completed
-
-                                                    </option>
-
-                                                    <option value="Cancelled" {{#ifEquals this.status "Cancelled" }}
-                                                        selected {{/ifEquals}}>
-
-                                                        Cancelled
-
-                                                    </option>
-
+                                                        selected {{/ifEquals}}>Shipped</option>
+                                                    {{/if}}
+                                                    <!-- Completed Option -->
+                                                    {{#if (eq this.status "Shipped")}}
+                                                    <option value="Completed">Completed</option>
+                                                    {{/if}}
+                                                    {{#ifEquals this.status "Completed"}}
+                                                    <option value="Completed" selected>Completed</option>
+                                                    {{/ifEquals}}
+                                                    <!-- Cancelled Option -->
+                                                    {{#if (eq this.status "Pending")}}
+                                                    <option value="Cancelled">Cancelled</option>
+                                                    {{/if}}
+                                                    {{#ifEquals this.status "Cancelled"}}
+                                                    <option value="Cancelled" selected>Cancelled</option>
+                                                    {{/ifEquals}}
                                                 </select>
-
                                                 {{/if}}
-
                                                 <span
                                                     class="status-badge status-{{toLowerCase (replaceSpaceWithHyphen this.status)}} align-self-start">
-
-                                                    {{this.status}}
-
-                                                </span>
-
+                                                    {{this.status}} </span>
                                                 {{/if}}
-
                                             </div>
-
                                         </td>
-
                                     </tr>
-
                                     {{/each}}
-
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
                 <!-- Delivery Information Card -->
                 <div class="card">
                     <div class="card-header">
@@ -301,54 +240,28 @@
                                                 d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
                                             </path>
                                         </svg>
-
                                         {{order.deliveryAddress.phone}}
                                     </p>
                                 </div>
                             </div>
-                            {{!-- <div class="col-md-6">
-                                <h6 class="text-uppercase text-muted mb-3">Shipping Method</h6>
-                                <div class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded">
-                                        <svg class="admin-icon text-primary" xmlns="http://w3.org" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                                        </svg>
-
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Standard Delivery</h6>
-                                        <small class="text-muted">3-5 business days</small>
-                                    </div>
-                                </div>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%;"
-                                        aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <div class="mt-2 small text-muted">
-                                    <span>Order Placed</span>
-                                    <span class="float-end">Out for Delivery</span>
-                                </div>
-                            </div> --}}
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Right Column -->
             <div class="col-lg-4">
                 <!-- Order Summary Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
+                        <h5 class="mb-0">
+                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z">
                                 </path>
                                 <path d="M6 8h12M6 12h12M6 16h8"></path>
                             </svg>
-                            Order Summary</h5>
+                            Order Summary
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="summary-item">
@@ -375,216 +288,120 @@
                             <span>-₹{{order.offerDiscount}}</span>
                         </div>
                         {{/if}}
+                        <hr>
+                        <div class="summary-item">
+                            <span><strong>Checkout Total</strong></span>
+                            <span><strong>₹{{order.checkoutTotal}}</strong></span>
+                        </div>
+                        {{#if order.totalRefundAmount}}
+                        <div class="summary-item text-danger">
+                            <span><strong>Cancelled Amount</strong></span>
+                            <span>-₹{{order.totalRefundAmount}}</span>
+                        </div>
+                        {{/if}}
                         <div class="summary-item pt-2 mt-2 summary-total">
-                            <span>Total Amount</span>
+                            <span>
+                                {{#ifEquals order.paymentMethod "cod"}}
+                                Amount Payable
+                                {{else}}
+                                Final Amount Paid
+                                {{/ifEquals}}
+                            </span>
                             <span>₹{{order.totalAmount}}</span>
                         </div>
                     </div>
                 </div>
-
                 <!-- Payment Information Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <h5 class="mb-0">
+                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2"></rect>
                                 <line x1="1" y1="10" x2="23" y2="10"></line>
                             </svg>
-                            Payment Information</h5>
+                            Payment Information
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <h6 class="text-uppercase text-muted mb-2">Payment Method</h6>
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted mb-2">
+                                Payment Method
+                            </h6>
                             <div class="payment-method">
                                 <div class="payment-icon">
                                     {{#ifEquals order.paymentMethod "wallet"}}
                                     <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2">
                                         <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
                                         <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
                                         <path d="M18 12a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4v-6z"></path>
                                     </svg>
-
                                     {{else ifEquals order.paymentMethod "cod"}}
                                     <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2">
                                         <rect x="2" y="6" width="20" height="12" rx="2"></rect>
                                         <circle cx="12" cy="12" r="2"></circle>
-                                        <path d="M6 12h.01M18 12h.01"></path>
                                     </svg>
-
-                                    {{else ifEquals order.paymentMethod "card"}}
-                                    <i class="far fa-credit-card"></i>
                                     {{else}}
                                     <svg class="admin-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2">
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
-                                        <line x1="6" y1="14" x2="10" y2="14"></line>
-                                        <line x1="14" y1="14" x2="18" y2="14"></line>
                                     </svg>
-
                                     {{/ifEquals}}
                                 </div>
                                 <div>
-                                    <p class="mb-0 text-capitalize">{{order.paymentMethod}}</p>
-                                    <span class="badge bg-{{#ifEquals order.paymentStatus "
-                                        Completed"}}success{{else}}warning{{/ifEquals}}">
+                                    <p class="mb-1">
+                                        {{#ifEquals order.paymentMethod "wallet"}}
+                                        Wallet
+                                        {{else ifEquals order.paymentMethod "cod"}}
+                                        Cash On Delivery
+                                        {{else}}
+                                        Online Payment (Razorpay)
+                                        {{/ifEquals}}
+                                    </p>
+                                    <span class="badge
+                        {{#ifEquals order.paymentStatus " Completed"}} bg-success {{else ifEquals
+                                        order.paymentStatus "Refunded" }} bg-info {{else ifEquals
+                                        order.paymentStatus "Failed" }} bg-danger {{else}} bg-warning {{/ifEquals}}">
                                         {{order.paymentStatus}}
                                     </span>
                                 </div>
                             </div>
                         </div>
-
-                        {{#if order.transactionId}}
+                        {{#if item.refundDetails.refundType}}
                         <div>
-                            <h6 class="text-uppercase text-muted mb-2">Transaction Details</h6>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-muted">ID:</span>
-                                <span class="font-monospace">{{order.transactionId}}</span>
+                            <h6 class="text-uppercase text-muted mb-2">
+                                Financial Status
+                            </h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Adjustment Type</span>
+                                <strong>{{item.refundDetails.refundType}}</strong>
                             </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Status</span>
+                                <strong>{{item.refundDetails.refundAmountStatus}}</strong>
+                            </div>
+                            {{#ifEquals item.refundDetails.refundAmountStatus "Refunded"}}
+                            <div class="d-flex justify-content-between">
+                                <span>Refund Amount</span>
+                                <strong>₹{{item.refundDetails.refundAmount}}</strong>
+                            </div>
+                            {{else}}
+                            <div class="d-flex justify-content-between">
+                                <span>Cancelled Amount</span>
+                                <strong>₹{{item.refundDetails.refundAmount}}</strong>
+                            </div>
+                            {{/ifEquals}}
                         </div>
                         {{/if}}
                     </div>
                 </div>
-
-
-                <!-- Customer Actions Card -->
-                {{!-- <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                                <circle cx="19" cy="11" r="2"></circle>
-                            </svg>
-                            Customer Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn btn-outline-primary w-100 mb-2">
-                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                                <circle cx="19" cy="11" r="2"></circle>
-                            </svg>
-                            Contact Customer
-                        </button>
-                        <button class="btn btn-outline-secondary w-100">
-                            <svg class="admin-icon me-2" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
-                                </path>
-                                <rect x="6" y="14" width="12" height="8"></rect>
-                            </svg>
-                            Print Invoice
-                        </button>
-                    </div>
-                </div> --}}
             </div>
         </div>
     </div>
 </main>
-
-
-<script>
-    function updateItemStatus(itemId, newStatus) {
-        const orderId = `{{order._id}}`;
-        if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) {
-            return;
-        }
-
-        fetch(`/admin/orderDetails/${orderId}/item/${itemId}/status`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: newStatus }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                showPopupMessage(`Status updated to ${newStatus}`, 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            })
-            .catch(error => {
-                console.error('Error updating status:', error);
-                showPopupMessage('Failed to update status', 'error');
-            });
-    }
-
-    // Download Invoice
-    document.getElementById("download-invoice-button")
-        ?.addEventListener("click", async function () {
-
-            try {
-
-                const response = await fetch(
-                    "/admin/download-invoice",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            orderId: "{{order._id}}"
-                        })
-                    }
-                );
-
-                if (!response.ok) {
-
-                    showPopupMessage(
-                        "Invoice generation failedddddddddddddddd",
-                        "error"
-                    );
-
-                    return;
-                }
-
-                const blob =
-                    await response.blob();
-
-                const url =
-                    window.URL.createObjectURL(blob);
-
-                const a =
-                    document.createElement("a");
-
-                a.href = url;
-
-                a.download =
-                    "invoice.pdf";
-
-                document.body.appendChild(a);
-
-                a.click();
-
-                a.remove();
-
-                window.URL.revokeObjectURL(url);
-
-            } catch (error) {
-
-                console.log(error);
-
-                showPopupMessage(
-                    "Invoice could not be generated",
-                    "error"
-                );
-            }
-        });
-</script>
+{{#section 'scripts'}}
+<script src="/javascripts/admin/orderDetails.js" defer></script>
+{{/section}}

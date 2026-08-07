@@ -15,27 +15,6 @@ const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//cartdataIcon
-exports.cartDataIcon = async (req, res) => {
-  try {
-    const userId = res.locals.user._id
-    const cart = await Cart.findOne({ userId });
-
-    if (cart) {
-      const itemCount = cart.items ? cart.items.length : 0;
-      return res.json({ itemCount: itemCount });
-    } else {
-      return res.json({ itemCount: 0 });
-    }
-  } catch (error) {
-    console.error("Error fetching cart data for icon:", error);
-    return res.status(500).json({ error: "Failed to fetch cart data" }); // Send an error response
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 exports.cartRender = async (req, res) => {
   try {
@@ -52,11 +31,29 @@ exports.cartRender = async (req, res) => {
     //  Recalculate totals
     const summary = await recalculateCartSummary(userId);
 
-    //  Get fresh populated data
+    // Get fresh populated data
     const updatedCart = await Cart.findOne({ userId })
       .populate('items.productId')
       .populate('couponId')
       .lean();
+
+    // Patch the null productIds with an object containing the raw ID string
+    if (updatedCart && updatedCart.items && cartExists && cartExists.items) {
+      updatedCart.items.forEach((item, index) => {
+        if (item.productId === null) {
+          const originalItem = cartExists.items[index];
+          if (originalItem && originalItem.productId) {
+            // Format it as an object with an _id property to match population layout
+            item.productId = {
+              _id: originalItem.productId.toString()
+            };
+            // Add a flag so your frontend template can detect it is inactive/disabled
+            item.isInactiveProduct = true;
+          }
+        }
+      });
+    }
+
 
     // Prepare Coupons for your specific template logic
     const allCoupons = await Coupon.find({
@@ -80,7 +77,7 @@ exports.cartRender = async (req, res) => {
       })
       .map(coupon => ({
         ...coupon,
-        _id: coupon._id.toString() 
+        _id: coupon._id.toString()
       }))
       .sort((a, b) => {
         if (a._id === currentCouponId) return -1;
@@ -96,7 +93,8 @@ exports.cartRender = async (req, res) => {
       tax: summary.tax,
       totalAmount: summary.totalAmount,
       coupons: availableCoupons,
-      appliedCoupon: updatedCart.couponId 
+      appliedCoupon: updatedCart.couponId,
+      message: res.locals.message || null
     });
 
   } catch (error) {
@@ -112,9 +110,7 @@ exports.cartRender = async (req, res) => {
 exports.addToCart = async (req, res) => {
   try {
     const userId = res.locals.user._id;
-    
-    // Destructuring fields (Ensure your route matches req.params, or change to req.body)
-    const { productId, variationIndex, quantity: reqQty } = req.params; 
+    const { productId, variationIndex, quantity: reqQty } = req.params;
     const changeAmount = parseInt(reqQty);
     const vIndex = parseInt(variationIndex);
 
@@ -125,12 +121,11 @@ exports.addToCart = async (req, res) => {
     }
 
     let cart = await Cart.findOne({ userId });
-
     const existingItem = cart ? cart.items.find(item =>
       item.productId.toString() === productId && item.variationIndex === vIndex
     ) : null;
 
-    //HANDLE QUANTITY DECREMENT (changeAmount is negative, e.g., -1)
+    // HANDLE QUANTITY DECREMENT (changeAmount is negative, e.g., -1)
     if (changeAmount < 0) {
       if (!existingItem) {
         return res.status(404).json({ success: false, message: 'Item not found in cart' });
@@ -142,26 +137,37 @@ exports.addToCart = async (req, res) => {
       existingItem.quantity += changeAmount; // Decreases the quantity safely
       await cart.save();
 
-      // Recalculate all totals/coupons
+      // Recalculate all totals/coupons natively across database models
       await recalculateCartSummary(userId);
 
+      // FIX: Fetch fresh calculations after summary script processing completes
+      const updatedCart = await Cart.findOne({ userId });
+      const currentUnitProductPrice = parseFloat(check.variation.price || 0);
+
       return res.status(200).json({
-        success: true,
+        success: false,
+        info: true,
         message: 'Quantity decreased',
-        cartCount: cart.items.reduce((acc, item) => acc + item.quantity, 0)
+        newQuantity: existingItem.quantity,
+        itemTotal: existingItem.quantity * currentUnitProductPrice,
+        cartSubtotal: updatedCart.subtotal,
+        cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+        shippingFee: updatedCart.shippingFee,
+        tax: updatedCart.tax,
+        couponDiscount: updatedCart.couponDiscount,
+        offerDiscount: updatedCart.offerDiscount,
+        totalAmount: updatedCart.totalAmount
       });
     }
-    // HANDLE QUANTITY INCREMENT / ADD NEW (changeAmount is positive)
 
+    // HANDLE QUANTITY INCREMENT / ADD NEW (changeAmount is positive)
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
 
     const currentQtyInCart = existingItem ? existingItem.quantity : 0;
     const newTotalQty = currentQtyInCart + changeAmount;
-    
-    // check.variation gives you the direct variation object from your helper!
-    const productStock = check.variation.quantity; 
+    const productStock = check.variation.quantity;
 
     // Business Logic Limits
     if (newTotalQty > 10) {
@@ -176,23 +182,42 @@ exports.addToCart = async (req, res) => {
     } else {
       cart.items.push({ productId, variationIndex: vIndex, quantity: changeAmount });
     }
-
     await cart.save();
 
-    // Updates subtotal and recalculates everything
+    // Updates subtotal and recalculates everything inside the helper script
     await recalculateCartSummary(userId);
 
+    // FIX: Fetch fresh calculations after summary script processing completes
+    const updatedCart = await Cart.findOne({ userId });
+    const currentUnitProductPrice = parseFloat(check.variation.price || 0);
+    const postSavedTargetItem = updatedCart.items.find(item =>
+      item.productId.toString() === productId && item.variationIndex === vIndex
+    );
+
     return res.status(200).json({
-      success: true,
-      message: existingItem ? 'Quantity updated' : `Added ${check.product.name} to cart`,
-      cartCount: cart.items.reduce((acc, item) => acc + item.quantity, 0)
+      // Conditional logic for your flags
+      success: existingItem ? false : true,
+      info: existingItem ? true : undefined, // Omitted from JSON if false, or set to existingItem ? true : false
+      message: existingItem ? 'Quantity updated' : `Item Added to cart`,
+
+      newQuantity: postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty,
+      itemTotal: (postSavedTargetItem ? postSavedTargetItem.quantity : newTotalQty) * currentUnitProductPrice,
+      cartSubtotal: updatedCart.subtotal,
+      cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+      shippingFee: updatedCart.shippingFee,
+      tax: updatedCart.tax,
+      couponDiscount: updatedCart.couponDiscount,
+      offerDiscount: updatedCart.offerDiscount,
+      totalAmount: updatedCart.totalAmount
     });
+
 
   } catch (error) {
     console.error("Cart Update Error:", error);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 
 
 
@@ -203,28 +228,40 @@ exports.addToCart = async (req, res) => {
 
 exports.deleteCart = async (req, res) => {
   try {
-    const userId = res.locals.user._id
+    const userId = res.locals.user._id;
     const productId = req.params.productId;
     const variationIndex = parseInt(req.params.variationIndex);
 
     const cart = await Cart.findOne({ userId });
-
-
-
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
 
+    // Filter out the item matching both product ID and variation index
     cart.items = cart.items.filter(item =>
       !(item.productId.toString() === productId && item.variationIndex === variationIndex)
     );
+
     await cart.save();
 
-    const summary = await recalculateCartSummary(userId);
+    // Recalculates subtotals, shipping, and discount rules internally
+    await recalculateCartSummary(userId);
 
+    // Fetch the updated document from the database to grab fresh calculation states
+    const updatedCart = await Cart.findOne({ userId });
 
-
-    return res.json({ success: true, message: 'Item removed successfully', ...summary });
+    // Return the explicit key naming conventions expected by your cart.js
+    return res.json({
+      success: true,
+      message: 'Item removed successfully',
+      cartSubtotal: updatedCart.subtotal,
+      cartTotalItems: updatedCart.items.reduce((acc, item) => acc + item.quantity, 0),
+      shippingFee: updatedCart.shippingFee,
+      tax: updatedCart.tax,
+      couponDiscount: updatedCart.couponDiscount,
+      offerDiscount: updatedCart.offerDiscount,
+      totalAmount: updatedCart.totalAmount
+    });
 
   } catch (error) {
     console.error('Delete error:', error);
@@ -249,7 +286,7 @@ exports.getAddressInCart = async (req, res) => {
 
     // If no cart exists or it's empty, redirect them or render empty state
     if (!cartData || cartData.items.length === 0) {
-      return res.redirect('/cart');
+      return res.redirect('user/cart');
     }
 
     //  --- INTEGRATION: Loop and check every item in the cart array ---
@@ -258,7 +295,7 @@ exports.getAddressInCart = async (req, res) => {
 
     for (const item of cartData.items) {
       const check = await verifyProductVariation(item.productId, item.variationIndex);
-      
+
       if (check.isValid) {
         // Optional: Check if the product has run out of stock since they added it
         if (check.variation.quantity < item.quantity) {
@@ -293,10 +330,10 @@ exports.getAddressInCart = async (req, res) => {
 
       // Important: Recalculate your subtotal, tax, coupons, etc., since items were removed
       await recalculateCartSummary(userId);
-      
+
       // If no valid items are left at all, bounce them out of checkout back to the cart
       if (validItems.length === 0) {
-        return res.redirect('/user/cart'); 
+        return res.redirect('/user/cart');
       }
     }
 
@@ -305,13 +342,41 @@ exports.getAddressInCart = async (req, res) => {
       .populate('items.productId')
       .lean();
 
-    return res.render('user/addressInCheckout', { 
-      cart: finalizedCart, 
-      address: address 
+    return res.render('user/addressInCheckout', {
+      cart: finalizedCart,
+      address: address
     });
 
   } catch (error) {
     console.error('Error fetching address page data:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
+};
+
+
+
+
+
+
+exports.processPaymentPage = async (req, res) => {
+    try {
+        const { paymentMethod, addressId } = req.body;
+
+        if (paymentMethod === 'cod') {
+            const userId = res.locals.user._id;
+            const cart = await Cart.findOne({ userId }).lean();
+
+            if (cart && cart.totalAmount > 1000) {
+                console.log(`COD limit exceeded by user ${userId}`);
+                
+                return res.redirect(`/user/payment?selectedAddressId=${addressId}&error=cod_limit`);
+            }
+        }
+
+        return res.render("user/paymentProcessing", { method: paymentMethod, addressId });
+
+    } catch (error) {
+        console.error("Error in processPaymentPage:", error);
+        return res.status(500).send("Internal Server Error");
+    }
 };

@@ -7,12 +7,15 @@ const userSchema = new mongoose.Schema({
             return this.signUpMethod === 'google';
         }
     },
-    profileImg: {
-        path: String,
-        altText: String,
-    },
     name: { type: String, required: true },
-    email: { type: String, required: true },
+    email: {
+        type: String,
+        required: [true, 'Email is required'],
+        unique: true,
+        trim: true,
+        lowercase: true,
+        match: [/^\s*[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}\s*$/, 'Please fill a valid email address']
+    },
     password: {
         type: String,
         validate: {
@@ -28,16 +31,6 @@ const userSchema = new mongoose.Schema({
     blocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-
-    verificationToken: { type: String, default: null },
-    verificationTokenExpires: { type: Date, default: null },
-    verificationAttempts: { type: Number, default: 0, min: 0 },
-    verificationTimer: { type: Date, default: null },
-
-    resetToken: { type: String, default: null },
-    resetTokenExpires: { type: Date, default: null },
-    resetAttempts: { type: Number, default: 0, min: 0 },
-    resetTimer: { type: Date, default: null },
 
 }, { timestamps: true });
 

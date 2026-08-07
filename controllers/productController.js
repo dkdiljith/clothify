@@ -1,7 +1,9 @@
-
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema")
 const Offer = require("../models/offerSchema")
+const Wishlist = require(`../models/wishListSchema`)
+const Cart = require(`../models/cartSchema`)
+
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs');
@@ -20,7 +22,7 @@ const MESSAGES = require(`../utils/constants`)
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '..', 'public', 'images' , 'productImages')
+        const uploadPath = path.join(__dirname, '..', 'public', 'images', 'productImages')
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -960,43 +962,63 @@ exports.updateProduct = async (req, res) => {
 
 
 
-
 exports.showProducts = async (req, res) => {
     try {
         // 1. Get params from URL (e.g., /admin/products?page=1&query=shirt)
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-        const query = req.query.query || '';
-
+        const query = req.query.query || "";
+        const status = req.query.status || "";
         // 2. Build the search filter
         let filter = {};
         if (query) {
-            filter = {
-                $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { description: { $regex: query, $options: 'i' } }
-                ]
-            };
+            filter.$or = [
+                {
+                    name: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+                {
+                    description: {
+                        $regex: query,
+                        $options: "i",
+                    },
+                },
+            ];
         }
-
+        if (status === "active") {
+            filter.isActive = true;
+        }
+        if (status === "blocked") {
+            filter.isActive = false;
+        }
         // 3. Execute queries with 'showInactive' flag so admin sees everything
-        const [totalDocuments, products] = await Promise.all([
+        const [totalDocuments, products, categories] = await Promise.all([
             Product.countDocuments(filter),
             Product.find(filter)
                 .setOptions({ showInactive: true })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .lean()
+                .lean(),
+            Category.find({}).lean(),
         ]);
 
+        products.forEach(product => {
+            product.totalStock = product.details.reduce(
+                (sum, detail) => sum + (detail.quantity || 0),
+                0
+            );
+        });
         const totalPages = Math.ceil(totalDocuments / limit);
-
         // 4. Render the page with data and pagination helpers
-        return res.render('admin/products', {
+        return res.render("admin/products", {
             products,
+            categories,
             query,
+            status,
             pagination: {
                 page,
                 totalPages,
@@ -1004,13 +1026,14 @@ exports.showProducts = async (req, res) => {
                 hasPrevPage: page > 1,
                 nextPage: page + 1,
                 prevPage: page - 1,
-                serialNumberStart: skip
-            }
+                serialNumberStart: skip,
+            },
         });
-
     } catch (error) {
-        console.error('Error in showProducts:', error);
-        return res.status(500).render('error', { message: 'Failed to load products' });
+        console.error("Error in showProducts:", error);
+        return res
+            .status(500)
+            .render("error", { message: "Failed to load products" });
     }
 };
 
@@ -1018,38 +1041,73 @@ exports.showProducts = async (req, res) => {
 
 
 
-
-
 exports.singleProductPage = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).lean()
-        const categoryId = product.categoryId
-        const categories = await Category.findById(categoryId).lean();
-
+        // PRODUCT
+        const product = await Product.findById(req.params.id).lean();
         if (!product) {
-            return res.status(404).render('error', { message: 'Product not found' });
+            return res.render("user/singleProductPageNF");
         }
-
+        // USER
+        const userId = res.locals.user?._id || null;
+        // CATEGORY
+        const categories = await Category
+            .findById(product.categoryId)
+            .lean();
+        // =====================================================
+        // RELATED PRODUCTS
+        // =====================================================
         const relatedProducts = await Product.find({
             categoryId: product.categoryId,
-            _id: { $ne: product._id },
-        }).limit(4).lean()
-
-        const offers = await Offer.find().lean()
-
-        return res.render('user/singleProductPage', {
-            product: product,
-            relatedProducts: relatedProducts,
-            categories: categories,
-            offers: offers,
+            _id: { $ne: product._id }
+        })
+            .limit(4)
+            .lean();
+        const offers = await Offer.find().lean();
+        // Default states
+        product.isWishlisted = false;
+        let isInCart = false;
+        if (userId) {
+            const wishlist = await Wishlist
+                .findOne({ userId })
+                .lean();
+            const cart = await Cart
+                .findOne({ userId })
+                .lean();
+            // Mark current product
+            if (wishlist?.items) {
+                product.isWishlisted = wishlist.items.some(item =>
+                    item.productId.toString() === product._id.toString()
+                );
+                // Mark related products
+                const wishlistSet = new Set(
+                    wishlist.items.map(item => item.productId.toString())
+                );
+                relatedProducts.forEach(item => {
+                    item.isWishlisted = wishlistSet.has(item._id.toString());
+                });
+            }
+            if (cart?.items) {
+                isInCart = cart.items.some(item =>
+                    item.productId.toString() === product._id.toString()
+                );
+            }
+        }
+        return res.render("user/singleProductPage", {
+            product,
+            relatedProducts,
+            categories,
+            offers,
+            isInCart
         });
-    } catch (err) {
-        console.error('Error fetching product:', err);
-        return res.status(500).render('error', { message: 'Server error' });
     }
-}
-
-
+    catch (err) {
+        console.error("Error fetching product:", err);
+        return res.status(500).render("error", {
+            message: "Server Error"
+        });
+    }
+};
 
 
 
@@ -1088,39 +1146,6 @@ exports.blockProduct = async (req, res) => {
     }
 };
 
-
-exports.deleteProduct = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.productId).setOptions({ showInactive: true });
-
-        if (!product) {
-            return res.json({
-                success: true,
-                message: 'Product not found',
-            });
-        }
-
-        const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean()
-
-        if (!product.isActive && existingActive) {
-            return res.json({
-                success: false,
-                message: "Cannot Restore. An active product with this name already exists.",
-            });
-        }
-
-        product.isDeleted = !product.isDeleted;
-        await product.save();
-
-        return res.json({
-            success: true,
-            message: 'success',
-        });
-
-    } catch (error) {
-        res.redirect('back');
-    }
-};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

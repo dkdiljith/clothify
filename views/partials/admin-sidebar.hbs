@@ -17,7 +17,8 @@
       <div onclick="location.href='/admin/category'" class="nav-item bar-title">📂 Categories</div>
       <div onclick="location.href='/admin/coupons'" class="nav-item bar-title">🏷️ Coupons</div>
       <div onclick="location.href='/admin/offer'" class="nav-item bar-title">🛒 Offers</div>
-      <div onclick="location.href='/admin/activity-log'" class="nav-item bar-title">💻 Activity-Log</div>
+      {{!-- <div onclick="location.href='/admin/activity-log'" class="nav-item bar-title">💻 Activity-Log</div> --}}
+      <div onclick="location.href='/admin/settings'" class="nav-item bar-title">🛠️ Settings</div>
     </nav>
   </aside>
 
@@ -44,7 +45,15 @@
       </div>
     </div>
 
+    {{#if isSettings}}
+
+    {{> admin-settings-sidebar}}
+
+    {{else}}
+
     {{{body}}}
+
+    {{/if}}
 
   </main>
 </div>

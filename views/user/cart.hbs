@@ -1,12 +1,21 @@
-<head>
-  <title>Your Shopping Cart</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
-</head>
+{{#section 'head'}}
+<title>Your Shopping Cart</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/cart.css">
+{{/section}}
 
-<body class="cart-page">
+<div class="cart-page">
   <div class="container">
-    <div class="cart-container">
 
+    <!-- FIX 1: Display the validation error banner if a message is sent from the server -->
+    {{!-- {{#if message}}
+    <div class="cart-error-banner"
+      style="background-color: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: bold;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>{{message}}</span>
+    </div>
+    {{/if}} --}}
+
+    <div class="cart-container">
       {{#if coupons.length}}
       <div class="coupons-available">
         <h3><i class="fas fa-tag"></i> Available Coupons</h3>
@@ -38,11 +47,11 @@
             Min. purchase: ₹{{this.minimumPurchaseAmount}}
           </div>
           {{#if (eq this._id ../cart.couponId)}}
-          <button class="btn-apply-coupon" onclick="removeCoupon()">
+          <button class="btn-apply-coupon btn-remove-coupon">
             <i class="fas fa-times"></i> Remove Coupon
           </button>
           {{else}}
-          <button class="btn-apply-coupon" onclick="applyCoupon('{{this._id}}')">
+          <button class="btn-apply-coupon btn-submit-coupon" data-id="{{this._id}}">
             <i class="fas fa-tag"></i> Apply Coupon
           </button>
           {{/if}}
@@ -51,65 +60,72 @@
       </div>
       {{/if}}
 
-
       <div class="cart-items-section">
         <div class="cart-page-header">
-
-          <h1 class="cart-page-title">
-            Your Shopping Cart
-          </h1>
-
+          <h1 class="cart-page-title">Your Shopping Cart</h1>
           <p class="cart-page-subtitle">
             Review your selected products and proceed to secure checkout.
           </p>
-
         </div>
         <div class="cart-items">
-          {{#if cart.items}}
-          {{#each cart.items}}
-          <div class="cart-item">
-            <div class="item-image">
-              <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}">
-            </div>
-            <div class="item-details">
-              <h3>{{this.productId.name}}</h3>
-              <p class="item-variation">
-                {{#if (getDetail this.productId.details this.variationIndex "size")}}
-                Size: {{getDetail this.productId.details this.variationIndex "size"}}
-                {{else}}
-                Size: Not Specified
-                {{/if}}
-              </p>
-              <p class="price">
-                ₹{{#if (getDetail this.productId.details this.variationIndex "price")}}
-                {{getDetail this.productId.details this.variationIndex "price"}}
-                {{else}}
-                Price not available
-                {{/if}} per unit
-              </p>
-              <div class="quantity-selector">
-                <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}"
-                  data-variation-index="{{this.variationIndex}}" {{#if (lte this.quantity 1)}}disabled{{/if}}>
-                  <i class="fas fa-minus"></i>
-                </button>
-                <input type="number" value="{{this.quantity}}" min="1" class="quantity-input"
-                  data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" readonly>
-                <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}"
-                  data-variation-index="{{this.variationIndex}}">
-                  <i class="fas fa-plus"></i>
+             {{#if cart.items}}
+            {{#each cart.items}}
+              <!-- Check each individual item's availability flag -->
+              <div class="cart-item {{#unless this.isAvailable}}unavailable-item-card{{/unless}}" 
+                   style="{{#unless this.isAvailable}}border: 2px dashed #d9534f; background-color: #fff5f5; opacity: 0.85;{{/unless}}">
+                
+                <div class="item-image">
+                  <img src="{{this.productId.images.[0].path}}" alt="{{this.productId.name}}">
+                </div>
+                
+                <div class="item-details">
+                  <h3>{{this.productId.name}}</h3>
+                  
+                  <!-- TARGETED ALERT: Only shows up inside this specific broken item card -->
+                  {{#unless this.isAvailable}}
+                    <div class="item-error-tag" style="color: #d9534f; background-color: #fddcdc; border: 1px solid #d9534f; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin: 8px 0; display: inline-flex; align-items: center; gap: 6px;">
+                      <i class="fas fa-exclamation-circle"></i>
+                      <span>Item is not available, remove the item to proceed</span>
+                    </div>
+                  {{/unless}}
+
+                  <p class="item-variation">
+                    {{#if (getDetail this.productId.details this.variationIndex "size")}}
+                      Size: {{getDetail this.productId.details this.variationIndex "size"}}
+                    {{else}}
+                      Size: Not Specified
+                    {{/if}}
+                  </p>
+                  <p class="price">
+                    ₹{{#if (getDetail this.productId.details this.variationIndex "price")}}
+                      {{getDetail this.productId.details this.variationIndex "price"}}
+                    {{else}}
+                      Price not available
+                    {{/if}} per unit
+                  </p>
+                  
+                  <!-- Lock quantity controls for this specific item if it is broken -->
+                  <div class="quantity-selector">
+                    <button class="btn-quantity decrement-quantity" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" {{#if (lte this.quantity 1)}}disabled{{/if}} {{#unless this.isAvailable}}disabled{{/unless}}>
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" value="{{this.quantity}}" min="1" class="quantity-input" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" readonly>
+                    <button class="btn-quantity increment-quantity" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}" {{#unless this.isAvailable}}disabled{{/unless}}>
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                  <p class="total-price">
+                    Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}}
+                  </p>
+                </div>
+                
+                <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}" data-variation-index="{{this.variationIndex}}">
+                  <i class="fas fa-trash"></i> Remove
                 </button>
               </div>
-              <p class="total-price">
-                Total: ₹{{multiply this.quantity (getDetail this.productId.details this.variationIndex "price")}}
-              </p>
-            </div>
-            <button class="btn-remove remove-item" data-product-id="{{this.productId._id}}"
-              data-variation-index="{{this.variationIndex}}">
-              <i class="fas fa-trash"></i> Remove
-            </button>
-          </div>
-          {{/each}}
+            {{/each}}
           {{else}}
+
           <div class="empty-cart-message">
             <i class="fas fa-shopping-cart"></i>
             <h3>Your Cart is Empty</h3>
@@ -142,31 +158,31 @@
             <span>Tax</span>
             <span>₹{{tax}}</span>
           </div>
-
-
-
-          {{#if cart.couponId}}
-          <div class="summary-item">
+          <div class="summary-item coupon-discount-row" style="{{#unless cart.couponId}}display: none;{{/unless}}">
             <span>Coupon Discount</span>
             <span style="color: var(--success-color);">-₹{{cart.couponDiscount}}</span>
           </div>
-          {{/if}}
-
-          {{#if cart.offerDiscount}}
-          <div class="summary-item">
+          <div class="summary-item offer-discount-row" style="{{#unless cart.offerDiscount}}display: none;{{/unless}}">
             <span>Discount For You</span>
             <span style="color: var(--success-color);">-₹{{cart.offerDiscount}}</span>
           </div>
-          {{/if}}
-
           <div class="summary-item total">
             <span>Total Amount</span>
             <span>₹{{totalAmount}}</span>
           </div>
         </div>
+
+        <!-- FIX 4: Disable checkout navigation entirely if any cart item has isAvailable === false -->
+        {{#if (hasUnavailableItems cart.items)}}
+        <button class="btn-checkout" disabled style="background-color: #cccccc; cursor: not-allowed;"
+          title="Please remove unavailable items to continue">
+          <i class="fas fa-lock"></i> Fix Cart to Proceed
+        </button>
+        {{else}}
         <button onclick="location.href='/user/addressInCart'" class="btn-checkout">
           <i class="fas fa-lock"></i> Proceed to Checkout
         </button>
+        {{/if}}
       </div>
       {{else}}
       <div class="cart-summary-section">
@@ -196,141 +212,8 @@
       {{/if}}
     </div>
   </div>
+</div>
 
-
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-      // Quantity adjustment buttons
-      document.querySelectorAll(".btn-quantity").forEach((button) => {
-        button.addEventListener("click", async function () {
-          const productId = this.getAttribute("data-product-id");
-          const variationIndex = this.getAttribute("data-variation-index");
-          const isIncrement = this.classList.contains("increment-quantity");
-
-          const quantityChange = isIncrement ? 1 : -1;
-
-          try {
-            const response = await fetch(`/user/cart/${productId}/${variationIndex}/${quantityChange}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quantity: quantityChange }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              location.reload();
-            } else {
-              showPopupMessage(data.message || "Operation failed", "error");
-            }
-          } catch (error) {
-            console.error("Request failed:", error);
-            showPopupMessage("Something went wrong. Please try again.", "error");
-          }
-        });
-      });
-
-      // Remove item buttons
-      document.querySelectorAll(".btn-remove").forEach((button) => {
-        button.addEventListener("click", async function () {
-          const productId = this.getAttribute("data-product-id");
-          const variationIndex = this.getAttribute("data-variation-index");
-
-          try {
-            const response = await fetch(`/user/cart/${productId}/${variationIndex}`, {
-              method: "DELETE"
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              location.reload();
-            } else {
-              showPopupMessage(data.message || "Failed to remove item", "error");
-            }
-          } catch (error) {
-            console.error("Request failed:", error);
-            showPopupMessage("Failed to remove item. Please try again.", "error");
-          }
-        });
-      });
-    });
-
-    async function applyCoupon(couponId) {
-      const couponCard = document.querySelector(`.coupon-card button[onclick="applyCoupon('${couponId}')"]`).closest('.coupon-card');
-      const minPurchase = parseFloat(couponCard.querySelector('.coupon-min-purchase').textContent.replace('Min. purchase: ₹', ''));
-      const currentSubtotal = parseFloat('{{subtotal}}');
-
-      if (currentSubtotal < minPurchase) {
-        showPopupMessage(`This coupon requires a minimum purchase of ₹${minPurchase}`, "error");
-        return;
-      }
-
-      const confirmation = await Swal.fire({
-        title: 'Apply Coupon?',
-        html: `Are you sure you want to apply this coupon?<br><br>
-              <strong>${couponCard.querySelector('.coupon-code').textContent}</strong><br>
-              ${couponCard.querySelector('.coupon-discount').textContent}<br><br>
-              Current discount will be replaced.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, apply it!',
-        cancelButtonText: 'Cancel'
-      });
-
-      if (!confirmation.isConfirmed) return;
-
-      try {
-        const response = await fetch('/user/cart/apply-coupon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            couponId: couponId,
-          })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          location.reload();
-        } else {
-          showPopupMessage(data.message || 'Failed to apply coupon', 'error');
-        }
-      } catch (error) {
-        console.error('Error applying coupon:', error);
-        showPopupMessage('Failed to apply coupon. Please try again.', 'error');
-      }
-    }
-
-    async function removeCoupon() {
-      const confirmation = await Swal.fire({
-        title: 'Remove Coupon?',
-        text: 'Are you sure you want to remove the applied coupon?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, remove it!',
-        cancelButtonText: 'Cancel'
-      });
-
-      if (!confirmation.isConfirmed) return;
-
-      try {
-        const response = await fetch('/user/cart/remove-coupon', {
-          method: 'DELETE'
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          location.reload();
-        } else {
-          showPopupMessage(data.message || 'Failed to remove coupon', 'error');
-        }
-      } catch (error) {
-        console.error('Error removing coupon:', error);
-        showPopupMessage('Failed to remove coupon. Please try again.', 'error');
-      }
-    }
-
-  </script>
-</body>
+{{#section 'scripts'}}
+<script src="/javascripts/user/cart.js" defer></script>
+{{/section}}

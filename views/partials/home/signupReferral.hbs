@@ -1,0 +1,252 @@
+<script src="/javascripts/user/home/signupReferral.js"></script>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/home/signupReferral.css">
+
+
+<!-- ==========================================================
+     Referral Welcome Modal
+========================================================== -->
+<input type="hidden" id="welcomeTrigger" value="{{showWelcomeModal}}">
+<div class="referral-modal-overlay" id="referralModal">
+
+    <div class="referral-modal">
+
+        <button class="close-referral-modal" id="closeReferralModal">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- Coin Illustration -->
+
+        <div class="reward-circle">
+
+            <div class="reward-circle-inner">
+
+                <i class="fa-solid fa-coins"></i>
+
+                <h2 id="welcomeReferralReward"></h2>
+
+                <span>Referral Coins</span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Heading -->
+
+        <div class="modal-content-area">
+
+            <h2>Welcome to Clothify 🎉</h2>
+
+            <p>
+
+                Got invited by a friend?
+
+                Enter their referral code below and instantly unlock
+
+                <strong id="welcomeReferralText">
+
+                    500 Referral Coins.
+
+                </strong>
+
+            </p>
+
+        </div>
+
+
+
+        <!-- Referral Form -->
+
+        <form class="welcome-referral-form">
+
+            <div class="modal-input-group">
+
+                <input type="text" name="referralCode" maxlength="6" autocomplete="off"
+                    placeholder="Enter Referral Code">
+
+                <div class="input-error-msg"></div>
+
+            </div>
+
+            <button type="submit" class="claim-btn">
+
+                <i class="fa-solid fa-gift"></i>
+
+                <span id="claimReferralButtonText">
+
+                    Claim My 500 Coins
+
+                </span>
+
+            </button>
+
+        </form>
+
+
+
+        <!-- Skip -->
+
+        <button class="skip-btn" id="skipReferral">
+
+            Continue Without Referral
+
+        </button>
+
+
+        <small>
+
+            Referral codes can only be applied once after registration.
+
+        </small>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================================
+     Welcome Reward Modal
+========================================================== -->
+
+<div class="reward-modal-overlay" id="rewardModal">
+
+    <div class="reward-modal">
+
+        <div class="reward-header">
+
+            <h2>Welcome to Clothify!</h2>
+
+            <p>
+
+                Your account has been successfully created.
+
+                Here are your welcome rewards.
+
+            </p>
+
+        </div>
+
+
+        <div class="reward-list">
+
+            <!-- Signup Bonus -->
+
+            <div class="reward-card">
+
+                <div class="reward-card-left">
+
+                    <div class="reward-badge signup">
+
+                        <i class="fa-solid fa-gift"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h4>Signup Bonus</h4>
+
+                        <small>Welcome reward from Clothify</small>
+
+                    </div>
+
+                </div>
+
+                <div class="reward-card-right">
+
+                    <span id="signupBonusAmount">
+
+                        +1000
+
+                    </span>
+
+                    <small>Coins</small>
+
+                </div>
+
+            </div>
+
+
+            <!-- Referral Bonus -->
+
+            <div class="reward-card" id="referralRewardCard">
+
+                <div class="reward-card-left">
+
+                    <div class="reward-badge referral">
+
+                        <i class="fa-solid fa-user-group"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h4>Referral Bonus</h4>
+
+                        <small>
+
+                            Referral code applied successfully
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="reward-card-right">
+
+                    <span id="referralBonusAmount">
+
+                        +500
+
+                    </span>
+
+                    <small>Coins</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="reward-total">
+
+            <small>Total Reward</small>
+
+            <h2 id="rewardCoins">
+
+                +1000 Coins
+
+            </h2>
+
+            <p id="rewardValue">
+
+                Worth ₹100
+
+            </p>
+
+        </div>
+
+
+        <div class="reward-footer">
+
+            <button class="reward-btn" id="startShoppingBtn">
+
+                <i class="fa-solid fa-bag-shopping"></i>
+
+                Start Shopping
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<input type="hidden" id="refereeRewardSetting" value="{{referralSettings.refereeReward}}">
+
+<input type="hidden" id="signupBonusSetting" value="{{referralSettings.signupBonus}}">
+
+<input type="hidden" id="coinValueSetting" value="{{referralSettings.coinValue}}">

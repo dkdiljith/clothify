@@ -1,175 +1,140 @@
-<head>
-    <title>My Orders | Clothify</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/user/userOrders.css">
-</head>
+{{#section 'head'}}
+<title>My Orders | Clothify</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/userOrders.css">
+{{/section}}
 
-<body>
-    <div class="container" style="margin-top:20px;">
-        <div class="profile-header">
 
+
+<div class="orders-header">
+    <h2 class="orders-title">
+        <i class="fas fa-clipboard-list"></i>
+        My Orders
+    </h2>
+</div>
+<div class="orders-list">
+    {{#if orders.length}}
+    {{#each orders}}
+    <a href="/user/orderDetails/{{this._id}}"
+        class="order-card {{#ifeq this.paymentStatus 'Failed'}}order-failed{{/ifeq}}">
+        <!-- Left -->
+        <div class="order-image">
+            {{#if this.items.[0].productImg}}
+            <img src="{{this.items.[0].productImg}}" alt="{{this.items.[0].productName}}">
+            {{else}}
+            <img src="/images/no-image.png" alt="Product">
+            {{/if}}
         </div>
-
-        <div class="profile-container">
-            <div class="profile-sidebar">
-                <ul>
-                    <li onclick="location.href='/user/profile'">
-                        <i class="fas fa-user"></i> Profile
-                    </li>
-                    <li onclick="location.href='/user/security'">
-                        <i class="fas fa-lock"></i> Security & Password
-                    </li>
-                    <li onclick="location.href='/user/wallet'">
-                        <i class="fas fa-wallet"></i> Wallet
-                    </li>
-                    <li class="active" onclick="location.href='/user/orders'">
-                        <i class="fas fa-shopping-bag"></i> Orders
-                    </li>
-                    <li onclick="location.href='/user/address'">
-                        <i class="fas fa-map-marker-alt"></i> Addresses
-                    </li>
-                    <li onclick="location.href='/user/deleteuser'">
-                        <i class="fas fa-trash-alt"></i> Delete Account
-                    </li>
-                </ul>
+        <!-- Center -->
+        <div class="order-content">
+            <div class="order-top">
+                <h3 class="product-name">
+                    {{this.items.[0].productName}}
+                </h3>
+                 {{#ifCond this.items.length ">" 1}}
+                <span class="more-items">
+                    +{{subtract this.items.length 1}} more items
+                </span>
+                {{/ifCond}}
             </div>
-
-            <div class="profile-content">
-                <div class="orders-header">
-                    <h2 class="orders-title">
-                        <i class="fas fa-clipboard-list"></i> Order History
-                    </h2>
-                </div>
-
-                {{!-- <div class="orders-search-filter">
-                    <input type="text" class="search-input" placeholder="Search orders...">
-                    <button class="filter-button">
-                        <i class="fas fa-filter"></i> Filters
-                    </button>
-                </div> --}}
-
-                <div class="order-list">
-                    {{#if orders.length}}
-                    {{#each orders}}
-                    {{!-- Conditional class 'order-failed' applied if paymentStatus is 'Failed' --}}
-                    <div class="order-card {{#ifeq this.paymentStatus 'Failed'}}order-failed{{/ifeq}}">
-                        <div class="order-header">
-                            <div class="order-meta">
-                                <div class="order-meta-item">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span>Ordered on {{formatDate this.createdAt "MMM D, YYYY"}}</span>
-                                </div>
-                                <div class="order-meta-item">
-                                    <i class="fas fa-tag"></i>
-                                    <span>Order #{{this.orderId}}</span>
-                                </div>
-                                <div class="order-meta-item">
-                                    <i class="fas fa-wallet"></i>
-                                    <span>Total: ₹{{ this.totalAmount}}</span>
-                                </div>
-
-                                {{!-- Alert the user specifically about the Failed Payment --}}
-                                {{#ifeq this.paymentStatus "Failed"}}
-                                <div class="order-meta-item payment-failed-text">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <span>Payment Failed</span>
-                                </div>
-                                {{/ifeq}}
-                            </div>
-                            <div class="order-status status-{{toLowerCase this.status}}">
-                                {{this.status}}
-                            </div>
-                        </div>
-
-                        <div class="order-items">
-                            {{#each this.items}}
-                            <div class="order-item">
-                                <div class="order-item-image">
-                                    <img src="{{this.productImg}}" alt="{{this.productName}}">
-                                </div>
-                                <div class="order-item-details">
-                                    <div class="order-item-name">{{this.productName}}</div>
-                                    <div class="order-item-attributes">
-                                        <span>Size: {{this.productSize}}</span>
-                                        <span>Qty: {{this.quantity}}</span>
-                                        <span>Price: ₹{{ this.productPrice}}</span>
-                                    </div>
-                                    <div class="order-item-price">
-                                        Total: ₹{{ multiply this.productPrice this.quantity}}
-                                    </div>
-                                </div>
-                                <div class="order-item-actions">
-                                    <a href="/user/orderDetails/{{../this._id}}/{{this._id}}" class="view-details">
-                                        View Details <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            {{/each}}
-                        </div>
-                    </div>
-                    {{/each}}
-
-                    {{else}}
-                    <div class="no-orders">
-                        <div class="no-orders-icon">
-                            <i class="far fa-clipboard"></i>
-                        </div>
-                        <h3>No Orders Found</h3>
-                        <p>You haven't placed any orders yet. Start shopping to see your orders here.</p>
-                        <a href="/user/home" class="shop-button">
-                            <i class="fas fa-shopping-bag"></i> Start Shopping
-                        </a>
-                    </div>
-                    {{/if}}
-                </div>
-
-                {{#if orders.length}}
-                <!-- Simple Pagination Controls -->
-                <div style="display: flex; justify-content: center; margin-top: 20px; padding: 15px 0;">
-                    {{#if pagination.hasPrevPage}}
-                    <a href="/user/orders?page={{pagination.prevPage}}"
-                        style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
-                        <i class="fas fa-chevron-left"></i> Previous
-                    </a>
-                    {{/if}}
-
-                    <span style="padding: 8px 16px; margin: 0 5px;">
-                        Page {{pagination.page}} of {{pagination.totalPages}}
+            <div class="order-meta">
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-hashtag"></i>
+                        Order ID
                     </span>
-
-                    {{#if pagination.hasNextPage}}
-                    <a href="/user/orders?page={{pagination.nextPage}}"
-                        style="padding: 8px 16px; margin: 0 5px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;">
-                        Next <i class="fas fa-chevron-right"></i>
-                    </a>
-                    {{/if}}
+                    <span class="meta-value">
+                        {{this.orderId}}
+                    </span>
                 </div>
-                {{/if}}
-
-
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="far fa-calendar-alt"></i>
+                        Ordered On
+                    </span>
+                    <span class="meta-value">
+                        {{formatDate this.createdAt "MMM D, YYYY"}}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-shopping-bag"></i>
+                        Items
+                    </span>
+                    <span class="meta-value">
+                        {{this.items.length}}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-credit-card"></i>
+                        Payment
+                    </span>
+                    <span class="meta-value">
+                        {{paymentMethod this.paymentMethod}}
+                    </span>
+                </div>
             </div>
         </div>
+        <!-- Right -->
+        <div class="order-summary">
+            <div class="order-price">
+                ₹{{this.totalAmount}}
+            </div>
+            <div class="order-status status-{{toLowerCase this.status}}">
+                {{this.status}}
+            </div>
+            {{#ifeq this.paymentStatus "Failed"}}
+            <button class="btn-retry-payment" data-order-id="{{this.orderId}}"
+                data-expires-at="{{this.paymentRetryExpiresAt}}" data-attempts-count="{{this.paymentAttemptsCount}}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
+                Retry Payment
+            </button>
+            {{/ifeq}}
+            <div class="view-arrow">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+    </a>
+    {{/each}}
+    {{else}}
+    <div class="no-orders">
+        <div class="no-orders-icon">
+            <i class="far fa-clipboard"></i>
+        </div>
+        <h3>No Orders Found</h3>
+        <p>
+            You haven't placed any orders yet.
+        </p>
+        <a href="/user/home" class="shop-button">
+            <i class="fas fa-shopping-bag"></i>
+            Start Shopping
+        </a>
     </div>
+    {{/if}}
+</div>
+{{#if orders.length}}
+<div class="pagination">
+    {{#if pagination.hasPrevPage}}
+    <a href="/user/orders?page={{pagination.prevPage}}" class="pagination-button">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {{/if}}
+    <span class="pagination-button active">
+        {{pagination.page}}
+    </span>
+    {{#if pagination.hasNextPage}}
+    <a href="/user/orders?page={{pagination.nextPage}}" class="pagination-button">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    {{/if}}
+</div>
+{{/if}}
 
-    <script>
-        // Search functionality
-        document.querySelector('.search-input').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const orderCards = document.querySelectorAll('.order-card');
 
-            orderCards.forEach(card => {
-                const orderText = card.textContent.toLowerCase();
-                if (orderText.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
 
-        // Filter button functionality
-        document.querySelector('.filter-button').addEventListener('click', function () {
-            // This would open a filter modal in a real implementation
-            alert('Filter functionality would open a filter dialog here');
-        });
-    </script>
-</body>
+{{#section 'scripts'}}
+<script src="/javascripts/user/userOrders.js" defer></script>
+{{/section}}

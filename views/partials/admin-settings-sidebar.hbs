@@ -1,0 +1,38 @@
+<link rel="stylesheet" type="text/css" href="/stylesheets/admin/settings/settings-sidebar.css" />
+<script src="/javascripts/admin/settings/settings-sidebar.js"></script>
+
+<main class="dashboard-container">
+    <div class="settings-layout">
+
+        <!-- Left -->
+        <aside class="settings-sidebar">
+            <div class="settings-sidebar-header">
+                <h3> <i class="fa-solid fa-sliders"></i> Settings</h3>
+                <p>System Configuration</p>
+            </div>
+
+            <nav class="settings-nav">
+
+                <a href="/admin/settings/referral" class="settings-nav-item">
+                    <div class="nav-icon"><i class="fa-solid fa-gift"></i> </div>
+                    <div class="nav-content"><strong>Referral Program</strong><small>Rewards & referral rules</small> </div>
+                </a>
+
+                
+                {{!-- <a href="#" class="settings-nav-item disabled">
+                    <div class="nav-icon"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="nav-content"><strong>Wallet</strong><small>Coming Soon</small></div>
+                    <span>Soon</span>
+                </a> --}}
+
+            </nav>
+        </aside>
+
+        <!-- Right -->
+        <section class="settings-content">
+
+            {{{body}}}
+
+        </section>
+    </div>
+</main>

@@ -1,0 +1,167 @@
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  
+  /* DIM BACKGROUND FIX: Softens the background without turning it pitch black */
+  background-color: rgba(15, 23, 42, 0.25); 
+  
+  /* FROSTED GLASS EFFECT: Blurs the content behind the modal */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); 
+
+  /* STACKING FIX: Safe max integer layer limit */
+  z-index: 2147483647;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Base Modal Container layout window positioned dead center */
+.modal-alert-window {
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 14px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* ANIMATION FIX: Using 3D matrix translation for fluid, hardware-accelerated movement */
+  transform: scale(0.9) translate3d(0, 20px, 0);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Animation trigger configurations toggled via JS class adjustments */
+.modal-backdrop.modal-active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.modal-backdrop.modal-active .modal-alert-window {
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
+/* Internal body padding & structural layouts */
+.modal-body-layout {
+  padding: 24px 24px 16px 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Modern Rounded Icon frame borders container */
+.modal-icon-frame {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-icon-frame svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Typography styles setup */
+.modal-text-frame {
+  flex: 1;
+}
+
+.modal-title-text {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-description-text {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-description-text p {
+  margin: 0 0 8px 0;
+}
+
+.modal-gap {
+  height: 10px;
+}
+
+/* Action control bar footer configuration setup */
+.modal-actions-layout {
+  background: #f9fafb;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  
+  /* FIX: Explicit bottom border radiuses prevent design shape metrics without clipping children */
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Unified Action Button Rules */
+.modal-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ACCESSIBILITY: Adds visual focus state rings for keyboard navigation */
+.modal-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.modal-btn-cancel {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.modal-btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+/* --- THEME CONFIGURATIONS / PRESETS --- */
+
+/* Danger (Red Theme) */
+.modal-type-danger .modal-icon-frame { background: #fee2e2; color: #dc2626; }
+.modal-type-danger .modal-btn-confirm { background: #dc2626; color: #ffffff; }
+.modal-type-danger .modal-btn-confirm:hover { background: #b91c1c; }
+
+/* Warning (Yellow/Orange Theme) */
+.modal-type-warning .modal-icon-frame { background: #fef3c7; color: #d97706; }
+.modal-type-warning .modal-btn-confirm { background: #d97706; color: #ffffff; }
+.modal-type-warning .modal-btn-confirm:hover { background: #b45309; }
+
+/* Info (Blue Theme) */
+.modal-type-info .modal-icon-frame { background: #e0f2fe; color: #2563eb; }
+.modal-type-info .modal-btn-confirm { background: #2563eb; color: #ffffff; }
+.modal-type-info .modal-btn-confirm:hover { background: #1d4ed8; }
+
+/* Success (Green Theme) */
+.modal-type-success .modal-icon-frame { background: #d1fae5; color: #059669; }
+.modal-type-success .modal-btn-confirm { background: #059669; color: #ffffff; }
+.modal-type-success .modal-btn-confirm:hover { background: #047857; }

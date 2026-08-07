@@ -1,163 +1,186 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
+  /* =====================================================
+       Elements
+    ===================================================== */
   const form = document.getElementById("registrationForm");
   const name = document.getElementById("name");
-  const phone = document.getElementById("phone");
   const email = document.getElementById("email");
   const password = document.getElementById("password");
-
+  const confirmPassword = document.getElementById("confirmPassword");
   const nameError = document.getElementById("nameError");
-  const phoneError = document.getElementById("phoneError");
   const emailError = document.getElementById("emailError");
   const passwordError = document.getElementById("passwordError");
-
-  // Validation functions
-  function validateName() {
-    const nameValue = name.value.trim();
-
-    // Check if the name is empty
-    if (nameValue === "") {
-      nameError.textContent = "This field is required";
-      nameError.style.visibility = "visible";
-      return false;
-    }
-
-    // Check for valid length (5 to 20 characters)
-    if (nameValue.length < 5 || nameValue.length > 20) {
-      nameError.textContent = "Name must be between 5 and 20 characters";
-      nameError.style.visibility = "visible";
-      return false;
-    }
-
-    // Check if the name contains only alphabets and spaces
-    const nameRegex = /^[a-zA-Z\s]+$/;
-    if (!nameRegex.test(nameValue)) {
-      nameError.textContent = "Only letters and spaces are allowed";
-      nameError.style.visibility = "visible";
-      return false;
-    }
-
-    // Check for excessive repetition of characters (e.g., "ssssssssssssss")
-    const repeatedCharRegex = /(.)\1{9,}/; // 10 or more repeated characters
-    if (repeatedCharRegex.test(nameValue)) {
-      nameError.textContent = "Name cannot have repeated characters";
-      nameError.style.visibility = "visible";
-      return false;
-    }
-
-    nameError.style.visibility = "hidden";
-    return true;
-  }
-
-  function validatePhone() {
-    const phoneRegex = /^(?:\+91|91|0)?[6-9][0-9]{9}$/; // Matches +91, 91, 0, or no prefix with exactly 10 digits starting with 6-9
-    const phoneValue = phone.value.trim();
-  
-    // Remove spaces or non-digit characters while typing
-    phone.value = phone.value.replace(/\D/g, "");
-  
-    if (phoneValue === "") {
-      phoneError.textContent = "This field is required";
-      phoneError.style.visibility = "visible";
-      return false;
-    } else if (!phoneRegex.test(phoneValue)) {
-      phoneError.textContent = "Invalid phone number. Please enter a valid 10-digit number.";
-      phoneError.style.visibility = "visible";
-      return false;
-    }
-  
-    phoneError.style.visibility = "hidden";
-    return true;
-  }
-  
-
-  function validateEmail() {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Ensure no spaces and convert to lowercase
-    email.value = email.value.toLowerCase().replace(/\s/g, "");
-
-    if (email.value.trim() === "") {
-      emailError.textContent = "This field is required";
-      emailError.style.visibility = "visible";
-      return false;
-    } else if (!emailRegex.test(email.value.trim())) {
-      emailError.textContent = "Invalid email address";
-      emailError.style.visibility = "visible";
-      return false;
-    }
-    emailError.style.visibility = "hidden";
-    return true;
-  }
-
-  function validatePassword() {
-    const passwordValue = password.value.trim();
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,20}$/;
-
-    // Remove spaces while typing
-    password.value = password.value.replace(/\s/g, "");
-
-    // Check if password is empty
-    if (passwordValue === "") {
-      passwordError.textContent = "This field is required";
-      passwordError.style.visibility = "visible";
-      return false;
-    }
-
-    // Check for password length and character requirements
-    if (passwordValue.length < 8 || passwordValue.length > 20) {
-      passwordError.textContent =
-        "Password must be at least 8 characters";
-      passwordError.style.visibility = "visible";
-      return false;
-    }
-
-    // Check for mix of uppercase, lowercase, numbers, and symbols
-    if (
-      !/[A-Z]/.test(passwordValue) ||
-      !/[a-z]/.test(passwordValue) ||
-      !/[0-9]/.test(passwordValue) ||
-      !/[!@#$%^&*]/.test(passwordValue)
-    ) {
-      passwordError.textContent =
-        "Use a mix of letters, numbers & symbols";
-      passwordError.style.visibility = "visible";
-      return false;
-    }
-
-    passwordError.style.visibility = "hidden";
-    return true;
-  }
-
-  // Attach event listeners for validation
-  name.addEventListener("input", validateName);
-  phone.addEventListener("input", validatePhone);
-  email.addEventListener("input", validateEmail);
-  password.addEventListener("input", validatePassword);
-
-  form.addEventListener("submit", function (event) {
-    const isNameValid = validateName();
-    const isPhoneValid = validatePhone();
-    const isEmailValid = validateEmail();
-    const isPasswordValid = validatePassword();
-
-    if (
-      !isNameValid ||
-      !isPhoneValid ||
-      !isEmailValid ||
-      !isPasswordValid
-    ) {
-      event.preventDefault(); // Prevent form submission if validation fails
-    }
-  });
-
-  // Eye toggle functionality
+  const confirmPasswordError = document.getElementById("confirmPasswordError");
   const togglePassword = document.getElementById("togglePassword");
-  togglePassword.addEventListener("click", function () {
-    const type = password.type === "password" ? "text" : "password";
-    password.type = type;
-    togglePassword.classList.toggle("fa-eye");
-    togglePassword.classList.toggle("fa-eye-slash");
+  const toggleConfirmPassword = document.getElementById(
+    "toggleConfirmPassword",
+  );
+  /* =====================================================
+       Helpers
+    ===================================================== */
+  function showError(element, message) {
+    element.textContent = message;
+    element.classList.remove("hidden");
+    element.classList.add("visible");
+  }
+  function hideError(element) {
+    element.textContent = "";
+    element.classList.remove("visible");
+    element.classList.add("hidden");
+  }
+  /* =====================================================
+       Name Validation
+    ===================================================== */
+  function validateName() {
+    const value = name.value.trim();
+    if (!value) {
+      showError(nameError, "Full name is required.");
+      return false;
+    }
+    if (value.length < 5 || value.length > 20) {
+      showError(nameError, "Name must be between 5 and 20 characters.");
+      return false;
+    }
+    if (!/^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/.test(value)) {
+      showError(
+        nameError,
+        "Only letters, spaces, hyphens and apostrophes are allowed.",
+      );
+      return false;
+    }
+    if (/\s{2,}/.test(value)) {
+      showError(nameError, "Multiple spaces are not allowed.");
+      return false;
+    }
+    if (/(.)\1{5,}/.test(value)) {
+      showError(nameError, "Too many repeated characters.");
+      return false;
+    }
+    hideError(nameError);
+    return true;
+  }
+  /* =====================================================
+       Email Validation
+    ===================================================== */
+  function validateEmail() {
+    const value = email.value.trim().toLowerCase();
+    if (!value) {
+      showError(emailError, "Email address is required.");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      showError(emailError, "Please enter a valid email address.");
+      return false;
+    }
+    if (value.includes("..") || value.startsWith(".") || value.endsWith(".")) {
+      showError(emailError, "Please enter a valid email address.");
+      return false;
+    }
+    hideError(emailError);
+    return true;
+  }
+  /* =====================================================
+       Password Validation
+    ===================================================== */
+  function validatePassword() {
+    const value = password.value;
+    if (!value) {
+      showError(passwordError, "Password is required.");
+      return false;
+    }
+    if (/\s/.test(value)) {
+      showError(passwordError, "Password cannot contain spaces.");
+      return false;
+    }
+    if (value.length < 8 || value.length > 20) {
+      showError(passwordError, "Password must be 8 to 20 characters.");
+      return false;
+    }
+    if (!/[A-Z]/.test(value)) {
+      showError(passwordError, "Include at least one uppercase letter.");
+      return false;
+    }
+    if (!/[a-z]/.test(value)) {
+      showError(passwordError, "Include at least one lowercase letter.");
+      return false;
+    }
+    if (!/\d/.test(value)) {
+      showError(passwordError, "Include at least one number.");
+      return false;
+    }
+    if (!/[!@#$%^&*]/.test(value)) {
+      showError(passwordError, "Include at least one special character.");
+      return false;
+    }
+    hideError(passwordError);
+    if (confirmPassword.value.length > 0) {
+      validateConfirmPassword();
+    }
+    return true;
+  }
+  /* =====================================================
+       Confirm Password Validation
+    ===================================================== */
+  function validateConfirmPassword() {
+    if (!confirmPassword.value) {
+      showError(confirmPasswordError, "Please confirm your password.");
+      return false;
+    }
+    if (password.value !== confirmPassword.value) {
+      showError(confirmPasswordError, "Passwords do not match.");
+      return false;
+    }
+    hideError(confirmPasswordError);
+    return true;
+  }
+  /* =====================================================
+       Events
+    ===================================================== */
+  [
+    [name, validateName],
+    [email, validateEmail],
+    [password, validatePassword],
+    [confirmPassword, validateConfirmPassword],
+  ].forEach(([input, validator]) => {
+    input.addEventListener("input", validator);
+    input.addEventListener("blur", validator);
   });
-  
+  /* =====================================================
+       Submit
+    ===================================================== */
+  form.addEventListener("submit", function (e) {
+    const isValid =
+      validateName() &&
+      validateEmail() &&
+      validatePassword() &&
+      validateConfirmPassword();
+    if (!isValid) {
+      e.preventDefault();
+      return;
+    }
+    const submitButton = form.querySelector("button[type='submit']");
+    if (submitButton.disabled) {
+      e.preventDefault();
+      return;
+    }
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Sending OTP...
+    `;
+  });
+  /* =====================================================
+       Password Toggle
+    ===================================================== */
+  function togglePasswordVisibility(button, input) {
+    button.addEventListener("click", () => {
+      const hidden = input.type === "password";
+      input.type = hidden ? "text" : "password";
+      button.classList.toggle("fa-eye");
+      button.classList.toggle("fa-eye-slash");
+    });
+  }
+  togglePasswordVisibility(togglePassword, password);
+  // togglePasswordVisibility(toggleConfirmPassword, confirmPassword);
 });

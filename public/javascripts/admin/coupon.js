@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('couponForm');
     const codeInput = document.getElementById('couponCode');
     const minPurchaseInput = document.getElementById('minimumPurchaseAmount');
+    const maxPurchaseInput = document.getElementById('maximumPurchaseAmount');
     const discountTypeInput = document.getElementById('discountType');
     const discountValueInput = document.getElementById('discountValue');
     const endDateInput = document.getElementById('endDate');
@@ -153,6 +154,20 @@ document.addEventListener('DOMContentLoaded', () => {
             clearError(minPurchaseInput);
         }
 
+        // Maximum Purchase Validation
+        const maxPurchase = parseFloat(maxPurchaseInput.value);
+
+        if (isNaN(maxPurchase) || maxPurchase < 100 || maxPurchase > 10000) {
+            showError(maxPurchaseInput, 'Max purchase must be ₹100-₹10,000.');
+            isValid = false;
+        } else if (maxPurchase < minPurchase) {
+            showError(maxPurchaseInput, 'Maximum purchase amount should be greater than minimum purchase amount.');
+            isValid = false;
+        } else {
+            clearError(maxPurchaseInput);
+        }
+
+
         // ✅ Date Validation
         if (!startDateInput.value) {
             showError(startDateInput, 'Select a date as start date.');
@@ -172,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ✅ Real-time validation event listeners
-    [codeInput, minPurchaseInput, discountTypeInput, discountValueInput, endDateInput, startDateInput].forEach(input => {
+    [codeInput, minPurchaseInput, maxPurchaseInput, discountTypeInput, discountValueInput, endDateInput, startDateInput].forEach(input => {
         input.addEventListener('input', validateForm);
         input.addEventListener('blur', validateForm);
     });
@@ -257,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('couponCode').value = coupon.couponCode;
             document.getElementById('discountType').value = coupon.discountType;
             document.getElementById('minimumPurchaseAmount').value = coupon.minimumPurchaseAmount;
+            document.getElementById('maximumPurchaseAmount').value = coupon.maximumPurchaseAmount;
             document.getElementById('discountValue').value = coupon.discountValue;
             document.getElementById('startDate').value = coupon.startDate.split('T')[0];
             document.getElementById('endDate').value = coupon.endDate.split('T')[0];

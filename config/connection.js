@@ -15,5 +15,5 @@ module.exports.connect = function (done){
 }
 
 module.exports.get = function (){
-    return mongoose.connect
+   return mongoose.connection;
 }

@@ -20,6 +20,7 @@ const nocache = require(`nocache`)
 app.use(nocache())
 
 
+//express-handlebars-section
 const sections = require('express-handlebars-sections');
 
 //HBS Connections
@@ -70,18 +71,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Database connection
 db.connect((err) => {
   if (err) {
-    console.log("Database Connection Failed")
+    console.log("Connection Failed")
     process.exit(1)
   }
-  console.log("Database Successfully Running")
-})
+  console.log("Database Successfully Running");
 
-//Coupon and Offer Pricing and Expiry Engine
-require("./jobs/pricingExpiryEngine");
+  const { initializeSettings } = require('./controllers/settingController');
+  
+  initializeSettings()
+    .then(() => console.log("Settings logic finished check."))
+    .catch((err) => console.error("Settings logic failed:", err));
+});
+
+
+//Cron
+require("./jobs/cron");
 
 // Routes
 app.use(`/admin`, adminRouter);
 app.use('/user', userRouter);
+app.get('/', (req, res) => {
+  res.redirect(`/user`);
+});
 
 // Handling Unhandled Requests
 const ErrorMessage = require(`./utils/ErrorMessage`)

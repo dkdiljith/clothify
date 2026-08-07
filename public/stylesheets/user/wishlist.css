@@ -303,7 +303,6 @@
 
     display: -webkit-box;
 
-    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 
     overflow: hidden;
@@ -710,4 +709,500 @@
         scroll-behavior: auto !important;
     }
 
+}
+
+
+
+/* =========================================================
+   WISHLIST PRODUCT CARD
+========================================================= */
+
+.wishlist-product-card {
+    position: relative;
+
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 14px rgba(0,0,0,.05);
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+}
+
+.wishlist-product-card:hover{
+
+    transform: translateY(-5px);
+
+    box-shadow:
+        0 14px 34px rgba(0,0,0,.08);
+
+}
+
+.wishlist-product-card:active{
+
+    transform: scale(.99);
+
+}
+
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.wishlist-product-card .product-badge{
+
+    position:absolute;
+
+    top:12px;
+    left:12px;
+
+    z-index:3;
+
+    background:#e65540;
+    color:#fff;
+
+    padding:4px 10px;
+
+    border-radius:6px;
+
+    font-size:.72rem;
+    font-weight:600;
+
+}
+
+.wishlist-product-card .product-badge.sale{
+
+    background:#2ecc71;
+
+}
+
+.wishlist-product-card .discount-badge{
+
+    position:absolute;
+
+    top:12px;
+    right:58px;
+
+    z-index:3;
+
+    background:rgba(255,255,255,.95);
+
+    color:#e65540;
+
+    border:1px solid #e65540;
+
+    padding:3px 8px;
+
+    border-radius:6px;
+
+    font-size:.7rem;
+    font-weight:700;
+
+}
+
+
+
+/* =========================================================
+   REMOVE BUTTON
+========================================================= */
+
+.wishlist-remove-container{
+
+    position:absolute;
+
+    top:12px;
+    right:12px;
+
+    z-index:5;
+
+}
+
+.remove-from-wishlist{
+
+    width:38px;
+    height:38px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.92);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    color:#444;
+
+    backdrop-filter:blur(8px);
+
+    transition:
+        .25s;
+
+}
+
+.remove-from-wishlist:hover{
+
+    background:#e65540;
+
+    color:#fff;
+
+    transform:scale(1.08);
+
+    box-shadow:
+        0 6px 16px rgba(230,85,64,.3);
+
+}
+
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.wishlist-product-card .product-image{
+
+    width:100%;
+
+    aspect-ratio:4/5;
+
+    overflow:hidden;
+
+    background:#f4f4f4;
+
+}
+
+.wishlist-product-card .product-img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    transition:
+        transform .5s ease;
+
+}
+
+.wishlist-product-card:hover
+.product-img{
+
+    transform:scale(1.05);
+
+}
+
+
+
+/* =========================================================
+   DETAILS
+========================================================= */
+
+.wishlist-product-card
+.product-details{
+
+    display:flex;
+    flex-direction:column;
+
+    flex-grow:1;
+
+    padding:14px;
+
+}
+
+.wishlist-product-card
+.product-title{
+
+    min-height:44px;
+
+    margin-bottom:12px;
+
+    font-size:.98rem;
+    font-weight:600;
+
+    line-height:1.45;
+
+    color:#222;
+
+    display:-webkit-box;
+
+    -webkit-box-orient:vertical;
+
+    overflow:hidden;
+
+}
+
+.wishlist-product-card
+.price-container{
+
+    display:flex;
+    align-items:center;
+
+    gap:8px;
+
+    margin-bottom:auto;
+
+    flex-wrap:wrap;
+
+}
+
+.wishlist-product-card
+.product-price{
+
+    font-size:1.08rem;
+    font-weight:700;
+
+    color:#e65540;
+
+}
+
+.wishlist-product-card
+.original-price{
+
+    font-size:.86rem;
+
+    color:#999;
+
+    text-decoration:line-through;
+
+}
+
+
+
+/* =========================================================
+   ADD TO CART
+========================================================= */
+
+.wishlist-add-cart{
+
+    width:100%;
+
+    margin-top:18px;
+
+    height:44px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#111;
+
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:8px;
+
+    font-size:.88rem;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:
+        background .25s,
+        transform .25s,
+        box-shadow .25s;
+
+}
+
+.wishlist-add-cart:hover{
+
+    background:#e65540;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 22px rgba(230,85,64,.28);
+
+}
+
+.wishlist-add-cart i{
+
+    font-size:.9rem;
+
+}
+
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:992px){
+
+    .wishlist-product-card
+    .product-title{
+
+        font-size:.92rem;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .wishlist-product-card
+    .product-details{
+
+        padding:12px;
+
+    }
+
+    .wishlist-product-card
+    .product-title{
+
+        min-height:40px;
+
+        font-size:.88rem;
+
+    }
+
+    .wishlist-product-card
+    .product-price{
+
+        font-size:1rem;
+
+    }
+
+    .wishlist-add-cart{
+
+        height:42px;
+
+        font-size:.82rem;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media(max-width:576px){
+
+    .wishlist-product-card{
+
+        border-radius:14px;
+
+    }
+
+    .wishlist-product-card
+    .product-image{
+
+        aspect-ratio:4/5.4;
+
+    }
+
+    .wishlist-product-card
+    .product-details{
+
+        padding:11px;
+
+    }
+
+    .wishlist-product-card
+    .product-title{
+
+        min-height:38px;
+
+        font-size:.84rem;
+
+    }
+
+    .wishlist-product-card
+    .product-price{
+
+        font-size:.95rem;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   EXTRA SMALL
+========================================================= */
+
+@media(max-width:420px){
+
+    .wishlist-product-card
+    .product-details{
+
+        padding:10px;
+
+    }
+
+    .wishlist-product-card
+    .product-title{
+
+        font-size:.8rem;
+
+    }
+
+    .wishlist-product-card
+    .product-price{
+
+        font-size:.88rem;
+
+    }
+
+    .wishlist-add-cart{
+
+        height:40px;
+
+        font-size:.8rem;
+
+    }
+
+    .remove-from-wishlist{
+
+        width:34px;
+        height:34px;
+
+    }
+
+}
+
+.unavailable-product{
+    border:2px dashed #ddd;
+    opacity:.8;
+}
+
+.unavailable-image{
+    height:240px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:4rem;
+    color:#bbb;
+}
+
+.unavailable-text{
+    color:#777;
+    margin:12px 0;
 }

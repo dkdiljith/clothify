@@ -1,17 +1,14 @@
+{{#section 'head'}}
 <title>Shop Products - Your Store</title>
-<script src="/javascripts/user/productCard.js"></script>
+<script src="/javascripts/user/home/productCard.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css">
 <link rel="stylesheet" type="text/css" href="/stylesheets/user/collection.css">
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/productCard.css">
-
-
-
+{{/section}}
 
 
 <div class="product-listing-page">
 
     <div class="container">
-
 
         <!-- =========================================================
              PAGE HEADER
@@ -172,7 +169,7 @@
 
                     <div class="product-card-wrapper">
 
-                        {{> user/productCard this}}
+                        {{> home/productCard this}}
 
                     </div>
 
@@ -294,49 +291,7 @@
 </div>
 
 
-<!-- =========================================================
-         SCRIPTS
-    ========================================================= -->
-
-<script>
-
-    document.addEventListener(
-        'DOMContentLoaded',
-        function () {
-
-            // MOBILE FILTER
-            const mobileFilterToggle =
-                document.querySelector(
-                    '.mobile-filter-toggle'
-                );
-
-            const filterSidebar =
-                document.querySelector(
-                    '.filter-sidebar'
-                );
-
-
-            if (
-                mobileFilterToggle &&
-                filterSidebar
-            ) {
-
-                mobileFilterToggle.addEventListener(
-                    'click',
-                    function () {
-
-                        filterSidebar.classList.toggle(
-                            'show'
-                        );
-
-                    }
-                );
-
-            }
-
-        }
-    );
-
-</script>
-
+{{#section 'scripts'}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js" defer></script>
+<script src="/javascripts/user/collection.js" defer></script>
+{{/section}}

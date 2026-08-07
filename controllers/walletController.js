@@ -13,33 +13,34 @@ const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-exports.createWallet = async (userId)=> {
-  try {
-    const existingWallet = await Wallet.findOne({ userId });
-
-    if (existingWallet) {
-      return existingWallet;
+exports.createWallet = async (userId, session = null) => {
+    try {
+        const existingWalletQuery = Wallet.findOne({ userId }).lean();
+        if (session) {
+            existingWalletQuery.session(session);
+        }
+        const existingWallet = await existingWalletQuery;
+        if (existingWallet) {
+            return existingWallet;
+        }
+        const newWallet = new Wallet({
+            userId,
+            balance: 0,
+            transactions: [],
+        });
+        const savedWallet = session
+            ? await newWallet.save({ session })
+            : await newWallet.save();
+        return savedWallet;
+    } catch (error) {
+        if (error.code === 11000) {
+            console.error("Wallet already exists.");
+            return null;
+        }
+        console.error("Error creating wallet:", error);
     }
+};
 
-    const newWallet = new Wallet({
-      userId: userId,
-      balance: 0,
-      transactions: [],
-    });
-
-    const savedWallet = await newWallet.save();
-    return savedWallet;
-  } catch (error) {
-    if (error.code === 11000) {
-      // Duplicate key error
-      console.error("Wallet creation failed: Wallet already exists for this user.");
-      return null; // Or throw a specific error object
-    } else {
-      console.error("Error creating wallet:", error);
-      throw error; // Rethrow other errors
-    }
-  }
-}
 
 
 
@@ -91,7 +92,8 @@ exports.walletRender = async (req, res) => {
             prevPage: page - 1,
             hasNextPage: page < totalPages,
             hasPrevPage: page > 1
-        }
+        },
+        user_sidebar: true
     });
 };
 
@@ -131,7 +133,7 @@ exports.walletPaymentVerification = async (req, res) => {
     const IntegerAmount = parseInt(amount)
 
     // Verify payment signature
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET.trim() );
+    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET.trim());
     hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
     const generatedSignature = hmac.digest('hex');
 

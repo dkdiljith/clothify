@@ -520,3 +520,62 @@
 
 
 }
+
+
+
+/* Pending */
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* Failed */
+.status-failed {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Shipped */
+.status-shipped {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* Completed */
+.status-completed {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* Cancelled */
+.status-cancelled {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Return Requested */
+.status-return\ requested {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+/* Return Rejected */
+.status-return\ rejected {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+/* Returned */
+.status-returned {
+    background: #efebe9;
+    color: #6d4c41;
+}
+
+/* Payment Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}

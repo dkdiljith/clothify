@@ -1,0 +1,140 @@
+{{#section 'head'}}
+<title>My Orders | Clothify</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/user/userOrders.css">
+{{/section}}
+
+
+
+<div class="orders-header">
+    <h2 class="orders-title">
+        <i class="fas fa-clipboard-list"></i>
+        My Orders
+    </h2>
+</div>
+<div class="orders-list">
+    {{#if orders.length}}
+    {{#each orders}}
+    <a href="/user/orderDetails/{{this._id}}"
+        class="order-card {{#ifeq this.paymentStatus 'Failed'}}order-failed{{/ifeq}}">
+        <!-- Left -->
+        <div class="order-image">
+            {{#if this.items.[0].productImg}}
+            <img src="{{this.items.[0].productImg}}" alt="{{this.items.[0].productName}}">
+            {{else}}
+            <img src="/images/no-image.png" alt="Product">
+            {{/if}}
+        </div>
+        <!-- Center -->
+        <div class="order-content">
+            <div class="order-top">
+                <h3 class="product-name">
+                    {{this.items.[0].productName}}
+                </h3>
+                 {{#ifCond this.items.length ">" 1}}
+                <span class="more-items">
+                    +{{subtract this.items.length 1}} more items
+                </span>
+                {{/ifCond}}
+            </div>
+            <div class="order-meta">
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-hashtag"></i>
+                        Order ID
+                    </span>
+                    <span class="meta-value">
+                        {{this.orderId}}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="far fa-calendar-alt"></i>
+                        Ordered On
+                    </span>
+                    <span class="meta-value">
+                        {{formatDate this.createdAt "MMM D, YYYY"}}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-shopping-bag"></i>
+                        Items
+                    </span>
+                    <span class="meta-value">
+                        {{this.items.length}}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">
+                        <i class="fas fa-credit-card"></i>
+                        Payment
+                    </span>
+                    <span class="meta-value">
+                        {{paymentMethod this.paymentMethod}}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Right -->
+        <div class="order-summary">
+            <div class="order-price">
+                ₹{{this.totalAmount}}
+            </div>
+            <div class="order-status status-{{toLowerCase this.status}}">
+                {{this.status}}
+            </div>
+            {{#ifeq this.paymentStatus "Failed"}}
+            <button class="btn-retry-payment" data-order-id="{{this.orderId}}"
+                data-expires-at="{{this.paymentRetryExpiresAt}}" data-attempts-count="{{this.paymentAttemptsCount}}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
+                Retry Payment
+            </button>
+            {{/ifeq}}
+            <div class="view-arrow">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+    </a>
+    {{/each}}
+    {{else}}
+    <div class="no-orders">
+        <div class="no-orders-icon">
+            <i class="far fa-clipboard"></i>
+        </div>
+        <h3>No Pending Orders Found</h3>
+        <p>
+            You Dont have any pending Orders.
+        </p>
+        <a href="/user/home" class="shop-button">
+            <i class="fas fa-shopping-bag"></i>
+            Start Shopping
+        </a>
+    </div>
+    {{/if}}
+</div>
+{{#if orders.length}}
+<div class="pagination">
+    {{#if pagination.hasPrevPage}}
+    <a href="/user/orders?page={{pagination.prevPage}}" class="pagination-button">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {{/if}}
+    <span class="pagination-button active">
+        {{pagination.page}}
+    </span>
+    {{#if pagination.hasNextPage}}
+    <a href="/user/orders?page={{pagination.nextPage}}" class="pagination-button">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    {{/if}}
+</div>
+{{/if}}
+
+
+
+{{#section 'scripts'}}
+<script src="/javascripts/user/userOrders.js" defer></script>
+{{/section}}

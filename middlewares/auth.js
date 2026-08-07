@@ -9,26 +9,31 @@ const MESSAGES = require(`../utils/constants`)
 
 // --- USER MIDDLEWARE ---
 exports.userAuth = async (req, res, next) => {
-    try {
-        if (!req.session.user) {
-            return res.redirect('/user/login');
-        }
-
-        const user = await User.findById(req.session.user._id).lean();
-
-        if (!user || user.blocked || !user.isActive) {
-            return req.session.save(() => {
-                if (user?.blocked || !user.isActive) return ErrorMessage.userUnavailableError(req, res);
-                return res.redirect('/user/login');
-            });
-        }
-
-        next();
-    } catch (error) {
-        console.error("User Auth Error:", error);
-        res.status(500).send("Internal Server Error");
+  try {
+    if (!req.session.user) {
+      return res.redirect('/user/login');
     }
+
+    const user = await User.findById(req.session.user._id).lean();
+
+    // Check if user is missing, blocked, or inactive
+    if (!user || user.blocked || !user.isActive) {
+      return req.session.save(() => {
+        
+        if (user?.blocked || (user && !user.isActive)) {
+          return ErrorMessage.userUnavailableError(req, res);
+        }
+        return res.redirect('/user/login');
+      });
+    }
+    req.session.user.showWelcomeModal = false;
+    next();
+  } catch (error) {
+    console.error("User Auth Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
 };
+
 
 
 

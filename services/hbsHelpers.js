@@ -54,12 +54,6 @@ module.exports = {
     }
     return null;
   },
-  multiply: function (a, b) {
-    if (a === null || a === undefined || b === null || b === undefined) {
-      return 0;
-    }
-    return a * b;
-  },
 
 
 
@@ -106,7 +100,13 @@ module.exports = {
     return a < b;
   },
   formatDate: function (date) {
-    return new Date(date).toLocaleDateString(); // Format the date
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
   },
 
   //userOrderDetails
@@ -116,6 +116,27 @@ module.exports = {
   },
   neq: function (a, b) {
     return a !== b;
+  },
+  paymentMethod: function (method) {
+    switch (method) {
+      case "razorpay":
+        return "Razorpay";
+
+      case "wallet":
+        return "Wallet";
+
+      case "cod":
+        return "Cash on Delivery";
+
+      default:
+        return method;
+    }
+  },
+  formatPrice: function (value) {
+    if (value === undefined || value === null) {
+      return "0";
+    }
+    return Number(value).toLocaleString("en-IN");
   },
 
   //coupon
@@ -157,9 +178,11 @@ module.exports = {
   //user order
   toLowerCase: function (str) {
     if (str && typeof str === 'string') {
-      return str.toLowerCase();
+      return str
+        .toLowerCase()
+        .replace(/\s+/g, '-');
     }
-    return ''; // Or handle non-string values as needed
+    return '';
   },
   ifeq: function (a, b, options) {
     if (a === b) {
@@ -206,9 +229,31 @@ module.exports = {
   and: function () {
     const args = Array.prototype.slice.call(arguments, 0, -1);
     return args.every(Boolean);
-  }
+  },
 
+  //referral page
+  initial: function (name) {
+    if (!name) return "";
+    return name.charAt(0).toUpperCase();
+  },
 
+  coinValuePreview: function (coinValue) {
+    if (!coinValue) return "100 Coins = ₹0";
+
+    return `100 Coins = ₹${100 * Number(coinValue)}`;
+  },
+  coinValue: (coins, value) => {
+    return (Number(coins) * Number(value)).toFixed(2);
+  },
+  hasUnavailableItems: function (items) {
+    if (!items || !Array.isArray(items)) return false;
+    // Checks if any array element explicitly carries the false flag
+    return items.some(item => item.isAvailable === false);
+  },
+  //ADMIN ORDER DETAILS
+  not: function (value) {
+    return !value;
+  },
 
 };
 

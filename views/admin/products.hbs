@@ -1,27 +1,52 @@
 {{#section 'head'}}
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/products.css" />
 {{/section}}
-
 <div class="dashboard-container">
     <div class="header">
         <h1 class="page-title">Product Management</h1>
+        <div style="display:flex; align-items:center; gap:15px;">
 
-        <div style="display:flex;">
-            <form method="GET" action="/admin/products" role="search" style="margin-right:15px;">
+            <form method="GET" action="/admin/products" style="display:flex; align-items:center; gap:10px;">
+
                 <div class="search-container">
                     <input type="search" name="query" class="search-input" id="search-input"
-                        placeholder="Search products..." {{#if query}}value="{{query}}" {{/if}}>
+                        placeholder="Search products..." value="{{query}}">
                 </div>
+
+                <select name="status" class="form-select" style="width:170px; height:44px;">
+
+                    <option value="" {{#unless status}}selected{{/unless}}>
+                        All Products
+                    </option>
+
+                    <option value="active" {{#ifCond status "==" "active" }}selected{{/ifCond}}>
+                        Active Products
+                    </option>
+
+                    <option value="blocked" {{#ifCond status "==" "blocked" }}selected{{/ifCond}}>
+                        Blocked Products
+                    </option>
+
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+
+                <a href="/admin/products" class="btn btn-outline-secondary">
+                    Reset
+                </a>
+
             </form>
 
             <button onclick="location.href='/admin/addProducts'" class="add-product-btn">
                 + Add Product
             </button>
+
         </div>
     </div>
-
     {{#if products.length}}
-
     <div class="orders-table">
         <table>
             <thead>
@@ -36,228 +61,127 @@
                     <th>Offer Applied</th>
                     <th style="text-align: center;">Management</th>
                 </tr>
-
             </thead>
-
             <tbody>
-
                 {{#each products}}
-
                 <tr>
-
                     <td data-label="Sl No">
-
                         {{serialNumber ../pagination.serialNumberStart @index}}
-
                     </td>
-
                     <td data-label="Image">
-
                         {{#if this.images.length}}
-
                         <img src="{{this.images.[0].path}}" class="product-thumbnail">
-
                         {{else}}
-
                         <div class="no-image">
-
                             📦
-
                         </div>
-
                         {{/if}}
-
                     </td>
-
                     <td data-label="Product">
-
                         <div class="product-name">
-
                             {{this.name}}
-
                         </div>
-
                     </td>
-
                     {{#if this.details.length}}
-
                     <td data-label="Price">
-
                         {{#if this.details.[0].offerPrice}}
-
                         <div>
-
                             <span style="text-decoration:line-through; opacity:.65;">
-
                                 ₹{{this.details.[0].price}}
-
                             </span>
-
                         </div>
-
                         <div style="font-weight:700; color:#16a34a;">
-
                             ₹{{this.details.[0].offerPrice}}
-
                         </div>
-
                         {{else}}
-
                         ₹{{this.details.[0].price}}
-
                         {{/if}}
-
                     </td>
-
                     <td data-label="Category">
-
                         {{getCategoryName this.categoryId ../categories}}
-
                     </td>
-
                     <td data-label="Inventory">
-
-                        {{this.details.[0].quantity}}
-
+                        {{this.totalStock}}
                     </td>
-
                     <td data-label="Offer Code">
-
                         {{#if this.currentOfferCode}}
-
                         {{this.currentOfferCode}}
-
                         {{else}}
-
                         <span style="font-size:12px; color:#9ca3af;">
-
                             None
-
                         </span>
-
                         {{/if}}
-
                     </td>
-
                     <td data-label="Offer Applied">
-
                         {{#if this.details.[0].offerId}}
-
                         {{#if this.details.[0].offerLocked}}
-
                         <span style="font-size:12px; font-weight:600; color:#ea580c;">
-
                             Manual
-
                         </span>
-
                         {{else}}
-
                         <span style="font-size:12px; font-weight:600; color:#2563eb;">
-
                             Automated
-
                         </span>
-
                         {{/if}}
-
                         {{else}}
-
                         <span style="font-size:12px; color:#9ca3af;">
-
                             None
-
                         </span>
-
                         {{/if}}
-
                     </td>
-
                     {{else}}
-
                     <td data-label="Price">N/A</td>
-
                     <td data-label="Category">N/A</td>
-
                     <td data-label="Inventory">N/A</td>
-
                     <td data-label="Offer Code">N/A</td>
-
                     <td data-label="Offer Applied">
-
                         <span style="color:#9ca3af;">
-
                             None
-
                         </span>
-
                     </td>
-
                     {{/if}}
-
                     <td data-label="Management">
-
                         <div class="action-buttons d-flex gap-2 align-items-center">
-
                             <!-- Apply Offer Button -->
                             <button type="button" class="btn btn-apply-offer" data-product-id="{{this._id}}" {{#unless
                                 this.isActive}} disabled title="Cannot apply offers to an inactive product" {{/unless}}>
-
                                 <i class="bi bi-tag"></i>
-
-                                Apply 🏷️
-
+                                Apply
                             </button>
-
                             <!-- Edit Button -->
                             <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" {{#if
                                 this.isActive}} onclick="location.href='/admin/editproducts/{{this._id}}'" {{else}}
                                 disabled title="Cannot edit an inactive product" {{/if}}>
                                 <i class="bi bi-pencil"></i>
-                                Edit ✏️
+                                Edit
                             </button>
-
                             <!-- Block / Unblock Button -->
                             {{#if this.isActive}}
-                            <button type="button" class="btn btn-danger d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
+                            <button type="button"
+                                class="btn btn-danger d-inline-flex align-items-center gap-1 block-toggle-btn"
+                                data-user-id="{{this._id}}">
                                 <i class="bi bi-slash-circle"></i>
-                                Block 🍃
+                                Block
                             </button>
                             {{else}}
                             <button type="button"
-                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
+                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1 block-toggle-btn"
+                                data-user-id="{{this._id}}">
                                 <i class="bi bi-unlock"></i>
-                                Unblock 🍂
+                                Unblock
                             </button>
                             {{/if}}
-
-                            {{!-- <button type="button"
-                                class="btn btn-warning text-dark d-inline-flex align-items-center gap-1"
-                                onclick="handleBlock('{{this._id}}')">
-                                <i class="bi bi-unlock"></i>
-                                Delete
-                            </button> --}}
-
                         </div>
-
-
                     </td>
-
                 </tr>
-
                 {{/each}}
-
             </tbody>
         </table>
     </div>
-
-    {{#if (gt pagination.totalPages 1)}}
+    {{#if pagination.totalPages}}
     <div class="pagination">
-
         {{#if pagination.hasPrevPage}}
-        <a href="/admin/products?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/products?page={{pagination.prevPage}}{{#if query}}&query={{query}}{{/if}}{{#if status}}&status={{status}}{{/if}}"
             class="pagination-button">
             <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -265,15 +189,12 @@
             </svg>
             Previous
         </a>
-
         {{/if}}
-
         <span class="pagination-info">
             Page {{pagination.page}} of {{pagination.totalPages}}
         </span>
-
         {{#if pagination.hasNextPage}}
-        <a href="/admin/products?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}"
+        <a href="/admin/products?page={{pagination.nextPage}}{{#if query}}&query={{query}}{{/if}}{{#if status}}&status={{status}}{{/if}}"
             class="pagination-button">
             Next
             <svg class="pagination-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -281,116 +202,68 @@
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </a>
-
         {{/if}}
-
     </div>
     {{/if}}
-
     {{else}}
-
     <div class="empty-state">
         <svg class="empty-state-image" xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
-
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M3 3h18v2H3V3zm2 4h14l-1.5 9H6.5L5 7zm2.75 11a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm8.5 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5z" />
         </svg>
-
         <h2>No Products Found</h2>
-
         {{#unless query}}
         <p>
             There are currently no products in your store.
             Add your first product to get started!
         </p>
-        {{/unless}}
-
         <button onclick="window.location.href='/admin/products'" class="add-product-btn empty-state-btn">
             Refresh
         </button>
+        {{/unless}}
     </div>
-
     {{/if}}
 </div>
-
 <div id="mainOverlay" class="app-overlay">
     <div class="modal-card">
-
         <div class="form-header">
             <h1 class="page-title" id="formModalTitle">Apply Offer</h1>
-
             <button id="closeFormBtn" class="btn btn-icon" type="button">
                 <svg class="action-icon close-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-
             </button>
         </div>
-
         <form id="mainForm" method="post" novalidate
             style="display:flex; flex-direction:column; flex-grow:1; overflow:hidden;">
-
             <div style="font-size:13px; opacity:.75; margin-bottom:10px;">
                 Choose a product offer or return product to automatic pricing.
             </div>
-
             <input type="text" id="offerSearch" class="form-control mb-3" placeholder="Search active offers..."
                 onkeyup="filterOffers()">
-
             <div id="offerListContainer"></div>
-
             <input type="hidden" id="selectedOfferIdInput" name="selectedOfferId">
             <input type="hidden" id="selectedProductIdInput" name="selectedProductId">
-
             <div class="form-actions">
-
                 <button type="submit" class="btnForm btn-primary">
                     <span class="icon">
                         <svg class="action-icon check-icon" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-
                     </span>
                     Apply Offer
                 </button>
-
                 <button type="button" id="autoPricingBtn" class="btnForm" style="background:#e5e7eb; color:#111827;">
                     Use Automatic Pricing
                 </button>
-
             </div>
         </form>
     </div>
 </div>
-
-<script>
-    async function handleBlock(productId) {
-        const response = await fetch(`/admin/blockProduct/${productId}`);
-        const data = await response.json();
-
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showPopupMessage(data.message, `error`)
-        }
-    }
-
-     async function handleDeleted(productId) {
-        const response = await fetch(`/admin/deleteProduct/${productId}`);
-        const data = await response.json();
-
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showPopupMessage(data.message, `error`)
-        }
-    }
-</script>
-
 {{#section 'scripts'}}
-<script src="/javascripts/admin/product.js" defer></script>
+<script src="/javascripts/admin/products.js" defer></script>
 {{/section}}

@@ -883,3 +883,11 @@ body {
   background-color: #eee;
   cursor: not-allowed;
 }
+
+.btn-wishlist.active {
+    color: #e63946;
+}
+
+.btn-wishlist.active i {
+    color: #e63946;
+}

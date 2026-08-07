@@ -1,0 +1,79 @@
+/* =========================================================
+   Product Not Found Page Styles
+   ========================================================= */
+
+.product-not-found-wrapper {
+    background: #ffffff;
+    padding: 60px 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.not-found-content {
+    max-width: 600px;
+    margin: 0 auto 50px auto;
+}
+
+.error-icon-box {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(44, 62, 80, 0.05);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px auto;
+    font-size: 3rem;
+}
+
+.error-title {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.error-actions .action-btn {
+    min-width: 180px;
+    text-decoration: none;
+}
+
+/* Fix spacing for the related products on the error page */
+.product-not-found-wrapper .related-products {
+    border-top: 1px solid #eee;
+    padding-top: 50px;
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments for error page */
+@media (max-width: 576px) {
+    .error-title {
+        font-size: 2rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .error-actions .action-btn {
+        width: 100%;
+    }
+}
