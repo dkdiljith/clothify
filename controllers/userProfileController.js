@@ -42,24 +42,24 @@ exports.editAddressRender = async (req, res) => {
 
 
 exports.securityRender = async (req, res) => {
-    const userId = res.locals.user._id
-    const user = await User.findOne({ _id: userId })
+  try {
 
-    const now = Date.now();
+    const hasPassword = !!(
+      await User.findById(res.locals.user._id)
+        .select("password")
+        .lean()
+    )?.password;
 
-    // Generate token
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(now + 3600000); // 1 hour
+    return res.render("user/security", {
+      user_sidebar: true,
+      hasPassword
+    });
 
-    // Update user
-    user.resetToken = token;
-    user.resetTokenExpires = tokenExpires;
-    await user.save();
-
-    const user1 = await User.findById(userId)
-
-    return res.render(`user/security`, { token, user: user1, user_sidebar: true })
-}
+  } catch (error) {
+    console.error("Security Render Error:", error);
+    return res.redirect("/user/profile");
+  }
+};
 
 
 

@@ -1,75 +1,92 @@
 {{#section 'head'}}
-<title>Security & Password | Clothify</title>
-<link rel="stylesheet" type="text/css" href="/stylesheets/user/security.css">
+<title>Privacy & Security | Clothify</title>
+<link rel="stylesheet" href="/stylesheets/user/security.css">
 {{/section}}
 
 
-<!-- Security Status -->
-<div class="security-status">
-    <i class="fas fa-shield-alt"></i>
-    <div>
-        <h3 style="margin: 0 0 5px 0;">Your account security is strong</h3>
-        {{!-- <p style="margin: 0; color: #666;">Last updated: {{formatDate user.updatedAt}}</p> --}}
+
+<div class="security-page">
+    <!-- ==========================================
+                    HEADER
+    =========================================== -->
+    <div class="security-header">
+        <div class="security-header-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="security-header-content">
+            <h2>Security Center</h2>
+            <p>
+                Manage your account security and keep your Clothify account protected.
+            </p>
+        </div>
+    </div>
+    <!-- ==========================================
+                PASSWORD FEATURE CARD
+    =========================================== -->
+    <div class="security-feature-card">
+        <div class="feature-top">
+            <div class="feature-icon">
+                {{#if hasPassword}}
+                <i class="fas fa-lock"></i>
+                {{else}}
+                <i class="fab fa-google"></i>
+                {{/if}}
+            </div>
+            <div class="feature-content">
+                {{#if hasPassword}}
+                <span class="status-badge success">
+                    <i class="fas fa-circle"></i>
+                    Active
+                </span>
+                <h3>Password Protection</h3>
+                <p>
+                    Your Clothify account is protected with a password.
+                    To change it, we'll first verify your identity using your registered email address.
+                </p>
+                {{else}}
+                <span class="status-badge warning">
+                    <i class="fas fa-circle"></i>
+                    Google Sign-In
+                </span>
+                <h3>No Password Created</h3>
+                <p>
+                    Your account was created using Google Sign-In.
+                    Create a password to sign in using either Google or your email and password.
+                </p>
+                {{/if}}
+            </div>
+        </div>
+        <!-- ==========================================
+                    FEATURES
+        =========================================== -->
+        <div class="security-features">
+            <div class="security-item">
+                <i class="fas fa-envelope-open-text"></i>
+                <span>Email verification before password reset</span>
+            </div>
+            <div class="security-item">
+                <i class="fas fa-lock"></i>
+                <span>Passwords are securely encrypted</span>
+            </div>
+            <div class="security-item">
+                <i class="fas fa-user-shield"></i>
+                <span>Single-use secure verification link</span>
+            </div>
+        </div>
+        <!-- ==========================================
+                    ACTION BUTTON
+        =========================================== -->
+        <button id="changePasswordButton" class="change-password-btn">
+            <i class="fas fa-key"></i>
+            {{#if hasPassword}}
+            Change Password
+            {{else}}
+            Create Password
+            {{/if}}
+        </button>
     </div>
 </div>
 
-<!-- Password Reset Card -->
-<div class="security-card">
-    <h2 class="security-section-title">
-        <i class="fas fa-key" style="margin-right: 10px;"></i>Change Password
-    </h2>
-
-    <form id="resetPasswordForm" novalidate>
-        <input type="hidden" id="token" name="token" value="{{token}}">
-
-        <div class="form-group">
-            <label for="currentPassword" class="form-label">Current Password</label>
-            <div class="input-group">
-                <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
-                <i class="fas fa-eye password-toggle"></i>
-            </div>
-            <div id="currentPasswordError" class="error-message"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="newPassword" class="form-label">New Password</label>
-            <div class="input-group">
-                <input type="password" id="newPassword" name="newPassword" class="form-control" required>
-                <i class="fas fa-eye password-toggle"></i>
-            </div>
-            <div class="password-strength">
-                <div class="password-strength-bar" id="passwordStrengthBar"></div>
-            </div>
-            <div id="passwordStrengthText" style="font-size: 12px; margin-top: 5px; color: #666;"></div>
-            <div class="password-requirements">
-                <p>Password must contain:</p>
-                <ul>
-                    <li id="req-length">At least 8 characters</li>
-                    <li id="req-uppercase">One uppercase letter</li>
-                    <li id="req-number">One number</li>
-                    <li id="req-special">One special character</li>
-                </ul>
-            </div>
-            <div id="newPasswordError" class="error-message"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-            <div class="input-group">
-                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
-                <i class="fas fa-eye password-toggle"></i>
-            </div>
-            <div id="confirmPasswordError" class="error-message"></div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
-            <span class="spinner" id="submitSpinner"></span>
-            <i class="fas fa-sync-alt" id="submitIcon"></i>
-            Update Password
-        </button>
-        <div id="formMessage" class="success-message"></div>
-    </form>
-</div>
 
 
 {{#section 'scripts'}}

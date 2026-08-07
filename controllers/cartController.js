@@ -15,27 +15,6 @@ const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//cartdataIcon
-exports.cartDataIcon = async (req, res) => {
-  try {
-    const userId = res.locals.user._id
-    const cart = await Cart.findOne({ userId });
-
-    if (cart) {
-      const itemCount = cart.items ? cart.items.length : 0;
-      return res.json({ itemCount: itemCount });
-    } else {
-      return res.json({ itemCount: 0 });
-    }
-  } catch (error) {
-    console.error("Error fetching cart data for icon:", error);
-    return res.status(500).json({ error: "Failed to fetch cart data" }); // Send an error response
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 exports.cartRender = async (req, res) => {
   try {

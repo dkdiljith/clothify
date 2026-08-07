@@ -20,8 +20,8 @@ const otpSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-//  Automatically delete document 24 hours (86400 seconds) after 'createdAt'
-otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
+//  Automatically delete document 24 hours after 'createdAt'
+otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 24 * 60 * 60 });
 // Only one active OTP per user & purpose
 otpSchema.index({ userId: 1, purpose: 1 }, { unique: true });
 

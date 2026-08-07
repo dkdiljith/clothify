@@ -14,7 +14,7 @@ const adminPaginationFactory = require(`../utils/pagination`);
 
 //nodemailer
 const verificationEmailSend = require(`../services/nodemailer`).verificationEmailSend
-const sendResetEmail = require(`../services/nodemailer`).passwordResetEmailSend
+const forgotPasswordEmailSend = require(`../services/nodemailer`).passwordResetEmailSend
 
 //MESSAGE_CONSTANTS
 const MESSAGES = require(`../utils/constants`)
@@ -37,6 +37,14 @@ const securePassword = async (password) => {
     console.log(err);
   }
 };
+
+
+const generateOtp = () => {
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  return { otp };
+};
+
+
 
 const hashOtp = (otp) => {
   const OTP_PEPPER = process.env.OTP_HASH_SECRET;
@@ -96,19 +104,7 @@ const validateAndCleanEmail = (email) => {
 };
 
 
-// Email verification code generator
-const generateVerificationCode = () => {
-  const verificationToken = crypto.randomInt(100000, 1000000).toString();
-  const tokenExpiration = Date.now() + 900000; // 15 minutes in milliseconds
 
-  return { verificationToken, tokenExpiration };
-};
-
-
-const generateOtp = () => {
-  const otp = crypto.randomInt(100000, 1000000).toString();
-  return { otp };
-};
 
 // ======================================================================================================
 
@@ -157,38 +153,6 @@ exports.homeRender = async (req, res) => {
 };
 
 
-// Display reset password form (with token verification)
-exports.resetPasswordRender = async (req, res) => {
-  try {
-    const token = req.params.token
-
-    if (!token) {
-      return res.redirect('/user/forgetPassword');
-    }
-
-    // Verify token exists and isn't expired
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpires: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.redirect('/user/forgetPassword');
-    }
-
-    // Render reset password page with token
-    return res.render('user/resetPassword', {
-      token,
-      plain_body: true
-    });
-
-  } catch (error) {
-    console.error('Reset password load error:', error);
-    return res.redirect('/user/forgetPassword');
-  }
-}
-
-
 
 
 
@@ -209,10 +173,22 @@ exports.loginRender = async (req, res) => {
 
 exports.forgetPasswordRender = async (req, res) => {
   if (req.session.user) {
-    return res.redirect(`/user/home`)
+    if (req.query.priority) {
+      return res.render("user/forgetPassword", {
+        plain_body: true,
+        error: req.query.error || null,
+        email: req.session.user.email,
+      });
+    }
+    return res.redirect("/user/home");
   }
-  return res.render("user/forgetPassword", { plain_body: true });
+  return res.render("user/forgetPassword", {
+    plain_body: true,
+    error: req.query.error || null,
+    email: "",
+  });
 };
+
 
 exports.userLogout = (req, res) => {
   delete req.session.user;
@@ -650,8 +626,9 @@ exports.emailVerification = async (req, res) => {
 
 
 
-
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -660,159 +637,272 @@ exports.emailVerification = async (req, res) => {
 exports.forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const MAX_RESET_ATTEMPTS = 3;
-    const RESET_COOLDOWN = 30 * 60 * 1000; // 30 minutes
-
-    const user = await User.findOne({ email });
+    const otpPurpose = "FORGOT_PASSWORD";
+    //  Input Validation
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email is required.",
+      });
+    }
+    const validatedEmail = validateAndCleanEmail(email);
+    //  Find User
+    const user = await User.findOne({
+      email: validatedEmail,
+    }).lean();
     if (!user) {
-      return res.status(200).json({
-        message: 'If an account exists, a reset link has been sent'
+      return res.status(404).json({
+        success: false,
+        error: "No account found with this email.",
       });
     }
-
-    // Check reset attempts and cooldown
-    const now = Date.now();
-    if (user.resetAttempts >= MAX_RESET_ATTEMPTS &&
-      user.resetTimer &&
-      user.resetTimer > now) {
-      return res.status(429).json({
-        error: 'Too many attempts. Try again later.',
-        resetTimer: user.resetTimer
+    //  Existing OTP
+    const existingOtp = await Otp.findOne({
+      userId: user._id,
+      purpose: otpPurpose,
+    }).lean();
+    if (existingOtp) {
+      // Daily resend limit
+      if (existingOtp.resendCount >= 3) {
+        return res.status(429).json({
+          success: false,
+          error: "OTP resend limit exceeded. Please try again tomorrow.",
+        });
+      }
+      // Prevent rapid requests
+      if (Date.now() - existingOtp.updatedAt.getTime() < 5000) {
+        return res.status(429).json({
+          success: false,
+          error: "Please wait a few seconds before requesting another OTP.",
+        });
+      }
+    }
+    //  Generate OTP
+    const { otp } = generateOtp();
+    const otpHash = hashOtp(otp);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const resendAvailableAt = new Date(Date.now() + 60 * 1000);
+    //  Update Existing OTP
+    if (existingOtp) {
+      await Otp.updateOne(
+        { _id: existingOtp._id },
+        {
+          $set: {
+            otpHash,
+            attempts: 0,
+            expiresAt,
+          },
+          $inc: {
+            resendCount: 1,
+          },
+        },
+      );
+    } else {
+      await Otp.create({
+        userId: user._id,
+        purpose: otpPurpose,
+        otpHash,
+        attempts: 0,
+        resendCount: 0,
+        expiresAt,
       });
     }
-
-    // Generate token
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(now + 3600000); // 1 hour
-
-    // Update user
-    user.resetToken = token;
-    user.resetTokenExpires = tokenExpires;
-    user.resetAttempts += 1;
-    user.resetTimer = new Date(now + RESET_COOLDOWN);
-    await user.save();
-
-
-    await sendResetEmail(user.email, token);
-
-    // Render page with timer
+    //  Send OTP Email
+    await forgotPasswordEmailSend(validatedEmail, otp);
+    //  Store Session
+    req.session.forgot_password = {
+      _id: user._id.toString(),
+      email: validatedEmail,
+      otpExpiresAt: expiresAt.toISOString(),
+      resendAvailableAt: resendAvailableAt.toISOString(),
+    };
+    //  Success
     return res.status(200).json({
       success: true,
-      resetTimer: user.resetTimer
+      message: "Verification code sent successfully.",
+      verificationTimer: expiresAt.toISOString(),
+      resendTimer: resendAvailableAt.toISOString(),
     });
-
   } catch (error) {
-    console.error('Password reset error:', error);
-    return res.status(500).json({ error: 'Error processing request' });
+    console.error("Forget Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Something went wrong. Please try again.",
+    });
   }
 };
 
-// Resend Reset Email
-exports.resendResetEmail = async (req, res) => {
+
+
+
+
+
+// Display reset password form (with token verification)
+exports.resetPasswordRender = async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
+    const otp = req.params.token;
+    const otpPurpose = "FORGOT_PASSWORD";
+    //  Link Validation
+    if (!otp) {
+      return res.redirect("/user/forgetPassword?priority=true&&error=invalidLink");
+    }
+    //  Session Validation
+    const forgotPasswordSession = req.session.forgot_password;
+    if (!forgotPasswordSession?._id) {
+      return res.redirect("/user/forgetPassword?priority=true&&error=sessionExpired");
+    }
+    const userId = forgotPasswordSession._id;
+    //  User Validation
+    const user = await User.findById(userId).lean();
     if (!user) {
-      return res.status(200).json({
-        message: 'If an account exists, a reset link has been sent'
-      });
+      delete req.session.forgot_password;
+      return res.redirect("/user/forgetPassword?priority=true&&error=userNotFound");
+    }
+    //  OTP Validation
+    const existingOtp = await Otp.findOne({
+      userId,
+      purpose: otpPurpose,
+    }).lean();
+
+    if (!existingOtp) {
+      delete req.session.forgot_password;
+      return res.redirect("/user/forgetPassword?priority=true&&error=otpNotFound");
+    }
+    //  Reusable Attempt Increment
+    const increaseAttempts = async () => {
+      await Otp.updateOne({ _id: existingOtp._id }, { $inc: { attempts: 1 } });
+    };
+    //  OTP Expired
+    if (Date.now() > existingOtp.expiresAt.getTime()) {
+      await increaseAttempts();
+      delete req.session.forgot_password;
+      return res.redirect("/user/forgetPassword?priority=true&&error=otpExpired");
+    }
+    //  Maximum Attempts
+    if (existingOtp.attempts >= 5) {
+      delete req.session.forgot_password;
+      return res.redirect("/user/forgetPassword?priority=true&&error=maxAttempts");
+    }
+    //  Verify OTP
+    const isValidOtp = verifyOtp(otp, existingOtp.otpHash);
+    if (!isValidOtp) {
+      await increaseAttempts();
+      return res.redirect("/user/forgetPassword?priority=true&&error=invalidLink");
     }
 
-    // Check cooldown
-    const now = Date.now();
-    if (user.resetTimer && user.resetTimer > now) {
-      return res.status(429).json({
-        error: 'Please wait before requesting another reset',
-        newResetTimer: user.resetTimer
-      });
-    }
-
-    // Generate new token
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(now + 3600000);
-
-    // Update user
-    user.resetToken = token;
-    user.resetTokenExpires = tokenExpires;
-    user.resetAttempts += 1;
-    user.resetTimer = new Date(now + 1800000); // 30 minute cooldown
-    await user.save();
-
-    // Send email
-    const resetUrl = `${req.protocol}://${req.get('host')}/resetpassword?token=${token}`;
-    await sendResetEmail(user.email, resetUrl);
-
-    return res.status(200).json({
-      success: true,
-      newResetTimer: user.resetTimer
+    //  Render Reset Password Page
+    await increaseAttempts();
+    return res.render("user/resetPassword", {
+      plain_body: true,
     });
-
   } catch (error) {
-    console.error('Resend reset email error:', error);
-    return res.status(500).json({ error: 'Error processing request' });
+    console.error("Reset Password Render Error:", error);
+    delete req.session.forgot_password;
+    return res.redirect("/user/forgetPassword?priority=true&&error=serverError");
   }
 };
+
+
+
+
 
 
 
 exports.resetPassword = async (req, res) => {
   try {
-
-    // Passwords from request body
-    const { oldPassword, newPassword, token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({
+    const { newPassword, confirmPassword } = req.body;
+    //  Session Validation
+    const forgotPasswordSession = req.session.forgot_password;
+    if (!forgotPasswordSession?._id) {
+      return res.status(401).json({
         success: false,
-        error: "Token is required"
+        error: "Password reset session has expired.",
       });
     }
-
-    const user = await User.findOne({
-      resetToken: token,
-    });
-
+    const userId = forgotPasswordSession._id;
+    //  Input Validation
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "All fields are required.",
+      });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Passwords do not match.",
+      });
+    }
+    //  User Validation
+    const user = await User.findById(userId).lean();
     if (!user) {
-      return res.status(400).json({
+      delete req.session.forgot_password;
+      return res.status(404).json({
         success: false,
-        error: 'Invalid or expired token'
+        error: "User not found.",
       });
     }
-
-    if (!user.password) {
-      return res.status(404).json({ success: false, error: "Google Login Detected" });
+    //  Prevent Password Reuse
+    if (user.password) {
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Your new password must be different from your current password.",
+        });
+      }
     }
-
-    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
-
-    if (!isPasswordMatch) {
-      return res.status(401).json({ success: false, error: "Invalid Password" });
-    }
-
-    // ... password validation and update ...
-    user.password = await bcrypt.hash(newPassword, 12);
-    user.resetToken = null;
-    user.resetTokenExpires = null;
-    user.resetAttempts = 0,
-      user.resetTimer = null
-    await user.save();
-
-    sendPasswordChangedEmail(user.email)
-
+    //  Secure Password
+    const passwordHash = await securePassword(newPassword);
+    //  Update Password
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          password: passwordHash,
+        },
+      },
+    );
+    //  Consume OTP (Single Use)
+    await Otp.updateOne(
+      {
+        userId,
+        purpose: "FORGOT_PASSWORD",
+      },
+      {
+        $set: {
+          otpHash: "",
+          attempts: 4,
+          resendCount: 4,
+        },
+      },
+    );
+    //  Cleanup Session
+    delete req.session.forgot_password;
+    //  Send Notification
+    // await sendPasswordChangedEmail(user.email);
+    //  Success
     return res.status(200).json({
       success: true,
-      message: 'Password reset successful'
+      message: "Password changed successfully.",
     });
-
   } catch (error) {
-    console.error('Password reset error:', error);
+    console.error("Reset Password Error:", error);
     return res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: "Something went wrong. Please try again.",
     });
   }
 };
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -951,9 +1041,9 @@ exports.verifyPassword = async (req, res) => {
 }
 
 
-//////////////////////////////
-///      RESET EMAIL      ///
-////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.verifyEmail = async (req, res) => {
   try {
@@ -981,7 +1071,7 @@ exports.verifyEmail = async (req, res) => {
     if (anyone) {
       return res.status(409).json({
         success: false,
-        message: "This email address is already registered to another account."
+        message: "This email address is already registered to an account."
       });
     }
     const { otp } = generateOtp()

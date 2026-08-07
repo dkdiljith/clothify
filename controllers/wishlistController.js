@@ -10,27 +10,6 @@ const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//wishlistDataIcon
-exports.wishlistDataIcon = async (req, res) => {
-    try {
-        const userId = res.locals.user._id
-
-        const wishlist = await Wishlist.findOne({ userId: userId });
-
-        if (wishlist && wishlist.items) {
-            const wishlistCount = wishlist.items.length;
-            return res.json({ wishlistCount: wishlistCount });
-        } else {
-            return res.json({ wishlistCount: 0 });
-        }
-    } catch (error) {
-        console.error("Error fetching wishlist data for icon:", error);
-        return res.status(500).json({ error: "Failed to fetch wishlist data" });
-    }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 exports.wishlistRender = async (req, res) => {
     const userId = res.locals.user._id;
     // Pagination parameters

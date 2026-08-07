@@ -32,11 +32,6 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
-    resetToken: { type: String, default: null },
-    resetTokenExpires: { type: Date, default: null },
-    resetAttempts: { type: Number, default: 0, min: 0 },
-    resetTimer: { type: Date, default: null },
-
 }, { timestamps: true });
 
 const User = mongoose.model("users", userSchema);

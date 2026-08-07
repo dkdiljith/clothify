@@ -62,19 +62,15 @@ router.route(`/register`)
 router.route(`/emailVerification`)
   .get(userController.emailVerificationRender)
   .post(userController.emailVerification)
-
 router.post(`/resend-email-verification`, userController.resendEmailVerification)
 
-router.route(`/forgetpassword`)
+router.route(`/forgetPassword`)
   .get(userController.forgetPasswordRender)
   .post(userController.forgetPassword)
-
 router.get('/resetpassword/:token', userController.resetPasswordRender)
-router.get(`/logout`, userController.userLogout)
-
-
-router.post(`/resend-reset-email`, userController.resendResetEmail)
 router.post(`/resetpassword`, userController.resetPassword)
+
+router.get(`/logout`, userController.userLogout)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -83,9 +79,6 @@ router.get(`/home`, userController.homeRender)
 router.get('/collections', searchController.collections);
 router.get('/singleproduct/:id', productController.singleProductPage)
 
-//for Header Icon
-router.get(`/cartDataIcon`, userAuth, cartController.cartDataIcon)
-router.get(`/wishlistDataIcon`, userAuth, wishlistController.wishlistDataIcon)
 
 //ADD TO CART
 router.get(`/cart`, userAuth, productValidator, cartController.cartRender)
