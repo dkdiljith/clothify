@@ -8,9 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const newPasswordError = document.getElementById("newPasswordError");
   const confirmPasswordError = document.getElementById("confirmPasswordError");
   const toggleNewPassword = document.getElementById("toggleNewPassword");
-  const toggleConfirmPassword = document.getElementById(
-    "toggleConfirmPassword",
-  );
+
   const resetButton = document.getElementById("resetButton");
   let resetInProgress = false;
   /* ==========================================
@@ -101,9 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleNewPassword.addEventListener("click", () => {
     togglePassword(newPasswordInput, toggleNewPassword);
   });
-  // toggleConfirmPassword.addEventListener("click", () => {
-  //   togglePassword(confirmPasswordInput, toggleConfirmPassword);
-  // });
   /* ==========================================
      Button Helpers
   ========================================== */
@@ -158,8 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         window.location.href = "/user/login";
       }, 800);
-    } catch (error) {
-      console.error(error);
+    } catch {
       showError(newPasswordError, "Unable to connect to the server.");
     } finally {
       resetInProgress = false;

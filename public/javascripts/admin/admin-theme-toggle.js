@@ -65,10 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 updateButtonText();
 
-                if (typeof updateChartColors === 'function') {
-                    updateChartColors();
-                }
-
             });
 
         });

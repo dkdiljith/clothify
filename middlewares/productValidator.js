@@ -83,7 +83,6 @@ async function validateCartCheckout(req, res, next) {
 
     return next();
   } catch (error) {
-    console.error("Middleware Collection Validation Error:", error);
     return next(error);
   }
 }

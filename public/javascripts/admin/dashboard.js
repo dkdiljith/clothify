@@ -75,8 +75,6 @@ async function loadDashboard(filter, showLoader = false) {
         updatePaymentChart(result.paymentMethods);
         document.getElementById("lastUpdated").textContent =
             `Updated ${new Date().toLocaleTimeString("en-IN")}`;
-    } catch (error) {
-        console.error(error);
     } finally {
         if (showLoader) {
             hideLoading();
@@ -340,12 +338,4 @@ document.addEventListener("visibilitychange", () => {
         startAutoRefresh();
     }
 });
-/* ==========================================================
-                    GLOBAL ERRORS
-========================================================== */
-window.addEventListener("unhandledrejection", (event) => {
-    console.error("Unhandled Promise Rejection:", event.reason);
-});
-window.addEventListener("error", (event) => {
-    console.error("JavaScript Error:", event.error);
-});
+

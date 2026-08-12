@@ -5,7 +5,7 @@ const host = process.env.MAIL_HOST;
 const port = process.env.MAIL_PORT;
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`);
+// const MESSAGES = require(`../utils/constants`);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -91,10 +91,9 @@ exports.verificationEmailSend = async (email, verificationToken) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(verificationToken);
+    // console.log(`verification code is ${verificationToken}`);
     return { success: true, message: "Verification email sent successfully" };
   } catch (error) {
-    console.error("Error sending email:", error);
     return {
       success: false,
       message: "Failed to send verification email",
@@ -161,11 +160,9 @@ exports.passwordResetEmailSend = async (email, resetToken) => {
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Password reset email sent: ", info.response);
+    await transporter.sendMail(mailOptions);
     return { success: true, message: "Password reset email sent successfully" };
   } catch (error) {
-    console.error("Error sending password reset email:", error);
     return {
       success: false,
       message: "Failed to send password reset email",
@@ -175,7 +172,7 @@ exports.passwordResetEmailSend = async (email, resetToken) => {
 };
 
 // utils/emailSender.js
-const sendPasswordChangedEmail = async (email) => {
+exports.sendPasswordChangedEmail = async (email) => {
   const transporter = nodemailer.createTransport({
     host,
     port,

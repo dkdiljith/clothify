@@ -22,12 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const endDate = endInput.value;
 
         if (!startDate || !endDate) {
-            Swal.fire('Error', 'Please select both start and end dates', 'error');
+            showPopupMessage('Please select both start and end dates' , `error`)
             return;
         }
 
         if (new Date(startDate) > new Date(endDate)) {
-            Swal.fire('Error', 'Start date cannot be after end date', 'error');
+             showPopupMessage('Start date cannot be after end date' , `error`)
             return;
         }
 

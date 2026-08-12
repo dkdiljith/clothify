@@ -8,7 +8,7 @@ const razorpay = new Razorpay({
 
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,10 +34,8 @@ exports.createWallet = async (userId, session = null) => {
         return savedWallet;
     } catch (error) {
         if (error.code === 11000) {
-            console.error("Wallet already exists.");
             return null;
         }
-        console.error("Error creating wallet:", error);
     }
 };
 
@@ -52,7 +50,7 @@ exports.walletRender = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 3; // 3 transactions per page
     let totalPages = 0;
-    let paginatedTransactions = [];
+    let paginatedTransactions
     let credit = 0;
     let debit = 0;
 
@@ -172,45 +170,40 @@ exports.walletPayment = async (req, res) => {
     const { amount } = req.body;
     const IntegerAmount = parseInt(amount)
 
-    try {
-
-        // 25,000 limit 
-        const ORDER_LIMIT = 25000;
-        if (amount > ORDER_LIMIT) {
-            return res.json({
-                success: false,
-                message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`
-            });
-        }
-
-        const userId = res.locals.user._id
-        if (!userId) {
-            return res.status(500).json({ error: `User not found` })
-        }
-
-        const wallet = await Wallet.findOne({ userId })
-        if (!wallet) {
-            return res.status(500).json({ error: `Wallet not found` })
-        }
-
-        if (wallet.balance < IntegerAmount) {
-            return res.status(500).json({ error: `Insuffecient balance detected` })
-        }
-        wallet.balance -= IntegerAmount;
-        wallet.transactions.push({
-            type: "debit",
-            amount: IntegerAmount,
-            description: `₹${IntegerAmount} debited for order payment`,
+    // 25,000 limit 
+    const ORDER_LIMIT = 25000;
+    if (amount > ORDER_LIMIT) {
+        return res.json({
+            success: false,
+            message: `Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`
         });
-        const result = await wallet.save();
+    }
 
-        if (result) {
-            return res.status(200).json({
-                success: true,
-                message: 'Payment verified'
-            });
-        }
-    } catch (err) {
-        console.log(err)
+    const userId = res.locals.user._id
+    if (!userId) {
+        return res.status(500).json({ error: `User not found` })
+    }
+
+    const wallet = await Wallet.findOne({ userId })
+    if (!wallet) {
+        return res.status(500).json({ error: `Wallet not found` })
+    }
+
+    if (wallet.balance < IntegerAmount) {
+        return res.status(500).json({ error: `Insuffecient balance detected` })
+    }
+    wallet.balance -= IntegerAmount;
+    wallet.transactions.push({
+        type: "debit",
+        amount: IntegerAmount,
+        description: `₹${IntegerAmount} debited for order payment`,
+    });
+    const result = await wallet.save();
+
+    if (result) {
+        return res.status(200).json({
+            success: true,
+            message: 'Payment verified'
+        });
     }
 }

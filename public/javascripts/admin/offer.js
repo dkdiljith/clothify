@@ -111,8 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderSelectionItems(data.products || data.categories, type);
 
             renderSelectionPagination(data.pagination);
-        } catch (error) {
-            console.error(error);
+        } catch {
 
             selectionList.innerHTML =
                 '<div class="error-message show">Failed to load data.</div>';
@@ -471,8 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 showPopupMessage(result.message, 'error')
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
 
             showPopupMessage('Something went wrong', 'error')
         }
@@ -521,8 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 selectionStatusBadge.style.display = "flex";
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
 
             showPopupMessage('Failed to load offer data', 'error')
 
@@ -586,10 +583,9 @@ function setupDeleteButtons() {
                 } else {
                     showPopupMessage(result.message, 'error')
                 }
-            } catch (error) {
-                console.error(error);
+            } catch {
 
-                showPopupMessage(`Failed to delete offer` , `error`)
+                showPopupMessage(`Failed to delete offer`, `error`)
             }
         });
     });

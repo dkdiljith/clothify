@@ -12,11 +12,8 @@ const fs = require('fs');
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
-//pagination
-const adminPaginationFactory = require(`../utils/pagination`);
-
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +89,6 @@ exports.addProducts = async (req, res) => {
 
         upload(req, res, async (err) => {
             if (err) {
-                console.error("Multer Error:", err);
                 return res.status(500).json({
                     success: false,
                     error: err.message
@@ -366,8 +362,7 @@ exports.addProducts = async (req, res) => {
                 }
                 );
 
-            } catch (error) {
-                console.error("Add Product Error:", error);
+            } catch {
                 return res.status(500).json({
                     success: false,
                     error: "Something went wrong while adding the product."
@@ -376,7 +371,6 @@ exports.addProducts = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Outer Add Product Error:", err);
         return res.status(500).json({
             success: false,
             error: err.message
@@ -399,11 +393,6 @@ exports.updateProduct = async (req, res) => {
         upload(req, res, async (err) => {
 
             if (err) {
-
-                console.error(
-                    "Multer Error:",
-                    err
-                );
 
                 return res.status(500).json({
                     success: false,
@@ -767,11 +756,7 @@ exports.updateProduct = async (req, res) => {
                         (err) => {
 
                             if (err) {
-
-                                console.error(
-                                    "Image Delete Error:",
-                                    err
-                                );
+                                showPopupMessage(err.message, "error")
                             }
                         }
                     );
@@ -924,12 +909,7 @@ exports.updateProduct = async (req, res) => {
                     "/admin/products"
                 );
 
-            } catch (error) {
-
-                console.error(
-                    "Update Product Error:",
-                    error
-                );
+            } catch {
 
                 return res.status(500).json({
                     success: false,
@@ -939,12 +919,7 @@ exports.updateProduct = async (req, res) => {
             }
         });
 
-    } catch (err) {
-
-        console.error(
-            "Outer Update Product Error:",
-            err
-        );
+    } catch(err) {
 
         return res.status(500).json({
             success: false,
@@ -1029,8 +1004,7 @@ exports.showProducts = async (req, res) => {
                 serialNumberStart: skip,
             },
         });
-    } catch (error) {
-        console.error("Error in showProducts:", error);
+    } catch {
         return res
             .status(500)
             .render("error", { message: "Failed to load products" });
@@ -1101,8 +1075,7 @@ exports.singleProductPage = async (req, res) => {
             isInCart
         });
     }
-    catch (err) {
-        console.error("Error fetching product:", err);
+    catch {
         return res.status(500).render("error", {
             message: "Server Error"
         });
@@ -1141,7 +1114,7 @@ exports.blockProduct = async (req, res) => {
             message: 'success',
         });
 
-    } catch (error) {
+    } catch{
         res.redirect('back');
     }
 };
@@ -1267,7 +1240,7 @@ exports.applyOffer = async (req, res) => {
             detail.offerPrice = 0;
             detail.offerLocked = false;
 
-            let newPrice = originalPrice;
+            let newPrice 
 
             if (offer.discountType === "percentage") {
                 newPrice =
@@ -1306,8 +1279,7 @@ exports.applyOffer = async (req, res) => {
             message: "Offer applied successfully with manual override."
         });
 
-    } catch (error) {
-        console.log("applyOffer failed:", error.message);
+    } catch {
 
         return res.status(500).json({
             success: false,
@@ -1346,8 +1318,7 @@ exports.autoPricing = async (req, res) => {
             message: "Automatic pricing enabled successfully."
         });
 
-    } catch (error) {
-        console.log("product autoPricing failed:", error.message);
+    } catch {
 
         return res.status(500).json({
             success: false,

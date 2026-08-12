@@ -64,8 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
                 showPopupMessage(data.message || "Operation failed", "error");
             }
-            } catch (error) {
-                console.error("Request failed:", error);
+            } catch  {
                 showPopupMessage("Something went wrong. Please try again.", "error");
             }
         });
@@ -144,8 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 showPopupMessage(data.message || "Failed to remove item", "error");
             }
-        } catch (error) {
-            console.error("Request failed:", error);
+        } catch  {
             showPopupMessage("Failed to remove item. Please try again.", "error");
         }
     });
@@ -252,8 +250,7 @@ async function applyCoupon(couponId) {
         } else {
             showPopupMessage(data.message || 'Failed to apply coupon', 'error');
         }
-    } catch (error) {
-        console.error('Error applying coupon:', error);
+    } catch  {
         showPopupMessage('Failed to apply coupon. Please try again.', 'error');
     }
 }
@@ -277,8 +274,7 @@ async function removeCoupon() {
         } else {
             showPopupMessage(data.message || 'Failed to remove coupon', 'error');
         }
-    } catch (error) {
-        console.error('Error removing coupon:', error);
+    } catch {
         showPopupMessage('Failed to remove coupon. Please try again.', 'error');
     }
 }

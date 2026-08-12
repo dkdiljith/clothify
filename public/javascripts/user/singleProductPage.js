@@ -1,18 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Global variables
   let selectedSize = null;
-  let selectedQuantity = 1;
-  let currentImageIndex = 0;
 
   // Frequently used DOM elements (global)
   const quantityInput = document.getElementById("quantity");
   const addToWishlistButtons = document.querySelectorAll(".add-to-wishlist");
   const addToCartButton = document.querySelector(".btn-add-to-cart");
   const buyNowButton = document.getElementById("buy-now-btn");
-  const selectedPriceEl = document.getElementById("selected-price");
-  const originalPriceEl = document.getElementById("original-price");
-  const selectedStockEl = document.getElementById("selected-stock");
-  const cartCountEl = document.getElementById("cart-count");
+
 
   const galleryContainer = document.querySelector(".thumbnail-gallery");
   const mainImg = document.getElementById("main-image");
@@ -93,17 +88,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  // Reusable helper function to fetch product-related data
-  function getCartDataFromElement(element) {
-    return {
-      productId: element.getAttribute("data-product-id"),
-      productDetailsId: element.getAttribute("data-details-id"),
-      price: element.getAttribute("data-price"),
-
-      stock: element.getAttribute("data-quantity"),
-    };
-  }
 
   // Update Price and Stock when a size option is clicked
   function updatePriceAndStock(element) {
@@ -186,8 +170,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update global state variables if your script uses them
     if (typeof selectedSize !== "undefined") selectedSize = size;
     if (typeof quantityInput !== "undefined") quantityInput.value = 1;
-
-    console.log("Size Selected. Index:", variationIndex, "Stock:", stock);
   }
 
   // Adjust quantity
@@ -197,22 +179,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (newQuantity > 10) newQuantity = 10;
 
     quantityInput.value = newQuantity;
-    selectedQuantity = newQuantity;
   }
 
   // Add to Cart function
   async function addToCart() {
     const productId = addToCartButton.getAttribute("data-product-id");
-    const detailsId = addToCartButton.getAttribute("data-details-id");
     const variationIndex = addToCartButton.getAttribute("data-variation-index");
     const quantity = parseInt(quantityInput.value, 10) || 1;
-
-    console.log("Attempting to add to cart with:", {
-      productId,
-      detailsId,
-      variationIndex,
-      quantity,
-    });
 
     if (!productId || !variationIndex) {
       showValidationError();
@@ -238,8 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         showPopupMessage(data.message || "Action restricted", "error");
       }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
+    } catch {
       showPopupMessage("Login First :)", "error");
     }
   }
@@ -297,8 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ClothifyCounterManager.update("wishlist", "increment");
       }
       showPopupMessage(data.message, "success");
-    } catch (error) {
-      console.error(error);
+    } catch {
       updateWishlistButton(button, wasWishlisted);
       showPopupMessage("Login First :)", "error");
     } finally {

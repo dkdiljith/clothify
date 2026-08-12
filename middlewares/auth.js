@@ -3,7 +3,7 @@ const User = require("../models/userSchema");
 const Admin = require(`../models/adminSchema`)
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //=======================================================================================================//
 
@@ -28,8 +28,7 @@ exports.userAuth = async (req, res, next) => {
     }
     req.session.user.showWelcomeModal = false;
     next();
-  } catch (error) {
-    console.error("User Auth Error:", error);
+  } catch {
     res.status(500).send("Internal Server Error");
   }
 };
@@ -58,8 +57,7 @@ exports.adminAuth = async (req, res, next) => {
 
 
         next();
-    } catch (error) {
-        console.error("Admin Auth Error:", error);
+    } catch {
         res.status(500).send("Internal Server Error");
     }
 };

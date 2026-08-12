@@ -15,7 +15,7 @@ async function loadHeaderBadges(req, res, next) {
         }
 
         next();
-    } catch (error) {
+    } catch {
 
         if (res.locals.user) {
             res.locals.user.cartCount = 0;

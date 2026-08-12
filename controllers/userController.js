@@ -1,6 +1,5 @@
 const User = require("../models/userSchema");
 const Product = require(`../models/productSchema`)
-const Wallet = require(`../models/walletSchema`)
 const Settings = require(`../models/settingSchema`)
 const Wishlist = require(`../models/wishListSchema`)
 const Otp = require(`../models/otpSchema`)
@@ -9,15 +8,14 @@ const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
-//pagination
-const adminPaginationFactory = require(`../utils/pagination`);
 
 //nodemailer
 const verificationEmailSend = require(`../services/nodemailer`).verificationEmailSend
 const forgotPasswordEmailSend = require(`../services/nodemailer`).passwordResetEmailSend
+const sendPasswordChangedEmail = require(`../services/nodemailer`).sendPasswordChangedEmail
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //////////////wallet cretaion/////////////////////
 const createWallet = require(`../controllers/walletController`).createWallet
@@ -30,12 +28,8 @@ const createReferral = require(`../controllers/referralController`).createReferr
 
 //secure password
 const securePassword = async (password) => {
-  try {
-    const passwordHash = await bcrypt.hash(password, 10);
-    return passwordHash;
-  } catch (err) {
-    console.log(err);
-  }
+  const passwordHash = await bcrypt.hash(password, 10);
+  return passwordHash;
 };
 
 
@@ -147,8 +141,8 @@ exports.homeRender = async (req, res) => {
       showWelcomeModal: showModal,
       referralSettings,
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
+    res.redirect(`/user/home`)
   }
 };
 
@@ -245,8 +239,7 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({ success: true, message: "Login successful" });
 
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
@@ -343,8 +336,7 @@ exports.register = async (req, res) => {
     };
     // Render Verification Page
     return res.redirect("/user/emailverification");
-  } catch (error) {
-    console.error("Registration Error:", error);
+  } catch {
     return res.render("user/register", { message: "Something went wrong. Please try again.", plain_body: true });
   }
 };
@@ -455,8 +447,7 @@ exports.resendEmailVerification = async (req, res) => {
       verificationTimer: expiresAt.toISOString(),
       resendTimer: resendAvailableAt.toISOString()
     });
-  } catch (error) {
-    console.error("Resend Email Verification:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       error: "Something went wrong. Please try again."
@@ -610,9 +601,8 @@ exports.emailVerification = async (req, res) => {
       success: true,
       message: "Email verified successfully.",
     });
-  } catch (error) {
+  } catch {
     await session.abortTransaction();
-    console.error("Email Verification Error:", error);
     delete req.session.unknown_user;
     return res.status(500).json({
       success: false,
@@ -723,8 +713,7 @@ exports.forgetPassword = async (req, res) => {
       verificationTimer: expiresAt.toISOString(),
       resendTimer: resendAvailableAt.toISOString(),
     });
-  } catch (error) {
-    console.error("Forget Password Error:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       error: "Something went wrong. Please try again.",
@@ -795,8 +784,7 @@ exports.resetPasswordRender = async (req, res) => {
     return res.render("user/resetPassword", {
       plain_body: true,
     });
-  } catch (error) {
-    console.error("Reset Password Render Error:", error);
+  } catch {
     delete req.session.forgot_password;
     return res.redirect("/user/forgetPassword?priority=true&&error=serverError");
   }
@@ -881,14 +869,13 @@ exports.resetPassword = async (req, res) => {
     //  Cleanup Session
     delete req.session.forgot_password;
     //  Send Notification
-    // await sendPasswordChangedEmail(user.email);
+    await sendPasswordChangedEmail(user.email);
     //  Success
     return res.status(200).json({
       success: true,
       message: "Password changed successfully.",
     });
-  } catch (error) {
-    console.error("Reset Password Error:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       error: "Something went wrong. Please try again.",
@@ -967,8 +954,7 @@ exports.showUsers = async (req, res) => {
         serialNumberStart: skip
       }
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.render("admin/usersList", {
       admin: true,
       user: [],
@@ -1007,8 +993,7 @@ exports.blockUser = async (req, res) => {
 
     const referer = req.get('Referer') || req.get('referrer') || '/admin/users';
     return res.redirect(referer);
-  } catch (error) {
-    console.error("Error in blocking user:", error);
+  } catch {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -1034,8 +1019,7 @@ exports.verifyPassword = async (req, res) => {
       message: 'Password Verified Successfully'
     });
 
-  } catch (error) {
-    console.log(error)
+  } catch {
     return res.status(500).json({ message: "Password is Not Verified" });
   }
 }
@@ -1066,7 +1050,6 @@ exports.verifyEmail = async (req, res) => {
         message: "OTP Resend Limit Exceeded, Try again Tomorrow"
       });
     }
-    const user = await User.findById(userId).lean()
     const anyone = await User.findOne({ email: validatedEmail }).lean()
     if (anyone) {
       return res.status(409).json({
@@ -1103,14 +1086,13 @@ exports.verifyEmail = async (req, res) => {
       await verificationDocument.save();
     }
 
-    const emailSend = await verificationEmailSend(validatedEmail, otp);
+    await verificationEmailSend(validatedEmail, otp);
     return res.status(200).json({
       success: true,
       message: 'Verification code sent to your email inbox successfully.'
     });
 
-  } catch (error) {
-    console.log(error)
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Email is not Verified"
@@ -1190,8 +1172,7 @@ exports.resetEmail = async (req, res) => {
     // 8. Success Response
     return res.status(200).json({ success: true, message: "Email updated successfully!" });
 
-  } catch (error) {
-    console.error("Reset Email Error:", error);
+  } catch {
     return res.status(500).json({ success: false, message: "Email reset failed due to a server error." });
   }
 };

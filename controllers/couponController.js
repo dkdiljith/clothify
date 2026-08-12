@@ -8,11 +8,8 @@ const recalculateCartSummary = require(`../services/recalculateCartSummary`)
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
-//pagination
-const adminPaginationFactory = require(`../utils/pagination`);
-
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 exports.couponRender = async (req, res) => {
@@ -71,8 +68,7 @@ exports.couponRender = async (req, res) => {
                 serialNumberStart: skip,
             },
         });
-    } catch (error) {
-        console.error("Error fetching coupons:", error);
+    } catch {
         return res.render("admin/coupon", {
             admin: true,
             coupon: [],
@@ -211,8 +207,7 @@ exports.createCoupon = async (req, res) => {
             message: "Coupon created successfully",
             coupon: result,
         });
-    } catch (err) {
-        console.error("Error creating coupon:", err);
+    } catch {
         return res.status(500).json({
             success: false,
             type: "server_error",
@@ -235,131 +230,130 @@ exports.createCoupon = async (req, res) => {
 
 
 exports.couponEdit = async (req, res) => {
-  try {
-    const couponId = req.params.couponId;
-    const {
-      couponCode,
-      discountType,
-      discountValue,
-      minimumPurchaseAmount,
-      maximumPurchaseAmount,
-      startDate,
-      endDate,
-    } = req.body;
+    try {
+        const couponId = req.params.couponId;
+        const {
+            couponCode,
+            discountType,
+            discountValue,
+            minimumPurchaseAmount,
+            maximumPurchaseAmount,
+            startDate,
+            endDate,
+        } = req.body;
 
-    // 1. INPUT VALIDATION
-    if (
-      !couponCode ||
-      !discountType ||
-      !discountValue ||
-      !startDate ||
-      !endDate
-    ) {
-      return res.status(400).json({
-        success: false,
-        type: "validation_error",
-        message: "Missing required fields: couponCode, discountType, discountValue, startDate, and endDate are required.",
-      });
+        // 1. INPUT VALIDATION
+        if (
+            !couponCode ||
+            !discountType ||
+            !discountValue ||
+            !startDate ||
+            !endDate
+        ) {
+            return res.status(400).json({
+                success: false,
+                type: "validation_error",
+                message: "Missing required fields: couponCode, discountType, discountValue, startDate, and endDate are required.",
+            });
+        }
+
+        // 2. LOGICAL NUMERIC VALIDATION
+        const minAmt = Number(minimumPurchaseAmount) || 0;
+        const maxAmt = Number(maximumPurchaseAmount) || 0;
+
+        if (maxAmt > 0 && minAmt > maxAmt) {
+            return res.status(400).json({
+                success: false,
+                type: "validation_error",
+                message: "Maximum purchase amount must be greater than or equal to minimum purchase amount.",
+            });
+        }
+
+        if (Number(discountValue) <= 0) {
+            return res.status(400).json({
+                success: false,
+                type: "validation_error",
+                message: "Discount value must be greater than 0.",
+            });
+        }
+
+        // 3. DATE VALIDATION
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({
+                success: false,
+                type: "validation_error",
+                message: "Invalid date format provided.",
+            });
+        }
+
+        if (start >= end) {
+            return res.status(400).json({
+                success: false,
+                type: "validation_error",
+                message: "End date must be after the start date.",
+            });
+        }
+
+        // 4. DUPLICATE CHECK (Excluding current coupon)
+        // Prevents renaming to another existing coupon's code (case-insensitive)
+        const existingCoupon = await Coupon.findOne({
+            couponCode: { $regex: new RegExp(`^${couponCode}$`, "i") },
+            _id: { $ne: couponId }, // Exclude the coupon currently being edited
+        });
+
+        if (existingCoupon) {
+            return res.status(409).json({
+                success: false,
+                type: "duplicate_error",
+                message: `Coupon code '${couponCode}' already exists on another coupon.`,
+            });
+        }
+
+        // 5. FETCH AND UPDATE DATABASE RECORD
+        const coupon = await Coupon.findById(couponId);
+        if (!coupon) {
+            return res.status(404).json({
+                success: false,
+                type: "not_found_error",
+                message: "Coupon not found.",
+            });
+        }
+
+        // Assign normalized properties
+        coupon.couponCode = couponCode.toUpperCase().trim();
+        coupon.discountType = discountType;
+        coupon.discountValue = Number(discountValue);
+        coupon.minimumPurchaseAmount = minAmt;
+        coupon.maximumPurchaseAmount = maxAmt;
+        coupon.startDate = start;
+        coupon.endDate = end;
+
+        // Maintain the active status logic based on dates if needed
+        if (end >= new Date()) {
+            coupon.isActive = true;
+        }
+
+        const result = await coupon.save();
+
+        // Trigger background utility function
+        await pricingExpiryUpdate();
+
+        return res.status(200).json({
+            success: true,
+            type: "success",
+            message: "Coupon updated successfully",
+            coupon: result,
+        });
+    } catch {
+        return res.status(500).json({
+            success: false,
+            type: "server_error",
+            message: "Internal server error occurred while updating the coupon.",
+        });
     }
-
-    // 2. LOGICAL NUMERIC VALIDATION
-    const minAmt = Number(minimumPurchaseAmount) || 0;
-    const maxAmt = Number(maximumPurchaseAmount) || 0;
-
-    if (maxAmt > 0 && minAmt > maxAmt) {
-      return res.status(400).json({
-        success: false,
-        type: "validation_error",
-        message: "Maximum purchase amount must be greater than or equal to minimum purchase amount.",
-      });
-    }
-
-    if (Number(discountValue) <= 0) {
-      return res.status(400).json({
-        success: false,
-        type: "validation_error",
-        message: "Discount value must be greater than 0.",
-      });
-    }
-
-    // 3. DATE VALIDATION
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return res.status(400).json({
-        success: false,
-        type: "validation_error",
-        message: "Invalid date format provided.",
-      });
-    }
-
-    if (start >= end) {
-      return res.status(400).json({
-        success: false,
-        type: "validation_error",
-        message: "End date must be after the start date.",
-      });
-    }
-
-    // 4. DUPLICATE CHECK (Excluding current coupon)
-    // Prevents renaming to another existing coupon's code (case-insensitive)
-    const existingCoupon = await Coupon.findOne({
-      couponCode: { $regex: new RegExp(`^${couponCode}$`, "i") },
-      _id: { $ne: couponId }, // Exclude the coupon currently being edited
-    });
-
-    if (existingCoupon) {
-      return res.status(409).json({
-        success: false,
-        type: "duplicate_error",
-        message: `Coupon code '${couponCode}' already exists on another coupon.`,
-      });
-    }
-
-    // 5. FETCH AND UPDATE DATABASE RECORD
-    const coupon = await Coupon.findById(couponId);
-    if (!coupon) {
-      return res.status(404).json({
-        success: false,
-        type: "not_found_error",
-        message: "Coupon not found.",
-      });
-    }
-
-    // Assign normalized properties
-    coupon.couponCode = couponCode.toUpperCase().trim();
-    coupon.discountType = discountType;
-    coupon.discountValue = Number(discountValue);
-    coupon.minimumPurchaseAmount = minAmt;
-    coupon.maximumPurchaseAmount = maxAmt;
-    coupon.startDate = start;
-    coupon.endDate = end;
-
-    // Maintain the active status logic based on dates if needed
-    if (end >= new Date()) {
-      coupon.isActive = true;
-    }
-
-    const result = await coupon.save();
-
-    // Trigger background utility function
-    await pricingExpiryUpdate();
-
-    return res.status(200).json({
-      success: true,
-      type: "success",
-      message: "Coupon updated successfully",
-      coupon: result,
-    });
-  } catch (err) {
-    console.error("Error updating coupon:", err);
-    return res.status(500).json({
-      success: false,
-      type: "server_error",
-      message: "Internal server error occurred while updating the coupon.",
-    });
-  }
 };
 
 
@@ -382,7 +376,6 @@ exports.couponDelete = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Coupon not found' });
         }
     } catch (err) {
-        console.error('Error deleting coupon:', err);
         return res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
     }
 }
@@ -425,8 +418,7 @@ exports.applyCoupon = async (req, res) => {
         await recalculateCartSummary(userId);
 
         return res.json({ success: true });
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.json({ success: false, message: 'Error applying coupon' });
     }
 }
@@ -443,8 +435,7 @@ exports.removeCoupon = async (req, res) => {
         await cart.save();
 
         return res.json({ success: true });
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.json({ success: false, message: 'Error removing coupon' });
     }
 }

@@ -120,11 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             /* ==================================================
                REQUEST ERROR
             ================================================== */
-            catch (error) {
-                console.error(
-                    'Wishlist Error:',
-                    error
-                );
+            catch {
                 // Restore previous UI state
                 setWishlistButtonState(
                     button,

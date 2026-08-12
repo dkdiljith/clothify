@@ -15,12 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function toggleDeleteButton() {
-        const confirmCheckbox = document.getElementById('confirmDeletion');
-        const deleteButton = document.getElementById('deleteButton');
-        deleteButton.disabled = !confirmCheckbox.checked;
-    }
-
     // Declared as an async function to use await on our custom confirmation modal
     async function confirmAccountDeletion() {
         // 1. Replaced native confirm() with custom center 'danger' modal window
@@ -70,8 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteButton.disabled = false;
             }
         })
-        .catch(async (error) => {
-            console.error('Error:', error);
+        .catch(async () => {
             // 4. Replaced native catch network error alert with custom center 'danger' modal window
             await showCustomConfirm(
                 "System Error",

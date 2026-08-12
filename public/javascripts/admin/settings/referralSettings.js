@@ -343,11 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       let result = {};
-      try {
-        result = await response.json();
-      } catch (err) {
-        console.error(err);
-      }
+      result = await response.json();
 
       // Success
       if (response.ok) {
@@ -399,9 +395,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "error",
         );
       }
-    } catch (error) {
+    } catch {
       // Network Error
-      console.error(error);
       showPopupMessage("Network error occurred. Please try again.", "error");
     } finally {
       // Restore Button

@@ -64,8 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         showPopupMessage(data.message || 'Failed to load address', 'error');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch(() => {
                     showPopupMessage('Failed to load address details', 'error');
                 });
         });
@@ -212,8 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showPopupMessage(data.message || 'An error occurred', 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .catch(() => {
                 showPopupMessage('Failed to save address. Please try again.', 'error');
             });
     }
@@ -268,8 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             showPopupMessage(data.message || 'Failed to remove address', 'error');
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
+                    .catch(() => {
                         showPopupMessage('Failed to remove address. Please try again.', 'error');
                     });
             }

@@ -6,7 +6,7 @@ const { verifyProductVariation } = require('../services/productHelper');
 const addToCart = require(`../controllers/cartController`).addToCart
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +75,7 @@ exports.wishlistRender = async (req, res) => {
             }
         });
     }
-    catch (error) {
-        console.error("Error rendering wishlist:", error);
+    catch {
         return res.status(500).render("user/wishlist", {
             product: [],
             pagination: {
@@ -128,8 +127,7 @@ exports.addToWishlist = async (req, res) => {
             success: true, 
             message: `Item Added to wishlist!` 
         });
-    } catch (error) {
-        console.error("Error adding to wishlist:", error);
+    } catch {
         return res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
     }
 };
@@ -144,7 +142,6 @@ exports.removeFromWishlist = async (req, res) => {
     try {
         const userId = res.locals.user._id
         const productId = req.params.id;
-        console.log(productId, "this is productId")
 
         const wishlist = await Wishlist.findOne({ userId });
 
@@ -160,8 +157,7 @@ exports.removeFromWishlist = async (req, res) => {
 
         return res.json({ success: true, message: 'Item removed from wishlist' });
 
-    } catch (error) {
-        console.error('Wishlist remove error:', error);
+    } catch {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
@@ -204,8 +200,7 @@ exports.addToCartFromWishlist = async (req, res) => {
         req.params.variationIndex = variationIndex;
         req.params.quantity = 1;
         return addToCart(req, res);
-    } catch (err) {
-        console.error(err);
+    } catch {
         return res.status(500).json({
             success: false,
             message: "Server Error",

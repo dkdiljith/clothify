@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer'); //for pdf generation
 const ExcelJS = require('exceljs'); //for excel generation
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,8 +90,7 @@ exports.salesReportRender = async (req, res) => {
             endDate: endDate || "",
         });
 
-    } catch (error) {
-        console.log("Sales report error:", error);
+    } catch {
         return res.render("admin/salesReport", {
             admin: true,
             orders: [],
@@ -379,8 +378,7 @@ exports.downloadSalesReportPdf = async (req, res) => {
         });
         return res.end(pdfBuffer);
 
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.status(500).send("Failed to generate PDF");
     }
 };
@@ -583,8 +581,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
         );
         await workbook.xlsx.write(res);
         res.end();
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.status(500).send("Error generating report");
     }
 };
@@ -709,8 +706,7 @@ exports.downloadSalesReportCsv = async (req, res) => {
         );
         await workbook.csv.write(res);
         res.end();
-    } catch (error) {
-        console.error(error);
+    } catch {
         res.status(500).send("Error generating CSV report");
     }
 };

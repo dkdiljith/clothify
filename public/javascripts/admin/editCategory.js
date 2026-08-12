@@ -1,5 +1,3 @@
-let filterOffers;
-
 document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = document.querySelectorAll(".btn-delete");
     const form = document.querySelector(".form");
@@ -18,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let availableOffers = [];
     let selectedOfferId = null;
-    let selectedCategoryId = null;
 
     // delete subcategory
     deleteButtons.forEach(button => {
@@ -96,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function resetModal() {
         selectedOfferId = null;
-        selectedCategoryId = null;
 
         selectedOfferIdInput.value = "";
         selectedCategoryIdInput.value = "";
@@ -129,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Category not found.");
             }
 
-            selectedCategoryId = data.category._id;
             selectedCategoryIdInput.value = data.category._id;
 
             availableOffers = data.offers || [];
@@ -182,21 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
             offerListContainer.appendChild(card);
         });
     }
-
-    filterOffers = function () {
-        const term = offerSearchInput.value.toLowerCase().trim();
-
-        const filtered = availableOffers.filter(offer => {
-            const text =
-                String(offer.offerCode || "") + " " +
-                String(offer.discountType || "") + " " +
-                String(offer.discountValue || "");
-
-            return text.toLowerCase().includes(term);
-        });
-
-        displayOffers(filtered);
-    };
 
     // open modal buttons
     document.querySelectorAll(".btn-apply-offer").forEach(button => {

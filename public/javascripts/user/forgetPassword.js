@@ -89,8 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         location.reload();
       }, 3000);
-    } catch (error) {
-      console.error(error);
+    } catch{
       showError("Unable to connect to the server.");
     } finally {
       requestInProgress = false;

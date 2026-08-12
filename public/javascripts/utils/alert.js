@@ -59,3 +59,11 @@ function showCustomConfirm(title, message, type = "danger") {
     backdrop.querySelector(".modal-btn-confirm").addEventListener("click", () => closeModal(true));
   });
 }
+
+
+
+
+// Safe assignment to the browser global scope
+if (typeof window !== "undefined") {
+  window.showCustomConfirm = showCustomConfirm;
+}

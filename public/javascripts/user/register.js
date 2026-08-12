@@ -12,9 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordError = document.getElementById("passwordError");
   const confirmPasswordError = document.getElementById("confirmPasswordError");
   const togglePassword = document.getElementById("togglePassword");
-  const toggleConfirmPassword = document.getElementById(
-    "toggleConfirmPassword",
-  );
   /* =====================================================
        Helpers
     ===================================================== */
@@ -182,5 +179,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   togglePasswordVisibility(togglePassword, password);
-  // togglePasswordVisibility(toggleConfirmPassword, confirmPassword);
 });

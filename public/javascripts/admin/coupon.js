@@ -49,13 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    const createNotificationContainer = () => {
-        const container = document.createElement('div');
-        container.id = 'notification-container';
-        document.body.appendChild(container);
-        return container;
-    };
-
     // ✅ Validation functions
     const showError = (input, message) => {
         const errorElement = input.nextElementSibling;
@@ -280,8 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger Select2 update if using it
             $('#discountType').trigger('change');
 
-        } catch (error) {
-            console.error('Error loading coupon:', error);
+        } catch {
             showPopupMessage('Failed to load coupon data', 'error')
             closeModal();
         }
@@ -319,8 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showPopupMessage(result.message, 'error')
             }
 
-        } catch (error) {
-            console.error('Error:', error);
+        } catch {
             showPopupMessage('Something went wrong!', 'error')
         }
     });
@@ -351,8 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             showPopupMessage(result.message, 'error')
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
+                    } catch  {
                         showPopupMessage('Failed to delete the coupon.', 'error')
                     }
                 }

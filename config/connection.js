@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const url = process.env.DB_URL;
+const logger = require('../config/logger');
 
 
 module.exports.connect = function (done){
@@ -9,7 +10,7 @@ module.exports.connect = function (done){
         done()
     })
     .catch((err)=>{
-        console.log(err)
+        logger.error(err)
         done(err)
     })
 }

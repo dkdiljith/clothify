@@ -88,8 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         userControllerErrorMessage.textContent = data.error || "Something went wrong!";
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       userControllerErrorMessage.textContent = "An error occurred. Please try again.";
     }
   });
@@ -103,19 +102,4 @@ document.addEventListener("DOMContentLoaded", function () {
     togglePassword.classList.toggle("fa-eye-slash");
   });
 
-  // Google Sign In
-  function onSignIn(googleUser) {
-    const id_token = googleUser.getAuthResponse().id_token;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/google-sign-in');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        console.log('Logged in successfully');
-        window.location.href = "/dashboard"; // Redirect after Google login
-      }
-    };
-    xhr.send(JSON.stringify({ token: id_token }));
-  }
 });

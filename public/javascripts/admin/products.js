@@ -1,5 +1,3 @@
-let filterOffers;
-
 document.addEventListener("DOMContentLoaded", () => {
     const mainOverlay = document.getElementById("mainOverlay");
     const closeFormBtn = document.getElementById("closeFormBtn");
@@ -7,18 +5,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const offerListContainer = document.getElementById("offerListContainer");
     const selectedOfferIdInput = document.getElementById("selectedOfferIdInput");
     const selectedProductIdInput = document.getElementById("selectedProductIdInput");
-    const modalTitle = document.getElementById("formModalTitle");
     const offerSearchInput = document.getElementById("offerSearch");
     const autoPricingBtn = document.getElementById("autoPricingBtn");
 
     let availableOffers = [];
     let selectedOfferId = null;
-    let selectedProductId = null;
 
 
     function resetModal() {
         selectedOfferId = null;
-        selectedProductId = null;
 
         selectedOfferIdInput.value = "";
         selectedProductIdInput.value = "";
@@ -90,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Product not found.");
             }
 
-            selectedProductId = data.product._id;
             selectedProductIdInput.value = data.product._id;
 
             availableOffers = data.offers || [];
@@ -165,22 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
-
-    filterOffers = function () {
-        const term = offerSearchInput.value.toLowerCase().trim();
-
-        const filtered = availableOffers.filter(offer => {
-            const text =
-                String(offer.offerCode || "") + " " +
-                String(offer.discountType || "") + " " +
-                String(offer.discountValue || "");
-
-            return text.toLowerCase().includes(term);
-        });
-
-        displayOffers(filtered);
-    };
 
     // open modal buttons
     document.querySelectorAll(".btn-apply-offer").forEach(button => {

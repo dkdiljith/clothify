@@ -2,7 +2,7 @@ const Product = require("../models/productSchema");
 const Wishlist = require(`../models/wishListSchema`)
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,9 +127,7 @@ exports.collections = async (req, res) => {
       totalProducts
     });
 
-  } catch (error) {
-
-    console.error("collections failed:", error.message);
+  } catch {
 
     return res.status(500).render("error", {
       message: "Unable to load collections"

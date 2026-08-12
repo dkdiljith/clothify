@@ -78,8 +78,6 @@ module.exports = {
         const product = productDetails.find(p => p._id.toString() === item.productId.toString());
         if (product && product.details && product.details[item.variationIndex]) {
           subtotal += item.quantity * product.details[item.variationIndex].price;
-        } else {
-          console.error("Product or details not found for item:", item);
         }
       });
     }

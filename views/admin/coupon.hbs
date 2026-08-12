@@ -1,6 +1,10 @@
 {{#section 'head'}}
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/coupon.css">
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
 {{/section}}
+
+
 <div class="coupon-management-layout">
     <!-- Coupons List -->
     <div class="coupons-list-container">
@@ -118,7 +122,7 @@
             <a href="/admin/coupons" class="btn btn-primary">Refresh</a>
             {{/unless}}
             {{/unless}}
-            
+
         </div>
         {{/if}}
         {{#if (gt pagination.totalPages 1)}}
@@ -227,6 +231,13 @@
 </div>
 {{!-- Edit Coupon Essential --}}
 <input type="hidden" id="editCouponId" value="">
+
+
 {{#section 'scripts'}}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script src="/javascripts/admin/coupon.js" defer></script>
 {{/section}}

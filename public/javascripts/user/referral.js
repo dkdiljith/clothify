@@ -147,8 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else {
         showError(result.message || "Unable to redeem coins.");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       showPopupMessage("Network error occurred.", "error");
     } finally {
       submitBtn.disabled = false;

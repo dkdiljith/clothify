@@ -6,11 +6,9 @@ const Category = require(`../models/categorySchema`)
 const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
-//pagination
-const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,8 +86,7 @@ exports.offerRender = async (req, res) => {
                 serialNumberStart: skip
             }
         });
-    } catch (error) {
-        console.error("Error fetching offers:", error);
+    } catch {
         return res.render("admin/offer", {
             admin: true,
             offer: [],
@@ -269,7 +266,6 @@ exports.createOffer = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Create Offer Error:", err);
 
         return res.status(500).json({
             success: false,
@@ -530,7 +526,6 @@ exports.editOffer = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Edit Offer Error:", err);
 
         return res.status(500).json({
             success: false,
@@ -548,7 +543,6 @@ exports.editOffer = async (req, res) => {
 exports.offerDelete = async (req, res) => {
     try {
         const { offerId } = req.params;
-        console.log("this is offerId :", offerId)
 
         // delete the offer
         const deletedOffer = await Offer.findByIdAndDelete(offerId);
@@ -569,7 +563,6 @@ exports.offerDelete = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('Error deleting offer:', err);
         return res.status(500).json({
             success: false,
             message: 'Internal server error',

@@ -1,5 +1,4 @@
 const Cart = require(`../models/cartSchema`);
-const Product = require(`../models/productSchema`);
 const Address = require(`../models/addressSchema`)
 const Coupon = require(`../models/couponSchema`)
 
@@ -9,7 +8,7 @@ const recalculateCartSummary = require(`../services/recalculateCartSummary`)
 const { verifyProductVariation } = require('../services/productHelper');
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 
@@ -97,8 +96,7 @@ exports.cartRender = async (req, res) => {
       message: res.locals.message || null
     });
 
-  } catch (error) {
-    console.error("Cart Render Error:", error);
+  } catch {
     return res.status(500).send('Cart Render Error');
   }
 };
@@ -212,8 +210,7 @@ exports.addToCart = async (req, res) => {
     });
 
 
-  } catch (error) {
-    console.error("Cart Update Error:", error);
+  } catch {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -263,8 +260,7 @@ exports.deleteCart = async (req, res) => {
       totalAmount: updatedCart.totalAmount
     });
 
-  } catch (error) {
-    console.error('Delete error:', error);
+  } catch {
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -347,8 +343,7 @@ exports.getAddressInCart = async (req, res) => {
       address: address
     });
 
-  } catch (error) {
-    console.error('Error fetching address page data:', error);
+  } catch {
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -359,24 +354,25 @@ exports.getAddressInCart = async (req, res) => {
 
 
 exports.processPaymentPage = async (req, res) => {
-    try {
-        const { paymentMethod, addressId } = req.body;
+  try {
+    const { paymentMethod, addressId } = req.body;
 
-        if (paymentMethod === 'cod') {
-            const userId = res.locals.user._id;
-            const cart = await Cart.findOne({ userId }).lean();
+    const userId = res.locals.user._id;
+    const cart = await Cart.findOne({ userId }).lean();
 
-            if (cart && cart.totalAmount > 1000) {
-                console.log(`COD limit exceeded by user ${userId}`);
-                
-                return res.redirect(`/user/payment?selectedAddressId=${addressId}&error=cod_limit`);
-            }
-        }
-
-        return res.render("user/paymentProcessing", { method: paymentMethod, addressId });
-
-    } catch (error) {
-        console.error("Error in processPaymentPage:", error);
-        return res.status(500).send("Internal Server Error");
+    if (paymentMethod === 'cod') {
+      if (cart && cart.totalAmount > 1000) {
+        return res.redirect(`/user/payment?selectedAddressId=${addressId}&error=cod_limit`);
+      }
     }
+
+    if (cart && cart.totalAmount >= 25000) {
+      return res.redirect(`/user/payment?selectedAddressId=${addressId}&error=payment_limit`);
+    }
+
+    return res.render("user/paymentProcessing", { method: paymentMethod, addressId });
+
+  } catch {
+    return res.status(500).send("Internal Server Error");
+  }
 };

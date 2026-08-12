@@ -1,5 +1,7 @@
 {{#section 'head'}}
 <link rel="stylesheet" type="text/css" href="/stylesheets/admin/offer.css">
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
 {{/section}}
 
 <div class="coupon-management-layout">
@@ -207,15 +209,15 @@
             </svg>
             <h2>No Offers Found</h2>
             {{#unless query}}
-    {{#unless offerType}}
-        {{#unless discountType}}
+            {{#unless offerType}}
+            {{#unless discountType}}
             {{#unless offerStatus}}
-                <p>There are currently no offers in the system.</p>
-                <a href="/admin/offer" class="btn btn-primary">Refresh</a>
+            <p>There are currently no offers in the system.</p>
+            <a href="/admin/offer" class="btn btn-primary">Refresh</a>
             {{/unless}}
-        {{/unless}}
-    {{/unless}}
-{{/unless}}
+            {{/unless}}
+            {{/unless}}
+            {{/unless}}
         </div>
         {{/if}}
 
@@ -390,5 +392,10 @@
 
 
 {{#section 'scripts'}}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script src="/javascripts/admin/offer.js" defer></script>
 {{/section}}

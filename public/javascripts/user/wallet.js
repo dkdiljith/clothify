@@ -136,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
             rzp.open();
 
         } catch (error) {
-            console.error('Error:', error);
             showPopupMessage(error.message, 'error');
         }
     }

@@ -1,7 +1,7 @@
 const Address = require(`../models/addressSchema`)
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,8 +80,7 @@ exports.addAddress = async (req, res) => {
       address: newAddress
     });
 
-  } catch (error) {
-    console.error('Error adding address:', error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -136,9 +135,7 @@ exports.renderEditForm = async (req, res) => {
       }
     });
 
-  } catch (error) {
-    console.error("Error rendering edit form:", error);
-    console.log("error....................................................")
+  } catch {
     return res.status(500).render('error', { message: 'Failed to load edit form' });
   }
 };
@@ -150,91 +147,90 @@ exports.renderEditForm = async (req, res) => {
 
 
 
-  // Edit existing address
-  exports.editAddress = async (req, res) => {
-    try {
-      const addressId = req.params.id;
-      const userId = res.locals.user._id
-      const {
-        name, phone, zip, streetAddress, landmark,
-        city, state, country, isDefault
-      } = req.body;
+// Edit existing address
+exports.editAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const userId = res.locals.user._id
+    const {
+      name, phone, zip, streetAddress, landmark,
+      city, state, country, isDefault
+    } = req.body;
 
-      // Validate required fields
-      const requiredFields = ['name', 'phone', 'zip', 'streetAddress', 'city', 'state'];
-      const missingFields = requiredFields.filter(field => !req.body[field]);
+    // Validate required fields
+    const requiredFields = ['name', 'phone', 'zip', 'streetAddress', 'city', 'state'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
 
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'All fields are required',
-          missingFields
-        });
-      }
-
-      // Validate phone number
-      if (!/^\d{10}$/.test(phone)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Phone number must be 10 digits'
-        });
-      }
-
-      // Validate zip code
-      if (!/^\d{6}$/.test(zip)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Zip code must be 6 digits'
-        });
-      }
-
-      // Verify address belongs to user
-      const existingAddress = await Address.findOne({ _id: addressId, userId });
-      if (!existingAddress) {
-        return res.status(404).json({
-          success: false,
-          message: 'Address not found'
-        });
-      }
-
-      // If setting as default, update all other addresses
-      if (isDefault) {
-        await Address.updateMany(
-          { userId, _id: { $ne: addressId } },
-          { $set: { isDefault: false } }
-        );
-      }
-
-      const updatedAddress = await Address.findByIdAndUpdate(
-        addressId,
-        {
-          name,
-          phone,
-          zip,
-          streetAddress,
-          landmark: landmark || '',
-          city,
-          state,
-          country: country || 'India',
-          isDefault: isDefault || false
-        },
-        { new: true }
-      );
-
-      return res.json({
-        success: true,
-        message: 'Address updated successfully',
-        address: updatedAddress
-      });
-
-    } catch (error) {
-      console.error('Error editing address:', error);
-      return res.status(500).json({
+    if (missingFields.length > 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Internal server error'
+        message: 'All fields are required',
+        missingFields
       });
     }
-  },
+
+    // Validate phone number
+    if (!/^\d{10}$/.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number must be 10 digits'
+      });
+    }
+
+    // Validate zip code
+    if (!/^\d{6}$/.test(zip)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Zip code must be 6 digits'
+      });
+    }
+
+    // Verify address belongs to user
+    const existingAddress = await Address.findOne({ _id: addressId, userId });
+    if (!existingAddress) {
+      return res.status(404).json({
+        success: false,
+        message: 'Address not found'
+      });
+    }
+
+    // If setting as default, update all other addresses
+    if (isDefault) {
+      await Address.updateMany(
+        { userId, _id: { $ne: addressId } },
+        { $set: { isDefault: false } }
+      );
+    }
+
+    const updatedAddress = await Address.findByIdAndUpdate(
+      addressId,
+      {
+        name,
+        phone,
+        zip,
+        streetAddress,
+        landmark: landmark || '',
+        city,
+        state,
+        country: country || 'India',
+        isDefault: isDefault || false
+      },
+      { new: true }
+    );
+
+    return res.json({
+      success: true,
+      message: 'Address updated successfully',
+      address: updatedAddress
+    });
+
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+},
 
 
 
@@ -272,8 +268,7 @@ exports.renderEditForm = async (req, res) => {
         message: 'Address deleted successfully'
       });
 
-    } catch (error) {
-      console.error('Error deleting address:', error);
+    } catch {
       return res.status(500).json({
         success: false,
         message: 'Failed to delete address'
@@ -281,48 +276,47 @@ exports.renderEditForm = async (req, res) => {
     }
   }
 
-  
 
-  // Set default address
-  exports.setDefaultAddress = async (req, res) => {
-    try {
-      const addressId = req.params.id;
-      const userId = res.locals.user._id
 
-      // Verify address exists and belongs to user
-      const address = await Address.findOne({ _id: addressId, userId });
-      if (!address) {
-        return res.status(404).json({
-          success: false,
-          message: 'Address not found'
-        });
-      }
+// Set default address
+exports.setDefaultAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const userId = res.locals.user._id
 
-      // Update all addresses to not default
-      await Address.updateMany(
-        { userId },
-        { $set: { isDefault: false } }
-      );
-
-      // Set the selected address as default
-      const updatedAddress = await Address.findByIdAndUpdate(
-        addressId,
-        { $set: { isDefault: true } },
-        { new: true }
-      );
-
-      return res.json({
-        success: true,
-        message: 'Default address updated',
-        address: updatedAddress
-      });
-
-    } catch (error) {
-      console.error("Error setting default address:", error);
-      return res.status(500).json({
+    // Verify address exists and belongs to user
+    const address = await Address.findOne({ _id: addressId, userId });
+    if (!address) {
+      return res.status(404).json({
         success: false,
-        message: 'Server error'
+        message: 'Address not found'
       });
     }
+
+    // Update all addresses to not default
+    await Address.updateMany(
+      { userId },
+      { $set: { isDefault: false } }
+    );
+
+    // Set the selected address as default
+    const updatedAddress = await Address.findByIdAndUpdate(
+      addressId,
+      { $set: { isDefault: true } },
+      { new: true }
+    );
+
+    return res.json({
+      success: true,
+      message: 'Default address updated',
+      address: updatedAddress
+    });
+
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
+}
 
