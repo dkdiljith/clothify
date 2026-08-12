@@ -12,26 +12,6 @@ const securePassword = async (password) => {
   return passwordHash;
 };
 
-//phone number validation
-const validatePhoneStartsWithPlus91 = async (phone) => {
-  if (typeof phone !== "string") {
-    throw new Error("Invalid input: phone number must be a string.");
-  }
-
-  phone = phone.trim();
-
-  if (!phone.startsWith("+91")) {
-    if (phone.startsWith("91")) {
-      phone = `+${phone}`;
-    } else if (phone.startsWith("0")) {
-      phone = `+91${phone.slice(1)}`;
-    } else {
-      phone = `+91${phone}`;
-    }
-  }
-
-  return phone;
-};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -89,8 +69,7 @@ exports.login = async (req, res) => {
 
     return res.redirect("/admin/dashboard");
 
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.redirect("/admin?error=serverError");
   }
 };
@@ -158,8 +137,7 @@ exports.register = async (req, res) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
     return res.redirect("/admin/dashboard");
-  } catch (error) {
-    console.error("Admin Register Error:", error);
+  } catch {
     return res.redirect("/admin/register?error=serverError");
   }
 };
