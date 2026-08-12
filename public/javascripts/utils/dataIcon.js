@@ -53,3 +53,9 @@ const ClothifyCounterManager = {
 // usage
 //  ClothifyCounterManager.update('wishlist', 'increment');
 //  ClothifyCounterManager.update('cart', 'set', data.cartCount);
+
+
+
+if (typeof window !== "undefined") {
+  window.ClothifyCounterManager = ClothifyCounterManager;
+}

@@ -1,10 +1,11 @@
 const cron = require("node-cron");
+const logger = require('../config/logger');
 
 const pricingExpiryUpdate = require("../services/pricingExpiry").pricingExpiryUpdate
 const referralCronService = require(`../controllers/referralController`).processPendingReferralsCron
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15,10 +16,10 @@ cron.schedule("*/5 * * * *", async () => {
 
         await pricingExpiryUpdate()
 
-        console.log("Offers,Coupons and Products updated successfully");
+        logger.info("Offers,Coupons and Products updated successfully");
 
     } catch (error) {
-        console.log("scheduler failed:", error.message);
+        logger.error("scheduler failed:", error.message);
     }
 });
 
@@ -26,15 +27,14 @@ cron.schedule("*/5 * * * *", async () => {
 //Referral Status Validation Checker
 cron.schedule("0 * * * *", async () => {
     try {
-        console.log("Running Pending Referral validation checks...");
         const result = await referralCronService();
         if (result.success) {
-            console.log(result.message);
+            logger.info(result.message);
         } else {
-            console.log("Referral scheduler completed with errors:", result.error);
+            logger.error("Referral scheduler completed with errors:", result.error);
         }
     } catch (error) {
-        console.log("Referral scheduler crashed:", error.message);
+        logger.error("Referral scheduler crashed:", error.message);
     }
 });
 

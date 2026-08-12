@@ -4,7 +4,8 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const morgan = require('morgan');
+const logger = require(`./config/logger`) //WINSTON LOGGER
 const exphbs = require('express-handlebars');
 const session = require("express-session")
 
@@ -61,8 +62,16 @@ app.use(session({
 }));
 
 
-// Logger and Middleware
-app.use(logger('dev'));
+// Create a stream pipeline from Morgan to Winston
+const morganStream = {
+  write: (message) => logger.info(message.trim()),
+};
+
+// Choose 'combined' format for detailed production logs, or 'dev' for local testing
+const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+
+
+app.use(morgan(morganFormat, { stream: morganStream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -71,16 +80,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Database connection
 db.connect((err) => {
   if (err) {
-    console.log("Connection Failed")
-    process.exit(1)
+    console.log("Connection Failed");
+    process.exit(1);
   }
-  console.log("Database Successfully Running");
+  logger.info("Database connected successfully");
 
   const { initializeSettings } = require('./controllers/settingController');
   
   initializeSettings()
-    .then(() => console.log("Settings logic finished check."))
-    .catch((err) => console.error("Settings logic failed:", err));
+    .then(() => logger.info("Settings logic finished check"))
+    .catch(() => logger.error("Settings logic failed:"));
 });
 
 

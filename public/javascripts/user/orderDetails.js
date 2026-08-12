@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ==========================================
          ELEMENTS
       ========================================== */
-    const retryForm = document.getElementById("retry-payment-form");
     const invoiceBtn = document.getElementById("download-invoice-button");
     const cancelModal = document.getElementById("cancel-order-modal");
     const returnModal = document.getElementById("return-order-modal");
@@ -66,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const orderId = retryBtn.dataset.orderId;
         if (!orderId) {
-            console.error("Order ID not found.");
             return;
         }
         await startRazorpayPayment(orderId);
@@ -98,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-        } catch (err) {
+        } catch {
             showPopupMessage("Unable to download invoice.", "error");
         }
     });
@@ -147,8 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     showPopupMessage(result.message, "error");
                 }
-            } catch (err) {
-                console.error(err);
+            } catch {
                 showPopupMessage("Unable to cancel item.", "error");
             }
         });
@@ -195,8 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     showPopupMessage(result.message, "error");
                 }
-            } catch (err) {
-                console.error(err);
+            } catch {
                 showPopupMessage("Unable to submit return request.", "error");
             }
         });
@@ -296,8 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         } else {
                             showPopupMessage("Verification failed: " + result.message, "error");
                         }
-                    } catch (verifyErr) {
-                        console.error("Verification Error:", verifyErr);
+                    } catch {
                         showPopupMessage("Something went wrong during verification", "error");
                     }
                 },
@@ -311,7 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 modal: {
                     ondismiss: function () {
-                        console.log("Checkout form closed by user");
                     },
                     escape: true
                 }
@@ -321,7 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 4. Handle Explicit Payment Failures
             rzp.on('payment.failed', async function (response) {
-                console.log("Payment Failed Event Triggered");
 
                 try {
                     const failureRes = await fetch('/user/payment/failure', {
@@ -356,7 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                 } catch (err) {
-                    console.error("Error logging payment failure:", err);
                     showPopupMessage("Connection error: " + err.message, "error");
                 }
             });
@@ -364,8 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 5. Open the Razorpay Modal
             rzp.open();
 
-        } catch (error) {
-            console.error("Razorpay Error:", error);
+        } catch {
             showPopupMessage("Payment failed to initialize", "error");
         }
     }

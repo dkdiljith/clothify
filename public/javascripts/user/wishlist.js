@@ -59,8 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 ClothifyCounterManager.update("wishlist", "decrement");
                 showPopupMessage(data.message, "info");
-            } catch (err) {
-                console.error("Wishlist Remove Error:", err);
+            } catch {
                 showPopupMessage("Something went wrong. Please try again.", "error");
             }
         });
@@ -128,8 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     showPopupMessage(data.message || "Action restricted", "error");
                 }
-            } catch (err) {
-                console.error("Wishlist Cart Error:", err);
+            } catch {
                 showPopupMessage("Something went wrong. Please try again.", "error");
             }
         });

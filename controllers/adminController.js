@@ -2,50 +2,21 @@ const Admin = require("../models/adminSchema")
 const bcrypt = require("bcryptjs");
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //=======================//SECURITY FUNCTIONS // Other Used Services====================================
 
 //secure password
 const securePassword = async (password) => {
-  try {
-    const passwordHash = await bcrypt.hash(password, 10);
-    return passwordHash;
-  } catch (err) {
-    console.log(err);
-  }
+  const passwordHash = await bcrypt.hash(password, 10);
+  return passwordHash;
 };
 
-//phone number validation
-const validatePhoneStartsWithPlus91 = async (phone) => {
-  try {
-    if (typeof phone !== "string") {
-      throw new Error("Invalid input: phone number must be a string.");
-    }
-
-    phone = phone.trim();
-
-    if (!phone.startsWith("+91")) {
-      if (phone.startsWith("91")) {
-        phone = `+${phone}`;
-      } else if (phone.startsWith("0")) {
-        phone = `+91${phone.slice(1)}`;
-      } else {
-        phone = `+91${phone}`;
-      }
-    }
-
-    return phone;
-  } catch (err) {
-    console.error("Error while validating the phone number:", err);
-    throw err;
-  }
-};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 exports.loginRender = async (req, res) => {
-  if(req.session.admin){
+  if (req.session.admin) {
     return res.redirect(`admin/dashboard`)
   }
   return res.render(`admin/login`, { plain_body: true })
@@ -61,62 +32,113 @@ exports.activityLogRender = async (req, res) => {
 
 
 
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Input Validation
+    if (!email || !password) {
+      return res.redirect("/admin?error=missingFields");
+    }
+
     const admin = await Admin.findOne({ email }).lean();
 
+    // Admin Not Found
     if (!admin) {
-      return res.render("admin/login", { message: "Invalid credentials", plain_body: true });
+      return res.redirect("/admin?error=adminNotFound");
     }
 
+    // Password Check
     const isMatch = await bcrypt.compare(password, admin.password);
 
-    if (isMatch) {
-      req.session.admin = { _id: admin._id , name:admin.name , email:admin.email};
-
-      return req.session.save((err) => {
-        if (err) return next(err);
-        res.redirect("/admin/dashboard");
-      });
+    if (!isMatch) {
+      return res.redirect("/admin?error=incorrectPassword");
     }
 
-    res.render("admin/login", { message: "Invalid credentials", plain_body: true });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).render("error", { message: "Internal Server Error" });
+    // Session
+    req.session.admin = {
+      _id: admin._id,
+      name: admin.name,
+      email: admin.email,
+    };
+
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
+    return res.redirect("/admin/dashboard");
+
+  } catch {
+    return res.redirect("/admin?error=serverError");
   }
 };
 
 
 
+
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
-
-    // 1. Check existence FIRST (Save CPU)
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.render("admin/register", { message: "Email already exists", plain_body: true });
+    const { name, email, password, confirmPassword } = req.body;
+    // MISSING FIELDS
+    if (!name || !email || !password || !confirmPassword) {
+      return res.redirect("/admin/register?error=missingFields");
     }
-
-    // 2. Process data only if valid
+    // NAME VALIDATION
+    const trimmedName = name.trim();
+    if (
+      trimmedName.length < 3 ||
+      trimmedName.length > 50 ||
+      !/^[A-Za-z ]+$/.test(trimmedName)
+    ) {
+      return res.redirect("/admin/register?error=invalidName");
+    }
+    // EMAIL VALIDATION
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.redirect("/admin/register?error=invalidEmail");
+    }
+    // PASSWORD MATCH
+    if (password !== confirmPassword) {
+      return res.redirect("/admin/register?error=passwordMismatch");
+    }
+    // PASSWORD VALIDATION
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.redirect("/admin/register?error=weakPassword");
+    }
+    // EMAIL EXISTS
+    const existingAdmin = await Admin.findOne({
+      email: trimmedEmail,
+    }).lean();
+    if (existingAdmin) {
+      return res.redirect("/admin/register?error=emailExists");
+    }
+    // HASH PASSWORD
     const passwordHash = await securePassword(password);
-    const validatedPhone = await validatePhoneStartsWithPlus91(phone);
-
-    const newAdmin = new Admin({
-      name,
-      email,
-      phone: validatedPhone,
-      password: passwordHash
+    // CREATE ADMIN
+    await Admin.create({
+      name: trimmedName,
+      email: trimmedEmail,
+      password: passwordHash,
     });
-
-    await newAdmin.save();
-
-    res.redirect("/admin/dashboard");
-  } catch (error) {
-    console.error("Registration Error:", error);
-    res.status(500).send("Internal Server Error");
+    // SESSION
+    const admin = await Admin.findOne({
+      email: trimmedEmail,
+    }).lean();
+    req.session.admin = {
+      _id: admin._id,
+      name: admin.name,
+      email: admin.email,
+    };
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+    return res.redirect("/admin/dashboard");
+  } catch {
+    return res.redirect("/admin/register?error=serverError");
   }
 };
 

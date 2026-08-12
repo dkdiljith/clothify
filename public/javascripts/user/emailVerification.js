@@ -131,10 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
     resendButton.disabled = true;
     resendButton.textContent = "Sending...";
   }
-  function unlockResendButton() {
-    resendButton.disabled = false;
-    resendButton.textContent = "Resend Verification Code";
-  }
   /* =====================================================
        Initialize
     ===================================================== */
@@ -182,8 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       showError(data.error || "Invalid verification code.");
-    } catch (error) {
-      console.error(error);
+    } catch {
       showError("Unable to verify your email. Please try again.");
     } finally {
       verifyInProgress = false;
@@ -216,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       if (!response.ok || !data.success) {
         showError(data.error || "Unable to resend verification code.");
-         resendButton.textContent = "Resend Verification Code";
+        resendButton.textContent = "Resend Verification Code";
         return;
       }
       /* ==========================================
@@ -233,10 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
         data.message || "A new verification code has been sent.",
         "success",
       );
-        resendButton.textContent = "Resend Verification Code";
+      resendButton.textContent = "Resend Verification Code";
 
-    } catch (error) {
-      console.error(error);
+    } catch {
       showError("Unable to connect to the server.");
     } finally {
       resendInProgress = false;

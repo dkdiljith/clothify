@@ -1,8 +1,4 @@
-/**
- * Universal Popup Message
- * @param {string} message - The text to display
- * @param {string} type - 'success', 'error', 'warning', or 'info'
- */
+
 function showPopupMessage(message, type = "success") {
     // Check if a popup already exists to prevent stacking overlaps (optional)
     const existingPopup = document.querySelector(".popup-message");
@@ -32,4 +28,12 @@ function showPopupMessage(message, type = "success") {
         popup.classList.add("fade-out");
         setTimeout(() => popup.remove(), 500);
     }, 3000);
+}
+
+
+
+
+
+if (typeof window !== "undefined") {
+    window.showPopupMessage = showPopupMessage;
 }

@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Delete category functionality
     const deleteButtons = document.querySelectorAll(".btn-delete");
     deleteButtons.forEach((button) => {
-        button.addEventListener("click", async (e) => {
+        button.addEventListener("click", async () => {
             const categoryId = button.getAttribute("data-id");
             // 1. Double-button choice modal ('danger' automatically adds Cancel)
             const confirmed = await showCustomConfirm(

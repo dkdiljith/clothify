@@ -1,6 +1,5 @@
 const Order = require("../models/orderSchema");
 const Product = require("../models/productSchema");
-const Category = require("../models/categorySchema");
 const User = require("../models/userSchema");
 
 const ANALYTICS_STATUSES = ["Pending", "Shipped", "Completed", 'Return Requested', "Return Rejected"];
@@ -9,8 +8,7 @@ const ANALYTICS_STATUSES = ["Pending", "Shipped", "Completed", 'Return Requested
 exports.dashboardRender = async (req, res) => {
     try {
         return res.render("admin/dashboard");
-    } catch (error) {
-        console.error("Dashboard Render Error:", error);
+    } catch {
         return res.status(500).render("admin/error", {
             message: "Failed to load dashboard",
         });
@@ -44,8 +42,7 @@ exports.getDashboardData = async (req, res) => {
             categories: topCategories,
             paymentMethods
         });
-    } catch (error) {
-        console.error("Dashboard Data Error:", error);
+    } catch {
         return res.status(500).json({
             success: false,
             message: "Unable to fetch dashboard data.",
@@ -106,13 +103,13 @@ async function getStatistics(filter) {
 
     let totalRevenue = 0;
     let totalOrders = 0;
+    let pendingCodOrders = 0;
 
     for (const order of orders) {
-        let hasCompletedItem = false;
+
         for (const item of order.items) {
             if (isValidAnalyticsItem(order, item)) {
                 totalRevenue += item.amount;
-                hasCompletedItem = true;
             }
         }
 
@@ -120,10 +117,13 @@ async function getStatistics(filter) {
         const isCod = order.paymentMethod?.toLowerCase() === "cod";
 
         // Check if EVERY item inside this specific order has a "Pending" status
-        const areAllItemsPending = order.items.every(item => item.status === "Pending");
+        const areAllItemsPending = order.items.every(
+            item => ["Pending", "Shipped"].includes(item.status)
+        );
 
         // Skip counting this order if it is COD and all its items are pending
         if (isCod && areAllItemsPending) {
+            pendingCodOrders++;
             continue;
         }
 
@@ -141,6 +141,7 @@ async function getStatistics(filter) {
     return {
         revenue: Math.round(totalRevenue),
         orders: totalOrders,
+        pendingCodOrders,
         users,
         products,
     };
@@ -149,7 +150,7 @@ async function getStatistics(filter) {
 
 
 async function getRevenueChart(filter) {
-    const { startDate, endDate } = getDateFilter(filter);
+    const { startDate } = getDateFilter(filter);
     let groupId;
     let labels = [];
     let data = [];
@@ -210,21 +211,20 @@ async function getRevenueChart(filter) {
             data = new Array(12).fill(0);
             break;
         case "month":
-        default:
-            groupId = {
-                $dayOfMonth: {
-                    date: "$createdAt",
-                    timezone: "Asia/Kolkata"
-                }
-            };
+        default: {
+            groupId = { $dayOfMonth: { date: "$createdAt", timezone: "Asia/Kolkata" } };
+
             const totalDays = new Date(
                 startDate.getFullYear(),
                 startDate.getMonth() + 1,
                 0,
             ).getDate();
+
             labels = Array.from({ length: totalDays }, (_, i) => String(i + 1));
             data = new Array(totalDays).fill(0);
             break;
+        }
+
     }
     const revenue = await Order.aggregate([
         {
@@ -304,8 +304,7 @@ async function getRevenueChart(filter) {
 
 
 
-async function getTopProducts(filter) {
-    const { startDate, endDate } = getDateFilter(filter);
+async function getTopProducts() {
     return await Order.aggregate([
         {
             $unwind: "$items",
@@ -364,8 +363,7 @@ async function getTopProducts(filter) {
 
 
 
-async function getTopCategories(filter) {
-    const { startDate, endDate } = getDateFilter(filter);
+async function getTopCategories() {
     return await Order.aggregate([
         {
             $unwind: "$items",
@@ -444,8 +442,7 @@ async function getTopCategories(filter) {
 
 
 
-async function getPaymentMethods(filter) {
-    const { startDate, endDate } = getDateFilter(filter);
+async function getPaymentMethods() {
     return await Order.aggregate([
         {
             $unwind: "$items"

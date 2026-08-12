@@ -1,12 +1,9 @@
 const User = require("../models/userSchema");
 const Address = require(`../models/addressSchema`)
 const Order = require(`../models/orderSchema`)
-const Wallet = require(`../models/walletSchema`)
-
-const crypto = require("crypto");
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,8 +24,7 @@ exports.addressRender = async (req, res) => {
         const userId = res.locals.user._id
         const addresses = await Address.find({ userId }).lean();
         return res.render('user/address', { addresses: addresses, user_sidebar: true });
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.status(500).send('Internal Server Error');
     }
 }
@@ -42,23 +38,22 @@ exports.editAddressRender = async (req, res) => {
 
 
 exports.securityRender = async (req, res) => {
-  try {
+    try {
 
-    const hasPassword = !!(
-      await User.findById(res.locals.user._id)
-        .select("password")
-        .lean()
-    )?.password;
+        const hasPassword = !!(
+            await User.findById(res.locals.user._id)
+                .select("password")
+                .lean()
+        )?.password;
 
-    return res.render("user/security", {
-      user_sidebar: true,
-      hasPassword
-    });
+        return res.render("user/security", {
+            user_sidebar: true,
+            hasPassword
+        });
 
-  } catch (error) {
-    console.error("Security Render Error:", error);
-    return res.redirect("/user/profile");
-  }
+    } catch {
+        return res.redirect("/user/profile");
+    }
 };
 
 
@@ -173,8 +168,7 @@ exports.profileEdit = async (req, res) => {
             success: true,
             message: "Profile updated successfully.",
         });
-    } catch (error) {
-        console.error("Profile Edit Error:", error);
+    } catch {
         return res.status(500).json({
             success: false,
             message: "Something went wrong. Please try again.",
@@ -205,8 +199,7 @@ exports.setDefaultAddress = async (req, res) => {
         );
 
         return res.redirect('/user/address');
-    } catch (error) {
-        console.error("Error setting default address:", error);
+    } catch {
         return res.status(500).send('Server error');
     }
 };
@@ -232,8 +225,7 @@ exports.editAddress = async (req, res) => {
             phone
         });
         return res.redirect('back');
-    } catch (error) {
-        console.error("Error updating address:", error);
+    } catch {
         return res.status(500).send('Server Error');
 
     }
@@ -265,7 +257,6 @@ exports.deleteUser = async (req, res) => {
 
             req.session.save((err) => {
                 if (err) {
-                    console.error(" Failed to save session after removing user:", err);
                     return res.status(500).json({
                         success: false,
                         message: "Internal Server Error during deactivation"
@@ -281,8 +272,7 @@ exports.deleteUser = async (req, res) => {
         } else {
             res.status(404).json({ success: false, message: "User not found" });
         }
-    } catch (error) {
-        console.error(error);
+    } catch {
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
@@ -359,8 +349,7 @@ exports.userOrders = async (req, res) => {
             user_sidebar: true
         });
 
-    } catch (error) {
-        console.error('Error fetching orders:', error);
+    } catch {
         return res.render('user/userOrders', {
             orders: [],
             isRetryPendingOrder: false,
@@ -393,7 +382,6 @@ exports.addAddress = async (req, res) => {
     try {
         const { streetAddress, landmark, city, state, zip, country, phone, name } = req.body;
         const userId = res.locals.user._id
-        console.log(userId, "this is userId")
         const addresses = await Address.find({ userId: userId }).lean()
 
         const isFirstAddress = addresses.length === 0;
@@ -414,8 +402,7 @@ exports.addAddress = async (req, res) => {
         const address = await Address.find({ userId: userId }).lean()
 
         return res.render('user/address', { addresses: address, user_sidebar: true });
-    } catch (error) {
-        console.error(error);
+    } catch {
         return res.status(500).json({ message: 'Server error' });
     }
 }

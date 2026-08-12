@@ -2,7 +2,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
-const Wallet = require(`../models/walletSchema`)
 require('dotenv').config();
 
 
@@ -88,7 +87,7 @@ const googleLogin = (req, res, next) => {
 
 
 const googleCallback = (req, res, next) => {
-  passport.authenticate('google', (err, user, info) => {
+  passport.authenticate('google', (err, user) => {
     if (err) return next(err);
     if (!user) return res.redirect('/user/login');
 

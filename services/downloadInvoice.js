@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const Order = require(`../models/orderSchema`)
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -96,19 +96,6 @@ const downloadInvoice = async (req, res) => {
                 paymentStatus
             };
         });
-        //////////////////////////////////////////////////////////////////////////////////
-        // SUMMARY VALUES
-        const subtotal = order.subtotal;
-        const shipping = order.shippingFee;
-        const tax = order.tax;
-        const couponDiscount =
-            order.couponDiscount || 0;
-        const offerDiscount =
-            order.offerDiscount || 0;
-        const totalRefund =
-            order.totalRefundAmount || 0;
-        const finalPaid =
-            order.totalAmount;
         //////////////////////////////////////////////////////////////////////////////////
       const html = `
 <html>
@@ -460,8 +447,7 @@ const downloadInvoice = async (req, res) => {
             'Content-Length': pdfBuffer.length
         });
         return res.end(pdfBuffer);
-    } catch (error) {
-        console.error('Invoice Generation Error:', error);
+    } catch{
         return res.status(500).send('Failed to generate invoice');
     }
 };

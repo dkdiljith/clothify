@@ -66,8 +66,7 @@ async function startRazorpayPayment(addressId, userName, userEmail, userPhone) {
                     } else {
                         showPopupMessage("Verification failed: " + result.message, "error");
                     }
-                } catch (verifyErr) {
-                    console.error("Verification Error:", verifyErr);
+                } catch  {
                     showPopupMessage("Something went wrong during verification", "error");
                 }
             },
@@ -82,7 +81,6 @@ async function startRazorpayPayment(addressId, userName, userEmail, userPhone) {
         };
         const rzp = new Razorpay(options);
         rzp.on("payment.failed", async function (response) {
-            console.log("Payment Failed Event Triggered");
             try {
                 const failureRes = await fetch("/user/payment/failure", {
                     method: "POST",
@@ -107,13 +105,11 @@ async function startRazorpayPayment(addressId, userName, userEmail, userPhone) {
                     );
                 }
             } catch (err) {
-                console.error("Error logging payment failure:", err);
                 showPopupMessage("Connection error: " + err.message, "error");
             }
         });
         rzp.open();
-    } catch (error) {
-        console.error("Razorpay Error:", error);
+    } catch {
         showPopupMessage("Payment failed to initialize", "error");
     }
 }
@@ -136,8 +132,7 @@ async function processWallet(addressId) {
         } else {
             showPopupMessage(result.message, "error");
         }
-    } catch (error) {
-        console.error("Wallet Payment Error:", error);
+    } catch {
         showPopupMessage("Something went wrong. Please try again.", "error");
     }
 }
@@ -160,8 +155,7 @@ async function processCOD(addressId) {
         } else {
             showPopupMessage(result.message, "error");
         }
-    } catch (error) {
-        console.error("COD Payment Error:", error);
+    } catch {
         showPopupMessage("Something went wrong. Please try again.", "error");
     }
 }

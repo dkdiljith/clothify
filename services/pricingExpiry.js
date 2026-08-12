@@ -3,13 +3,13 @@ const Coupon = require("../models/couponSchema");
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 
-//MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// //MESSAGE_CONSTANTS
+// const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.pricingExpiryUpdate = async () => {
-    try {
+
         const now = new Date();
 
         // activate valid offers
@@ -218,7 +218,7 @@ exports.pricingExpiryUpdate = async () => {
 
                     for (let k = 0; k < matchedOffers.length; k++) {
                         const offer = matchedOffers[k];
-                        let newPrice = item.price;
+                        let newPrice 
 
                         if (offer.discountType === "percentage") {
                             newPrice = item.price - (item.price * offer.discountValue) / 100;
@@ -263,8 +263,4 @@ exports.pricingExpiryUpdate = async () => {
 
             lastId = products[products.length - 1]._id;
         }
-
-    } catch (error) {
-        console.log("pricingExpiryUpdate failed:", error.message);
-    }
 };

@@ -7,7 +7,7 @@ const pricingExpiry = require("../services/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,12 +50,11 @@ exports.showCategories = async (req, res) => {
         prevPage: page - 1,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-        serialNumberStart: (page - 1) * limit 
+        serialNumberStart: (page - 1) * limit
       }
     });
 
-  } catch (error) {
-    console.error("Error fetching categories:", error);
+  } catch {
     return res.render("admin/category", {
       admin: true,
       categories: [],
@@ -65,7 +64,7 @@ exports.showCategories = async (req, res) => {
         totalPages: 1,
         hasNextPage: false,
         hasPrevPage: false,
-        serialNumberStart: 0 
+        serialNumberStart: 0
       },
       errorMessage: "Error fetching categories. Please try again later."
     });
@@ -75,96 +74,96 @@ exports.showCategories = async (req, res) => {
 
 //show edit category
 exports.editCategoryRender = async (req, res) => {
-    const parentId = req.params.id;
+  const parentId = req.params.id;
 
-    const parentCategory = await Category.findById(parentId).lean();
+  const parentCategory = await Category.findById(parentId).lean();
 
-    if (!parentCategory) {
-        return res.status(404).send("Parent category not found");
+  if (!parentCategory) {
+    return res.status(404).send("Parent category not found");
+  }
+
+  const subcategories = await Category.find({
+    parentCategory: parentCategory._id
+  }).lean();
+
+  const offers = await Offer.find(
+    {},
+    { _id: 1, offerCode: 1 }
+  ).lean();
+
+  const offerMap = {};
+
+  offers.forEach(item => {
+    offerMap[item._id.toString()] = item.offerCode;
+  });
+
+  const productCounts = await Product.aggregate([
+    {
+      $match: {
+        categoryId: { $in: subcategories.map(item => item._id) }
+      }
+    },
+    {
+      $group: {
+        _id: "$categoryId",
+        count: { $sum: 1 }
+      }
     }
+  ]);
 
-    const subcategories = await Category.find({
-        parentCategory: parentCategory._id
-    }).lean();
+  const countMap = {};
 
-    const offers = await Offer.find(
-        {},
-        { _id: 1, offerCode: 1 }
-    ).lean();
+  productCounts.forEach(item => {
+    countMap[item._id.toString()] = item.count;
+  });
 
-    const offerMap = {};
+  const updatedSubcategories = subcategories.map(item => ({
+    ...item,
+    productCount: countMap[item._id.toString()] || 0,
+    offerCode: item.offerId
+      ? offerMap[item.offerId.toString()] || ""
+      : ""
+  }));
 
-    offers.forEach(item => {
-        offerMap[item._id.toString()] = item.offerCode;
-    });
-
-    const productCounts = await Product.aggregate([
-        {
-            $match: {
-                categoryId: { $in: subcategories.map(item => item._id) }
-            }
-        },
-        {
-            $group: {
-                _id: "$categoryId",
-                count: { $sum: 1 }
-            }
-        }
-    ]);
-
-    const countMap = {};
-
-    productCounts.forEach(item => {
-        countMap[item._id.toString()] = item.count;
-    });
-
-    const updatedSubcategories = subcategories.map(item => ({
-        ...item,
-        productCount: countMap[item._id.toString()] || 0,
-        offerCode: item.offerId
-            ? offerMap[item.offerId.toString()] || ""
-            : ""
-    }));
-
-    return res.render("admin/editCategory", {
-        admin: true,
-        parentCategory,
-        subcategories: updatedSubcategories
-    });
+  return res.render("admin/editCategory", {
+    admin: true,
+    parentCategory,
+    subcategories: updatedSubcategories
+  });
 };
 
 
 // create new Category
 exports.addCategory = async (req, res) => {
-    try {
-        const { name, parentCategory } = req.body;
+  try {
+    const { name, parentCategory } = req.body;
 
-        if (!name || name.trim() === "") {
-            return res.status(400).json({ message: "Category name is required!" });
-        }
-
-        const formattedName = name
-            .trim()                                     
-            .replace(/\s+/g, ' ')                       
-            .toLowerCase()                               
-            .replace(/(^\w|\s\w)/g, m => m.toUpperCase()); 
-
-        const existingCategory = await Category.findOne({ name: formattedName });
-        if (existingCategory) {
-            return res.status(400).json({ message: "Category already exists!" });
-        }
-
-        const newCategory = new Category({ 
-            name: formattedName, 
-            parentCategory: parentCategory || null 
-        });
-        
-        await newCategory.save();
-        return res.status(201).json({ message: "Category created successfully!" });
-
-    } catch (error) {
-        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ message: "Category name is required!" });
     }
+
+    const formattedName = name
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase()
+      .replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+
+    const existingCategory = await Category.findOne({ name: formattedName });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists!" });
+    }
+
+    const newCategory = new Category({
+      name: formattedName,
+      parentCategory: parentCategory || null
+    });
+
+    await newCategory.save();
+    return res.status(201).json({ message: "Category created successfully!" });
+
+  } catch (error) {
+    return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
+  }
 };
 
 
@@ -197,8 +196,7 @@ exports.deleteCategory = async (req, res) => {
       return res.status(200).json({ message: "Subcategory deleted successfully." });
     }
 
-  } catch (error) {
-    console.error("❌ Error deleting category:", error);
+  } catch {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -235,8 +233,7 @@ exports.editCategory = async (req, res) => {
 
     return res.status(200).json({ message: "Category updated successfully" });
 
-  } catch (err) {
-    console.error("❌ Error updating category:", err);
+  } catch {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -336,8 +333,6 @@ exports.applyOffer = async (req, res) => {
       });
     }
 
-    let appliedCount = 0;
-
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
 
@@ -348,7 +343,7 @@ exports.applyOffer = async (req, res) => {
         detail.offerPrice = 0;
         detail.offerLocked = false;
 
-        let newPrice = originalPrice;
+        let newPrice
 
         if (offer.discountType === "percentage") {
           newPrice = originalPrice - (originalPrice * offer.discountValue) / 100;
@@ -364,8 +359,6 @@ exports.applyOffer = async (req, res) => {
         detail.offerId = offer._id;
         detail.offerPrice = newPrice;
         detail.offerLocked = true;
-
-        appliedCount++;
       });
 
       await product.save();
@@ -385,8 +378,7 @@ exports.applyOffer = async (req, res) => {
       message: "Manual category offer applied successfully."
     });
 
-  } catch (error) {
-    console.log("category applyOffer failed:", error.message);
+  } catch {
 
     return res.status(500).json({
       success: false,
@@ -434,8 +426,7 @@ exports.autoPricing = async (req, res) => {
       message: "Automatic pricing enabled successfully."
     });
 
-  } catch (error) {
-    console.log("category autoPricing failed:", error.message);
+  } catch {
 
     return res.status(500).json({
       success: false,

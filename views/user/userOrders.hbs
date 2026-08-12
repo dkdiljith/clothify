@@ -30,7 +30,7 @@
                 <h3 class="product-name">
                     {{this.items.[0].productName}}
                 </h3>
-                 {{#ifCond this.items.length ">" 1}}
+                {{#ifCond this.items.length ">" 1}}
                 <span class="more-items">
                     +{{subtract this.items.length 1}} more items
                 </span>
@@ -136,5 +136,7 @@
 
 
 {{#section 'scripts'}}
+<!-- Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="/javascripts/user/userOrders.js" defer></script>
 {{/section}}

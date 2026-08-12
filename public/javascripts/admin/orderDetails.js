@@ -65,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 location.reload();
             }, 1800);
         } catch (error) {
-            console.error(error);
             dropdown.disabled = false;
             showPopupMessage(
                 error.message || "Unable to update item status.",
@@ -94,14 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 }
             );
-            if (!response.ok) {
-                let message = "Unable to generate invoice.";
-                try {
-                    const data = await response.json();
-                    message = data.message || message;
-                } catch { }
-                throw new Error(message);
-            }
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -116,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 "success"
             );
         } catch (error) {
-            console.error(error);
             showPopupMessage(
                 error.message || "Invoice could not be generated.",
                 "error"

@@ -1,215 +1,353 @@
-
+/* ==========================================================
+                        LOGIN PAGE
+========================================================== */
+.login-page {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+}
+/* ==========================================================
+                        LOGOS
+========================================================== */
 .website-logo {
     position: absolute;
     top: -60px;
     left: 40px;
     width: 250px;
-    height: auto;
-    z-index: 10;
-  }
-  .admin-logo{
+    z-index: 20;
+}
+.admin-logo {
     position: absolute;
-    top: 80px;
-    left: 30px;
-    width: 250px;
-    height: auto;
-    z-index: 10;
-  }
-
-  .login-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    padding: 3rem;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .login-card:focus-within {
-    box-shadow: 0 6px 30px rgba(0, 123, 255, 0.2);
-  }
-
-  .form-control {
-    border: 1px solid #ced4da;
-    border-radius: 50px;
-    padding: 12px 45px;
-    transition: all 0.3s ease-in-out;
-    font-size: 1rem;
-    line-height: 1.5;
-    height: 48px;
-  }
-
-  .form-control:focus {
-    border-color: #fdd49e;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-  }
-
-  .form-group {
+    top: 85px;
+    left: 35px;
+    width: 235px;
+    z-index: 20;
+}
+/* ==========================================================
+                        CARD
+========================================================== */
+.login-card {
     position: relative;
-    margin-bottom: 1.5rem;
-  }
-
- .form-group .form-field-icon:not(.password-toggle) {
+    background: #fff;
+    border-radius: 22px;
+    padding: 45px;
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, .15);
+    transition: .25s ease;
+}
+.login-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 28px 60px rgba(0, 0, 0, .18);
+}
+.login-card:focus-within {
+    box-shadow:
+        0 0 0 4px rgba(244, 140, 6, .15),
+        0 22px 60px rgba(0, 0, 0, .18);
+}
+/* ==========================================================
+                        HEADER
+========================================================== */
+.login-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+.login-header h2 {
+    font-size: 34px;
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 10px;
+}
+.login-header p {
+    color: #777;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+}
+/* ==========================================================
+                        FORM
+========================================================== */
+.form-group {
+    margin-bottom: 22px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+}
+/* ==========================================================
+                    INPUT WRAPPER
+========================================================== */
+.input-wrapper {
+    position: relative;
+}
+/* ==========================================================
+                        ICONS
+========================================================== */
+.form-field-icon {
     position: absolute;
-    left: 20px;
+    left: 22px !important;
     top: 50%;
     transform: translateY(-50%);
-    color: #aaa;
-    z-index: 1;
+    width: 18px;
+    height: 18px;
+    color: #999;
     pointer-events: none;
 }
-
-
-  .password-toggle {
+.password-toggle {
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+    transition: .25s;
+}
+.password-toggle:hover {
+    color: #f48c06;
+}
+/* ==========================================================
+                        INPUT
+========================================================== */
+.login-card .form-control {
+    width: 100%;
+    height: 52px;
+    border-radius: 50px;
+    border: 1px solid #d9d9d9;
+    padding-left: 65px !important;
+    padding-right: 55px !important;
+    font-size: 15px;
+    transition: .25s;
+    background: #fff;
+}
+.login-card .form-control::placeholder {
+    color: #9e9e9e;
+}
+.login-card .form-control:focus {
+    outline: none;
+    border-color: #f48c06;
+    box-shadow:
+        0 0 0 4px rgba(244, 140, 6, .15);
+}
+.form-control.error {
+    border-color: #dc3545 !important;
+}
+.form-control.valid {
+    border-color: #22c55e !important;
+}
+/* ==========================================================
+                        FORM
+========================================================== */
+.form-group {
+    margin-bottom: 22px;
+    position: relative;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #34495e;
+}
+/* ==========================================================
+                    INPUT WRAPPER
+========================================================== */
+.input-wrapper {
+    position: relative;
+}
+.input-wrapper i:not(.password-toggle i) {
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9aa0a6;
+    font-size: 17px;
+    pointer-events: none;
+    transition: .25s;
+}
+/* ==========================================================
+                        INPUT
+========================================================== */
+.form-control {
+    width: 100%;
+    height: 56px;
+    border-radius: 16px;
+    border: 1px solid #dde3ea;
+    background: #fff;
+    padding: 0 58px !important;
+    padding-right: 58px !important;
+    padding-left: 58px !important;
+    font-size: 15px;
+    transition: .25s;
+}
+.form-control::placeholder {
+    color: #b0b7c3;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow:
+        0 0 0 4px rgba(52,152,219,.12);
+}
+.input-wrapper:focus-within i:not(.password-toggle i) {
+    color: #3498db;
+}
+.form-control.error {
+    border-color: #dc3545 !important;
+    background: #fff9f9;
+}
+.form-control.success {
+    border-color: #2ecc71 !important;
+}
+/* ==========================================================
+                    PASSWORD TOGGLE
+========================================================== */
+.password-toggle {
     position: absolute;
     right: 18px;
     top: 50%;
     transform: translateY(-50%);
-    cursor: pointer;
-    color: #aaa;
-    z-index: 2;
-    font-size: 16px;
-    background: transparent;
+    width: 40px;
+    height: 40px;
     border: none;
-    margin: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
     display: flex;
-    align-items: center;
     justify-content: center;
-    outline: none;
-    pointer-events: auto;
-  }
-
-  /* General styling for .btn-primary */
-  .btn-primary {
-    background: #f48c06 !important;
-    border: none !important;
-    padding: 0.75rem 2.5rem;
-    font-size: 1.2rem;
-    color: white !important;
-    border-radius: 5px;
-    transition: all 0.3s ease-in-out;
-  }
-
-  /* Hover state */
-  .btn-primary:hover {
-    background: #c76000 !important;
-    box-shadow: 0 6px 20px rgba(146, 82, 4, 0.3);
-    transform: scale(1.05);
-  }
-
-  /* Focus state */
-  .btn-primary:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    background: #f48c06 !important;
-  }
-
-  /* Active state */
-  .btn-primary:active {
-    background: #c76000 !important;
-    box-shadow: none !important;
-  }
-
-  .google-btn {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 50px;
-    padding: 0.6rem 1rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #555;
-    transition: all 0.3s ease;
-  }
-
-  .google-btn img {
-    width: 24px;
-    height: 24px;
-    margin-right: 12px;
-  }
-
-  .google-btn:hover {
-    background-color: #f5f5f5;
-    border-color: #aaa;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .custom-links {
-    margin-top: 1.5rem;
-    text-align: center;
-  }
-
-  .custom-links a {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin: 0 10px;
-    text-decoration: none;
-    color: #007bff;
-    transition: color 0.3s ease;
-  }
-
-  .custom-links a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-  }
-
-  .login-logo {
-    width: 80px;
-    margin-bottom: 2rem;
-    margin-top: -2rem;
+    color: #888;
+    transition: .25s;
+}
+.password-toggle:hover {
+    background: rgba(52,152,219,.08);
+    color: #3498db;
+}
+/* ==========================================================
+                        ERROR
+========================================================== */
+.error-message {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .remember-me {
-    font-size: 0.9rem;
-    text-align: left;
-    margin-bottom: 2rem;
-  }
-
-  .form-control::placeholder {
-    color: #6c757d;
-    opacity: 0.8;
-  }
-
-  .error-message {
-    position: absolute;
-    bottom: -25px; /* Slightly increase bottom offset for better visibility */
-    left: 0;
-    color: #e74c3c; /* A brighter, more noticeable red */
-    font-size: 0.875rem; /* Slightly smaller font size for a balanced look */
-    font-weight: 500; /* Makes the error message stand out a bit more */
-    width: 100%;
-    text-align: left;
-    margin-top: 0.5rem;
-    padding: 0 5px; /* Adds some space around the text for better alignment */
-    background-color: #ffdddd;/* Light red background to highlight the error */
-    border-radius: 4px; /* Rounded corners for a softer look */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for depth */
-    transition: all 0.3s ease-in-out; /* Smooth transition for error message visibility */
-  }
-
-  .error-message.visible {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  .error-message.hidden {
-    visibility: hidden;
+    min-height: 18px;
+    margin-top: 7px;
+    margin-left: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #dc3545;
     opacity: 0;
-  }
-
-
-  .form-field-icon {
+    visibility: hidden;
+    transition: .25s;
+}
+.error-message.show {
+    opacity: 1;
+    visibility: visible;
+}
+/* ==========================================================
+                    LOGIN BUTTON
+========================================================== */
+.login-btn {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: 16px;
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: white;
+    background: linear-gradient(
+        135deg,
+        #f48c06,
+        #ff9f1c
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: .3s;
+}
+.login-btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 16px 35px rgba(244,140,6,.35);
+}
+.login-btn:active {
+    transform: translateY(0);
+}
+.login-btn:disabled {
+    opacity: .75;
+    cursor: not-allowed;
+    transform: none;
+}
+/* ==========================================================
+                        SPINNER
+========================================================== */
+.spinner {
     width: 18px;
     height: 18px;
-    display: inline-block;
-    vertical-align: middle;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+}
+.d-none {
+    display: none !important;
+}
+/* ==========================================================
+                    FOOTER
+========================================================== */
+.login-footer {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #edf1f5;
+}
+.security-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: #6b7280;
+    font-size: 14px;
+}
+.security-info i {
+    color: #2ecc71;
+    font-size: 16px;
+}
+.login-card .form-control{
+    padding-left:50px !important;
+    padding-right:50px !important;
 }
 
-.password-toggle {
-    cursor: pointer;
+.btn-primary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    max-width: 420px;      /* keeps button slightly narrower than the card */
+    height: 56px;          /* slightly taller */
+
+    margin: 18px auto 0;   /* centers horizontally */
+
+    background: #f48c06 !important;
+    border: none !important;
+    border-radius: 8px;
+
+    color: #fff !important;
+    font-size: 1.15rem;
+    font-weight: 600;
+
+    transition: all .25s ease;
+}
+
+.btn-primary:hover {
+    background: #c76000 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(244, 140, 6, .28);
 }

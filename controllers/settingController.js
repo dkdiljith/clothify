@@ -1,7 +1,8 @@
 const Settings = require("../models/settingSchema");
+const logger = require('../config/logger');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-exports.initializeSettings = async (req, res) => {
+exports.initializeSettings = async () => {
   try {
     const settingsExist = await Settings.findOne({
       settingsType: "global_settings",
@@ -9,21 +10,17 @@ exports.initializeSettings = async (req, res) => {
 
     if (!settingsExist) {
       await Settings.create({});
-      console.log("✅ Global settings initialized successfully.");
+      logger.info("✅ Global settings initialized successfully.");
     }
   } catch (error) {
-    console.error("❌ Error initializing settings:", error);
+    logger.error("❌ Error initializing settings:", error);
   }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.landingPage = async (req, res) => {
-  try {
-    res.render(`admin/settings/landingPage`, { isSettings: true });
-  } catch (error) {
-    console.error(" Error initializing referral settings:", error);
-  }
+  res.render(`admin/settings/landingPage`, { isSettings: true });
 };
 
 
@@ -45,8 +42,7 @@ exports.referralSettingsRender = async (req, res) => {
       isSettings: true,
       settings,
     });
-  } catch (error) {
-    console.error("Error loading referral settings:", error);
+  } catch {
     return res.status(500).render("error/500", {
       message: "Unable to load referral settings.",
     });
@@ -232,8 +228,7 @@ exports.referralSettings = async (req, res) => {
       referralSettings: settings.referralSettings,
     });
 
-  } catch (error) {
-    console.error("Referral Settings Update Error:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Internal server error.",

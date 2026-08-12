@@ -1,14 +1,11 @@
 const Order = require("../models/orderSchema");
 const Product = require(`../models/productSchema`);
 const Wallet = require(`../models/walletSchema`);
-const Coupon = require(`../models/couponSchema`);
 const mongoose = require("mongoose");
 
-//pagination
-const adminPaginationFactory = require(`../utils/pagination`);
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`);
+// const MESSAGES = require(`../utils/constants`);
 
 /////////////////////////////////////////////////////////////
 
@@ -143,8 +140,7 @@ exports.ordersRender = async (req, res) => {
         serialNumberStart: skip,
       },
     });
-  } catch (error) {
-    console.error("Error fetching orders:", error);
+  } catch {
     return res.render("admin/orders", {
       admin: true,
       order: [],
@@ -361,7 +357,6 @@ exports.orderStatusChange = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    console.error("Order Status Change Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Something went wrong",
@@ -527,7 +522,6 @@ exports.orderCancel = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    console.error("Order Cancel Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Something went wrong",
@@ -652,9 +646,7 @@ exports.orderReturn = async (req, res) => {
       success: true,
       message: "Return request submitted successfully",
     });
-  } catch (error) {
-    console.error("Order Return Error:", error);
-
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Something went wrong",
@@ -834,7 +826,6 @@ async function processItemCancellation(orderId, itemId, reason) {
     };
   } catch (error) {
     await session.abortTransaction();
-    console.error("Order Cancel Error:", error);
     return {
       status: 500,
       success: false,

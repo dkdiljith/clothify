@@ -75,8 +75,6 @@ async function loadDashboard(filter, showLoader = false) {
         updatePaymentChart(result.paymentMethods);
         document.getElementById("lastUpdated").textContent =
             `Updated ${new Date().toLocaleTimeString("en-IN")}`;
-    } catch (error) {
-        console.error(error);
     } finally {
         if (showLoader) {
             hideLoading();
@@ -91,6 +89,7 @@ function updateStatistics(stats) {
         stats.revenue,
     ).toLocaleString("en-IN")}`;
     document.getElementById("totalOrders").textContent = stats.orders;
+    document.getElementById("pendingCodOrders").textContent = stats.pendingCodOrders;
     document.getElementById("totalUsers").textContent = stats.users;
     document.getElementById("totalProducts").textContent = stats.products;
 }
@@ -106,6 +105,7 @@ function updateMetricSubtitle(filter) {
     };
     document.getElementById("metricPeriodRevenue").textContent = labels[filter];
     document.getElementById("metricPeriodOrders").textContent = labels[filter];
+    document.getElementById("metricPeriodPendingCod").textContent = labels[filter];
 }
 /* ==========================================================
                         LOADING
@@ -340,12 +340,4 @@ document.addEventListener("visibilitychange", () => {
         startAutoRefresh();
     }
 });
-/* ==========================================================
-                    GLOBAL ERRORS
-========================================================== */
-window.addEventListener("unhandledrejection", (event) => {
-    console.error("Unhandled Promise Rejection:", event.reason);
-});
-window.addEventListener("error", (event) => {
-    console.error("JavaScript Error:", event.error);
-});
+

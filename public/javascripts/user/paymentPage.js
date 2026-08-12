@@ -20,6 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
             "error"
         );
     }
+
+      if (urlParams.get("error") === "payment_limit") {
+        showPopupMessage(
+            "Cannot Create an order of 25,000 or more,Please reduce your cart total",
+            "error"
+        );
+    }
     // ------------------------------
     // COD Validation
     // ------------------------------

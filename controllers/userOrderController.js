@@ -1,13 +1,12 @@
 const Order = require("../models/orderSchema");
 const Wallet = require(`../models/walletSchema`)
-const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 const Address = require(`../models/addressSchema`)
 const Product = require(`../models/productSchema`)
 const mongoose = require("mongoose");
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,8 +85,7 @@ exports.payment = async (req, res) => {
 
     return res.render('user/paymentPage', { cart, address, wallet });
 
-  } catch (error) {
-    console.error('Error fetching order details:', error);
+  } catch {
     return res.status(500).send('Server error');
   }
 };
@@ -291,9 +289,8 @@ exports.placeOrder = async (req, res) => {
       message: "Order placed successfully",
       orderId: order.orderId,
     });
-  } catch (error) {
+  } catch (error){
     await session.abortTransaction();
-    console.error("Order Placement Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to place order.",
@@ -312,7 +309,6 @@ exports.placeOrder = async (req, res) => {
 
 
 exports.placeOrderFailed = async (req, res) => {
-  console.log("Razorpay failed order processor triggered.");
   try {
     const userId = res.locals.user._id;
     const { addressId, reason, orderId } = req.body;
@@ -430,8 +426,7 @@ exports.placeOrderFailed = async (req, res) => {
     await Cart.findByIdAndDelete(cart._id); // Clear cart so they don't buy duplicate items
 
     return res.status(201).json({ success: true, paymentStatus: "Failed", message: "Failed order record generated. You can retry from your dashboard.", orderId: order.orderId });
-  } catch (error) {
-    console.error("Order Placement Error:", error);
+  } catch {
     return res.status(500).json({ success: false, message: "Failed to place order." });
   }
 };
@@ -500,9 +495,8 @@ exports.retryFailedOrder = async (req, res) => {
       message: "Order status updated and stock reduced successfully.",
       orderId: order.orderId,
     });
-  } catch (error) {
+  } catch(error) {
     await session.abortTransaction();
-    console.error("Retry Payment Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to retry payment.",
@@ -542,8 +536,7 @@ async function retryFailedOrderFailed(req, res, orderId) {
     await retryOrder.save();
 
     return res.status(200).json({ success: true, message: `Payment failed again. Attempt ${retryOrder.paymentAttemptsCount}/6 used.`, orderId });
-  } catch (error) {
-    console.error("Retry Fail Handler Error:", error);
+  } catch {
     return res.status(500).json({ success: false, message: "An error occurred while updating the retry order." });
   }
 }
@@ -566,8 +559,7 @@ exports.orderSuccess = async (req, res) => {
     }
 
     return res.render('user/orderSuccess', { plain_body: true, order });
-  } catch (error) {
-    console.error("Order Success Route Error:", error);
+  } catch {
     return res.render('user/orderSuccess', { plain_body: true });
   }
 };
@@ -589,8 +581,7 @@ exports.orderFailed = async (req, res) => {
     }
     return res.render('user/orderFailure', { plain_body: true, order });
 
-  } catch (error) {
-    console.error("Order Failure Route Error:", error);
+  } catch {
     return res.render('user/orderFailure', { plain_body: true });
   }
 };

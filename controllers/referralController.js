@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const User = require(`../models/userSchema`);
 const Wallet = require(`../models/walletSchema`);
 const Order = require(`../models/orderSchema`);
@@ -179,8 +178,7 @@ exports.referral = async (req, res) => {
         serialNumberStart: (coinPage - 1) * coinLimit,
       },
     });
-  } catch (error) {
-    console.log(error);
+  } catch {
     return res.status(500).json({
       success: false,
       error: "Referral Controller Error",
@@ -195,7 +193,7 @@ exports.applyReferral = async (req, res) => {
   try {
     const { referralCode } = req.body;
 
-    const { signupBonus, referrerReward, refereeReward, coinValue } =
+    const { signupBonus, refereeReward, coinValue } =
       await getReferralSettings();
 
     if (!referralCode) {
@@ -267,8 +265,7 @@ exports.applyReferral = async (req, res) => {
       rewardValue: referral.referralCoins * Number(coinValue),
       referralApplied: true,
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Referral Controller Error",
@@ -296,8 +293,7 @@ exports.cancelReferral = async (req, res) => {
       rewardValue: referral.referralCoins * Number(coinValue),
       referralApplied: false,
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Unable to dismiss referral popup.",
@@ -402,8 +398,7 @@ exports.redeemCoin = async (req, res) => {
       success: false,
       message: "Complete Your First Order",
     });
-  } catch (error) {
-    console.error("this is redeemcoin error:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: "An internal server error occurred while redeeming coins.",
@@ -473,8 +468,8 @@ exports.createReferral = async (userId, session = null) => {
       ? await newReferral.save({ session })
       : await newReferral.save();
     return savedReferral;
-  } catch (error) {
-    console.error(error, "Referral Creation Error");
+  } catch {
+    return {}
   }
 };
 
@@ -550,14 +545,11 @@ exports.processPendingReferralsCron = async () => {
           });
           await referralHistory.save();
         }
-
-        console.log(`Successfully completed referral for User: ${userId}`);
       }
     }
 
     return { success: true, message: "Referrals processed successfully." };
   } catch (error) {
-    console.error("Error in referral cron service:", error);
     return { success: false, error: error.message };
   }
 };

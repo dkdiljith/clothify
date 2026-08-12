@@ -2,6 +2,8 @@
 <title>Order Details | Clothify</title>
 <link rel="stylesheet" href="/stylesheets/user/orderDetails.css">
 {{/section}}
+
+
 <div class="order-details-page">
     <!-- ========================= -->
     <!-- PAGE HEADER -->
@@ -158,7 +160,7 @@
                         {{this.status}}
                     </span>
                     <div class="item-total">
-                       ₹{{formatPrice (multiply this.productPrice this.quantity)}}
+                        ₹{{formatPrice (multiply this.productPrice this.quantity)}}
                     </div>
                     <div class="item-actions">
                         {{!-- Pending --}}
@@ -455,6 +457,10 @@
         </button>
     </div>
 </div>
+
+
 {{#section 'scripts'}}
+<!-- Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 <script src="/javascripts/user/orderDetails.js" defer></script>
 {{/section}}

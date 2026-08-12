@@ -1,11 +1,10 @@
-const { OrderedBulkOperation } = require('mongodb');
 const Cart = require(`../models/cartSchema`)
 const Order = require(`../models/orderSchema`)
 const placeOrder = require(`../controllers/userOrderController`).placeOrder
 const retryFailedOrder = require(`../controllers/userOrderController`).retryFailedOrder
 
 //MESSAGE_CONSTANTS
-const MESSAGES = require(`../utils/constants`)
+// const MESSAGES = require(`../utils/constants`)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,8 +80,7 @@ exports.razorpayReciept = async (req, res) => {
       currency: order.currency
     });
 
-  } catch (error) {
-    console.error("Razorpay Order Error:", error);
+  } catch {
     return res.status(500).json({ success: false, message: 'Failed to create order' });
   }
 };
@@ -116,20 +114,13 @@ exports.razorpayVerification = async (req, res) => {
 
       return placeOrder(req, res);
 
-      return res.status(200).json({
-        success: true,
-        message: 'Payment verified',
-        payment_id: razorpay_payment_id
-      });
     } else {
-      console.log("Signature Mismatch - Possible Tampering");
       return res.status(400).json({
         success: false,
         message: 'Payment verification failed: Invalid signature'
       });
     }
-  } catch (error) {
-    console.error("Verification Route Error:", error);
+  } catch {
     return res.status(500).json({
       success: false,
       message: 'Internal server error during verification'

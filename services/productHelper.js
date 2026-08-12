@@ -3,7 +3,7 @@ const Product = require('../models/productSchema');
 
 
 async function verifyProductVariation(productId, variationIndex) {
-    try {
+
         const product = await Product.findById(productId);
 
         if (!product) {
@@ -45,10 +45,6 @@ async function verifyProductVariation(productId, variationIndex) {
             message: `Product and size (${selectedVariation.size}) are valid.`
         };
 
-    } catch (error) {
-        console.error("Error verifying product variation:", error);
-        throw error;
-    }
 }
 
 module.exports = { verifyProductVariation };

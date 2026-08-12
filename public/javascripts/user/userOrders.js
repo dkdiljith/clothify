@@ -55,8 +55,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const orderId = retryBtn.getAttribute("data-order-id");
         if (orderId) {
             await startRazorpayPayment(orderId);
-        } else {
-            console.error("Order ID data attribute is missing.");
         }
     });
 
@@ -108,8 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             showPopupMessage("Verification failed: " + result.message, "error");
                         }
-                    } catch (verifyErr) {
-                        console.error("Verification Error:", verifyErr);
+                    } catch {
                         showPopupMessage("Something went wrong during verification", "error");
                     } 
                 },
@@ -123,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 modal: {
                     ondismiss: function () {
-                        console.log("Checkout form closed by user");
                     },
                     escape: true
                 }
@@ -133,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 4. Handle Explicit Payment Failures
             rzp.on('payment.failed', async function (response) {
-                console.log("Payment Failed Event Triggered");
 
                 try {
                     const failureRes = await fetch('/user/payment/failure', {
@@ -168,7 +163,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                 } catch (err) {
-                    console.error("Error logging payment failure:", err);
                     showPopupMessage("Connection error: " + err.message, "error");
                 }
             });
@@ -176,8 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 5. Open the Razorpay Modal
             rzp.open();
 
-        } catch (error) {
-            console.error("Razorpay Error:", error);
+        } catch  {
             showPopupMessage("Payment failed to initialize", "error");
         }
     }

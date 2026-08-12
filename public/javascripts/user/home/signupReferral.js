@@ -13,16 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Settings From Backend
 
-  const signupBonusSetting = Number(
-    document.getElementById("signupBonusSetting")?.value || 1000,
-  );
-
   const refereeRewardSetting = Number(
     document.getElementById("refereeRewardSetting")?.value || 500,
-  );
-
-  const coinValueSetting = Number(
-    document.getElementById("coinValueSetting")?.value || 0.01,
   );
 
   // Populate Referral Welcome Modal
@@ -117,34 +109,30 @@ document.addEventListener("DOMContentLoaded", () => {
   async function cancelReferral() {
     closeReferralModal();
 
-    try {
-      const response = await fetch("/user/referral/cancel", {
-        method: "POST",
+    const response = await fetch("/user/referral/cancel", {
+      method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      populateRewardModal({
+        signupBonus: result.signupBonus,
+
+        referralBonus: 0,
+
+        rewardCoins: result.rewardCoins,
+
+        rewardValue: result.rewardValue,
+
+        referralApplied: false,
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        populateRewardModal({
-          signupBonus: result.signupBonus,
-
-          referralBonus: 0,
-
-          rewardCoins: result.rewardCoins,
-
-          rewardValue: result.rewardValue,
-
-          referralApplied: false,
-        });
-
-        openRewardModal();
-      }
-    } catch (err) {
-      console.error(err);
+      openRewardModal();
     }
   }
 
@@ -281,10 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else {
         showError(result.message || "Invalid referral code.");
       }
-    } catch (err) {
-      // Network Error
-
-      console.error(err);
+    } catch {
 
       showPopupMessage(
         "Network error occurred.",

@@ -388,8 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
       emailInputStep.classList.remove("collapsed");
       newEmail.focus();
       showEmailStep(2);
-    } catch (error) {
-      console.error(error);
+    } catch {
       showPopupMessage("Something went wrong.", "error");
     } finally {
       setLoading(verifyPasswordBtn, false);
@@ -431,8 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
       requestOtpBtn.disabled = true;
       requestOtpBtn.style.display = "none";
       showPopupMessage("OTP sent successfully.", "success");
-    } catch (error) {
-      console.error(error);
+    } catch {
       showPopupMessage("Something went wrong.", "error");
     } finally {
       setLoading(requestOtpBtn, false);
@@ -464,8 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         window.location.reload();
       }, 800);
-    } catch (error) {
-      console.error(error);
+    } catch  {
       showPopupMessage("Something went wrong.", "error");
     } finally {
       setLoading(verifyOtpBtn, false);
@@ -503,8 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         window.location.reload();
       }, 800);
-    } catch (error) {
-      console.error(error);
+    } catch {
       showPopupMessage("Something went wrong.", "error");
     } finally {
       setLoading(saveProfileBtn, false);
@@ -555,13 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
   newEmail.addEventListener("blur", () => {
     newEmail.value = newEmail.value.trim().toLowerCase();
   });
-  /* ==========================================================
-                          PREVENT DOUBLE REQUESTS
-          ========================================================== */
-  let isPasswordVerifying = false;
-  let isOtpSending = false;
-  let isOtpVerifying = false;
-  let isProfileUpdating = false;
+
   /* ==========================================================
                           OPEN/CLOSE HELPERS
           ========================================================== */
@@ -598,10 +588,6 @@ document.addEventListener("DOMContentLoaded", () => {
     clearAllErrors();
     removeValidationState();
     showEmailStep(1);
-    isPasswordVerifying = false;
-    isOtpSending = false;
-    isOtpVerifying = false;
-    isProfileUpdating = false;
     verifyPasswordBtn.disabled = false;
     requestOtpBtn.disabled = false;
     verifyOtpBtn.disabled = false;

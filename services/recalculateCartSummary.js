@@ -1,6 +1,4 @@
 const Cart = require(`../models/cartSchema`)
-const Product = require(`../models/productSchema`)
-const Coupon = require(`../models/couponSchema`)
 
 
 
@@ -30,7 +28,6 @@ async function recalculateCartSummary(userId) {
     const variation = details ? details[index] : null;
 
     if (!variation) {
-      console.error(`Missing variation for item: ${item._id}`);
       return; // Skip this item to avoid NaN
     }
 
@@ -59,7 +56,6 @@ async function recalculateCartSummary(userId) {
     const isDiscountTooHigh = coupon.discountType === 'price' && discValue > subtotal;
 
     if (isSubtotalTooLow || isDiscountTooHigh) {
-      console.log("Removing coupon: Requirements no longer met.");
       cart.couponId = null;
       cart.couponDiscount = 0;
 
