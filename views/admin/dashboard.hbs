@@ -35,12 +35,27 @@
         </div>
         <div class="metric-card">
             <h3 class="page-title">
-                Total Orders
+                Prepaid Orders
             </h3>
+            <span>(wallet,razorpay)</span>
             <div class="metric-value" id="totalOrders">
                 0
             </div>
             <span class="metric-subtitle" id="metricPeriodOrders">
+                This Month
+            </span>
+        </div>
+        <div class="metric-card">
+            <h3 class="page-title">
+                Postpaid Orders 
+            </h3>
+            <span>(pending cod)</span>
+
+            <div class="metric-value" id="pendingCodOrders">
+                0
+            </div>
+
+            <span class="metric-subtitle" id="metricPeriodPendingCod">
                 This Month
             </span>
         </div>
@@ -73,21 +88,21 @@
     <div class="chart-container">
         <!-- Revenue -->
         <div class="chart-card" id="revenueChartCard">
-            
+
             <div class="chart-header">
                 <h3 class="page-title">
                     Revenue Analytics
                 </h3>
 
 
-<small id="lastUpdated" class="text-muted">
-    Updated just now
-</small>
+                <small id="lastUpdated" class="text-muted">
+                    Updated just now
+                </small>
 
-                
+
                 <select id="chartFilter" class="chart-filter">
 
-                    
+
                     <option value="today">
                         Today
                     </option>

@@ -89,6 +89,7 @@ function updateStatistics(stats) {
         stats.revenue,
     ).toLocaleString("en-IN")}`;
     document.getElementById("totalOrders").textContent = stats.orders;
+    document.getElementById("pendingCodOrders").textContent = stats.pendingCodOrders;
     document.getElementById("totalUsers").textContent = stats.users;
     document.getElementById("totalProducts").textContent = stats.products;
 }
@@ -104,6 +105,7 @@ function updateMetricSubtitle(filter) {
     };
     document.getElementById("metricPeriodRevenue").textContent = labels[filter];
     document.getElementById("metricPeriodOrders").textContent = labels[filter];
+    document.getElementById("metricPeriodPendingCod").textContent = labels[filter];
 }
 /* ==========================================================
                         LOADING

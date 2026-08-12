@@ -103,6 +103,7 @@ async function getStatistics(filter) {
 
     let totalRevenue = 0;
     let totalOrders = 0;
+    let pendingCodOrders = 0;
 
     for (const order of orders) {
 
@@ -116,10 +117,13 @@ async function getStatistics(filter) {
         const isCod = order.paymentMethod?.toLowerCase() === "cod";
 
         // Check if EVERY item inside this specific order has a "Pending" status
-        const areAllItemsPending = order.items.every(item => item.status === "Pending");
+        const areAllItemsPending = order.items.every(
+            item => ["Pending", "Shipped"].includes(item.status)
+        );
 
         // Skip counting this order if it is COD and all its items are pending
         if (isCod && areAllItemsPending) {
+            pendingCodOrders++;
             continue;
         }
 
@@ -137,6 +141,7 @@ async function getStatistics(filter) {
     return {
         revenue: Math.round(totalRevenue),
         orders: totalOrders,
+        pendingCodOrders,
         users,
         products,
     };
