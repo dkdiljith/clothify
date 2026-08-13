@@ -2,7 +2,7 @@ const Wishlist = require(`../models/wishListSchema`)
 const Product = require(`../models/productSchema`)
 
 
-const { verifyProductVariation } = require('../services/productHelper');
+const { verifyProductVariation } = require('../utils/productHelper');
 const addToCart = require(`../controllers/cartController`).addToCart
 
 //MESSAGE_CONSTANTS

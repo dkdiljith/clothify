@@ -168,8 +168,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Determine the endpoint based on action
         const endpoint = currentAction === 'add'
-            ? '/user/postAddressInCart'
-            : `/user/editaddress/${editAddressId}`;
+            ? '/user/address' 
+            : `/user/address/${editAddressId}`;
 
         const method = currentAction === 'add' ? 'POST' : 'PUT';
 

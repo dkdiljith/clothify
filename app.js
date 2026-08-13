@@ -34,7 +34,7 @@ const hbs = exphbs.create({
 });
 
 //REGISTERING HBS HELPERS
-const hbsHelpers = require('./services/hbsHelpers')
+const hbsHelpers = require('./utils/hbsHelpers')
 for (const helperName in hbsHelpers) {
   hbs.handlebars.registerHelper(helperName, hbsHelpers[helperName]);
 }

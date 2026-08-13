@@ -27,7 +27,7 @@ const settingController = require(`../controllers/settingController`)
 //adminAuth (session)
 const adminAuth = require("../middlewares/auth").adminAuth
 //invoice generator
-const downloadInvoice = require(`../services/downloadInvoice`)
+const downloadInvoice = require(`../utils/downloadInvoice`)
 
 
 

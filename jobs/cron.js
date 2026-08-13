@@ -1,7 +1,7 @@
 const cron = require("node-cron");
 const logger = require('../config/logger');
 
-const pricingExpiryUpdate = require("../services/pricingExpiry").pricingExpiryUpdate
+const pricingExpiryUpdate = require("../utils/pricingExpiry").pricingExpiryUpdate
 const referralCronService = require(`../controllers/referralController`).processPendingReferralsCron
 
 //MESSAGE_CONSTANTS
