@@ -3,9 +3,9 @@ const Address = require(`../models/addressSchema`)
 const Coupon = require(`../models/couponSchema`)
 
 //update cart
-const recalculateCartSummary = require(`../services/recalculateCartSummary`)
+const recalculateCartSummary = require(`../utils/recalculateCartSummary`)
 
-const { verifyProductVariation } = require('../services/productHelper');
+const { verifyProductVariation } = require('../utils/productHelper');
 
 //MESSAGE_CONSTANTS
 // const MESSAGES = require(`../utils/constants`)

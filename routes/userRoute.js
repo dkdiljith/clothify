@@ -20,7 +20,7 @@ router.use(headerBadge)
 
 
 //RAZORPAY integration//
-const razorpay = require(`../services/razorpay`)
+const razorpay = require(`../utils/razorpay`)
 
 //Controllers
 const userController = require('../controllers/userController')
@@ -43,7 +43,7 @@ const userAuth = require(`../middlewares/auth`).userAuth
 const productValidator = require(`../middlewares/productValidator`)
 
 //invoice generator
-const downloadInvoice = require(`../services/downloadInvoice`)
+const downloadInvoice = require(`../utils/downloadInvoice`)
 
 // Routes to initiate Google authentication & handle the callback from Google
 router.get('/auth/google', passportFile.googleLogin);
@@ -87,10 +87,9 @@ router.delete('/cart/:productId/:variationIndex', userAuth, cartController.delet
 router.get(`/addressInCart`, userAuth, productValidator, cartController.getAddressInCart)
 
 router.get('/address/:id', userAuth, productValidator, addressController.renderEditForm)
-router.post('/postAddressInCart', userAuth, productValidator, addressController.addAddress);
+router.post('/address', userAuth, productValidator, addressController.addAddress);
 router.put('/address/:id', userAuth, productValidator, addressController.editAddress);
 router.delete('/address/:id', userAuth, productValidator, addressController.deleteAddress);
-router.put('/address/default/:id', userAuth, productValidator, addressController.setDefaultAddress);
 
 router.post("/payment/process", userAuth, productValidator, cartController.processPaymentPage);
 router.get('/payment', userAuth, productValidator, userOrderController.payment);

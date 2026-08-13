@@ -9,7 +9,7 @@ const path = require('path')
 const fs = require('fs');
 
 //update offer & coupon & products
-const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //MESSAGE_CONSTANTS

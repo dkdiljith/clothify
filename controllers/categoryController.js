@@ -3,7 +3,7 @@ const Offer = require(`../models/offerSchema`)
 const Product = require(`../models/productSchema`)
 
 //update offer & coupon & products
-const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //MESSAGE_CONSTANTS

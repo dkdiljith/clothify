@@ -3,7 +3,7 @@ const Product = require(`../models/productSchema`)
 const Category = require(`../models/categorySchema`)
 
 //update offer & coupon & products
-const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 

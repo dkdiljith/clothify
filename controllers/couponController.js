@@ -2,10 +2,10 @@ const Coupon = require(`../models/couponSchema`)
 const Cart = require(`../models/cartSchema`)
 
 //update cart
-const recalculateCartSummary = require(`../services/recalculateCartSummary`)
+const recalculateCartSummary = require(`../utils/recalculateCartSummary`)
 
 //update offer & coupon & products
-const pricingExpiry = require("../services/pricingExpiry");
+const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 //MESSAGE_CONSTANTS

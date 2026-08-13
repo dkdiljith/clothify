@@ -1,5 +1,5 @@
 const Cart = require('../models/cartSchema');
-const { verifyProductVariation } = require('../services/productHelper');
+const { verifyProductVariation } = require('../utils/productHelper');
 const { cartRender } = require(`../controllers/cartController`);
 
 async function validateCartCheckout(req, res, next) {

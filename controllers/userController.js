@@ -10,9 +10,9 @@ const crypto = require("crypto");
 
 
 //nodemailer
-const verificationEmailSend = require(`../services/nodemailer`).verificationEmailSend
-const forgotPasswordEmailSend = require(`../services/nodemailer`).passwordResetEmailSend
-const sendPasswordChangedEmail = require(`../services/nodemailer`).sendPasswordChangedEmail
+const verificationEmailSend = require(`../utils/nodemailer`).verificationEmailSend
+const forgotPasswordEmailSend = require(`../utils/nodemailer`).passwordResetEmailSend
+const sendPasswordChangedEmail = require(`../utils/nodemailer`).sendPasswordChangedEmail
 
 //MESSAGE_CONSTANTS
 // const MESSAGES = require(`../utils/constants`)
