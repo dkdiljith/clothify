@@ -25,7 +25,7 @@ exports.applyReferral = async (req, res) => {
     try {
         const { referralCode } = req.body;
         const userId = res.locals.user._id;
-        const { signupBonus, coinValue } = await referralService.getReferralSettings();
+        const { signupBonus } = await referralService.getReferralSettings();
 
         const result = await referralService.applyReferralCode(userId, referralCode);
 
@@ -71,7 +71,7 @@ exports.cancelReferral = async (req, res) => {
             rewardValue: (referral?.referralCoins || 0) * Number(coinValue),
             referralApplied: false,
         });
-    } catch (error) {
+    } catch {
         return res.status(500).json({
             success: false,
             message: "Unable to dismiss referral popup.",

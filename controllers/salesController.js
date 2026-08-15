@@ -27,7 +27,7 @@ exports.salesReportRender = async (req, res) => {
             endDate: endDate || "",
         });
 
-    } catch (error) {
+    } catch {
         return res.render("admin/salesReport", {
             admin: true,
             orders: [],
@@ -51,7 +51,7 @@ exports.downloadSalesReportPdf = async (req, res) => {
             "Content-Length": pdfBuffer.length,
         });
         return res.end(pdfBuffer);
-    } catch (error) {
+    } catch {
         return res.status(500).send("Failed to generate PDF");
     }
 };
@@ -72,7 +72,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
         
         await workbook.xlsx.write(res);
         return res.end();
-    } catch (error) {
+    } catch {
         return res.status(500).send("Error generating report");
     }
 };
@@ -90,7 +90,7 @@ exports.downloadSalesReportCsv = async (req, res) => {
 
         await workbook.csv.write(res);
         return res.end();
-    } catch (error) {
+    } catch  {
         return res.status(500).send("Error generating CSV report");
     }
 };

@@ -9,7 +9,7 @@ exports.collections = async (req, res) => {
         const data = await searchService.fetchCollectionsData(req.query, userId);
 
         return res.render("user/collections", data);
-    } catch (error) {
+    } catch {
         return res.status(500).render("error", {
             message: "Unable to load collections"
         });

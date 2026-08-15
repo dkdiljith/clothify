@@ -1,12 +1,5 @@
 const Product = require("../models/productSchema");
-const Category = require("../models/categorySchema");
-const Offer = require("../models/offerSchema");
-const Wishlist = require("../models/wishListSchema");
-const Cart = require("../models/cartSchema");
-const path = require('path');
-const fs = require('fs');
-
-
+const Wishlist = require(`../models/wishListSchema`)
 
 
 
