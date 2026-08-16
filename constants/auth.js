@@ -61,10 +61,18 @@ const AUTH_MESSAGES = {
     VERIFICATION_ERROR:
         "An error occurred during verification",
 
+
+
+
+    ACCOUNT_EXIST:
+        "An Account Exist with this email",
+
+    ADMIN_NOT_FOUND:
+        "Admin Not Found"
+
 }
 
 
 
 module.exports = AUTH_MESSAGES
 
-   

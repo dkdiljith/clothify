@@ -1,6 +1,9 @@
 const Admin = require('../models/adminSchema');
 const bcrypt = require('bcryptjs');
 
+//MESSAGE_CONSTANTS
+const ADMIN_AUTH_MESSAGES = require(`../constants/auth`)
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 //secure password
@@ -17,12 +20,12 @@ exports.authenticateAdmin = async (email, password) => {
     const admin = await Admin.findOne({ email }).lean();
 
     if (!admin) {
-        return { success: false, error: 'adminNotFound' };
+        return { success: false, error:ADMIN_AUTH_MESSAGES.ADMIN_NOT_FOUND };
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-        return { success: false, error: 'incorrectPassword' };
+        return { success: false, error: ADMIN_AUTH_MESSAGES.INVALID_PASSWORD };
     }
 
     return {
@@ -44,7 +47,7 @@ exports.registerAdmin = async (adminData) => {
     // Check if email already exists
     const existingAdmin = await Admin.findOne({ email }).lean();
     if (existingAdmin) {
-        return { success: false, error: 'emailExists' };
+        return { success: false, error: ADMIN_AUTH_MESSAGES.ACCOUNT_EXIST };
     }
 
     // Hash password
