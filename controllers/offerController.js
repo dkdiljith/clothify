@@ -1,5 +1,9 @@
 const offerService = require("../services/offerService");
 
+//MESSAGE_CONSTANTS
+const OFFER_MESAGES = require(`../constants/offer`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 exports.offerRender = async (req, res) => {
@@ -26,7 +30,7 @@ exports.offerRender = async (req, res) => {
         prevPage: 0,
         serialNumberStart: 0,
       },
-      errorMessage: "Error fetching offers.",
+      errorMessage: OFFER_MESAGES.FAILED_FETCHING,
     });
   }
 };
@@ -37,18 +41,18 @@ exports.offerRender = async (req, res) => {
 exports.createOffer = async (req, res) => {
   try {
     const savedOffer = await offerService.createOffer(req.body);
-    return res.status(201).json({
+    return res.status(STATUS_CODES.CREATED).json({
       success: true,
       type: "success",
-      message: "Offer created successfully",
+      message: OFFER_MESAGES.CREATED,
       offer: savedOffer,
     });
   } catch (err) {
-    const status = err.status || 500;
+    const status = err.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
     return res.status(status).json({
       success: false,
       type: "error",
-      message: err.message || "Internal server error",
+      message: err.message || OFFER_MESAGES.FAILED_CREATED,
       error: err.error || err.message,
     });
   }
@@ -62,7 +66,7 @@ exports.offerEditJson = async (req, res) => {
     const offer = await offerService.getOfferById(req.params.offerId);
     return res.json(offer);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 };
 
@@ -74,7 +78,7 @@ exports.totalListOfCategories = async (req, res) => {
     const result = await offerService.getPaginatedSubcategories(req.query);
     return res.json(result);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 };
 
@@ -86,7 +90,7 @@ exports.totalListOfProducts = async (req, res) => {
     const result = await offerService.getPaginatedProducts(req.query);
     return res.json(result);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 };
 
@@ -99,18 +103,18 @@ exports.editOffer = async (req, res) => {
       req.params.offerId,
       req.body,
     );
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       type: "success",
-      message: "Offer updated successfully",
+      message: OFFER_MESAGES.UPDATED,
       offer: updatedOffer,
     });
   } catch (err) {
-    const status = err.status || 500;
+    const status = err.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
     return res.status(status).json({
       success: false,
       type: "error",
-      message: err.message || "Internal server error",
+      message: err.message || OFFER_MESAGES.FAILED_UPDATED,
       error: err.error || err.message,
     });
   }
@@ -122,15 +126,15 @@ exports.editOffer = async (req, res) => {
 exports.offerDelete = async (req, res) => {
   try {
     await offerService.deleteOffer(req.params.offerId);
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
-      message: "Offer deleted successfully",
+      message: OFFER_MESAGES.DELETED,
     });
   } catch (err) {
-    const status = err.status || 500;
+    const status = err.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
     return res.status(status).json({
       success: false,
-      message: err.message || "Internal server error",
+      message: err.message || OFFER_MESAGES.FAILED_DELETING,
       error: err.error || err.message,
     });
   }

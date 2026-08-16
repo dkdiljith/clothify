@@ -6,12 +6,18 @@ const OFFER_MESSAGES = {
 
     CREATED:
         "Offer created successfully",
+        FAILED_CREATED:
+        "Failed Creating Offer",
 
     UPDATED:
         "Offer updated successfully",
+        FAILED_UPDATED:
+        "Failed Updating Offer",
 
     DELETED:
         "Offer deleted successfully",
+         FAILED_DELETING:
+        "Failed Deleting Offer",
 
     CODE_EXISTS:
         "Offer code already exists",
@@ -27,6 +33,8 @@ const OFFER_MESSAGES = {
 
     INVALID_DATES:
         "Invalid dates",
+        INVALID_DATEORDER:
+        "End date must be after start date",
 
     INVALID_PERCENTAGE:
         "Percentage must be between 1 and 100",
@@ -63,6 +71,12 @@ const OFFER_MESSAGES = {
 
     AUTO_PRICING_ENABLED:
         "Automatic pricing enabled successfully.",
+
+    FAILED_FETCHING:
+    "Error fetching offers.",
+
+     VALIDATION:
+        "Missing required Fields",
 
 }
 

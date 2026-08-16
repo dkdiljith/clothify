@@ -4,6 +4,11 @@ const Category = require("../models/categorySchema");
 const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
 
+
+//MESSAGE_CONSTANTS
+const OFFER_MESAGES = require(`../constants/offer`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 //////////////////////////////////////////////////////////////////////////////
 
 exports.getFilteredOffers = async (queryData) => {
@@ -62,35 +67,35 @@ exports.validateAndFormatOfferPayload = async (body, excludeId = null) => {
     const { offerCode, offerType, discountType, discountValue, startDate, endDate, targetIds } = body;
 
     if (!offerCode || !offerType || !discountType || discountValue === undefined || !startDate || !endDate) {
-        throw { status: 400, message: "All required fields must be filled" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.VALIDATION};
     }
 
     if (!["product", "subcategory"].includes(offerType)) {
-        throw { status: 400, message: "Invalid offer type" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.INVALID_TYPE };
     }
 
     if (!["percentage", "price"].includes(discountType)) {
-        throw { status: 400, message: "Invalid discount type" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.INVALID_DISCOUNT_TYPE };
     }
 
     const numericDiscount = Number(discountValue);
     if (isNaN(numericDiscount) || numericDiscount < 0) {
-        throw { status: 400, message: "Invalid discount value" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.INVALID_DISCOUNT_VALUE };
     }
 
     if (discountType === "percentage" && (numericDiscount <= 0 || numericDiscount > 100)) {
-        throw { status: 400, message: "Percentage must be between 1 and 100" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.INVALID_PERCENTAGE };
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
     if (isNaN(start) || isNaN(end)) {
-        throw { status: 400, message: "Invalid dates" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.INVALID_DATES };
     }
 
     if (start >= end) {
-        throw { status: 400, message: "End date must be after start date" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.END_DATE_INVALID };
     }
 
     const cleanCode = offerCode.trim().toUpperCase();
@@ -101,11 +106,11 @@ exports.validateAndFormatOfferPayload = async (body, excludeId = null) => {
 
     const duplicate = await Offer.findOne(query);
     if (duplicate) {
-        throw { status: 400, message: "Offer code already exists" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.CODE_EXISTS };
     }
 
     if (!Array.isArray(targetIds) || targetIds.length === 0) {
-        throw { status: 400, message: "Please select at least one item/target" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESAGES.SELECT_TARGET_REQUIRED };
     }
 
     const cleanedTargetIds = [...new Set(targetIds)];
@@ -215,7 +220,7 @@ exports.getPaginatedProducts = async (queryData) => {
 exports.updateOffer = async (offerId, body) => {
     const existingOffer = await Offer.findById(offerId);
     if (!existingOffer) {
-        throw { status: 404, message: "Offer not found" };
+        throw { status: STATUS_CODES.NOT_FOUND, message: OFFER_MESAGES.NOT_FOUND};
     }
 
     const payload = await exports.validateAndFormatOfferPayload(body, offerId);
@@ -237,7 +242,7 @@ exports.updateOffer = async (offerId, body) => {
 exports.deleteOffer = async (offerId) => {
     const deletedOffer = await Offer.findByIdAndDelete(offerId);
     if (!deletedOffer) {
-        throw { status: 404, message: "Offer not found" };
+        throw { status: STATUS_CODES.NOT_FOUND, message: OFFER_MESAGES.NOT_FOUND };
     }
     await pricingExpiryUpdate();
     return deletedOffer;
