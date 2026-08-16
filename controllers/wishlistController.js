@@ -13,7 +13,7 @@ exports.wishlistRender = async (req, res) => {
             product: products,
             pagination
         });
-    } catch (error) {
+    } catch {
         return res.status(500).render("user/wishlist", {
             product: [],
             pagination: { page: 1, limit: 12, totalPages: 1, hasNextPage: false, hasPrevPage: false }

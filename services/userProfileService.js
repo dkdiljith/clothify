@@ -123,8 +123,8 @@ async function fetchUserOrders(userId, queryParams) {
     const isRetryPendingOrder = queryParams.retryPendingOrder === 'true';
     const currentTime = new Date();
 
-    let totalOrders = 0;
-    let orders = [];
+    let totalOrders
+    let orders 
 
     if (isRetryPendingOrder) {
         const eligibleQuery = {

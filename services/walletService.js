@@ -40,7 +40,7 @@ async function getWalletDetails(userId, pageQuery) {
     const page = parseInt(pageQuery) || 1;
     const limit = 3;
     let totalPages = 0;
-    let paginatedTransactions = [];
+    let paginatedTransactions
     let credit = 0;
     let debit = 0;
 
