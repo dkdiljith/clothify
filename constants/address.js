@@ -1,37 +1,45 @@
 
 const ADDRESS_MESSAGES = {
 
-    NOT_FOUND:
-        "Address not found",
-
     ADDED:
         "Address added successfully",
+    FAILED_ADDED:
+        "Failed to add Address",
+
 
     UPDATED:
         "Address updated successfully",
+    FAILED_UPDATED:
+        "Failed to update  address",
+    FAILED_LOAD_UPDATEFORM:
+        "Failed to load edit form",
 
-    DELETED:
-        "Address deleted successfully",
 
     DEFAULT_UPDATED:
         "Default address updated",
 
-    DELETE_FAILED:
+
+    DELETED:
+        "Address deleted successfully",
+    FAILED_DELETE:
         "Failed to delete address",
 
-    EDIT_FORM_FAILED:
-        "Failed to load edit form",
 
+    FIELD_VALIDATION:
+        "Please correct the highlighted errors.",
     PHONE_INVALID:
         "Phone number must be 10 digits",
-
     ZIP_INVALID:
         "Zip code must be 6 digits",
+
+
+    NOT_FOUND:
+        "Address not found",
 
 }
 
 
 
-module.exports =  ADDRESS_MESSAGES
+module.exports = ADDRESS_MESSAGES
 
 
