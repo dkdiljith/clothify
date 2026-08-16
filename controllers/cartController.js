@@ -3,8 +3,8 @@ const cartService = require('../services/cartService');
 
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
-
+const CART_MESSAGES = require(`../constants/cart`)
+const STATUS_CODES = require(`../constants/status-codes`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@ exports.cartRender = async (req, res) => {
     const cartData = await cartService.getCartForRendering(userId, flashMessage);
     return res.render('user/cart', cartData);
   } catch {
-    return res.status(500).send('Cart Render Error');
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(CART_MESSAGES.RENDER_ERROR);
   }
 };
 
@@ -33,7 +33,7 @@ exports.addToCart = async (req, res) => {
     }
     return res.status(result.status).json(result.data);
   } catch {
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: CART_MESSAGES.FAILED_ITEM_ADDED });
   }
 };
 
@@ -54,7 +54,7 @@ exports.deleteCart = async (req, res) => {
     }
     return res.status(result.status).json(result.data);
   } catch {
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: CART_MESSAGES.CART_NOT_FOUND });
   }
 };
 
@@ -72,7 +72,7 @@ exports.getAddressInCart = async (req, res) => {
     }
     return res.render('user/addressInCheckout', result.data);
   } catch {
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: CART_MESSAGES.FAILED_TO_FETCH });
   }
 };
 
@@ -98,6 +98,6 @@ exports.processPaymentPage = async (req, res) => {
     return res.render("user/paymentProcessing", { method: paymentMethod, addressId });
 
   } catch {
-    return res.status(500).send("Internal Server Error");
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(CART_MESSAGES.FAILED_PAYMENTPAGE);
   }
 };

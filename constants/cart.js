@@ -4,14 +4,8 @@ const CART_MESSAGES = {
     ITEM_NOT_FOUND:
         "Item not found",
 
-    ITEM_NOT_FOUND_IN_ORDER:
-        "Item not found in order",
-
     ITEM_REMOVED:
         "Item removed successfully",
-
-    CART_EMPTY:
-        "Cart is empty",
 
     CART_NOT_FOUND:
         "Cart not found",
@@ -36,6 +30,12 @@ const CART_MESSAGES = {
 
     ITEM_ADDED:
         "Added to cart",
+    FAILED_ITEM_ADDED:
+        "Failed Added to Cart",
+    FAILED_TO_FETCH:
+        "Failed to fetch Cart Data",
+    FAILED_PAYMENTPAGE:
+        "Failed to fetch Payment Page",
 
     ONLY_AVAILABLE: (stock) =>
         `Only ${stock} available`,
@@ -44,4 +44,4 @@ const CART_MESSAGES = {
 
 
 
-module.exports =  CART_MESSAGES
+module.exports = CART_MESSAGES

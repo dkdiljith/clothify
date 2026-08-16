@@ -8,6 +8,12 @@ const recalculateCartSummary = require(`../utils/recalculateCartSummary`);
 const { verifyProductVariation } = require("../utils/productHelper");
 
 
+//MESSAGE_CONSTANTS
+const CART_MESSAGES = require(`../constants/cart`)
+const USER_MESSAGE = require(`../constants/auth`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -106,7 +112,7 @@ exports.modifyCartItem = async (
     // Validate the product and its specific variation using your helper
     const check = await verifyProductVariation(productId, vIndex);
     if (!check.isValid) {
-        return { success: false, status: 400, message: check.message };
+        return { success: false, status: STATUS_CODES.BAD_REQUEST, message: check.message };
     }
     let cart = await Cart.findOne({ userId });
     const existingItem = cart
@@ -119,10 +125,10 @@ exports.modifyCartItem = async (
     // HANDLE QUANTITY DECREMENT (changeAmount is negative, e.g., -1)
     if (changeAmount < 0) {
         if (!existingItem) {
-            return { success: false, status: 404, message: "Item not found in cart" };
+            return { success: false, status: STATUS_CODES.NOT_FOUND, message: CART_MESSAGES.ITEM_NOT_FOUND };
         }
         if (existingItem.quantity <= 1) {
-            return { success: false, status: 400, message: "Minimum quantity is 1" };
+            return { success: false, status: STATUS_CODES.BAD_REQUEST, message:CART_MESSAGES.MIN_QUANTITY };
         }
         existingItem.quantity += changeAmount; // Decreases the quantity safely
         await cart.save();
@@ -132,11 +138,11 @@ exports.modifyCartItem = async (
         const currentUnitProductPrice = parseFloat(check.variation.price || 0);
         return {
             success: true,
-            status: 200,
+            status: STATUS_CODES.OK,
             data: {
                 success: false,
                 info: true,
-                message: "Quantity decreased",
+                message:CART_MESSAGES.QUANTITY_DECREASED,
                 newQuantity: existingItem.quantity,
                 itemTotal: existingItem.quantity * currentUnitProductPrice,
                 cartSubtotal: updatedCart.subtotal,
@@ -163,15 +169,15 @@ exports.modifyCartItem = async (
     if (newTotalQty > 10) {
         return {
             success: false,
-            status: 400,
-            message: "Maximum limit of 10 units reached",
+            status: STATUS_CODES.BAD_REQUEST,
+            message: CART_MESSAGES.MAX_QUANTITY,
         };
     }
     if (newTotalQty > productStock) {
         return {
             success: false,
-            status: 400,
-            message: `Only ${productStock} units available in stock`,
+            status: STATUS_CODES.BAD_REQUEST,
+            message:CART_MESSAGES.ONLY_AVAILABLE(productStock),
         };
     }
     if (existingItem) {
@@ -194,11 +200,11 @@ exports.modifyCartItem = async (
     );
     return {
         success: true,
-        status: 200,
+        status: STATUS_CODES.OK,
         data: {
             success: existingItem ? false : true,
             info: existingItem ? true : undefined,
-            message: existingItem ? "Quantity updated" : `Item Added to cart`,
+            message: existingItem ? CART_MESSAGES.QUANTITY_UPDATED : CART_MESSAGES.ITEM_ADDED,
             newQuantity: postSavedTargetItem
                 ? postSavedTargetItem.quantity
                 : newTotalQty,
@@ -227,7 +233,7 @@ exports.deleteCartItem = async (userId, productId, variationIndex) => {
     const vIndex = parseInt(variationIndex);
     const cart = await Cart.findOne({ userId });
     if (!cart) {
-        return { success: false, status: 404, message: "Cart not found" };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: CART_MESSAGES.CART_NOT_FOUND};
     }
     // Filter out the item matching both product ID and variation index
     cart.items = cart.items.filter(
@@ -244,10 +250,10 @@ exports.deleteCartItem = async (userId, productId, variationIndex) => {
     const updatedCart = await Cart.findOne({ userId });
     return {
         success: true,
-        status: 200,
+        status: STATUS_CODES.OK,
         data: {
             success: true,
-            message: "Item removed successfully",
+            message: CART_MESSAGES.ITEM_REMOVED,
             cartSubtotal: updatedCart.subtotal,
             cartTotalItems: updatedCart.items.reduce(
                 (acc, item) => acc + item.quantity,
@@ -268,7 +274,7 @@ exports.deleteCartItem = async (userId, productId, variationIndex) => {
 
 exports.prepareCheckoutAddresses = async (userId) => {
     if (!userId) {
-        return { success: false, status: 404, message: "User not found" };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: USER_MESSAGE.USER_NOT_FOUND };
     }
     // Fetch the user's initial cart data
     const cartData = await Cart.findOne({ userId: userId });
@@ -321,7 +327,7 @@ exports.prepareCheckoutAddresses = async (userId) => {
         .lean();
     return {
         success: true,
-        status: 200,
+        status: STATUS_CODES.OK,
         data: {
             cart: finalizedCart,
             address: address,
