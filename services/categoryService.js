@@ -9,7 +9,9 @@ const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
 
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+const CATEGORY_MESSAGE = require(`../constants/category`)
+const OFFER_MESSAGES = require(`../constants/offer`)
+const STATUS_CODES = require(`../constants/status-codes`)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +26,7 @@ exports.getAllCategories = async () => {
 exports.getCategoryEditData = async (parentId) => {
     const parentCategory = await Category.findById(parentId).lean();
     if (!parentCategory) {
-        return { success: false, status: 404, message: "Parent category not found" };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.PARENT_NOT_FOUND };
     }
     const subcategories = await Category.find({
         parentCategory: parentCategory._id
@@ -80,14 +82,14 @@ exports.createCategory = async (name, parentCategory) => {
         .replace(/(^\w|\s\w)/g, m => m.toUpperCase());
     const existingCategory = await Category.findOne({ name: formattedName }).lean();
     if (existingCategory) {
-        return { success: false, status: 400, message: "Category already exists!" };
+        return { success: false, status: STATUS_CODES.BAD_REQUEST, message:CATEGORY_MESSAGE.CATEGORY_ALREADY_EXISTS };
     }
     const newCategory = new Category({
         name: formattedName,
         parentCategory: parentCategory || null
     });
     await newCategory.save();
-    return { success: true, status: 201, message: "Category created successfully!" };
+    return { success: true, status: STATUS_CODES.CREATED, message: CATEGORY_MESSAGE.CATEGORY };
 };
 
 
@@ -95,7 +97,7 @@ exports.createCategory = async (name, parentCategory) => {
 exports.removeCategory = async (categoryId) => {
     const category = await Category.findById(categoryId).lean();
     if (!category) {
-        return { success: false, status: 404, message: "Category not found!" };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.CATEGORY_NOT_FOUND };
     }
     if (category.parentCategory == null) {
         // Find subcategories using .lean()
@@ -104,10 +106,10 @@ exports.removeCategory = async (categoryId) => {
         const deleteCategories = [category._id, ...subcategories.map(sub => sub._id)];
         // Delete all categories
         await Promise.all(deleteCategories.map(id => Category.findByIdAndDelete(id)));
-        return { success: true, status: 200, message: "Category and subcategories deleted successfully." };
+        return { success: true, status: STATUS_CODES.OK, message: CATEGORY_MESSAGE.DELETED };
     } else {
         await Category.findByIdAndDelete(categoryId);
-        return { success: true, status: 200, message: "Subcategory deleted successfully." };
+        return { success: true, status: STATUS_CODES.OK, message: CATEGORY_MESSAGE.SUBCATEGORY_DELETED };
     }
 };
 
@@ -127,14 +129,14 @@ exports.updateCategory = async (categoryId, name, newSubcategory) => {
         const trimmedSubcategory = newSubcategory.trim();
         const existingCategory = await Category.findOne({ name: trimmedSubcategory }).lean();
         if (existingCategory) {
-            return { success: false, status: 400, message: "This Category exist." };
+            return { success: false, status: STATUS_CODES.BAD_REQUEST, message: CATEGORY_MESSAGE.CATEGORY_ALREADY_EXISTS };
         }
         await Category.create({
             name: trimmedSubcategory,
             parentCategory: categoryId,
         });
     }
-    return { success: true, status: 200, message: "Category updated successfully" };
+    return { success: true, status: STATUS_CODES.OK, message:CATEGORY_MESSAGE.UPDATED };
 };
 
 
@@ -144,7 +146,7 @@ exports.getOfferRenderData = async (categoryId) => {
     const now = new Date();
     const category = await Category.findById(categoryId).lean();
     if (!category) {
-        return { success: false, status: 404, message: "Category not found." };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.CATEGORY_NOT_FOUND};
     }
     const offers = await Offer.find({
         offerType: "subcategory",
@@ -155,7 +157,7 @@ exports.getOfferRenderData = async (categoryId) => {
     }).lean();
     return {
         success: true,
-        status: 200,
+        status: STATUS_CODES.OK,
         data: {
             category,
             offers
@@ -172,20 +174,20 @@ exports.applyCategoryOffer = async (categoryId, offerId) => {
     const offer = await Offer.findById(offerId).lean();
     const products = await Product.find({ categoryId });
     if (!category) {
-        return { success: false, status: 404, message: "Category not found." };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.CATEGORY_NOT_FOUND };
     }
     if (!offer) {
-        return { success: false, status: 404, message: "Offer not found." };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message:  OFFER_MESSAGES.NOT_FOUND};
     }
     if (!offer.isActive || offer.startDate > now || offer.endDate < now) {
-        return { success: false, status: 400, message: "This offer is not active." };
+        return { success: false, status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESSAGES.OFFER_NOT_ACTIVE };
     }
     if (offer.offerType !== "subcategory") {
-        return { success: false, status: 400, message: "This offer is not a subcategory offer." };
+        return { success: false, status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESSAGES.INVALID_SUBCATEGORY_OFFER };
     }
     const targetMatch = offer.targetIds.some(item => item.toString() === categoryId);
     if (!targetMatch) {
-        return { success: false, status: 400, message: "This offer does not belong to this subcategory." };
+        return { success: false, status: STATUS_CODES.BAD_REQUEST, message: OFFER_MESSAGES.SUBCATEGORY_MISMATCH };
     }
     for (let i = 0; i < products.length; i++) {
         const product = products[i];
@@ -215,7 +217,7 @@ exports.applyCategoryOffer = async (categoryId, offerId) => {
     category.offerLocked = true;
     await category.save();
     await pricingExpiryUpdate();
-    return { success: true, status: 200, message: "Manual category offer applied successfully." };
+    return { success: true, status: STATUS_CODES.OK, message: CATEGORY_MESSAGE.MANUAL_OFFER_APPLED };
 };
 
 
@@ -226,7 +228,7 @@ exports.resetCategoryPricing = async (categoryId) => {
     const category = await Category.findById(categoryId);
     const products = await Product.find({ categoryId });
     if (!category) {
-        return { success: false, status: 404, message: "Category not found." };
+        return { success: false, status: STATUS_CODES.NOT_FOUND, message:CATEGORY_MESSAGE.CATEGORY_NOT_FOUND };
     }
     for (let i = 0; i < products.length; i++) {
         const product = products[i];
@@ -241,5 +243,5 @@ exports.resetCategoryPricing = async (categoryId) => {
     category.offerLocked = false;
     await category.save();
     await pricingExpiryUpdate();
-    return { success: true, status: 200, message: "Automatic pricing enabled successfully." };
+    return { success: true, status: STATUS_CODES.OK, message: CATEGORY_MESSAGE.AUTOMATIC_OFFER_APPLIED };
 };
