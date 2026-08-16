@@ -1,7 +1,9 @@
 const couponService = require("../services/couponService");
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+const COUPON_MESSAGES = require(`../constants/coupon`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -48,7 +50,7 @@ exports.couponRender = async (req, res) => {
                 prevPage: 0,
                 serialNumberStart: 0,
             },
-            errorMessage: "Error fetching coupons.",
+            errorMessage: COUPON_MESSAGES.FETCHING_FAILED,
         });
     }
 };
@@ -60,7 +62,7 @@ exports.couponEditJson = async (req, res) => {
         const coupon = await couponService.getCouponById(req.params.couponId);
         return res.json(coupon);
     } catch (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: err.message });
     }
 };
 
@@ -76,10 +78,10 @@ exports.createCoupon = async (req, res) => {
             ...(result.coupon && { coupon: result.coupon }),
         });
     } catch {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             type: "server_error",
-            message: "Internal server error occurred while creating the coupon.",
+            message: COUPON_MESSAGES.CREATE_FAILED,
         });
     }
 };
@@ -97,10 +99,10 @@ exports.couponEdit = async (req, res) => {
             ...(result.coupon && { coupon: result.coupon }),
         });
     } catch {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             type: "server_error",
-            message: "Internal server error occurred while updating the coupon.",
+            message: COUPON_MESSAGES.EDIT_FAILED,
         });
     }
 };
@@ -116,9 +118,9 @@ exports.couponDelete = async (req, res) => {
             message: result.message,
         });
     } catch {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Internal server error",
+            message:COUPON_MESSAGES.FAILED_DELETE,
         });
     }
 };
@@ -136,8 +138,8 @@ exports.applyCoupon = async (req, res) => {
         });
     } catch {
         return res
-            .status(500)
-            .json({ success: false, message: "Error applying coupon" });
+            .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .json({ success: false, message:COUPON_MESSAGES.APPLY_ERROR});
     }
 };
 
@@ -153,7 +155,7 @@ exports.removeCoupon = async (req, res) => {
         });
     } catch {
         return res
-            .status(500)
-            .json({ success: false, message: "Error removing coupon" });
+            .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .json({ success: false, message: COUPON_MESSAGES.REMOVE_ERROR });
     }
 };
