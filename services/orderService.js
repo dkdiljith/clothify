@@ -363,7 +363,7 @@ exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
     if (returnAll) {
         const nonReturnableItems = order.items.filter((i) => i.status !== "Completed");
         if (nonReturnableItems.length > 0) {
-            const details = nonReturnableItems
+            nonReturnableItems
                 .map((i) => {
                     let statusReason = "is not eligible for return";
                     if (i.status === "Returned") statusReason = "has already been returned";

@@ -3,10 +3,15 @@ const Category = require("../models/categorySchema");
 const Offer = require("../models/offerSchema");
 const Wishlist = require("../models/wishListSchema");
 const Cart = require("../models/cartSchema");
-const path = require('path');
+const path = require('path'); 
 const fs = require('fs');
 
 const { pricingExpiryUpdate } = require("../utils/pricingExpiry");
+
+
+// MESSAGE_CONSTANTS
+const PRODUCT_MESSAGES = require(`../constants/product`)
+const OFFER_MESSAGES = require(`../constants/offer`)
 
 // Helper: Fetch grouped categories
 async function getGroupedCategories() {
@@ -28,10 +33,10 @@ function validateAndParseSizes(sizeNamesInput, sizeQuantitiesInput, sizePricesIn
     let sizePrices = Array.isArray(sizePricesInput) ? sizePricesInput : [sizePricesInput].filter(Boolean);
 
     if (!sizeNames.length || !sizeQuantities.length || !sizePrices.length) {
-        throw new Error("Size details are required.");
+        throw new Error(PRODUCT_MESSAGES.SIZE_REQUIRED);
     }
     if (new Set(sizeNames).size !== sizeNames.length) {
-        throw new Error("Duplicate sizes are not allowed.");
+        throw new Error(PRODUCT_MESSAGES.DUPLICATE_SIZES);
     }
 
     const details = [];
@@ -40,12 +45,12 @@ function validateAndParseSizes(sizeNamesInput, sizeQuantitiesInput, sizePricesIn
         const quantity = Number(sizeQuantities[i]);
         const price = Number(sizePrices[i]);
 
-        if (!size) throw new Error("Invalid size name.");
+        if (!size) throw new Error(PRODUCT_MESSAGES.INVALID_SIZE);
         if (!Number.isInteger(quantity) || quantity < 1) {
-            throw new Error("Quantity must be at least 1.");
+            throw new Error(PRODUCT_MESSAGES.INVALID_QUANTITY);
         }
         if (!Number.isInteger(price) || price < 200) {
-            throw new Error("Price must be at least ₹200.");
+            throw new Error(PRODUCT_MESSAGES.INVALID_PRICE);
         }
 
         details.push({ size, quantity, price });
@@ -141,28 +146,28 @@ async function createNewProduct(body, files) {
     const validGenders = ["Men", "Women", "Unisex"];
 
     if (!name || name.length < 3 || name.length > 100 || !validNameRegex.test(name)) {
-        throw new Error("Invalid product name or length (must be 3-100 characters).");
+        throw new Error(PRODUCT_MESSAGES.INVALID_NAME);
     }
     if (!categoryId || !categoryExists) {
-        throw new Error("Valid category is required.");
+        throw new Error(PRODUCT_MESSAGES.INVALID_CATEGORY);
     }
     if (!validGenders.includes(gender)) {
         throw new Error("Invalid gender selected.");
     }
     if (!description || description.length < 20 || description.length > 1000) {
-        throw new Error("Description must be between 20 and 1000 characters.");
+        throw new Error(PRODUCT_MESSAGES.DESCRIPTION_REQUIRED);
     }
 
     const existingProduct = await Product.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
     if (existingProduct) {
-        throw new Error("Product already exists.");
+        throw new Error(PRODUCT_MESSAGES.PRODUCT_EXISTS);
     }
 
     const details = validateAndParseSizes(body.sizeName, body.sizeQuantity, body.sizePrice);
 
     const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!files || files.length === 0) {
-        throw new Error("At least one image is required.");
+        throw new Error(PRODUCT_MESSAGES.IMAGE_REQUIRED);
     }
     if (files.length > 5) {
         throw new Error("Maximum 5 images allowed.");
@@ -170,7 +175,7 @@ async function createNewProduct(body, files) {
 
     for (const file of files) {
         if (!allowedMimeTypes.includes(file.mimetype) || file.size > 10 * 1024 * 1024) {
-            throw new Error("Invalid image format or file size exceeds 10MB.");
+            throw new Error(PRODUCT_MESSAGES.INVALID_IMAGE_FORMAT);
         }
     }
 
@@ -205,7 +210,7 @@ async function updateExistingProduct(productId, body, files) {
 
     const validNameRegex = /^[a-zA-Z0-9\s\-&()']+$/;
     if (!name || name.length < 3 || name.length > 100 || !validNameRegex.test(name)) {
-        throw new Error("Invalid product name.");
+        throw new Error(PRODUCT_MESSAGES.INVALID_NAME);
     }
 
     const existingProduct = await Product.findOne({
@@ -213,7 +218,7 @@ async function updateExistingProduct(productId, body, files) {
         name: { $regex: new RegExp(`^${name}$`, "i") }
     });
     if (existingProduct) {
-        throw new Error("Another product with this name already exists.");
+        throw new Error(PRODUCT_MESSAGES.PRODUCT_EXISTS);
     }
 
     const categoryExists = await Category.findById(categoryId);
@@ -227,7 +232,7 @@ async function updateExistingProduct(productId, body, files) {
     }
 
     if (!description || description.length < 20 || description.length > 1000) {
-        throw new Error("Description must be between 20 and 1000 characters.");
+        throw new Error(PRODUCT_MESSAGES.DESCRIPTION_REQUIRED);
     }
 
     const details = validateAndParseSizes(body.sizeName, body.sizeQuantity, body.sizePrice);
@@ -252,11 +257,11 @@ async function updateExistingProduct(productId, body, files) {
     if (files && files.length > 0) {
         for (const file of files) {
             if (!allowedMimeTypes.includes(file.mimetype) || file.size > 10 * 1024 * 1024) {
-                throw new Error("Invalid image format or size exceeds 10MB.");
+                throw new Error(PRODUCT_MESSAGES.INVALID_IMAGE_FORMAT);
             }
         }
         if (product.images.length + files.length > 5) {
-            throw new Error("Maximum 5 images allowed in total.");
+            throw new Error(PRODUCT_MESSAGES.MAX_IMAGES);
         }
         const newImages = files.map((file, index) => ({
             path: "/images/productImages/" + file.filename,
@@ -266,7 +271,7 @@ async function updateExistingProduct(productId, body, files) {
     }
 
     if (product.images.length === 0) {
-        throw new Error("At least one image is required.");
+        throw new Error(PRODUCT_MESSAGES.IMAGE_REQUIRED);
     }
 
     product.name = name;
@@ -288,7 +293,7 @@ async function toggleBlockProduct(productId) {
 
     const existingActive = await Product.findOne({ name: product.name, isActive: true }).lean();
     if (!product.isActive && existingActive) {
-        throw new Error("Cannot activate. An active product with this name already exists.");
+        throw new Error(PRODUCT_MESSAGES.PRODUCT_EXISTS);
     }
 
     product.isActive = !product.isActive;
@@ -319,10 +324,10 @@ async function applyOfferToProduct(productId, offerId) {
     const product = await Product.findById(productId);
     const offer = await Offer.findById(offerId).lean();
 
-    if (!product) throw new Error("Product not found.");
-    if (!offer) throw new Error("Offer not found.");
+    if (!product) throw new Error(PRODUCT_MESSAGES.VARIATION_NOT_FOUND);
+    if (!offer) throw new Error(OFFER_MESSAGES.NOT_FOUND);
     if (!offer.isActive || offer.startDate > now || offer.endDate < now) {
-        throw new Error("This offer is not active.");
+        throw new Error(OFFER_MESSAGES.OFFER_NOT_ACTIVE);
     }
 
     let targetMatch = false;
@@ -334,7 +339,7 @@ async function applyOfferToProduct(productId, offerId) {
     }
 
     if (!targetMatch) {
-        throw new Error("This offer is not applicable for this product.");
+        throw new Error(OFFER_MESSAGES.VARIANT_APPLY_FAILED);
     }
 
     let appliedCount = 0;
@@ -361,7 +366,7 @@ async function applyOfferToProduct(productId, offerId) {
     });
 
     if (appliedCount === 0) {
-        throw new Error("Offer could not be applied to any product variant due to pricing rules.");
+        throw new Error(OFFER_MESSAGES.VARIANT_APPLY_FAILED);
     }
 
     await product.save();
@@ -370,7 +375,7 @@ async function applyOfferToProduct(productId, offerId) {
 
 async function resetAutoPricing(productId) {
     const product = await Product.findById(productId);
-    if (!product) throw new Error("Product not found.");
+    if (!product) throw new Error(PRODUCT_MESSAGES.VARIATION_NOT_FOUND);
 
     product.details.forEach(detail => {
         detail.offerId = null;

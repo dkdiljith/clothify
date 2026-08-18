@@ -83,6 +83,10 @@ const PRODUCT_MESSAGES = {
     VARIATION_MISSING: (productName) =>
         `${productName} variation not found`,
 
+    FAILED_LOADING_ADDPRODUCTPAGE:
+    "Failed Loading Add Product Page",
+    FAILED_LOADING:
+    "Failed Loading Products",
 }
 
 
