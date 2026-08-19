@@ -8,7 +8,6 @@ const Setting = require("../models/settingSchema");
 
 //MESSAGE_CONSTANTS
 const REFERRAL_MESSAGES = require(`../constants/referral`)
-const COMMON_MESSAGES = require(`../constants/common-messages`)
 
 const DEFAULT_REFERRAL_SETTINGS = {
     coinValue: "0.010",

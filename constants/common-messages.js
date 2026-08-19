@@ -1,4 +1,3 @@
-const { UNAUTHORIZED } = require("./status-codes")
 
 const COMMON_MESSAGES = {
 

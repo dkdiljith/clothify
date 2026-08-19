@@ -1,4 +1,8 @@
+// controllers/salesController.js
 const salesReportService = require("../services/salesService");
+const SALES_MESSAGES = require("../constants/sales");
+const STATUS_CODES = require("../constants/status-codes");
+const COMMON_MESSAGES = require("../constants/common-messages");
 
 exports.salesReportRender = async (req, res) => {
     try {
@@ -35,7 +39,7 @@ exports.salesReportRender = async (req, res) => {
             pagination: { page: 1, limit: 5, totalPages: 1, hasNextPage: false, hasPrevPage: false, serialNumberStart: 0 },
             startDate: "",
             endDate: "",
-            errorMessage: "Error fetching sales report. Please try again later.",
+            errorMessage: SALES_MESSAGES.ERROR_FETCHING_REPORT,
         });
     }
 };
@@ -45,14 +49,14 @@ exports.downloadSalesReportPdf = async (req, res) => {
         const { startDate, endDate } = req.query;
         const pdfBuffer = await salesReportService.generatePdfBuffer(startDate, endDate);
 
-        res.writeHead(200, {
+        res.writeHead(STATUS_CODES.OK, {
             "Content-Type": "application/pdf",
             "Content-Disposition": "attachment; filename=sales-report.pdf",
             "Content-Length": pdfBuffer.length,
         });
         return res.end(pdfBuffer);
     } catch {
-        return res.status(500).send("Failed to generate PDF");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(SALES_MESSAGES.FAILED_PDF);
     }
 };
 
@@ -73,7 +77,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
         await workbook.xlsx.write(res);
         return res.end();
     } catch {
-        return res.status(500).send("Error generating report");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(SALES_MESSAGES.ERROR_EXCEL);
     }
 };
 
@@ -91,6 +95,6 @@ exports.downloadSalesReportCsv = async (req, res) => {
         await workbook.csv.write(res);
         return res.end();
     } catch  {
-        return res.status(500).send("Error generating CSV report");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(SALES_MESSAGES.ERROR_CSV);
     }
 };
