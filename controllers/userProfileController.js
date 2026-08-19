@@ -1,4 +1,6 @@
+// controllers/userProfileController.js
 const userService = require("../services/userProfileService");
+const PROFILE_MESSAGES = require("../constants/profile");
 
 // Profile Renders
 exports.profileRender = async (req, res) => {
@@ -7,7 +9,7 @@ exports.profileRender = async (req, res) => {
         const { userData, address } = await userService.fetchUserProfile(userId);
         return res.render(`user/profile`, { userData, address, user_sidebar: true });
     } catch {
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).send(PROFILE_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -29,12 +31,12 @@ exports.profileEdit = async (req, res) => {
         await userService.updateUserData(userId, req.body);
         return res.status(200).json({
             success: true,
-            message: "Profile updated successfully.",
+            message: PROFILE_MESSAGES.PROFILE_UPDATED_SUCCESS,
         });
     } catch (error) {
         return res.status(400).json({
             success: false,
-            message: error.message || "Something went wrong. Please try again.",
+            message: error.message,
         });
     }
 };
@@ -54,17 +56,17 @@ exports.deleteUser = async (req, res) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    message: "Internal Server Error during deactivation"
+                    message: PROFILE_MESSAGES.DEACTIVATION_SERVER_ERROR
                 });
             }
             return res.status(200).json({
                 success: true,
-                message: "User account session cleared successfully"
+                message: PROFILE_MESSAGES.SESSION_CLEARED_SUCCESS
             });
         });
     } catch (error) {
-        const statusCode = error.message === "User not found" ? 404 : 500;
-        return res.status(statusCode).json({ success: false, message: error.message || "Server Error" });
+        const statusCode = error.message === PROFILE_MESSAGES.USER_NOT_FOUND ? 404 : 500;
+        return res.status(statusCode).json({ success: false, message: error.message });
     }
 };
 
@@ -75,7 +77,7 @@ exports.addressRender = async (req, res) => {
         const addresses = await userService.fetchUserAddresses(userId);
         return res.render('user/address', { addresses, user_sidebar: true });
     } catch {
-        return res.status(500).send('Internal Server Error');
+        return res.status(500).send(PROFILE_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -88,7 +90,7 @@ exports.editAddressRender = async (req, res) => {
         const address = await userService.fetchSingleAddress(req.params.id);
         return res.render(`user/editAddress`, { address, user_sidebar: true });
     } catch {
-        return res.status(500).send('Internal Server Error');
+        return res.status(500).send(PROFILE_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -98,7 +100,7 @@ exports.addAddress = async (req, res) => {
         const addresses = await userService.createNewAddress(userId, req.body);
         return res.render('user/address', { addresses, user_sidebar: true });
     } catch {
-        return res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: PROFILE_MESSAGES.SERVER_ERROR });
     }
 };
 
@@ -107,7 +109,7 @@ exports.editAddress = async (req, res) => {
         await userService.updateExistingAddress(req.params.id, req.body);
         return res.redirect('back');
     } catch {
-        return res.status(500).send('Server Error');
+        return res.status(500).send(PROFILE_MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -117,7 +119,7 @@ exports.setDefaultAddress = async (req, res) => {
         await userService.setDefaultAddress(userId, req.params.id);
         return res.redirect('/user/address');
     } catch {
-        return res.status(500).send('Server error');
+        return res.status(500).send(PROFILE_MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -126,7 +128,7 @@ exports.deleteAddress = async (req, res) => {
         await userService.removeAddress(req.params.id);
         return res.redirect(`/user/address`);
     } catch {
-        return res.status(500).send('Server Error');
+        return res.status(500).send(PROFILE_MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -158,6 +160,6 @@ exports.userOrderDetails = async (req, res) => {
         const order = await userService.fetchOrderDetails(req.params.orderId);
         return res.render(`user/orderDetails`, { order, user_sidebar: true });
     } catch {
-        return res.status(500).send('Server Error');
+        return res.status(500).send(PROFILE_MESSAGES.SERVER_ERROR);
     }
 };

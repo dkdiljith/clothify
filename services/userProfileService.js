@@ -1,6 +1,8 @@
+// services/userProfileService.js
 const User = require("../models/userSchema");
 const Address = require("../models/addressSchema");
 const Order = require("../models/orderSchema");
+const PROFILE_MESSAGES = require("../constants/profile");
 
 // --- Profile Services ---
 
@@ -19,30 +21,30 @@ async function updateUserData(userId, body) {
 
     // Validations
     const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
-    if (!name) throw new Error("Name is required.");
-    if (name.length < 3 || name.length > 50) throw new Error("Name must be between 3 and 50 characters.");
-    if (!nameRegex.test(name)) throw new Error("Name can contain only letters and single spaces.");
+    if (!name) throw new Error(PROFILE_MESSAGES.NAME_REQUIRED);
+    if (name.length < 3 || name.length > 50) throw new Error(PROFILE_MESSAGES.NAME_LENGTH_INVALID);
+    if (!nameRegex.test(name)) throw new Error(PROFILE_MESSAGES.NAME_FORMAT_INVALID);
 
     const phoneRegex = /^[6-9]\d{9}$/;
-    if (!phoneRegex.test(phone)) throw new Error("Invalid mobile number.");
+    if (!phoneRegex.test(phone)) throw new Error(PROFILE_MESSAGES.INVALID_PHONE);
 
     const allowedGenders = ["Male", "Female", "Other"];
-    if (!allowedGenders.includes(gender)) throw new Error("Invalid gender selected.");
+    if (!allowedGenders.includes(gender)) throw new Error(PROFILE_MESSAGES.INVALID_GENDER);
 
-    if (!dob) throw new Error("Date of birth is required.");
+    if (!dob) throw new Error(PROFILE_MESSAGES.DOB_REQUIRED);
     const dobDate = new Date(dob);
-    if (isNaN(dobDate.getTime())) throw new Error("Invalid date of birth.");
+    if (isNaN(dobDate.getTime())) throw new Error(PROFILE_MESSAGES.INVALID_DOB);
     
     const today = new Date();
-    if (dobDate > today) throw new Error("Date of birth cannot be in the future.");
+    if (dobDate > today) throw new Error(PROFILE_MESSAGES.DOB_FUTURE_ERROR);
 
     let age = today.getFullYear() - dobDate.getFullYear();
     const monthDiff = today.getMonth() - dobDate.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
         age--;
     }
-    if (age < 13) throw new Error("Minimum age is 13 years.");
-    if (age > 120) throw new Error("Invalid date of birth.");
+    if (age < 13) throw new Error(PROFILE_MESSAGES.MIN_AGE_ERROR);
+    if (age > 120) throw new Error(PROFILE_MESSAGES.INVALID_DOB);
 
     const updatedUser = await User.findByIdAndUpdate(
         userId,
@@ -50,7 +52,7 @@ async function updateUserData(userId, body) {
         { new: true, runValidators: true }
     );
 
-    if (!updatedUser) throw new Error("User not found.");
+    if (!updatedUser) throw new Error(PROFILE_MESSAGES.USER_NOT_FOUND);
     return updatedUser;
 }
 
@@ -62,7 +64,7 @@ async function checkUserHasPassword(userId) {
 async function deactivateUserAccount(userId) {
     const result = await User.updateOne({ _id: userId }, { $set: { isActive: false } });
     if (result.modifiedCount === 0) {
-        throw new Error("User not found");
+        throw new Error(PROFILE_MESSAGES.USER_NOT_FOUND);
     }
     return true;
 }
@@ -123,8 +125,8 @@ async function fetchUserOrders(userId, queryParams) {
     const isRetryPendingOrder = queryParams.retryPendingOrder === 'true';
     const currentTime = new Date();
 
-    let totalOrders
-    let orders 
+    let totalOrders;
+    let orders;
 
     if (isRetryPendingOrder) {
         const eligibleQuery = {
