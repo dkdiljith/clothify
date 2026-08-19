@@ -1,4 +1,8 @@
 const Address = require("../models/addressSchema");
+
+//MESSAGE_CONSTANTS
+const ADDRESS_MESSAGE = require(`../constants/address`)
+
 /////////////////////////////////////////////////////////////////////////////////
 
 
@@ -64,7 +68,7 @@ exports.deleteAddress = async (addressId, userId) => {
   // Verify address belongs to user
   const address = await Address.findOne({ _id: addressId, userId });
   if (!address) {
-    return { success: false, message: "Address not found" };
+    return { success: false, message: ADDRESS_MESSAGE.NOT_FOUND };
   }
   const wasDefault = address.isDefault;
   await Address.findByIdAndDelete(addressId);
@@ -77,5 +81,5 @@ exports.deleteAddress = async (addressId, userId) => {
       });
     }
   }
-  return { success: true, message: "Address deleted successfully" };
+  return { success: true, message: ADDRESS_MESSAGE.DELETED };
 };

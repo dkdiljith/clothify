@@ -1,8 +1,9 @@
 const addressService = require(`../services/addressService`);
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
-
+const ADDRESS_MESSAGE = require(`../constants/address`)
+const COMMON_MESSAGE = require(`../constants/common-messages`)
+const STATUS_CODES = require(`../constants/status-codes`)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // THIS ENTIRE CONTROLLER USES  JSON RETURNS
 
@@ -34,26 +35,26 @@ exports.addAddress = async (req, res) => {
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "All fields are required",
+        message: COMMON_MESSAGE.ALL_FIELDS_REQUIRED,
         missingFields,
       });
     }
 
     // Validate phone number
     if (!/^\d{10}$/.test(phone)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "Phone number must be 10 digits",
+        message: ADDRESS_MESSAGE.PHONE_INVALID,
       });
     }
 
     // Validate zip code
     if (!/^\d{6}$/.test(zip)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "Zip code must be 6 digits",
+        message: ADDRESS_MESSAGE.ZIP_INVALID,
       });
     }
 
@@ -73,13 +74,13 @@ exports.addAddress = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Address added successfully",
+      message: ADDRESS_MESSAGE.ADDED,
       address: newAddress,
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: ADDRESS_MESSAGE.FAILED_ADDED,
     });
   }
 };
@@ -97,21 +98,21 @@ exports.renderEditForm = async (req, res) => {
 
     // If not found, return JSON error
     if (!address) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
-        message: "Address not found or unauthorized",
+        message: ADDRESS_MESSAGE.NOT_FOUND,
       });
     }
 
     // Return the successful JSON response your frontend expects
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       address: address,
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Server error while fetching address details",
+      message: ADDRESS_MESSAGE.FAILED_LOAD_UPDATEFORM,
     });
   }
 };
@@ -157,19 +158,19 @@ exports.editAddress = async (req, res) => {
 
     // Validate phone number format
     if (phone && !/^\d{10}$/.test(phone)) {
-      errors.phone = "Phone number must be exactly 10 digits.";
+      errors.phone = ADDRESS_MESSAGE.PHONE_INVALID;
     }
 
     // Validate zip code format
     if (zip && !/^\d{6}$/.test(zip)) {
-      errors.zip = "Zip code must be exactly 6 digits.";
+      errors.zip = ADDRESS_MESSAGE.ZIP_INVALID;
     }
 
     // If any validation errors exist, return 400 with the errors object
     if (Object.keys(errors).length > 0) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "Please correct the highlighted errors.",
+        message: ADDRESS_MESSAGE.FIELD_VALIDATION,
         errors: errors,
       });
     }
@@ -192,21 +193,21 @@ exports.editAddress = async (req, res) => {
     );
 
     if (!updatedAddress) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
-        message: "Address not found or unauthorized.",
+        message: ADDRESS_MESSAGE.NOT_FOUND,
       });
     }
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
-      message: "Address updated successfully.",
+      message: ADDRESS_MESSAGE.UPDATED,
       address: updatedAddress,
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error.",
+      message: ADDRESS_MESSAGE.FAILED_UPDATED,
     });
   }
 };
@@ -225,7 +226,7 @@ exports.deleteAddress = async (req, res) => {
     const result = await addressService.deleteAddress(addressId, userId);
 
     if (!result.success) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
         message: result.message,
       });
@@ -236,9 +237,9 @@ exports.deleteAddress = async (req, res) => {
       message: result.message,
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Failed to delete address",
+      message: ADDRESS_MESSAGE.FAILED_DELETE,
     });
   }
 };

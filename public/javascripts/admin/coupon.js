@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ✅ Minimum Purchase Validation
         const minPurchase = parseFloat(minPurchaseInput.value);
-        if (isNaN(minPurchase) || minPurchase < 100 || minPurchase > 10000) {
+        if (isNaN(minPurchase) || minPurchase < 100 || minPurchase > 25000) {
             showError(minPurchaseInput, 'Min purchase must be ₹100-₹10,000.');
             isValid = false;
         } else {
@@ -150,8 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Maximum Purchase Validation
         const maxPurchase = parseFloat(maxPurchaseInput.value);
 
-        if (isNaN(maxPurchase) || maxPurchase < 100 || maxPurchase > 10000) {
-            showError(maxPurchaseInput, 'Max purchase must be ₹100-₹10,000.');
+        if (isNaN(maxPurchase) || maxPurchase < 100 || maxPurchase > 25000) {
+            showError(maxPurchaseInput, 'Max purchase must be ₹100-₹25,000.');
             isValid = false;
         } else if (maxPurchase < minPurchase) {
             showError(maxPurchaseInput, 'Maximum purchase amount should be greater than minimum purchase amount.');

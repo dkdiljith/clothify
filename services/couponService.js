@@ -9,7 +9,10 @@ const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+const COUPON_MESSAGES = require(`../constants/coupon`)
+const CART_MESSAGES = require(`../constants/cart`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -81,10 +84,10 @@ exports.createNewCoupon = async (couponData) => {
   ) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
       message:
-        "Missing required fields: couponCode, discountType, discountValue, startDate, and endDate are required.",
+        COUPON_MESSAGES.VALIDATION,
     };
   }
   // 2. LOGICAL NUMERIC VALIDATION
@@ -93,18 +96,18 @@ exports.createNewCoupon = async (couponData) => {
   if (maxAmt > 0 && minAmt > maxAmt) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
       message:
-        "Maximum purchase amount must be greater than or equal to minimum purchase amount.",
+        COUPON_MESSAGES.MAXIMUM_VALIDATION,
     };
   }
   if (Number(discountValue) <= 0) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "Discount value must be greater than 0.",
+      message: COUPON_MESSAGES.DISCOUNT_VALIDATION,
     };
   }
   // 3. DATE VALIDATION
@@ -113,17 +116,17 @@ exports.createNewCoupon = async (couponData) => {
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "Invalid date format provided.",
+      message: COUPON_MESSAGES.STARTDATE_VALIDATION,
     };
   }
   if (start >= end) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "End date must be after the start date.",
+      message:COUPON_MESSAGES.ENDDATE_VALIDATION ,
     };
   }
   // 4. DUPLICATE CHECK
@@ -133,9 +136,9 @@ exports.createNewCoupon = async (couponData) => {
   if (existingCoupon) {
     return {
       success: false,
-      status: 409,
+      status: STATUS_CODES.CONFLICT,
       type: "duplicate_error",
-      message: `Coupon code '${couponCode}' already exists.`,
+      message: COUPON_MESSAGES.COUPON_EXIST(couponCode),
     };
   }
   // 5. SAVE DATABASE RECORD
@@ -153,9 +156,9 @@ exports.createNewCoupon = async (couponData) => {
   await pricingExpiryUpdate();
   return {
     success: true,
-    status: 201,
+    status: STATUS_CODES.CREATED,
     type: "success",
-    message: "Coupon created successfully",
+    message: COUPON_MESSAGES.CREATED,
     coupon: result,
   };
 };
@@ -184,10 +187,10 @@ exports.updateCoupon = async (couponId, couponData) => {
   ) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
       message:
-        "Missing required fields: couponCode, discountType, discountValue, startDate, and endDate are required.",
+        COUPON_MESSAGES.VALIDATION,
     };
   }
   // 2. LOGICAL NUMERIC VALIDATION
@@ -196,18 +199,18 @@ exports.updateCoupon = async (couponId, couponData) => {
   if (maxAmt > 0 && minAmt > maxAmt) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
       message:
-        "Maximum purchase amount must be greater than or equal to minimum purchase amount.",
+        COUPON_MESSAGES.MAXIMUM_VALIDATION,
     };
   }
   if (Number(discountValue) <= 0) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "Discount value must be greater than 0.",
+      message:COUPON_MESSAGES.DISCOUNT_VALIDATION,
     };
   }
   // 3. DATE VALIDATION
@@ -216,17 +219,17 @@ exports.updateCoupon = async (couponId, couponData) => {
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "Invalid date format provided.",
+      message: COUPON_MESSAGES.STARTDATE_VALIDATION,
     };
   }
   if (start >= end) {
     return {
       success: false,
-      status: 400,
+      status: STATUS_CODES.BAD_REQUEST,
       type: "validation_error",
-      message: "End date must be after the start date.",
+      message: COUPON_MESSAGES.ENDDATE_VALIDATION,
     };
   }
   // 4. DUPLICATE CHECK (Excluding current coupon)
@@ -237,9 +240,9 @@ exports.updateCoupon = async (couponId, couponData) => {
   if (existingCoupon) {
     return {
       success: false,
-      status: 409,
+      status: STATUS_CODES.CONFLICT,
       type: "duplicate_error",
-      message: `Coupon code '${couponCode}' already exists on another coupon.`,
+      message: COUPON_MESSAGES.COUPON_EXIST(couponCode),
     };
   }
   // 5. FETCH AND UPDATE DATABASE RECORD
@@ -247,9 +250,9 @@ exports.updateCoupon = async (couponId, couponData) => {
   if (!coupon) {
     return {
       success: false,
-      status: 404,
+      status: STATUS_CODES.NOT_FOUND,
       type: "not_found_error",
-      message: "Coupon not found.",
+      message:COUPON_MESSAGES.NOT_FOUND,
     };
   }
   // Assign normalized properties
@@ -268,9 +271,9 @@ exports.updateCoupon = async (couponId, couponData) => {
   await pricingExpiryUpdate();
   return {
     success: true,
-    status: 200,
+    status: STATUS_CODES.OK,
     type: "success",
-    message: "Coupon updated successfully",
+    message: COUPON_MESSAGES.UPDATED,
     coupon: result,
   };
 };
@@ -283,9 +286,9 @@ exports.deleteCoupon = async (couponId) => {
   const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
   await pricingExpiryUpdate();
   if (!deletedCoupon) {
-    return { success: false, status: 404, message: "Coupon not found" };
+    return { success: false, status: STATUS_CODES.NOT_FOUND, message:COUPON_MESSAGES.NOT_FOUND };
   }
-  return { success: true, status: 200, message: "Coupon deleted successfully" };
+  return { success: true, status: STATUS_CODES.OK, message: COUPON_MESSAGES.DELETED};
 };
 
 
@@ -294,20 +297,20 @@ exports.deleteCoupon = async (couponId) => {
 exports.applyCouponToCart = async (userId, couponId) => {
   const coupon = await Coupon.findById(couponId).lean();
   if (!coupon || !coupon.isActive || new Date(coupon.endDate) < new Date()) {
-    return { success: false, status: 200, message: "Coupon is not valid" };
+    return { success: false, status: STATUS_CODES.BAD_REQUEST, message: COUPON_MESSAGES.INVALID };
   }
   if (coupon.minimumPurchaseAmount > coupon.maximumPurchaseAmount) {
-    return { success: false, status: 200, message: "Coupon is not valid" };
+    return { success: false, status: STATUS_CODES.BAD_REQUEST, message: COUPON_MESSAGES.INVALID };
   }
   const cart = await Cart.findOne({ userId });
   if (!cart) {
-    return { success: false, status: 404, message: "Cart not found" };
+    return { success: false, status: STATUS_CODES.NOT_FOUND, message: CART_MESSAGES.CART_NOT_FOUND };
   }
   if (cart.totalAmount < coupon.minimumPurchaseAmount) {
     return {
       success: false,
-      status: 200,
-      message: `Minimum purchase of ₹${coupon.minimumPurchaseAmount} required`,
+      status: STATUS_CODES.BAD_REQUEST,
+      message: COUPON_MESSAGES.MIN_PURCHASE_REQUIRED(coupon.minimumPurchaseAmount) ,
     };
   }
   if (
@@ -316,15 +319,15 @@ exports.applyCouponToCart = async (userId, couponId) => {
   ) {
     return {
       success: false,
-      status: 200,
-      message: `Maximum purchase limit ₹${coupon.maximumPurchaseAmount} Exceeded`,
+      status: STATUS_CODES.BAD_REQUEST,
+      message:COUPON_MESSAGES.MAX_PURCHASE_REQUIRED(coupon.maximumPurchaseAmount) ,
     };
   }
   cart.couponId = coupon._id;
   await cart.save();
   // Immediately recalculate so the user sees the change
   await recalculateCartSummary(userId);
-  return { success: true, status: 200 };
+  return { success: true, status: STATUS_CODES.OK };
 };
 
 
@@ -333,10 +336,10 @@ exports.applyCouponToCart = async (userId, couponId) => {
 exports.removeCouponFromCart = async (userId) => {
   const cart = await Cart.findOne({ userId });
   if (!cart) {
-    return { success: false, status: 404, message: "Cart not found" };
+    return { success: false, status: STATUS_CODES.NOT_FOUND, message: CART_MESSAGES.CART_NOT_FOUND };
   }
   cart.couponId = null;
   cart.couponDiscount = 0;
   await cart.save();
-  return { success: true, status: 200 };
+  return { success: true, status: STATUS_CODES.OK};
 };

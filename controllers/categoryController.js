@@ -3,7 +3,9 @@ const categoryService = require('../services/categoryService');
 
 
 //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+const CATEGORY_MESSAGE = require(`../constants/category`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -56,7 +58,7 @@ exports.showCategories = async (req, res) => {
         hasPrevPage: false,
         serialNumberStart: 0
       },
-      errorMessage: "Error fetching categories. Please try again later."
+      errorMessage: CATEGORY_MESSAGE.FAILED_TOSHOW_CATEGORY
     });
   }
 };
@@ -78,7 +80,7 @@ exports.editCategoryRender = async (req, res) => {
       subcategories: result.data.subcategories
     });
   } catch {
-    return res.status(500).send("Internal Server Error");
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(CATEGORY_MESSAGE.FAILED_TOSHOW_CATEGORY);
   }
 };
 
@@ -90,12 +92,13 @@ exports.addCategory = async (req, res) => {
   try {
     const { name, parentCategory } = req.body;
     if (!name || name.trim() === "") {
-      return res.status(400).json({ message: "Category name is required!" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: CATEGORY_MESSAGE.VALIDATION_NAME});
     }
     const result = await categoryService.createCategory(name, parentCategory);
     return res.status(result.status).json({ message: result.message });
   } catch {
-    return res.status(500).json({ message: `Internal Server Error` });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: CATEGORY_MESSAGE.FAILED_CATEGORY
+     });
   }
 };
 
@@ -110,7 +113,7 @@ exports.deleteCategory = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch {
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: CATEGORY_MESSAGE.FAILED_DELETE });
   }
 };
 
@@ -128,7 +131,7 @@ exports.editCategory = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch {
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: CATEGORY_MESSAGE.FAIED_UPDATED});
   }
 };
 
@@ -149,13 +152,13 @@ exports.applyOfferJson = async (req, res) => {
         message: result.message
       });
     }
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       category: result.data.category,
       offers: result.data.offers
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
     });
   }
@@ -176,14 +179,14 @@ exports.applyOffer = async (req, res) => {
         message: result.message
       });
     }
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       message: result.message
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error."
+      message: CATEGORY_MESSAGE.FAILED_OFFER_APPLY_MAUALLY
     });
   }
 };
@@ -201,14 +204,14 @@ exports.autoPricing = async (req, res) => {
         message: result.message
       });
     }
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       message: result.message
     });
   } catch {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error."
+      message: CATEGORY_MESSAGE.FAILED_OFFER_APPLY_AUTOMATIC
     });
   }
 };

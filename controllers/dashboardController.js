@@ -1,6 +1,10 @@
 
 const dashboardService = require('../services/dashboardService');
 
+//MESSAGE_CONSTANTS
+const DASHBOARD_MESSAGES = require(`../constants/dashboard`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -8,9 +12,9 @@ exports.dashboardRender = async (req, res) => {
     try {
         return res.render("admin/dashboard");
     } catch  {
-        return res.status(500).render("admin/error", {
-            message: "Failed to load dashboard",
-        });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("admin/error", {
+            message: DASHBOARD_MESSAGES.FAILED_RENDER,
+        }); 
     }
 };
 
@@ -37,9 +41,9 @@ exports.getDashboardData = async (req, res) => {
             paymentMethods,
         });
     } catch {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Unable to fetch dashboard data.",
+            message: DASHBOARD_MESSAGES.FAILED_FETCH,
         });
     }
 };

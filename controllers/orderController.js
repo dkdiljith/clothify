@@ -1,5 +1,11 @@
 const orderService = require("../services/orderService");
 
+// MESSAGE_CONSTANTS
+const ORDER_MESSAGES = require(`../constants/order`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +34,7 @@ exports.ordersRender = async (req, res) => {
                 prevPage: 0,
                 serialNumberStart: 0,
             },
-            errorMessage: "Failed to load orders.",
+            errorMessage: ORDER_MESSAGES.FAILED_RENDER ,
         });
     }
 };
@@ -39,7 +45,7 @@ exports.orderDetails = async (req, res) => {
         const order = await orderService.getOrderById(req.params.orderId);
         return res.render(`admin/orderDetails`, { order, admin: true });
     } catch {
-        return res.status(500).render("admin/error", { message: "Failed to load order details" });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("admin/error", { message:ORDER_MESSAGES.FAILED_RENDER });
     }
 };
 
@@ -48,12 +54,12 @@ exports.orderStatusChange = async (req, res) => {
         const { orderId, itemId } = req.params;
         const { status: newStatus } = req.body;
         const result = await orderService.updateOrderStatus(orderId, itemId, newStatus);
-        return res.status(200).json(result);
+        return res.status(STATUS_CODES.OK).json(result);
     } catch (error) {
-        const status = error.status || 500;
+        const status = error.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({
             success: false,
-            message: error.message || "Something went wrong",
+            message: error.message || ORDER_MESSAGES.STATUS_UPDATE_FAILED,
         });
     }
 };
@@ -62,12 +68,12 @@ exports.orderCancel = async (req, res) => {
     try {
         const { orderId, itemId, reason } = req.body;
         const result = await orderService.cancelOrder(orderId, itemId, reason);
-        return res.status(200).json(result);
+        return res.status(STATUS_CODES.OK).json(result);
     } catch (error) {
-        const status = error.status || 500;
+        const status = error.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({
             success: false,
-            message: error.message || "Something went wrong",
+            message: error.message ||ORDER_MESSAGES.FAILED_ORDER_CANCELLATION,
         });
     }
 };
@@ -76,12 +82,12 @@ exports.orderReturn = async (req, res) => {
     try {
         const { orderId, itemId, reason, returnAll } = req.body;
         const result = await orderService.returnOrder(orderId, itemId, reason, returnAll);
-        return res.status(200).json(result);
+        return res.status(STATUS_CODES.OK).json(result);
     } catch (error) {
-        const status = error.status || 500;
+        const status = error.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({
             success: false,
-            message: error.message || "Something went wrong",
+            message: error.message || ORDER_MESSAGES.FAILED_ORDER_RETURN,
         });
     }
 };

@@ -3,17 +3,23 @@ const Product = require("../models/productSchema");
 const Wallet = require("../models/walletSchema");
 const mongoose = require("mongoose");
 
+
+// MESSAGE_CONSTANTS
+const ORDER_MESSAGES = require(`../constants/order`)
+const WALLET_MESSAGES = require(`../constants/wallet`)
+const STATUS_CODES = require(`../constants/status-codes`)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Helper function to calculate refund breakdown per item
 async function calculateRefund(order, itemId) {
     if (!order) {
-        throw new Error("Order not found");
+        throw new Error(ORDER_MESSAGES.ORDER_NOT_FOUND);
     }
     const item = order.items.find((item) => item._id.toString() === itemId);
     if (!item) {
-        throw new Error("Item not found");
+        throw new Error(ORDER_MESSAGES.ITEM_NOT_FOUND);
     }
 
     const itemSubtotal = Number(item.productPrice) * item.quantity;
@@ -126,14 +132,14 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
     if (newStatus !== "Returned") {
         const order = await Order.findById(orderId);
         if (!order) {
-            throw { status: 404, message: "Order not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
         }
         const item = order.items.id(itemId);
         if (!item) {
-            throw { status: 404, message: "Item not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ITEM_NOT_FOUND };
         }
         if (["Returned", "Cancelled"].includes(item.status)) {
-            throw { status: 400, message: `Cannot change status. Item is already ${item.status}.` };
+            throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.CANNOT_STATUS_UPDATE(item.status) };
         }
 
         item.status = newStatus;
@@ -152,7 +158,7 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
         }
 
         await order.save();
-        return { success: true, message: `Item status updated to ${newStatus}` };
+        return { success: true, message: ORDER_MESSAGES.STATUS_UPDATED(newStatus) };
     }
 
     // Return Process with Transaction
@@ -162,16 +168,16 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
         const order = await Order.findById(orderId).session(session);
         if (!order) {
             await session.abortTransaction();
-            throw { status: 404, message: "Order not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
         }
         const item = order.items.id(itemId);
         if (!item) {
             await session.abortTransaction();
-            throw { status: 404, message: "Item not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ITEM_NOT_FOUND };
         }
         if (["Returned", "Cancelled"].includes(item.status)) {
             await session.abortTransaction();
-            throw { status: 400, message: `Cannot change status. Item is already ${item.status}.` };
+            throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.CANNOT_STATUS_UPDATE(item.status) };
         }
 
         const refundDetails = await calculateRefund(order, itemId);
@@ -185,14 +191,14 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
         const wallet = await Wallet.findOne({ userId: order.userId }).session(session);
         if (!wallet) {
             await session.abortTransaction();
-            throw { status: 404, message: "Wallet not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: WALLET_MESSAGES.NOT_FOUND };
         }
 
         wallet.balance += refundAmount;
         wallet.transactions.push({
             type: "credit",
             amount: refundAmount,
-            description: `Refund for returned item (${item.productName}) in Order #${order.orderId}`,
+            description: WALLET_MESSAGES.REFUND_WALLET(item.productName, order.orderId),
         });
         await wallet.save({ session });
 
@@ -224,10 +230,10 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
 
         await order.save({ session });
         await session.commitTransaction();
-        return { success: true, message: `Item status updated to ${newStatus}` };
+        return { success: true, message: ORDER_MESSAGES.STATUS_UPDATED(newStatus) };
     } catch (error) {
         await session.abortTransaction();
-        throw { status: error.status || 500, message: error.message || "Something went wrong" };
+        throw { status: error.status || STATUS_CODES.INTERNAL_SERVER_ERROR, message: error.message || ORDER_MESSAGES.STATUS_UPDATE_FAILED };
     } finally {
         await session.endSession();
     }
@@ -243,21 +249,21 @@ exports.cancelOrder = async (orderId, itemId, reason) => {
         const order = await Order.findById(orderId).session(session);
         if (!order) {
             await session.abortTransaction();
-            throw { status: 404, message: "Order not found" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
         }
         const item = order.items.find((i) => i._id.toString() === itemId);
         if (!item) {
             await session.abortTransaction();
-            throw { status: 404, message: "Item not found in order" };
+            throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ITEM_NOT_FOUND };
         }
 
         if (item.status === "Cancelled") {
             await session.abortTransaction();
-            throw { status: 400, message: "Item already cancelled" };
+            throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.ITEM_ALREADY_CANCELLED };
         }
         if (item.status !== "Pending") {
             await session.abortTransaction();
-            throw { status: 400, message: "Only pending items can be cancelled" };
+            throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.ONLY_PENDING_CANCEL };
         }
 
         const refundDetails = await calculateRefund(order, itemId);
@@ -278,13 +284,13 @@ exports.cancelOrder = async (orderId, itemId, reason) => {
             const wallet = await Wallet.findOne({ userId: order.userId }).session(session);
             if (!wallet) {
                 await session.abortTransaction();
-                throw { status: 404, message: "Wallet not found" };
+                throw { status: STATUS_CODES.NOT_FOUND, message: WALLET_MESSAGES.NOT_FOUND };
             }
             wallet.balance += refundAmount;
             wallet.transactions.push({
                 type: "credit",
                 amount: refundAmount,
-                description: `Refund for cancelled item (${item.productName}) in Order #${order.orderId}`,
+                description: WALLET_MESSAGES.REFUND_WALLET(item.productName, order.orderId),
             });
             await wallet.save({ session });
             item.refundDetails.refundedAt = new Date();
@@ -317,10 +323,10 @@ exports.cancelOrder = async (orderId, itemId, reason) => {
 
         await order.save({ session });
         await session.commitTransaction();
-        return { success: true, message: "Item cancelled successfully", refundAmount };
+        return { success: true, message: ORDER_MESSAGES.CANCELLED_REFUND_SUCCESS, refundAmount };
     } catch (error) {
         await session.abortTransaction();
-        throw { status: error.status || 500, message: error.message || "Something went wrong" };
+        throw { status: error.status || STATUS_CODES.INTERNAL_SERVER_ERROR, message: error.message || ORDER_MESSAGES.FAILED_ORDER_CANCELLATION };
     } finally {
         await session.endSession();
     }
@@ -336,28 +342,28 @@ exports.cancelOrder = async (orderId, itemId, reason) => {
 exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
     const order = await Order.findById(orderId);
     if (!order) {
-        throw { status: 404, message: "Order not found" };
+        throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
     }
 
     const item = order.items.find((i) => i._id.toString() === itemId);
     if (!item) {
-        throw { status: 404, message: "Item not found in order" };
+        throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ITEM_NOT_FOUND };
     }
 
     if (item.status === "Returned") {
-        throw { status: 400, message: "Item already returned" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.ITEM_ALREADY_RETURNED };
     }
     if (item.status === "Return Requested") {
-        throw { status: 400, message: "Return already requested" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.ITEM_ALREADY_REQUEST_RETURNED };
     }
     if (item.status !== "Completed") {
-        throw { status: 400, message: "Only delivered items can be returned" };
+        throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.ONLY_DELIVERED_RETURN };
     }
 
     if (returnAll) {
         const nonReturnableItems = order.items.filter((i) => i.status !== "Completed");
         if (nonReturnableItems.length > 0) {
-            const details = nonReturnableItems
+            nonReturnableItems
                 .map((i) => {
                     let statusReason = "is not eligible for return";
                     if (i.status === "Returned") statusReason = "has already been returned";
@@ -365,7 +371,7 @@ exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
                     return `${i.productName} (${statusReason})`;
                 })
                 .join(", ");
-            throw { status: 400, message: `Cannot process bulk return. Problem items: ${details}.` };
+            throw { status: STATUS_CODES.BAD_REQUEST, message: ORDER_MESSAGES.CANNOT_PROCESS_BULKRETURN };
         }
 
         for (let i = 0; i < order.items.length; i++) {
@@ -391,7 +397,7 @@ exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
     }
 
     await order.save();
-    return { success: true, message: "Return request submitted successfully" };
+    return { success: true, message: ORDER_MESSAGES.RETURN_REQUEST_SUCCESS };
 };
 
 
@@ -409,21 +415,21 @@ exports.processItemCancellation = async (orderId, itemId, reason) => {
         const order = await Order.findById(orderId).session(session);
         if (!order) {
             await session.abortTransaction();
-            return { status: 404, success: false, message: "Order not found" };
+            return { status: STATUS_CODES.NOT_FOUND, success: false, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
         }
         const item = order.items.find((i) => i._id.toString() === itemId);
         if (!item) {
             await session.abortTransaction();
-            return { status: 404, success: false, message: "Item not found in order" };
+            return { status: STATUS_CODES.NOT_FOUND, success: false, message: ORDER_MESSAGES.ITEM_NOT_FOUND };
         }
 
         if (item.status === "Cancelled") {
             await session.abortTransaction();
-            return { status: 400, success: false, message: "Item already cancelled" };
+            return { status: STATUS_CODES.BAD_REQUEST, success: false, message: ORDER_MESSAGES.ITEM_ALREADY_CANCELLED };
         }
         if (item.status !== "Pending") {
             await session.abortTransaction();
-            return { status: 400, success: false, message: "Only pending items can be cancelled" };
+            return { status: STATUS_CODES.BAD_REQUEST, success: false, message: ORDER_MESSAGES.ONLY_PENDING_CANCEL };
         }
 
         const refundDetails = await calculateRefund(order, itemId);
@@ -444,13 +450,13 @@ exports.processItemCancellation = async (orderId, itemId, reason) => {
             const wallet = await Wallet.findOne({ userId: order.userId }).session(session);
             if (!wallet) {
                 await session.abortTransaction();
-                return { status: 404, success: false, message: "Wallet not found" };
+                return { status: STATUS_CODES.NOT_FOUND, success: false, message: WALLET_MESSAGES.NOT_FOUND };
             }
             wallet.balance += refundAmount;
             wallet.transactions.push({
                 type: "credit",
                 amount: refundAmount,
-                description: `Refund for cancelled item (${item.productName}) in Order #${order.orderId}`,
+                description: ORDER_MESSAGES.REFUND_WALLET(item.productName, order.orderId),
             });
             await wallet.save({ session });
             item.refundDetails.refundedAt = new Date();
@@ -483,10 +489,10 @@ exports.processItemCancellation = async (orderId, itemId, reason) => {
 
         await order.save({ session });
         await session.commitTransaction();
-        return { status: 200, success: true, message: "Item cancelled successfully", refundAmount };
+        return { status: STATUS_CODES.OK, success: true, message: ORDER_MESSAGES.CANCELLED_REFUND_SUCCESS, refundAmount };
     } catch (error) {
         await session.abortTransaction();
-        return { status: 500, success: false, message: error.message || "Something went wrong during cancellation processing" };
+        return { status: STATUS_CODES.INTERNAL_SERVER_ERROR, success: false, message: error.message || ORDER_MESSAGES.FAILED_ORDER_CANCELLATION };
     } finally {
         await session.endSession();
     }
