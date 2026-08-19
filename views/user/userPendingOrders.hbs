@@ -83,7 +83,7 @@
             <div class="order-status status-{{toLowerCase this.status}}">
                 {{this.status}}
             </div>
-            {{#ifeq this.paymentStatus "Failed"}}
+            {{!-- {{#ifeq this.paymentStatus "Failed"}}
             <button class="btn-retry-payment" data-order-id="{{this.orderId}}"
                 data-expires-at="{{this.paymentRetryExpiresAt}}" data-attempts-count="{{this.paymentAttemptsCount}}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -92,7 +92,7 @@
                 </svg>
                 Retry Payment
             </button>
-            {{/ifeq}}
+            {{/ifeq}} --}}
             <div class="view-arrow">
                 <i class="fas fa-chevron-right"></i>
             </div>

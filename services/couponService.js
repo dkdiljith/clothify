@@ -9,7 +9,6 @@ const pricingExpiry = require("../utils/pricingExpiry");
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
 
 //MESSAGE_CONSTANTS
-//MESSAGE_CONSTANTS
 const COUPON_MESSAGES = require(`../constants/coupon`)
 const CART_MESSAGES = require(`../constants/cart`)
 const STATUS_CODES = require(`../constants/status-codes`)

@@ -14,7 +14,7 @@ const verificationEmailSend = require("../utils/nodemailer").verificationEmailSe
 const forgotPasswordEmailSend = require("../utils/nodemailer").passwordResetEmailSend;
 const sendPasswordChangedEmail = require("../utils/nodemailer").sendPasswordChangedEmail;
 
-const createWallet = require("../controllers/walletController").createWallet;
+const createWallet = require("../services/walletService").createWallet;
 const createReferral = require("../controllers/referralController").createReferral;
 
 // --- Security & Utility Functions ---
