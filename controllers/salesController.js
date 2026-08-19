@@ -2,7 +2,6 @@
 const salesReportService = require("../services/salesService");
 const SALES_MESSAGES = require("../constants/sales");
 const STATUS_CODES = require("../constants/status-codes");
-const COMMON_MESSAGES = require("../constants/common-messages");
 
 exports.salesReportRender = async (req, res) => {
     try {

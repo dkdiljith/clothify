@@ -1,4 +1,9 @@
+// controllers/settingsController.js
 const settingsService = require("../services/settingsService");
+
+
+const SETTINGS_MESSAGES = require("../constants/settings");
+const STATUS_CODES = require("../constants/status-codes");
 
 exports.initializeSettings = async () => {
     await settingsService.initializeGlobalSettings();
@@ -16,10 +21,10 @@ exports.referralSettingsRender = async (req, res) => {
             settings,
         });
     } catch (error) {
-        const statusCode = error.message === "Referral settings not found." ? 404 : 500;
-        const viewPath = statusCode === 404 ? "error/404" : "error/500";
+        const statusCode = error.message === SETTINGS_MESSAGES.REFERRAL_SETTINGS_NOT_FOUND ? STATUS_CODES.NOT_FOUND : STATUS_CODES.INTERNAL_SERVER_ERROR;
+        const viewPath = statusCode === STATUS_CODES.NOT_FOUND ? "error/404" : "error/500";
         return res.status(statusCode).render(viewPath, {
-            message: error.message || "Unable to load referral settings.",
+            message: error.message || SETTINGS_MESSAGES.UNABLE_LOAD_REFERRAL,
         });
     }
 };
@@ -27,17 +32,17 @@ exports.referralSettingsRender = async (req, res) => {
 exports.referralSettings = async (req, res) => {
     try {
         const updatedSettings = await settingsService.updateReferralSettings(req.body);
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Referral settings updated successfully.",
+            message: SETTINGS_MESSAGES.REFERRAL_UPDATED_SUCCESS,
             referralSettings: updatedSettings,
         });
     } catch (error) {
-        const statusCode = error.status || 400;
+        const statusCode = error.status || STATUS_CODES.BAD_REQUEST;
         return res.status(statusCode).json({
             success: false,
             field: error.field || null,
-            message: error.message || "Internal server error.",
+            message: error.message || SETTINGS_MESSAGES.INTERNAL_SERVER_ERROR,
         });
     }
 };
