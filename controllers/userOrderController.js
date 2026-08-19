@@ -1,18 +1,22 @@
+// controllers/userOrderController.js
 const orderService = require("../services/userOrderService");
 const mongoose = require("mongoose");
+const ORDER_MESSAGES = require("../constants/order");
+const AUTH_MESSAGES = require("../constants/auth");
+const STATUS_CODES = require("../constants/status-codes");
 
 // Render Payment Page
 exports.payment = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         if (!userId) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: AUTH_MESSAGES.USER_NOT_FOUND });
         }
 
         const { cart, address, wallet } = await orderService.getPaymentPageDetails(userId);
         return res.render('user/paymentPage', { cart, address, wallet });
     } catch {
-        return res.status(500).send('Server error');
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(ORDER_MESSAGES.SERVER_ERROR);
     }
 };
 
@@ -30,7 +34,7 @@ exports.placeOrder = async (req, res) => {
         return res.json({
             success: true,
             paymentStatus: result.paymentStatus,
-            message: "Order placed successfully",
+            message: ORDER_MESSAGES.ORDER_PLACED,
             orderId: result.orderId,
         });
     } catch (error) {
@@ -41,9 +45,9 @@ exports.placeOrder = async (req, res) => {
                 message: error.message,
             });
         }
-        return res.status(error.status || 500).json({
+        return res.status(error.status || STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: error.message || "Failed to place order.",
+            message: error.message || ORDER_MESSAGES.ORDER_FAILED,
         });
     } finally {
         await session.endSession();
@@ -57,23 +61,23 @@ exports.placeOrderFailed = async (req, res) => {
         const result = await orderService.placeFailedOrder(userId, req.body);
 
         if (result.isRetryFailedUpdate) {
-            return res.status(200).json({
+            return res.status(STATUS_CODES.OK).json({
                 success: true,
-                message: `Payment failed again. Attempt ${result.attempts}/6 used.`,
+                message: ORDER_MESSAGES.PAYMENT_FAILED_ATTEMPT(result.attempts),
                 orderId: result.orderId
             });
         }
 
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
             paymentStatus: "Failed",
-            message: "Failed order record generated. You can retry from your dashboard.",
+            message: ORDER_MESSAGES.FAILED_ORDER_RECORD_GENERATED,
             orderId: result.orderId
         });
     } catch (error) {
-        return res.status(error.status || 500).json({
+        return res.status(error.status || STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: error.message || "Failed to place order."
+            message: error.message || ORDER_MESSAGES.ORDER_FAILED
         });
     }
 };
@@ -88,16 +92,16 @@ exports.retryFailedOrder = async (req, res) => {
         const updatedOrderId = await orderService.retryFailedOrderPayment(orderId, session);
 
         await session.commitTransaction();
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Order status updated and stock reduced successfully.",
+            message: ORDER_MESSAGES.ORDER_STATUS_UPDATED,
             orderId: updatedOrderId,
         });
     } catch (error) {
         await session.abortTransaction();
-        return res.status(error.status || 500).json({
+        return res.status(error.status || STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: error.message || "Failed to retry payment.",
+            message: error.message || ORDER_MESSAGES.FAILED_TO_RETRY_PAYMENT,
         });
     } finally {
         await session.endSession();

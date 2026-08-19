@@ -1,9 +1,13 @@
+// services/userOrderService.js
 const Order = require("../models/orderSchema");
 const Wallet = require("../models/walletSchema");
 const Cart = require("../models/cartSchema");
 const Address = require("../models/addressSchema");
 const Product = require("../models/productSchema");
 const crypto = require("crypto");
+
+const ORDER_MESSAGES = require("../constants/order");
+const WALLET_MESSAGES = require("../constants/wallet");
 
 // Order ID Generation Helper
 async function orderIdGeneration(session) {
@@ -23,10 +27,10 @@ async function orderIdGeneration(session) {
 // Item Amount Calculation Helper
 async function itemAmountCalculate(order, item) {
     if (!order) {
-        throw new Error("Order not found");
+        throw new Error(ORDER_MESSAGES.ORDER_NOT_FOUND);
     }
     if (!item) {
-        throw new Error("Item not found");
+        throw new Error(ORDER_MESSAGES.ITEM_NOT_FOUND);
     }
     
     const itemSubtotal = Number(item.productPrice) * item.quantity;
@@ -64,33 +68,33 @@ async function placeNewOrder(userId, body, isRazorpayVerified, session) {
     const { paymentMethod, addressId } = body;
 
     if (!paymentMethod || !addressId) {
-        const err = new Error("Missing required fields");
+        const err = new Error(ORDER_MESSAGES.MISSING_REQUIRED_FIELDS);
         err.status = 400;
         throw err;
     }
     if (paymentMethod === "razorpay" && !isRazorpayVerified) {
-        const err = new Error("Wrong Payment Info");
+        const err = new Error(ORDER_MESSAGES.WRONG_PAYMENT_INFO);
         err.status = 400;
         throw err;
     }
 
     const cart = await Cart.findOne({ userId }).populate("items.productId").session(session);
     if (!cart || cart.items.length === 0) {
-        const err = new Error("Your cart is empty.");
+        const err = new Error(ORDER_MESSAGES.CART_EMPTY);
         err.status = 400;
         throw err;
     }
 
     const address = await Address.findById(addressId);
     if (!address) {
-        const err = new Error("Address not found");
+        const err = new Error(ORDER_MESSAGES.ADDRESS_NOT_FOUND);
         err.status = 404;
         throw err;
     }
 
     const ORDER_LIMIT = 25000;
     if (cart.totalAmount > ORDER_LIMIT) {
-        const err = new Error(`Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`);
+        const err = new Error(ORDER_MESSAGES.ORDER_LIMIT_EXCEEDED(ORDER_LIMIT));
         err.isCustomJson = true;
         throw err;
     }
@@ -100,12 +104,12 @@ async function placeNewOrder(userId, body, isRazorpayVerified, session) {
         const product = item.productId;
         const variation = product.details[item.variationIndex];
         if (!variation) {
-            const err = new Error(`${product.name} variation not found`);
+            const err = new Error(ORDER_MESSAGES.VARIATION_NOT_FOUND(product.name));
             err.isCustomJson = true;
             throw err;
         }
         if (variation.quantity < item.quantity) {
-            const err = new Error(`${product.name} is out of stock`);
+            const err = new Error(ORDER_MESSAGES.OUT_OF_STOCK(product.name));
             err.isCustomJson = true;
             throw err;
         }
@@ -119,12 +123,12 @@ async function placeNewOrder(userId, body, isRazorpayVerified, session) {
     if (paymentMethod === "wallet") {
         const wallet = await Wallet.findOne({ userId }).session(session);
         if (!wallet) {
-            const err = new Error("Wallet not found");
+            const err = new Error(WALLET_MESSAGES.NOT_FOUND);
             err.isCustomJson = true;
             throw err;
         }
         if (wallet.balance < cart.totalAmount) {
-            const err = new Error("Insufficient wallet balance");
+            const err = new Error(ORDER_MESSAGES.INSUFFICIENT_WALLET);
             err.isCustomJson = true;
             throw err;
         }
@@ -132,14 +136,14 @@ async function placeNewOrder(userId, body, isRazorpayVerified, session) {
         wallet.transactions.push({
             type: "debit",
             amount: cart.totalAmount,
-            description: `₹${cart.totalAmount} debited for order payment`,
+            description: ORDER_MESSAGES.WALLET_DEBIT_DESC(cart.totalAmount),
         });
         await wallet.save({ session });
         paymentStatus = "Completed";
     }
 
     if (paymentMethod === "wallet" && paymentStatus === "Pending") {
-        const err = new Error("Wallet payment failed.");
+        const err = new Error(ORDER_MESSAGES.WALLET_PAYMENT_FAILED);
         err.status = 500;
         throw err;
     }
@@ -211,7 +215,7 @@ async function placeNewOrder(userId, body, isRazorpayVerified, session) {
                 { session, new: true }
             );
             if (!updateResult) {
-                throw new Error(`${item.productId.name} went out of stock while placing the order.`);
+                throw new Error(ORDER_MESSAGES.STOCK_OUT_DURING_ORDER(item.productId.name));
             }
         }
         await Cart.findByIdAndDelete(cart._id, { session });
@@ -228,7 +232,7 @@ async function placeFailedOrder(userId, body) {
     if (orderId) {
         const retryOrder = await Order.findOne({ orderId, userId });
         if (!retryOrder) {
-            const err = new Error("Cannot Find Order");
+            const err = new Error(ORDER_MESSAGES.ORDER_NOT_FOUND);
             err.status = 400;
             throw err;
         }
@@ -236,7 +240,7 @@ async function placeFailedOrder(userId, body) {
     }
 
     if (!addressId || !reason || !userId) {
-        const err = new Error("Missing required fields");
+        const err = new Error(ORDER_MESSAGES.MISSING_REQUIRED_FIELDS);
         err.status = 400;
         throw err;
     }
@@ -245,19 +249,19 @@ async function placeFailedOrder(userId, body) {
     const address = await Address.findById(addressId);
 
     if (!cart || cart.items.length === 0) {
-        const err = new Error("Your cart is empty.");
+        const err = new Error(ORDER_MESSAGES.CART_EMPTY);
         err.status = 400;
         throw err;
     }
     if (!address) {
-        const err = new Error("Address not found");
+        const err = new Error(ORDER_MESSAGES.ADDRESS_NOT_FOUND);
         err.status = 404;
         throw err;
     }
 
     const ORDER_LIMIT = 25000;
     if (cart.totalAmount > ORDER_LIMIT) {
-        const err = new Error(`Orders above ₹${ORDER_LIMIT} are not allowed.`);
+        const err = new Error(ORDER_MESSAGES.ORDER_LIMIT_EXCEEDED(ORDER_LIMIT));
         err.status = 400;
         throw err;
     }
@@ -266,12 +270,12 @@ async function placeFailedOrder(userId, body) {
         const product = item.productId;
         const variation = product.details[item.variationIndex];
         if (!variation) {
-            const err = new Error(`${product.name} variation not found`);
+            const err = new Error(ORDER_MESSAGES.VARIATION_NOT_FOUND(product.name));
             err.status = 400;
             throw err;
         }
         if (variation.quantity < item.quantity) {
-            const err = new Error(`${product.name} is out of stock`);
+            const err = new Error(ORDER_MESSAGES.OUT_OF_STOCK(product.name));
             err.status = 400;
             throw err;
         }
@@ -340,20 +344,20 @@ async function placeFailedOrder(userId, body) {
 // Retry Failed Order Payment Service
 async function retryFailedOrderPayment(orderId, session) {
     if (!orderId) {
-        const err = new Error("Invalid Order ID provided");
+        const err = new Error(ORDER_MESSAGES.INVALID_ORDER_ID);
         err.status = 400;
         throw err;
     }
 
     const order = await Order.findOne({ orderId }).session(session);
     if (!order) {
-        const err = new Error("Order not found");
+        const err = new Error(ORDER_MESSAGES.ORDER_NOT_FOUND);
         err.status = 404;
         throw err;
     }
 
     if (order.paymentStatus === "Completed") {
-        const err = new Error("Order is already completed");
+        const err = new Error(ORDER_MESSAGES.ORDER_ALREADY_COMPLETED);
         err.status = 400;
         throw err;
     }
@@ -377,7 +381,7 @@ async function retryFailedOrderPayment(orderId, session) {
             { session, new: true }
         );
         if (!updatedProduct) {
-            throw new Error(`Insufficient stock for one or more products.`);
+            throw new Error(ORDER_MESSAGES.INSUFFICIENT_STOCK_GENERAL);
         }
     }
 
@@ -388,20 +392,20 @@ async function retryFailedOrderPayment(orderId, session) {
 async function handleRetryFailedOrderFailedFlow(userId, orderId) {
     const retryOrder = await Order.findOne({ orderId, userId });
     if (!retryOrder) {
-        const err = new Error("Cannot Find Order");
+        const err = new Error(ORDER_MESSAGES.ORDER_NOT_FOUND);
         err.status = 400;
         throw err;
     }
 
     const currentTime = new Date();
     if (retryOrder.paymentRetryExpiresAt && currentTime > retryOrder.paymentRetryExpiresAt) {
-        const err = new Error("The 30-minute retry window has expired. Please create a new order.");
+        const err = new Error(ORDER_MESSAGES.RETRY_WINDOW_EXPIRED);
         err.status = 400;
         throw err;
     }
 
     if (retryOrder.paymentAttemptsCount >= 6) {
-        const err = new Error("You have reached the maximum limit of 5 payment retries for this order.");
+        const err = new Error(ORDER_MESSAGES.MAX_RETRY_EXCEEDED);
         err.status = 400;
         throw err;
     }
