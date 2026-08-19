@@ -87,6 +87,9 @@ const PRODUCT_MESSAGES = {
     "Failed Loading Add Product Page",
     FAILED_LOADING:
     "Failed Loading Products",
+
+    FAILED_LOADING_COLLECTION:
+    "Unable to load collections",
 }
 
 

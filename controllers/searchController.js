@@ -1,6 +1,6 @@
 const searchService = require(`../services/searchService`)
 
-
+const PRODUCT_MESSAGES = require(`../constants/product`)
 
 
 exports.collections = async (req, res) => {
@@ -11,7 +11,7 @@ exports.collections = async (req, res) => {
         return res.render("user/collections", data);
     } catch {
         return res.status(500).render("error", {
-            message: "Unable to load collections"
+            message: PRODUCT_MESSAGES.FAILED_LOADING_COLLECTION
         });
     }
 };
