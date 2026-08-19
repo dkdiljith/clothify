@@ -1,4 +1,7 @@
+// controllers/userController.js
 const authService = require("../services/userService");
+const AUTH_MESSAGES = require("../constants/auth");
+const STATUS_CODES = require("../constants/status-codes");
 
 exports.homeRender = async (req, res) => {
     try {
@@ -48,7 +51,7 @@ exports.forgetPasswordRender = async (req, res) => {
 exports.userLogout = (req, res) => {
     delete req.session.user;
     req.session.save((err) => {
-        if (err) return res.status(500).send("Error");
+        if (err) return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Error");
         return res.redirect("/user/login");
     });
 };
@@ -59,12 +62,12 @@ exports.login = async (req, res) => {
         const userSessionData = await authService.loginUser(email, password);
 
         req.session.user = userSessionData;
-        return res.status(200).json({ success: true, message: "Login successful" });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: AUTH_MESSAGES.LOGIN_SUCCESS });
     } catch (err) {
         const msg = err.message;
-        const status = msg.includes("not found") ? 404 :
-                       msg.includes("Invalid") || msg.includes("Try Forgot") ? 401 :
-                       msg.includes("not verified") || msg.includes("blocked") ? 403 : 500;
+        const status = msg.includes("not found") ? STATUS_CODES.NOT_FOUND :
+                       msg.includes("Invalid") || msg.includes("Try Forgot") ? STATUS_CODES.UNAUTHORIZED :
+                       msg.includes("not verified") || msg.includes("blocked") ? STATUS_CODES.FORBIDDEN : STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({ success: false, error: msg });
     }
 };
@@ -103,7 +106,7 @@ exports.resendEmailVerification = async (req, res) => {
     try {
         const sessionUser = req.session.unknown_user;
         if (!sessionUser?._id) {
-            return res.status(401).json({ success: false, error: "Session expired. Please register again." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Session expired. Please register again." });
         }
 
         const timers = await authService.resendEmailVerificationProcess(sessionUser);
@@ -111,15 +114,15 @@ exports.resendEmailVerification = async (req, res) => {
         req.session.unknown_user.otpExpiresAt = timers.otpExpiresAt;
         req.session.unknown_user.resendTimer = timers.resendTimer;
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Verification code sent successfully.",
             verificationTimer: timers.otpExpiresAt,
             resendTimer: timers.resendTimer
         });
     } catch (err) {
-        const status = err.message.includes("limit") || err.message.includes("wait") ? 429 :
-                       err.message.includes("not found") ? 404 : 401;
+        const status = err.message.includes("limit") || err.message.includes("wait") ? STATUS_CODES.TOO_MANY_REQUESTS :
+                       err.message.includes("not found") ? STATUS_CODES.NOT_FOUND : STATUS_CODES.UNAUTHORIZED;
         return res.status(status).json({ success: false, error: err.message });
     }
 };
@@ -130,10 +133,10 @@ exports.emailVerification = async (req, res) => {
         const sessionUser = req.session.unknown_user;
 
         if (!sessionUser?._id) {
-            return res.status(401).json({ success: false, error: "Session expired. Please register again." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Session expired. Please register again." });
         }
         if (!verificationCode) {
-            return res.status(400).json({ success: false, error: "Please enter the verification code." });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, error: "Please enter the verification code." });
         }
 
         const user = await authService.verifyEmailOtpProcess(sessionUser._id, verificationCode);
@@ -147,14 +150,14 @@ exports.emailVerification = async (req, res) => {
         };
         delete req.session.unknown_user;
 
-        return res.status(200).json({ success: true, message: "Email verified successfully." });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: AUTH_MESSAGES.EMAIL_VERIFIED });
     } catch (err) {
         delete req.session.unknown_user;
         const msg = err.message;
-        const status = msg.includes("expired") ? 410 :
-                       msg.includes("limit") ? 429 :
-                       msg.includes("Invalid") ? 401 :
-                       msg.includes("not found") ? 404 : 400;
+        const status = msg.includes("expired") ? STATUS_CODES.GONE :
+                       msg.includes("limit") ? STATUS_CODES.TOO_MANY_REQUESTS :
+                       msg.includes("Invalid") ? STATUS_CODES.UNAUTHORIZED :
+                       msg.includes("not found") ? STATUS_CODES.NOT_FOUND : STATUS_CODES.BAD_REQUEST;
         return res.status(status).json({ success: false, error: msg });
     }
 };
@@ -166,7 +169,7 @@ exports.forgetPassword = async (req, res) => {
 
         req.session.forgot_password = sessionData;
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Verification code sent successfully.",
             verificationTimer: sessionData.otpExpiresAt,
@@ -174,8 +177,8 @@ exports.forgetPassword = async (req, res) => {
         });
     } catch (err) {
         const msg = err.message;
-        const status = msg.includes("limit") || msg.includes("wait") ? 429 :
-                       msg.includes("No account") ? 404 : 400;
+        const status = msg.includes("limit") || msg.includes("wait") ? STATUS_CODES.TOO_MANY_REQUESTS :
+                       msg.includes("No account") ? STATUS_CODES.NOT_FOUND : STATUS_CODES.BAD_REQUEST;
         return res.status(status).json({ success: false, error: msg });
     }
 };
@@ -203,15 +206,15 @@ exports.resetPassword = async (req, res) => {
         const forgotPasswordSession = req.session.forgot_password;
 
         if (!forgotPasswordSession?._id) {
-            return res.status(401).json({ success: false, error: "Password reset session has expired." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Password reset session has expired." });
         }
 
         await authService.resetPasswordProcess(forgotPasswordSession._id, newPassword, confirmPassword);
 
         delete req.session.forgot_password;
-        return res.status(200).json({ success: true, message: "Password changed successfully." });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: AUTH_MESSAGES.PASSWORD_RESET_SUCCESS });
     } catch (err) {
-        const status = err.message.includes("User not found") ? 404 : 400;
+        const status = err.message.includes("User not found") ? STATUS_CODES.NOT_FOUND : STATUS_CODES.BAD_REQUEST;
         return res.status(status).json({ success: false, error: err.message });
     }
 };
@@ -246,28 +249,28 @@ exports.showUsers = async (req, res) => {
 exports.blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
-        if (!userId) return res.status(404).json({ message: "User not found" });
+        if (!userId) return res.status(STATUS_CODES.NOT_FOUND).json({ message: AUTH_MESSAGES.USER_NOT_FOUND });
 
         await authService.toggleUserBlockStatus(userId);
 
         const referer = req.get('Referer') || req.get('referrer') || '/admin/users';
         return res.redirect(referer);
     } catch {
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Internal Server Error" });
     }
 };
 
 exports.verifyPassword = async (req, res) => {
     try {
         const { password } = req.body;
-        if (!password) return res.status(401).json({ message: "Password Not found" });
+        if (!password) return res.status(STATUS_CODES.UNAUTHORIZED).json({ message: AUTH_MESSAGES.INVALID_PASSWORD });
 
         const userId = res.locals.user._id;
         await authService.verifyUserPasswordProcess(userId, password);
 
         return res.json({ success: true, message: 'Password Verified Successfully' });
     } catch (err) {
-        const status = err.message.includes("incorrect") || err.message.includes("Google") ? 401 : 500;
+        const status = err.message.includes("incorrect") || err.message.includes("Google") ? STATUS_CODES.UNAUTHORIZED : STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({ message: err.message || "Password is Not Verified" });
     }
 };
@@ -279,14 +282,14 @@ exports.verifyEmail = async (req, res) => {
 
         await authService.verifyEmailChangeProcess(userId, email);
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             message: 'Verification code sent to your email inbox successfully.'
         });
     } catch (err) {
-        const status = err.message.includes("valid") ? 400 :
-                       err.message.includes("Exceeded") ? 400 :
-                       err.message.includes("already registered") ? 409 : 500;
+        const status = err.message.includes("valid") ? STATUS_CODES.BAD_REQUEST :
+                       err.message.includes("Exceeded") ? STATUS_CODES.BAD_REQUEST :
+                       err.message.includes("already registered") ? STATUS_CODES.CONFLICT : STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({ success: false, message: err.message || "Email is not Verified" });
     }
 };
@@ -298,13 +301,13 @@ exports.resetEmail = async (req, res) => {
 
         await authService.resetEmailProcess(userId, email, otp);
 
-        return res.status(200).json({ success: true, message: "Email updated successfully!" });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: "Email updated successfully!" });
     } catch (err) {
         const msg = err.message;
-        const status = msg.includes("valid") || msg.includes("No OTP") ? 400 :
-                       msg.includes("timed out") ? 410 :
-                       msg.includes("Maximum OTP") ? 429 :
-                       msg.includes("Invalid OTP") ? 401 : 500;
+        const status = msg.includes("valid") || msg.includes("No OTP") ? STATUS_CODES.BAD_REQUEST :
+                       msg.includes("timed out") ? STATUS_CODES.GONE :
+                       msg.includes("Maximum OTP") ? STATUS_CODES.TOO_MANY_REQUESTS :
+                       msg.includes("Invalid OTP") ? STATUS_CODES.UNAUTHORIZED : STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({ success: false, message: msg });
     }
 };

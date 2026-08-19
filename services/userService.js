@@ -1,3 +1,4 @@
+// services/userService.js
 const User = require("../models/userSchema");
 const Product = require("../models/productSchema");
 const Settings = require("../models/settingSchema");
@@ -6,6 +7,8 @@ const Otp = require("../models/otpSchema");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+
+const AUTH_MESSAGES = require("../constants/auth");
 
 const verificationEmailSend = require("../utils/nodemailer").verificationEmailSend;
 const forgotPasswordEmailSend = require("../utils/nodemailer").passwordResetEmailSend;
@@ -89,13 +92,13 @@ const getHomeData = async (userId) => {
 
 const loginUser = async (email, password) => {
     const user = await User.findOne({ email }).lean();
-    if (!user) throw new Error("User not found");
-    if (!user.password) throw new Error("Try Forgot Password");
+    if (!user) throw new Error(AUTH_MESSAGES.USER_NOT_FOUND);
+    if (!user.password) throw new Error(AUTH_MESSAGES.TRY_FORGOT_PASSWORD);
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) throw new Error("Invalid email or password");
-    if (!user.isVerified) throw new Error("User is not verified");
-    if (user.blocked) throw new Error("User is blocked by admin");
+    if (!isPasswordMatch) throw new Error(AUTH_MESSAGES.INVALID_CREDENTIALS);
+    if (!user.isVerified) throw new Error(AUTH_MESSAGES.USER_NOT_VERIFIED);
+    if (user.blocked) throw new Error(AUTH_MESSAGES.USER_BLOCKED);
 
     await createWallet(user._id);
     await createReferral(user._id);
@@ -111,17 +114,17 @@ const loginUser = async (email, password) => {
 
 const registerUserProcess = async (name, email, password) => {
     const validatedEmail = validateAndCleanEmail(email);
-    if (!validatedEmail) throw new Error("Invalid email format.");
+    if (!validatedEmail) throw new Error(AUTH_MESSAGES.INVALID_EMAIL_FORMAT);
 
     const otpPurpose = "EMAIL_VERIFICATION";
     let user = await User.findOne({ email: validatedEmail }).lean();
-    if (user?.isVerified) throw new Error("Email is already registered. Please login.");
+    if (user?.isVerified) throw new Error(AUTH_MESSAGES.ACCOUNT_EXIST);
 
     if (user) {
         const existingOtp = await Otp.findOne({ userId: user._id, purpose: otpPurpose }).lean();
-        if (existingOtp?.resendCount >= 3) throw new Error("OTP Resend Limit Exceeded, Try again Tomorrow");
+        if (existingOtp?.resendCount >= 3) throw new Error(AUTH_MESSAGES.OTP_RESEND_LIMIT_EXCEEDED);
         if (existingOtp && (Date.now() - existingOtp.updatedAt.getTime() < 5000)) {
-            throw new Error("A verification email was just sent. Please wait 5 seconds before trying again.");
+            throw new Error(AUTH_MESSAGES.OTP_RESENT_WAIT);
         }
     }
 
@@ -173,12 +176,12 @@ const resendEmailVerificationProcess = async (sessionUser) => {
     const otpPurpose = "EMAIL_VERIFICATION";
     const validatedEmail = validateAndCleanEmail(sessionUser.email);
     const user = await User.findById(sessionUser._id).lean();
-    if (!user) throw new Error("Session expired. Please register again.");
+    if (!user) throw new Error(AUTH_MESSAGES.SESSION_EXPIRED_REGISTER);
 
     const existingOtp = await Otp.findOne({ userId: user._id, purpose: otpPurpose }).lean();
-    if (!existingOtp) throw new Error("Verification session not found.");
-    if (existingOtp.resendCount >= 3) throw new Error("OTP resend limit exceeded. Please try again tomorrow.");
-    if (Date.now() - existingOtp.updatedAt.getTime() < 5000) throw new Error("Please wait a few seconds before requesting another OTP.");
+    if (!existingOtp) throw new Error(AUTH_MESSAGES.VERIFICATION_SESSION_NOT_FOUND);
+    if (existingOtp.resendCount >= 3) throw new Error(AUTH_MESSAGES.OTP_RESEND_LIMIT_EXCEEDED);
+    if (Date.now() - existingOtp.updatedAt.getTime() < 5000) throw new Error(AUTH_MESSAGES.OTP_RESENT_WAIT);
 
     const { otp } = generateOtp();
     const otpHash = hashOtp(otp);
@@ -204,19 +207,19 @@ const verifyEmailOtpProcess = async (userId, verificationCode) => {
     try {
         const otpPurpose = "EMAIL_VERIFICATION";
         const user = await User.findById(userId).select("_id name email blocked isVerified").lean().session(session);
-        if (!user) throw new Error("User not found.");
-        if (user.isVerified) throw new Error("Email is already verified.");
+        if (!user) throw new Error(AUTH_MESSAGES.USER_NOT_FOUND);
+        if (user.isVerified) throw new Error(AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
 
         const existingOtp = await Otp.findOne({ userId, purpose: otpPurpose }).lean().session(session);
-        if (!existingOtp) throw new Error("No active verification request found.");
-        if (Date.now() > existingOtp.expiresAt.getTime()) throw new Error("Verification code has expired.");
-        if (existingOtp.attempts >= 5) throw new Error("Maximum verification attempts reached. Please request another OTP.");
+        if (!existingOtp) throw new Error(AUTH_MESSAGES.NO_ACTIVE_VERIFICATION);
+        if (Date.now() > existingOtp.expiresAt.getTime()) throw new Error(AUTH_MESSAGES.VERIFICATION_EXPIRED);
+        if (existingOtp.attempts >= 5) throw new Error(AUTH_MESSAGES.MAX_ATTEMPTS_REACHED);
 
         const isMatch = verifyOtp(verificationCode, existingOtp.otpHash);
         if (!isMatch) {
             await Otp.updateOne({ _id: existingOtp._id }, { $inc: { attempts: 1 } }).session(session);
             await session.commitTransaction();
-            throw new Error("Invalid verification code.");
+            throw new Error(AUTH_MESSAGES.INVALID_VERIFICATION_CODE);
         }
 
         await User.updateOne({ _id: userId }, { $set: { isVerified: true } }).session(session);
@@ -240,16 +243,16 @@ const verifyEmailOtpProcess = async (userId, verificationCode) => {
 
 const forgetPasswordProcess = async (email) => {
     const validatedEmail = validateAndCleanEmail(email);
-    if (!validatedEmail) throw new Error("Email is required.");
+    if (!validatedEmail) throw new Error(AUTH_MESSAGES.EMAIL_REQUIRED);
 
     const otpPurpose = "FORGOT_PASSWORD";
     const user = await User.findOne({ email: validatedEmail }).lean();
-    if (!user) throw new Error("No account found with this email.");
+    if (!user) throw new Error(AUTH_MESSAGES.USER_NOT_FOUND);
 
     const existingOtp = await Otp.findOne({ userId: user._id, purpose: otpPurpose }).lean();
     if (existingOtp) {
-        if (existingOtp.resendCount >= 3) throw new Error("OTP resend limit exceeded. Please try again tomorrow.");
-        if (Date.now() - existingOtp.updatedAt.getTime() < 5000) throw new Error("Please wait a few seconds before requesting another OTP.");
+        if (existingOtp.resendCount >= 3) throw new Error(AUTH_MESSAGES.OTP_RESEND_LIMIT_EXCEEDED);
+        if (Date.now() - existingOtp.updatedAt.getTime() < 5000) throw new Error(AUTH_MESSAGES.OTP_RESENT_WAIT);
     }
 
     const { otp } = generateOtp();
@@ -276,7 +279,7 @@ const forgetPasswordProcess = async (email) => {
 const validateResetPasswordTokenProcess = async (userId, otp) => {
     const otpPurpose = "FORGOT_PASSWORD";
     const user = await User.findById(userId).lean();
-    if (!user) throw new Error("userNotFound");
+    if (!user) throw new Error(AUTH_MESSAGES.USER_NOT_FOUND);
 
     const existingOtp = await Otp.findOne({ userId, purpose: otpPurpose }).lean();
     if (!existingOtp) throw new Error("otpNotFound");
@@ -287,31 +290,31 @@ const validateResetPasswordTokenProcess = async (userId, otp) => {
 
     if (Date.now() > existingOtp.expiresAt.getTime()) {
         await increaseAttempts();
-        throw new Error("otpExpired");
+        throw new Error(AUTH_MESSAGES.VERIFICATION_EXPIRED);
     }
     if (existingOtp.attempts >= 5) {
-        throw new Error("maxAttempts");
+        throw new Error(AUTH_MESSAGES.MAX_ATTEMPTS_REACHED);
     }
 
     const isValidOtp = verifyOtp(otp, existingOtp.otpHash);
     if (!isValidOtp) {
         await increaseAttempts();
-        throw new Error("invalidLink");
+        throw new Error(AUTH_MESSAGES.INVALID_VERIFICATION_CODE);
     }
 
     await increaseAttempts();
 };
 
 const resetPasswordProcess = async (userId, newPassword, confirmPassword) => {
-    if (!newPassword || !confirmPassword) throw new Error("All fields are required.");
-    if (newPassword !== confirmPassword) throw new Error("Passwords do not match.");
+    if (!newPassword || !confirmPassword) throw new Error(AUTH_MESSAGES.ALL_FIELDS_REQUIRED);
+    if (newPassword !== confirmPassword) throw new Error(AUTH_MESSAGES.PASSWORDS_DONT_MATCH);
 
     const user = await User.findById(userId).lean();
-    if (!user) throw new Error("User not found.");
+    if (!user) throw new Error(AUTH_MESSAGES.USER_NOT_FOUND);
 
     if (user.password) {
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
-        if (isSamePassword) throw new Error("Your new password must be different from your current password.");
+        if (isSamePassword) throw new Error(AUTH_MESSAGES.SAME_PASSWORD_ERROR);
     }
 
     const passwordHash = await securePassword(newPassword);
@@ -366,22 +369,22 @@ const toggleUserBlockStatus = async (userId) => {
 
 const verifyUserPasswordProcess = async (userId, password) => {
     const user = await User.findById(userId).lean();
-    if (!user.password && user.googleId) throw new Error("Google Login Detected, Create Password First");
+    if (!user.password && user.googleId) throw new Error(AUTH_MESSAGES.GOOGLE_LOGIN_DETECTED);
 
     const result = await bcrypt.compare(password, user.password);
-    if (!result) throw new Error("Password is incorrect");
+    if (!result) throw new Error(AUTH_MESSAGES.INVALID_PASSWORD);
 };
 
 const verifyEmailChangeProcess = async (userId, email) => {
     const validatedEmail = validateAndCleanEmail(email);
-    if (!validatedEmail) throw new Error("Please enter a valid email address.");
+    if (!validatedEmail) throw new Error(AUTH_MESSAGES.VALID_EMAIL_REQUIRED);
 
     const currentPurpose = "RESET_EMAIL";
     const existingOtp = await Otp.findOne({ userId, purpose: currentPurpose }).lean();
-    if (existingOtp?.resendCount >= 3) throw new Error("OTP Resend Limit Exceeded, Try again Tomorrow");
+    if (existingOtp?.resendCount >= 3) throw new Error(AUTH_MESSAGES.OTP_RESEND_LIMIT_EXCEEDED);
 
     const anyone = await User.findOne({ email: validatedEmail }).lean();
-    if (anyone) throw new Error("This email address is already registered to an account.");
+    if (anyone) throw new Error(AUTH_MESSAGES.ACCOUNT_EXIST);
 
     const { otp } = generateOtp();
 
@@ -408,33 +411,30 @@ const verifyEmailChangeProcess = async (userId, email) => {
     await verificationEmailSend(validatedEmail, otp);
 };
 
-
-
-
 const resetEmailProcess = async (userId, email, otp) => {
     const validatedEmail = validateAndCleanEmail(email);
-    if (!validatedEmail) throw new Error("Please enter a valid email address.");
-    if (!otp) throw new Error("No OTP detected.");
+    if (!validatedEmail) throw new Error(AUTH_MESSAGES.VALID_EMAIL_REQUIRED);
+    if (!otp) throw new Error(AUTH_MESSAGES.NO_OTP_DETECTED);
 
     const currentPurpose = "RESET_EMAIL";
     const existingOtp = await Otp.findOne({ userId, purpose: currentPurpose }).lean();
-    if (!existingOtp) throw new Error("No active OTP request found. Please request a new code.");
+    if (!existingOtp) throw new Error(AUTH_MESSAGES.NO_ACTIVE_OTP);
 
     if (Date.now() > existingOtp.expiresAt.getTime()) {
-        throw new Error("OTP has timed out. Please generate another OTP.");
+        throw new Error(AUTH_MESSAGES.VERIFICATION_EXPIRED);
     }
     if (existingOtp.attempts >= 5) {
-        throw new Error("Maximum OTP attempts reached. Please generate another OTP.");
+        throw new Error(AUTH_MESSAGES.MAX_ATTEMPTS_REACHED);
     }
 
     const isMatch = verifyOtp(otp, existingOtp.otpHash);
     if (!isMatch) {
         await Otp.updateOne({ _id: existingOtp._id }, { $inc: { attempts: 1 } });
-        throw new Error("Invalid OTP code.");
+        throw new Error(AUTH_MESSAGES.INVALID_VERIFICATION_CODE);
     }
 
     const duplicateEmailUser = await User.findOne({ email: validatedEmail, _id: { $ne: userId } }).lean();
-    if (duplicateEmailUser) throw new Error("This email address is already in use.");
+    if (duplicateEmailUser) throw new Error(AUTH_MESSAGES.ACCOUNT_EXIST);
 
     await User.updateOne({ _id: userId }, { $set: { email: validatedEmail } });
 
