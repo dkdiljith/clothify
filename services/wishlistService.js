@@ -1,6 +1,7 @@
 const Wishlist = require("../models/wishListSchema");
 const Product = require("../models/productSchema");
 const { verifyProductVariation } = require("../utils/productHelper");
+const WISHLIST_MESSAGES = require("../constants/wishlist");
 
 async function fetchUserWishlist(userId, page, limit = 12) {
     const wishlist = await Wishlist.findOne({ userId }).lean();
@@ -69,7 +70,7 @@ async function addItemToWishlist(userId, productId, variationIndex) {
     );
 
     if (existingItem) {
-        const error = new Error('Item is already in your wishlist!');
+        const error = new Error(WISHLIST_MESSAGES.ITEM_ALREADY_EXISTS);
         error.isInfo = true; // Flag to handle custom response status/code
         throw error;
     }
@@ -81,7 +82,7 @@ async function addItemToWishlist(userId, productId, variationIndex) {
 async function removeItemFromWishlist(userId, productId) {
     const wishlist = await Wishlist.findOne({ userId });
     if (!wishlist) {
-        throw new Error('Wishlist not found');
+        throw new Error(WISHLIST_MESSAGES.NOT_FOUND);
     }
 
     wishlist.items = wishlist.items.filter(item => !(item.productId.toString() === productId));
@@ -91,12 +92,12 @@ async function removeItemFromWishlist(userId, productId) {
 async function getFirstAvailableVariationForWishlist(userId, productId) {
     const product = await Product.findById(productId);
     if (!product) {
-        throw new Error("Product not found");
+        throw new Error(WISHLIST_MESSAGES.PRODUCT_NOT_FOUND);
     }
 
     const variationIndex = product.details.findIndex(detail => detail.quantity > 0);
     if (variationIndex === -1) {
-        throw new Error("Out of Stock");
+        throw new Error(WISHLIST_MESSAGES.OUT_OF_STOCK);
     }
 
     await Wishlist.updateOne(

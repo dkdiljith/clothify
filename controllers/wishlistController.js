@@ -1,5 +1,8 @@
+// controllers/wishlistController.js
 const wishlistService = require("../services/wishlistService");
-const addToCart = require("../controllers/cartController").addToCart
+const addToCart = require("../controllers/cartController").addToCart;
+const STATUS_CODES = require("../constants/status-codes");
+const WISHLIST_MESSAGES = require("../constants/wishlist");
 
 exports.wishlistRender = async (req, res) => {
     try {
@@ -9,12 +12,12 @@ exports.wishlistRender = async (req, res) => {
 
         const { products, pagination } = await wishlistService.fetchUserWishlist(userId, page, limit);
 
-        return res.render("user/wishlist", {
+        return res.status(STATUS_CODES.OK).render("user/wishlist", {
             product: products,
             pagination
         });
     } catch {
-        return res.status(500).render("user/wishlist", {
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("user/wishlist", {
             product: [],
             pagination: { page: 1, limit: 12, totalPages: 1, hasNextPage: false, hasPrevPage: false }
         });
@@ -29,21 +32,21 @@ exports.addToWishlist = async (req, res) => {
 
         await wishlistService.addItemToWishlist(userId, productId, variationIndex);
 
-        return res.status(200).json({ 
+        return res.status(STATUS_CODES.OK).json({ 
             success: true, 
-            message: 'Item Added to wishlist!' 
+            message: WISHLIST_MESSAGES.ITEM_ADDED 
         });
     } catch (error) {
         if (error.isInfo) {
-            return res.status(200).json({ 
+            return res.status(STATUS_CODES.OK).json({ 
                 success: false, 
                 info: true, 
                 message: error.message 
             });
         }
-        return res.status(400).json({ 
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ 
             success: false, 
-            message: error.message || 'An error occurred. Please try again later.' 
+            message: error.message || WISHLIST_MESSAGES.DEFAULT_ERROR 
         });
     }
 };
@@ -55,10 +58,16 @@ exports.removeFromWishlist = async (req, res) => {
 
         await wishlistService.removeItemFromWishlist(userId, productId);
 
-        return res.status(200).json({ success: true, message: 'Item removed from wishlist' });
+        return res.status(STATUS_CODES.OK).json({ 
+            success: true, 
+            message: WISHLIST_MESSAGES.ITEM_REMOVED 
+        });
     } catch (error) {
-        const statusCode = error.message === 'Wishlist not found' ? 404 : 500;
-        return res.status(statusCode).json({ success: false, message: error.message || 'Internal server error' });
+        const statusCode = error.message === WISHLIST_MESSAGES.NOT_FOUND ? STATUS_CODES.NOT_FOUND : STATUS_CODES.INTERNAL_SERVER_ERROR;
+        return res.status(statusCode).json({ 
+            success: false, 
+            message: error.message || WISHLIST_MESSAGES.SERVER_ERROR 
+        });
     }
 };
 
@@ -74,10 +83,17 @@ exports.addToCartFromWishlist = async (req, res) => {
         req.params.quantity = 1;
         return addToCart(req, res);
     } catch (error) {
-        const statusCode = error.message === "Product not found" ? 404 : error.message === "Out of Stock" ? 400 : 500;
+        let statusCode = STATUS_CODES.INTERNAL_SERVER_ERROR;
+        
+        if (error.message === WISHLIST_MESSAGES.PRODUCT_NOT_FOUND) {
+            statusCode = STATUS_CODES.NOT_FOUND;
+        } else if (error.message === WISHLIST_MESSAGES.OUT_OF_STOCK) {
+            statusCode = STATUS_CODES.BAD_REQUEST;
+        }
+
         return res.status(statusCode).json({
             success: false,
-            message: error.message || "Server Error",
+            message: error.message || WISHLIST_MESSAGES.SERVER_ERROR,
         });
     }
 };
