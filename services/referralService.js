@@ -1,16 +1,21 @@
- const User = require("../models/userSchema");
+// services/referralService.js
+const User = require("../models/userSchema");
 const Wallet = require("../models/walletSchema");
 const Order = require("../models/orderSchema");
 const Referral = require("../models/referralSchema");
 const ReferralHistory = require("../models/referralHistorySchema"); 
 const Setting = require("../models/settingSchema");
 
+//MESSAGE_CONSTANTS
+const REFERRAL_MESSAGES = require(`../constants/referral`)
+const COMMON_MESSAGES = require(`../constants/common-messages`)
+
 const DEFAULT_REFERRAL_SETTINGS = {
     coinValue: "0.010",
     referrerReward: 300,
     refereeReward: 500,
     signupBonus: 1000,
-    referralHoldingPeriodDays: 7, // Safe default fallback
+    referralHoldingPeriodDays: 7,
 };
 
 async function getReferralSettings() {
@@ -33,7 +38,7 @@ async function getReferralDashboardData(userId, query) {
         Referral.findOne({ userId }).lean(),
     ]);
 
-    if (!rawUser) throw new Error("User profile not found.");
+    if (!rawUser) throw new Error(REFERRAL_MESSAGES.USER_PROFILE_NOT_FOUND);
 
     const user = {
         ...rawUser,
@@ -106,15 +111,15 @@ async function getReferralDashboardData(userId, query) {
 async function applyReferralCode(userId, referralCode) {
     const { refereeReward, coinValue } = await getReferralSettings();
 
-    if (!referralCode) throw new Error("No Referral Code Detected");
+    if (!referralCode) throw new Error(REFERRAL_MESSAGES.NO_REFERRAL_CODE);
 
     const referral = await Referral.findOne({ userId });
-    if (!referral) throw new Error("Referral not found");
-    if (referral.referrer) throw new Error("You have already applied a referral code.");
+    if (!referral) throw new Error(REFERRAL_MESSAGES.NOT_FOUND);
+    if (referral.referrer) throw new Error(REFERRAL_MESSAGES.ALREADY_APPLIED);
 
     const referrer = await Referral.findOne({ referralCode }).select("userId").lean();
-    if (!referrer) throw new Error("Referral Code Invalid");
-    if (referrer.userId.toString() === userId.toString()) throw new Error("You cannot refer yourself.");
+    if (!referrer) throw new Error(REFERRAL_MESSAGES.INVALID_CODE);
+    if (referrer.userId.toString() === userId.toString()) throw new Error(REFERRAL_MESSAGES.SELF_REFERRAL);
 
     referral.referrer = referrer.userId;
     referral.referralCoins += refereeReward;
@@ -135,9 +140,9 @@ async function applyReferralCode(userId, referralCode) {
 
 async function redeemUserCoins(userId, redeemCoinInput) {
     const redeemCoin = Number(redeemCoinInput);
-    if (!redeemCoin) throw new Error("Redeem coin amount is required.");
+    if (!redeemCoin) throw new Error(REFERRAL_MESSAGES.REDEEM_AMOUNT_REQUIRED);
     if (redeemCoin < 1000 || redeemCoin % 1000 !== 0) {
-        throw new Error("Redeem coin must be at least 1,000 and a multiple of 1,000.");
+        throw new Error(REFERRAL_MESSAGES.INVALID_REDEEM_MULTIPLE);
     }
 
     const [settings, referralRecord, completedOrders] = await Promise.all([
@@ -153,11 +158,11 @@ async function redeemUserCoins(userId, redeemCoinInput) {
     }
 
     if (completedOrders < 1) {
-        throw new Error("Complete Your First Order");
+        throw new Error(REFERRAL_MESSAGES.COMPLETE_FIRST_ORDER);
     }
 
     const wallet = await Wallet.findOne({ userId });
-    if (!wallet) throw new Error("Wallet not found.");
+    if (!wallet) throw new Error(REFERRAL_MESSAGES.WALLET_NOT_FOUND);
 
     const redeemAmount = redeemCoin * parseFloat(coinValue);
     const displayValue100 = 100 * parseFloat(coinValue);
@@ -242,7 +247,7 @@ async function processCronPendingReferrals() {
 
     const pendingReferrals = await Referral.find({ status: "Pending" });
     if (pendingReferrals.length === 0) {
-        return { success: true, message: "No pending referrals to process." };
+        return { success: true, message: REFERRAL_MESSAGES.NO_PENDING_REFERRALS };
     }
 
     for (const referral of pendingReferrals) {
@@ -287,7 +292,7 @@ async function processCronPendingReferrals() {
         }
     }
 
-    return { success: true, message: "Referrals processed successfully." };
+    return { success: true, message: REFERRAL_MESSAGES.REFERRALS_PROCESSED_SUCCESS };
 }
 
 module.exports = {

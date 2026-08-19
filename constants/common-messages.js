@@ -1,7 +1,12 @@
+const { UNAUTHORIZED } = require("./status-codes")
+
 const COMMON_MESSAGES = {
 
     INTERNAL_SERVER_ERROR:
         "Internal server error",
+        
+    UNAUTHORIZED_ACCESS:
+        "Unauthorized access.",
 
     SERVER_ERROR:
         "Server error",
@@ -28,6 +33,6 @@ const COMMON_MESSAGES = {
 
 
 
-module.exports =  COMMON_MESSAGES
+module.exports = COMMON_MESSAGES
 
-  
+

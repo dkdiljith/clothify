@@ -1,10 +1,16 @@
 const referralService = require("../services/referralService");
 
+const REFERRAL_MESSAGES = require(`../constants/referral`)
+const STATUS_CODES = require(`../constants/status-codes`)
+const COMMON_MESSAGES = require(`../constants/common-messages`)
+
+
+
 exports.referral = async (req, res) => {
     try {
         const userId = res.locals.user?._id;
         if (!userId) {
-            return res.status(401).render("error/401", { message: "Unauthorized access." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).render("/user/home", { message: COMMON_MESSAGES.UNAUTHORIZED_ACCESS});
         }
 
         const data = await referralService.getReferralDashboardData(userId, req.query);
@@ -14,9 +20,9 @@ exports.referral = async (req, res) => {
             user_sidebar: true,
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            error: error.message || "Referral Controller Error",
+            error: error.message || REFERRAL_MESSAGES.FAILED_RENDER,
         });
     }
 };
@@ -33,9 +39,9 @@ exports.applyReferral = async (req, res) => {
             req.session.user.showWelcomeModal = false;
         }
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Referral code applied successfully!",
+            message: REFERRAL_MESSAGES.REFERRAL_APPLIED_SUCCCESS,
             signupBonus,
             referralBonus: result.referralBonus,
             rewardCoins: result.rewardCoins,
@@ -44,9 +50,9 @@ exports.applyReferral = async (req, res) => {
         });
     } catch (error) {
         const statusCode = error.message.includes("not found") || error.message.includes("Invalid") ? 404 : 400;
-        return res.status(statusCode === 404 ? 404 : 400).json({
+        return res.status(statusCode === 404 ? STATUS_CODES.NOT_FOUND : STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: error.message || "Referral Controller Error",
+            message: error.message || REFERRAL_MESSAGES.FAILED_APPLY_REFERRAL,
         });
     }
 };
@@ -63,7 +69,7 @@ exports.cancelReferral = async (req, res) => {
             req.session.user.showWelcomeModal = false;
         }
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             signupBonus,
             referralBonus: 0,
@@ -72,10 +78,10 @@ exports.cancelReferral = async (req, res) => {
             referralApplied: false,
         });
     } catch {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Unable to dismiss referral popup.",
-        });
+            message: REFERRAL_MESSAGES.FAILED_CANCEL_REFERRAL,
+        }); 
     }
 };
 
@@ -84,17 +90,17 @@ exports.redeemCoin = async (req, res) => {
         const userId = res.locals.user._id;
         const result = await referralService.redeemUserCoins(userId, req.body.reedeemCoinInput);
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: `Successfully redeemed coins for ₹${result.redeemAmount.toFixed(2)}!`,
+            message: REFERRAL_MESSAGES.REDEEM_COINS,
             newWalletBalance: result.newWalletBalance,
             newBalance: result.newBalance,
             history: result.history
         });
     } catch (error) {
-        return res.status(400).json({
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "An internal server error occurred while redeeming coins.",
+            message: error.message || REFERRAL_MESSAGES.FAILED_REDEEM_COINS,
         });
     }
 };
