@@ -1,11 +1,14 @@
+// controllers/walletController.js
 const walletService = require("../services/walletService");
+const WALLET_MESSAGES = require("../constants/wallet");
+const STATUS_CODES = require("../constants/status-codes");
 
 exports.walletRender = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const { wallet, credit, debit, page, limit, totalPages } = await walletService.getWalletDetails(userId, req.query.page);
 
-        return res.render('user/wallet', {
+        return res.status(STATUS_CODES.OK).render('user/wallet', {
             wallet,
             credit,
             debit,
@@ -21,17 +24,17 @@ exports.walletRender = async (req, res) => {
             user_sidebar: true
         });
     } catch {
-        return res.status(500).send("Internal Server Error");
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(WALLET_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
-
+ 
 exports.amountDeposit = async (req, res) => {
     try {
         const { amount } = req.body;
         const order = await walletService.createRazorpayDepositOrder(amount);
-        return res.json(order);
+        return res.status(STATUS_CODES.OK).json(order);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
 };
 
@@ -40,14 +43,14 @@ exports.walletPaymentVerification = async (req, res) => {
         const userId = res.locals.user._id;
         const paymentId = await walletService.verifyAndCreditWalletPayment(userId, req.body);
         
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: 'Payment verified',
+            message: WALLET_MESSAGES.PAYMENT_VERIFIED,
             payment_id: paymentId
         });
     } catch (error) {
-        const status = error.status || 500;
-        return res.status(status).send(error.message || 'Failed to create order');
+        const status = error.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
+        return res.status(status).send(error.message || WALLET_MESSAGES.FAILED_TO_CREATE_ORDER);
     }
 };
 
@@ -58,18 +61,18 @@ exports.walletPayment = async (req, res) => {
 
         await walletService.processWalletPayment(userId, amount);
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: 'Payment verified'
+            message: WALLET_MESSAGES.PAYMENT_VERIFIED
         });
     } catch (error) {
         if (error.isCustomValidation) {
-            return res.json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: error.message
             });
         }
-        const status = error.status || 500;
+        const status = error.status || STATUS_CODES.INTERNAL_SERVER_ERROR;
         return res.status(status).json({ error: error.message });
     }
 };

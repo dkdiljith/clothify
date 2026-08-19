@@ -32,6 +32,8 @@ const ORDER_MESSAGES = {
     FAILED_TO_RETRY_PAYMENT: "Failed to retry payment.",
     ORDER_STATUS_UPDATED: "Order status updated and stock reduced successfully.",
 
+    ORDER_LIMIT_EXCEEDED: (limit) =>
+        `Orders above ₹${limit} are not allowed. Please reduce your cart total.`,
     MISSING_REQUIRED_FIELDS: "Missing required fields",
     WRONG_PAYMENT_INFO: "Wrong Payment Info",
     CART_EMPTY: "Your cart is empty.",

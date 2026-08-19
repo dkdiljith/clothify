@@ -1,6 +1,16 @@
+// services/walletService.js
 const Wallet = require("../models/walletSchema");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const WALLET_MESSAGES = require("../constants/wallet");
+const STATUS_CODES = require("../constants/status-codes");
+
+// Assuming you have order constants, otherwise you can replace ORDER_MESSAGES with strings
+const ORDER_MESSAGES = {
+    ORDER_LIMIT_EXCEEDED: (limit) => `Orders above ₹${limit} are not allowed. Please reduce your cart total.`,
+    INSUFFICIENT_WALLET: "Insufficient balance detected",
+    WALLET_DEBIT_DESC: (amount) => `₹${amount} debited for order payment`
+};
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID.trim(),
@@ -40,7 +50,7 @@ async function getWalletDetails(userId, pageQuery) {
     const page = parseInt(pageQuery) || 1;
     const limit = 3;
     let totalPages = 0;
-    let paginatedTransactions
+    let paginatedTransactions;
     let credit = 0;
     let debit = 0;
 
@@ -76,7 +86,7 @@ async function createRazorpayDepositOrder(amount) {
     };
     const order = await razorpay.orders.create(options);
     if (!order) {
-        throw new Error("Failed to create order");
+        throw new Error(WALLET_MESSAGES.FAILED_TO_CREATE_ORDER);
     }
     return order;
 }
@@ -90,15 +100,15 @@ async function verifyAndCreditWalletPayment(userId, paymentData) {
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature !== razorpay_signature) {
-        const err = new Error("Invalid signature");
-        err.status = 500;
+        const err = new Error(WALLET_MESSAGES.INVALID_SIGNATURE);
+        err.status = STATUS_CODES.BAD_REQUEST; 
         throw err;
     }
 
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) {
-        const err = new Error("Wallet not found");
-        err.status = 500;
+        const err = new Error(WALLET_MESSAGES.NOT_FOUND);
+        err.status = STATUS_CODES.NOT_FOUND;
         throw err;
     }
 
@@ -106,7 +116,7 @@ async function verifyAndCreditWalletPayment(userId, paymentData) {
     wallet.transactions.push({
         type: 'credit',
         amount: integerAmount,
-        description: `Wallet recharge: ₹${integerAmount} via Razorpay (ID: ${razorpay_payment_id})`
+        description: WALLET_MESSAGES.WALLET_RECHARGE_DESC(integerAmount, razorpay_payment_id)
     });
 
     await wallet.save();
@@ -118,27 +128,27 @@ async function processWalletPayment(userId, amount) {
     const ORDER_LIMIT = 25000;
 
     if (integerAmount > ORDER_LIMIT) {
-        const err = new Error(`Orders above ₹${ORDER_LIMIT} are not allowed. Please reduce your cart total.`);
+        const err = new Error(ORDER_MESSAGES.ORDER_LIMIT_EXCEEDED(ORDER_LIMIT));
         err.isCustomValidation = true;
         throw err;
     }
 
     if (!userId) {
-        const err = new Error("User not found");
-        err.status = 500;
+        const err = new Error(WALLET_MESSAGES.USER_NOT_FOUND);
+        err.status = STATUS_CODES.NOT_FOUND;
         throw err;
     }
 
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) {
-        const err = new Error("Wallet not found");
-        err.status = 500;
+        const err = new Error(WALLET_MESSAGES.NOT_FOUND);
+        err.status = STATUS_CODES.NOT_FOUND;
         throw err;
     }
 
     if (wallet.balance < integerAmount) {
-        const err = new Error("Insufficient balance detected");
-        err.status = 500;
+        const err = new Error(ORDER_MESSAGES.INSUFFICIENT_WALLET);
+        err.status = STATUS_CODES.BAD_REQUEST; 
         throw err;
     }
 
@@ -146,13 +156,13 @@ async function processWalletPayment(userId, amount) {
     wallet.transactions.push({
         type: "debit",
         amount: integerAmount,
-        description: `₹${integerAmount} debited for order payment`,
+        description: ORDER_MESSAGES.WALLET_DEBIT_DESC(integerAmount),
     });
 
     const result = await wallet.save();
     if (!result) {
-        const err = new Error("Failed to process wallet payment");
-        err.status = 500;
+        const err = new Error(WALLET_MESSAGES.WALLET_PAYMENT_FAILED);
+        err.status = STATUS_CODES.INTERNAL_SERVER_ERROR;
         throw err;
     }
     return result;
