@@ -1,4 +1,4 @@
-// controllers/userController.js
+
 const authService = require("../services/userService");
 const AUTH_MESSAGES = require("../constants/auth");
 const STATUS_CODES = require("../constants/status-codes");
@@ -51,7 +51,7 @@ exports.forgetPasswordRender = async (req, res) => {
 exports.userLogout = (req, res) => {
     delete req.session.user;
     req.session.save((err) => {
-        if (err) return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Error");
+        if (err) return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(AUTH_MESSAGES.INTERNAL_SERVER_ERROR);
         return res.redirect("/user/login");
     });
 };
@@ -76,10 +76,10 @@ exports.register = async (req, res) => {
     try {
         const { name, email, password, confirmPassword } = req.body;
         if (!name || !email || !password || !confirmPassword) {
-            return res.render("user/register", { message: "All fields are required.", plain_body: true });
+            return res.render("user/register", { message: AUTH_MESSAGES.ALL_FIELDS_REQUIRED, plain_body: true });
         }
         if (password !== confirmPassword) {
-            return res.render("user/register", { message: "Passwords do not match.", plain_body: true });
+            return res.render("user/register", { message: AUTH_MESSAGES.PASSWORDS_DONT_MATCH, plain_body: true });
         }
 
         const sessionData = await authService.registerUserProcess(name, email, password);
@@ -87,7 +87,7 @@ exports.register = async (req, res) => {
 
         return res.redirect("/user/emailverification");
     } catch (err) {
-        return res.render("user/register", { message: err.message || "Something went wrong. Please try again.", plain_body: true });
+        return res.render("user/register", { message: err.message || AUTH_MESSAGES.SOMETHING_WENT_WRONG, plain_body: true });
     }
 };
 
@@ -106,7 +106,7 @@ exports.resendEmailVerification = async (req, res) => {
     try {
         const sessionUser = req.session.unknown_user;
         if (!sessionUser?._id) {
-            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Session expired. Please register again." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: AUTH_MESSAGES.SESSION_EXPIRED_REGISTER });
         }
 
         const timers = await authService.resendEmailVerificationProcess(sessionUser);
@@ -116,7 +116,7 @@ exports.resendEmailVerification = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Verification code sent successfully.",
+            message: AUTH_MESSAGES.VERIFICATION_CODE_SENT,
             verificationTimer: timers.otpExpiresAt,
             resendTimer: timers.resendTimer
         });
@@ -133,10 +133,10 @@ exports.emailVerification = async (req, res) => {
         const sessionUser = req.session.unknown_user;
 
         if (!sessionUser?._id) {
-            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Session expired. Please register again." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: AUTH_MESSAGES.SESSION_EXPIRED_REGISTER });
         }
         if (!verificationCode) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, error: "Please enter the verification code." });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, error: AUTH_MESSAGES.INVALID_VERIFICATION_CODE });
         }
 
         const user = await authService.verifyEmailOtpProcess(sessionUser._id, verificationCode);
@@ -171,7 +171,7 @@ exports.forgetPassword = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Verification code sent successfully.",
+            message: AUTH_MESSAGES.VERIFICATION_CODE_SENT,
             verificationTimer: sessionData.otpExpiresAt,
             resendTimer: sessionData.resendAvailableAt,
         });
@@ -206,7 +206,7 @@ exports.resetPassword = async (req, res) => {
         const forgotPasswordSession = req.session.forgot_password;
 
         if (!forgotPasswordSession?._id) {
-            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: "Password reset session has expired." });
+            return res.status(STATUS_CODES.UNAUTHORIZED).json({ success: false, error: AUTH_MESSAGES.PASSWORD_RESET_SESSION_EXPIRED });
         }
 
         await authService.resetPasswordProcess(forgotPasswordSession._id, newPassword, confirmPassword);
@@ -241,7 +241,7 @@ exports.showUsers = async (req, res) => {
             query: "",
             accountStatus: "",
             pagination: { page: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false, nextPage: 2, prevPage: 0, serialNumberStart: 0 },
-            errorMessage: "Error fetching users."
+            errorMessage: AUTH_MESSAGES.ERROR_FETCHING_USERS
         });
     }
 };
@@ -256,7 +256,7 @@ exports.blockUser = async (req, res) => {
         const referer = req.get('Referer') || req.get('referrer') || '/admin/users';
         return res.redirect(referer);
     } catch {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Internal Server Error" });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR });
     }
 };
 
@@ -268,10 +268,10 @@ exports.verifyPassword = async (req, res) => {
         const userId = res.locals.user._id;
         await authService.verifyUserPasswordProcess(userId, password);
 
-        return res.json({ success: true, message: 'Password Verified Successfully' });
+        return res.json({ success: true, message: AUTH_MESSAGES.PASSWORD_VERIFIED_SUCCESS });
     } catch (err) {
         const status = err.message.includes("incorrect") || err.message.includes("Google") ? STATUS_CODES.UNAUTHORIZED : STATUS_CODES.INTERNAL_SERVER_ERROR;
-        return res.status(status).json({ message: err.message || "Password is Not Verified" });
+        return res.status(status).json({ message: err.message || AUTH_MESSAGES.PASSWORD_NOT_VERIFIED });
     }
 };
 
@@ -284,13 +284,13 @@ exports.verifyEmail = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: 'Verification code sent to your email inbox successfully.'
+            message: AUTH_MESSAGES.EMAIL_VERIFICATION_SENT
         });
     } catch (err) {
         const status = err.message.includes("valid") ? STATUS_CODES.BAD_REQUEST :
                        err.message.includes("Exceeded") ? STATUS_CODES.BAD_REQUEST :
                        err.message.includes("already registered") ? STATUS_CODES.CONFLICT : STATUS_CODES.INTERNAL_SERVER_ERROR;
-        return res.status(status).json({ success: false, message: err.message || "Email is not Verified" });
+        return res.status(status).json({ success: false, message: err.message || AUTH_MESSAGES.EMAIL_NOT_VERIFIED });
     }
 };
 
@@ -301,7 +301,7 @@ exports.resetEmail = async (req, res) => {
 
         await authService.resetEmailProcess(userId, email, otp);
 
-        return res.status(STATUS_CODES.OK).json({ success: true, message: "Email updated successfully!" });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: AUTH_MESSAGES.EMAIL_UPDATED_SUCCESS });
     } catch (err) {
         const msg = err.message;
         const status = msg.includes("valid") || msg.includes("No OTP") ? STATUS_CODES.BAD_REQUEST :

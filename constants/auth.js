@@ -1,4 +1,4 @@
-
+// constants/auth.js
 const AUTH_MESSAGES = {
     USER_NOT_FOUND: "User not found",
     INVALID_CREDENTIALS: "Invalid email or password",
@@ -23,7 +23,7 @@ const AUTH_MESSAGES = {
     ACCOUNT_EXIST: "An Account Exist with this email",
     ADMIN_NOT_FOUND: "Admin Not Found",
     
-
+    // Service layer messages
     NO_ACTIVE_OTP: "No active OTP request found. Please request a new code.",
     SESSION_EXPIRED_REGISTER: "Session expired. Please register again.",
     VERIFICATION_SESSION_NOT_FOUND: "Verification session not found.",
@@ -37,7 +37,20 @@ const AUTH_MESSAGES = {
     ALL_FIELDS_REQUIRED: "All fields are required.",
     SAME_PASSWORD_ERROR: "Your new password must be different from your current password.",
     VALID_EMAIL_REQUIRED: "Please enter a valid email address.",
-    NO_OTP_DETECTED: "No OTP detected."
+    NO_OTP_DETECTED: "No OTP detected.",
+
+    // Controller layer messages
+    INTERNAL_SERVER_ERROR: "Internal Server Error",
+    SOMETHING_WENT_WRONG: "Something went wrong. Please try again.",
+    VERIFICATION_CODE_SENT: "Verification code sent successfully.",
+    SESSION_EXPIRED_LOGIN: "Session expired. Please log in again.",
+    PASSWORD_RESET_SESSION_EXPIRED: "Password reset session has expired.",
+    ERROR_FETCHING_USERS: "Error fetching users.",
+    PASSWORD_VERIFIED_SUCCESS: "Password Verified Successfully",
+    PASSWORD_NOT_VERIFIED: "Password is Not Verified",
+    EMAIL_VERIFICATION_SENT: "Verification code sent to your email inbox successfully.",
+    EMAIL_NOT_VERIFIED: "Email is not Verified",
+    EMAIL_UPDATED_SUCCESS: "Email updated successfully!"
 };
 
 module.exports = AUTH_MESSAGES;
