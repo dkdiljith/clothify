@@ -216,7 +216,17 @@ async function generatePdfBuffer(startDate, endDate) {
     </html>
     `;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        // Uses container environment path, falls back to default locally
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', // Critical to prevent crash on small EC2 instances
+            '--disable-gpu'
+        ]
+    });
+    
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "domcontentloaded" });
 

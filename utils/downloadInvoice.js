@@ -7,97 +7,97 @@ const Order = require(`../models/orderSchema`)
 
 //////////////////////////////////////////////////////////////////////////////////
 const downloadInvoice = async (req, res) => {
-    try {
-        const { orderId } = req.body;
-        const order = await Order.findById(orderId).lean();
-        //////////////////////////////////////////////////////////////////////////
-        // VALIDATIONS
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: "Order not found."
-            });
-        }
-        // Failed payment
-        if (order.deliveryStatus === "Failed") {
-            return res.status(400).json({
-                success: false,
-                message: "Invoice cannot be generated for failed orders."
-            });
-        }
-        // Fully cancelled order
-        if (order.deliveryStatus === "Cancelled") {
-            return res.status(400).json({
-                success: false,
-                message: "Invoice cannot be generated for cancelled orders."
-            });
-        }
-        // Fully returned order
-        if (order.deliveryStatus === "Returned") {
-            return res.status(400).json({
-                success: false,
-                message: "Invoice cannot be generated for fully refunded orders."
-            });
-        }
-        // Extra safety
-        if (order.totalAmount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invoice cannot be generated."
-            });
-        }
-        //////////////////////////////////////////////////////////////////////////
-        // PREPARE ITEMS
-        const invoiceItems = order.items.map(item => {
-            const unitPrice = Number(item.productPrice);
-            const totalPrice =
-                unitPrice * item.quantity;
-            const refundAmount =
-                item.refundDetails?.refundAmount || 0;
-            const paymentStatus = (() => {
-                switch (item.status) {
-                    case "Completed":
-                        return {
-                            text: "Completed",
-                            color: "#28a745"
-                        };
-                    case "Cancelled":
-                        return {
-                            text: "Cancelled",
-                            color: "#dc3545"
-                        };
-                    case "Returned":
-                        return {
-                            text: "Returned",
-                            color: "#fd7e14"
-                        };
-                    case "Return Requested":
-                        return {
-                            text: "Return Requested",
-                            color: "#0d6efd"
-                        };
-                    case "Return Rejected":
-                        return {
-                            text: "Return Rejected",
-                            color: "#6c757d"
-                        };
-                    default:
-                        return {
-                            text: item.status,
-                            color: "#555"
-                        };
-                }
-            })();
+  try {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId).lean();
+    //////////////////////////////////////////////////////////////////////////
+    // VALIDATIONS
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found."
+      });
+    }
+    // Failed payment
+    if (order.deliveryStatus === "Failed") {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice cannot be generated for failed orders."
+      });
+    }
+    // Fully cancelled order
+    if (order.deliveryStatus === "Cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice cannot be generated for cancelled orders."
+      });
+    }
+    // Fully returned order
+    if (order.deliveryStatus === "Returned") {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice cannot be generated for fully refunded orders."
+      });
+    }
+    // Extra safety
+    if (order.totalAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice cannot be generated."
+      });
+    }
+    //////////////////////////////////////////////////////////////////////////
+    // PREPARE ITEMS
+    const invoiceItems = order.items.map(item => {
+      const unitPrice = Number(item.productPrice);
+      const totalPrice =
+        unitPrice * item.quantity;
+      const refundAmount =
+        item.refundDetails?.refundAmount || 0;
+      const paymentStatus = (() => {
+        switch (item.status) {
+          case "Completed":
             return {
-                ...item,
-                unitPrice,
-                totalPrice,
-                refundAmount,
-                paymentStatus
+              text: "Completed",
+              color: "#28a745"
             };
-        });
-        //////////////////////////////////////////////////////////////////////////////////
-      const html = `
+          case "Cancelled":
+            return {
+              text: "Cancelled",
+              color: "#dc3545"
+            };
+          case "Returned":
+            return {
+              text: "Returned",
+              color: "#fd7e14"
+            };
+          case "Return Requested":
+            return {
+              text: "Return Requested",
+              color: "#0d6efd"
+            };
+          case "Return Rejected":
+            return {
+              text: "Return Rejected",
+              color: "#6c757d"
+            };
+          default:
+            return {
+              text: item.status,
+              color: "#555"
+            };
+        }
+      })();
+      return {
+        ...item,
+        unitPrice,
+        totalPrice,
+        refundAmount,
+        paymentStatus
+      };
+    });
+    //////////////////////////////////////////////////////////////////////////////////
+    const html = `
 <html>
 
   <head>
@@ -251,8 +251,10 @@ const downloadInvoice = async (req, res) => {
           <strong>#${order.orderId}</strong>
         </p>
         <p>
-          ${new Date(order.createdAt).toLocaleDateString( "en-IN", { day:
-          "2-digit", month: "short", year: "numeric" } )}
+          ${new Date(order.createdAt).toLocaleDateString("en-IN", {
+      day:
+        "2-digit", month: "short", year: "numeric"
+    })}
         </p>
       </div>
     </div>
@@ -289,7 +291,7 @@ const downloadInvoice = async (req, res) => {
               ${item.refundDetails.refundType === "Returned" ? "↩ Returned" : "✖ Cancelled"}
               <br />
               ${order.paymentMethod === "cod" && item.refundDetails.refundType
-              === "Cancelled" ? `No Refund Applicable` : `Wallet Refund :
+          === "Cancelled" ? `No Refund Applicable` : `Wallet Refund :
               ₹${item.refundAmount.toLocaleString()}`}
             </div>
             ` : ""}
@@ -401,7 +403,7 @@ const downloadInvoice = async (req, res) => {
         </span>
         <span>
           ${order.paymentMethod === "razorpay" ? "Online Payment (Razorpay)" :
-          order.paymentMethod === "wallet" ? "Wallet" : "Cash On Delivery"}
+        order.paymentMethod === "wallet" ? "Wallet" : "Cash On Delivery"}
         </span>
       </div>
     </div>
@@ -411,7 +413,7 @@ const downloadInvoice = async (req, res) => {
       <br /><br />
       This invoice reflects the current financial status of your order,
       including any approved cancellations or returns. ${order.totalRefundAmount
-      > 0 ? `
+        > 0 ? `
       <br /><br />
       ${order.paymentMethod === "cod" ? `This order was placed using
       <strong>Cash on Delivery</strong>. The cancelled amount shown above has
@@ -426,30 +428,40 @@ const downloadInvoice = async (req, res) => {
 
 </html>
 `;
-        ////////////////////////////////////////////////////////////////////////////////////
-        // Launch browser
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        await page.setContent(html, {
-            waitUntil: 'domcontentloaded'
-        });
-        // Generate PDF
-        const pdf = await page.pdf({
-            format: 'A4',
-            printBackground: true
-        });
-        const pdfBuffer = Buffer.from(pdf);
-        await browser.close();
-        // Send PDF
-        res.writeHead(200, {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': 'attachment; filename=sales-report.pdf',
-            'Content-Length': pdfBuffer.length
-        });
-        return res.end(pdfBuffer);
-    } catch{
-        return res.status(500).send('Failed to generate invoice');
-    }
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Launch browser
+    const browser = await puppeteer.launch({
+      // Uses container environment path, falls back to default locally
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage', // Critical to prevent crash on small EC2 instances
+        '--disable-gpu'
+      ]
+    });
+    
+    const page = await browser.newPage();
+    await page.setContent(html, {
+      waitUntil: 'domcontentloaded'
+    });
+    // Generate PDF
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true
+    });
+    const pdfBuffer = Buffer.from(pdf);
+    await browser.close();
+    // Send PDF
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=sales-report.pdf',
+      'Content-Length': pdfBuffer.length
+    });
+    return res.end(pdfBuffer);
+  } catch {
+    return res.status(500).send('Failed to generate invoice');
+  }
 };
 
 

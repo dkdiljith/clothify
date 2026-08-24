@@ -1,0 +1,14 @@
+# Ignore local dependencies (Docker will install its own Linux versions)
+node_modules/
+
+# Ignore sensitive keys and configs (Docker will inject these via the run command)
+.env
+.env.local
+
+# Ignore editor and system clutter
+.git
+.gitignore
+.vscode/
+
+# Ignore logs (avoids baking local server logs into the image)
+logs/
