@@ -1,10 +1,9 @@
 // services/settingsService.js
-const Settings = require("../models/settingSchema");
-const logger = require('../config/logger');
+import Settings from '../models/settingSchema.js';
+import logger from '../config/logger.js';
 
-
-const SETTINGS_MESSAGES = require("../constants/settings");
-const STATUS_CODES = require("../constants/status-codes");
+import SETTINGS_MESSAGES from '../constants/settings.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 async function initializeGlobalSettings() {
     try {

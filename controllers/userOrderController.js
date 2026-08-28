@@ -1,9 +1,10 @@
 // controllers/userOrderController.js
-const orderService = require("../services/userOrderService");
-const mongoose = require("mongoose");
-const ORDER_MESSAGES = require("../constants/order");
-const AUTH_MESSAGES = require("../constants/auth");
-const STATUS_CODES = require("../constants/status-codes");
+import orderService from '../services/userOrderService.js';
+import mongoose from 'mongoose';
+import ORDER_MESSAGES from '../constants/order.js';
+import AUTH_MESSAGES from '../constants/auth.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 // Render Payment Page
 exports.payment = async (req, res) => {

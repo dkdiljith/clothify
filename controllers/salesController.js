@@ -1,7 +1,8 @@
 // controllers/salesController.js
-const salesReportService = require("../services/salesService");
-const SALES_MESSAGES = require("../constants/sales");
-const STATUS_CODES = require("../constants/status-codes");
+import salesReportService from '../services/salesService.js';
+import SALES_MESSAGES from '../constants/sales.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 exports.salesReportRender = async (req, res) => {
     try {

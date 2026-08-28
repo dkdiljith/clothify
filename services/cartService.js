@@ -1,17 +1,17 @@
-const Cart = require(`../models/cartSchema`);
-const Address = require(`../models/addressSchema`);
-const Coupon = require(`../models/couponSchema`);
+import Cart from '../models/cartSchema.js';
+import Address from '../models/addressSchema.js';
+import Coupon from '../models/couponSchema.js';
 
 
 //update cart
-const recalculateCartSummary = require(`../utils/recalculateCartSummary`);
-const { verifyProductVariation } = require("../utils/productHelper");
+import recalculateCartSummary from '../utils/recalculateCartSummary.js';
+import { verifyProductVariation } from '../utils/productHelper.js';
 
 
 //MESSAGE_CONSTANTS
-const CART_MESSAGES = require(`../constants/cart`)
-const USER_MESSAGE = require(`../constants/auth`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import CART_MESSAGES from '../constants/cart.js';
+import USER_MESSAGE from '../constants/auth.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

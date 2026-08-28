@@ -1,8 +1,8 @@
 // services/userProfileService.js
-const User = require("../models/userSchema");
-const Address = require("../models/addressSchema");
-const Order = require("../models/orderSchema");
-const PROFILE_MESSAGES = require("../constants/profile");
+import User from '../models/userSchema.js';
+import Address from '../models/addressSchema.js';
+import Order from '../models/orderSchema.js';
+import PROFILE_MESSAGES from '../constants/profile.js';
 
 // --- Profile Services ---
 

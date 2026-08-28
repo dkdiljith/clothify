@@ -1,7 +1,8 @@
 // controllers/userProfileController.js
-const userService = require("../services/userProfileService");
-const PROFILE_MESSAGES = require("../constants/profile");
-const STATUS_CODES = require("../constants/status-codes");
+import userService from '../services/userProfileService.js';
+import PROFILE_MESSAGES from '../constants/profile.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 // Profile Renders
 exports.profileRender = async (req, res) => {

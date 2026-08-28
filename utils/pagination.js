@@ -1,10 +1,17 @@
+import coupon from '../models/couponSchema.js';
+import offer from '../models/offerSchema.js';
+import product from '../models/productSchema.js';
+import order from '../models/orderSchema.js';
+import user from '../models/userSchema.js';
+
 const models = {
-    coupon: require('../models/couponSchema'),
-    offer: require('../models/offerSchema'),
-    product: require('../models/productSchema'),
-    order: require('../models/orderSchema'),
-    user: require('../models/userSchema'),
+    coupon,
+    offer,
+    product,
+    order,
+    user,
 };
+
 
 const searchableFields = {
     coupon: ['couponCode', 'discountType'],

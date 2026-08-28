@@ -1,8 +1,10 @@
-const referralService = require("../services/referralService");
+import referralService from '../services/referralService.js';
+import Referral from '../models/referralSchema.js';
 
-const REFERRAL_MESSAGES = require(`../constants/referral`)
-const STATUS_CODES = require(`../constants/status-codes`)
-const COMMON_MESSAGES = require(`../constants/common-messages`)
+
+import REFERRAL_MESSAGES from '../constants/referral.js';
+import STATUS_CODES from '../constants/status-codes.js';
+import COMMON_MESSAGES from '../constants/common-messages.js';
 
 
 
@@ -62,7 +64,6 @@ exports.cancelReferral = async (req, res) => {
         const { signupBonus, coinValue } = await referralService.getReferralSettings();
         const userId = res.locals.user._id;
         
-        const Referral = require("../models/referralSchema");
         const referral = await Referral.findOne({ userId }).lean();
 
         if (req.session?.user) {

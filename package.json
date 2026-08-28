@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nodemon ./bin/www",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "type": "module"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^2.0.3",

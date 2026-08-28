@@ -1,4 +1,4 @@
-const Cart = require(`../models/cartSchema`)
+import Cart from '../models/cartSchema.js';
 
 
 

@@ -1,8 +1,9 @@
 // controllers/wishlistController.js
-const wishlistService = require("../services/wishlistService");
-const addToCart = require("../controllers/cartController").addToCart;
-const STATUS_CODES = require("../constants/status-codes");
-const WISHLIST_MESSAGES = require("../constants/wishlist");
+import wishlistService from '../services/wishlistService.js';
+import { addToCart } from '../controllers/cartController.js';
+import STATUS_CODES from '../constants/status-codes.js';
+import WISHLIST_MESSAGES from '../constants/wishlist.js';
+
 
 exports.wishlistRender = async (req, res) => {
     try {

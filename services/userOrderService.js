@@ -1,13 +1,13 @@
 // services/userOrderService.js
-const Order = require("../models/orderSchema");
-const Wallet = require("../models/walletSchema");
-const Cart = require("../models/cartSchema");
-const Address = require("../models/addressSchema");
-const Product = require("../models/productSchema");
-const crypto = require("crypto");
+import Order from '../models/orderSchema.js';
+import Wallet from '../models/walletSchema.js';
+import Cart from '../models/cartSchema.js';
+import Address from '../models/addressSchema.js';
+import Product from '../models/productSchema.js';
+import crypto from 'crypto';
 
-const ORDER_MESSAGES = require("../constants/order");
-const WALLET_MESSAGES = require("../constants/wallet");
+import ORDER_MESSAGES from '../constants/order.js';
+import WALLET_MESSAGES from '../constants/wallet.js';
 
 // Order ID Generation Helper
 async function orderIdGeneration(session) {

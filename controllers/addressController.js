@@ -1,9 +1,10 @@
-const addressService = require(`../services/addressService`);
+import addressService from '../services/addressService.js';
 
 //MESSAGE_CONSTANTS
-const ADDRESS_MESSAGE = require(`../constants/address`)
-const COMMON_MESSAGE = require(`../constants/common-messages`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import ADDRESS_MESSAGE from '../constants/address.js';
+import COMMON_MESSAGE from '../constants/common-messages.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // THIS ENTIRE CONTROLLER USES  JSON RETURNS
 

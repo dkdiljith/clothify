@@ -1,10 +1,9 @@
-const categoryService = require('../services/categoryService');
-
-
+import categoryService from '../services/categoryService.js';
 
 //MESSAGE_CONSTANTS
-const CATEGORY_MESSAGE = require(`../constants/category`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import CATEGORY_MESSAGE from '../constants/category.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

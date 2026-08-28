@@ -1,7 +1,7 @@
-const Address = require("../models/addressSchema");
+import Address from '../models/addressSchema.js';
 
 //MESSAGE_CONSTANTS
-const ADDRESS_MESSAGE = require(`../constants/address`)
+import ADDRESS_MESSAGE from '../constants/address.js';
 
 /////////////////////////////////////////////////////////////////////////////////
 

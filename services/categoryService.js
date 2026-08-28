@@ -1,17 +1,17 @@
-const Category = require(`../models/categorySchema`)
-const Offer = require(`../models/offerSchema`)
-const Product = require(`../models/productSchema`)
+import Category from '../models/categorySchema.js';
+import Offer from '../models/offerSchema.js';
+import Product from '../models/productSchema.js';
 
 
 //update offer & coupon & products
-const pricingExpiry = require("../utils/pricingExpiry");
-const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate
+import pricingExpiry from '../utils/pricingExpiry.js';
+const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
 
 
 //MESSAGE_CONSTANTS
-const CATEGORY_MESSAGE = require(`../constants/category`)
-const OFFER_MESSAGES = require(`../constants/offer`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import CATEGORY_MESSAGE from '../constants/category.js';
+import OFFER_MESSAGES from '../constants/offer.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

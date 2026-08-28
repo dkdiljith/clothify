@@ -1,9 +1,9 @@
 // services/walletService.js
-const Wallet = require("../models/walletSchema");
-const Razorpay = require("razorpay");
-const crypto = require("crypto");
-const WALLET_MESSAGES = require("../constants/wallet");
-const STATUS_CODES = require("../constants/status-codes");
+import Wallet from '../models/walletSchema.js';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import WALLET_MESSAGES from '../constants/wallet.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 // Assuming you have order constants, otherwise you can replace ORDER_MESSAGES with strings
 const ORDER_MESSAGES = {

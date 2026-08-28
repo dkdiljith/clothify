@@ -1,6 +1,6 @@
-const Cart = require('../models/cartSchema');
-const { verifyProductVariation } = require('../utils/productHelper');
-const { cartRender } = require(`../controllers/cartController`);
+import Cart from '../models/cartSchema.js';
+import { verifyProductVariation } from '../utils/productHelper.js';
+import { cartRender } from '../controllers/cartController.js';
 
 async function validateCartCheckout(req, res, next) {
   try {

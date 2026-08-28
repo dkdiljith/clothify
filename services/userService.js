@@ -1,21 +1,23 @@
 // services/userService.js
-const User = require("../models/userSchema");
-const Product = require("../models/productSchema");
-const Settings = require("../models/settingSchema");
-const Wishlist = require("../models/wishListSchema");
-const Otp = require("../models/otpSchema");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
+import User from '../models/userSchema.js';
+import Product from '../models/productSchema.js';
+import Settings from '../models/settingSchema.js';
+import Wishlist from '../models/wishListSchema.js';
+import Otp from '../models/otpSchema.js';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
-const AUTH_MESSAGES = require("../constants/auth");
+import AUTH_MESSAGES from '../constants/auth.js';
 
-const verificationEmailSend = require("../utils/nodemailer").verificationEmailSend;
-const forgotPasswordEmailSend = require("../utils/nodemailer").passwordResetEmailSend;
-const sendPasswordChangedEmail = require("../utils/nodemailer").sendPasswordChangedEmail;
+import { 
+  verificationEmailSend, 
+  passwordResetEmailSend as forgotPasswordEmailSend, 
+  sendPasswordChangedEmail 
+} from '../utils/nodemailer.js';
 
-const createWallet = require("../services/walletService").createWallet;
-const createReferral = require("../controllers/referralController").createReferral;
+import { createWallet } from '../services/walletService.js';
+import { createReferral } from '../controllers/referralController.js';
 
 // --- Security & Utility Functions ---
 

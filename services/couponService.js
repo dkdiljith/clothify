@@ -1,17 +1,17 @@
-const Coupon = require(`../models/couponSchema`);
-const Cart = require(`../models/cartSchema`);
+import Coupon from '../models/couponSchema.js';
+import Cart from '../models/cartSchema.js';
 
 //update cart
-const recalculateCartSummary = require(`../utils/recalculateCartSummary`);
+import recalculateCartSummary from '../utils/recalculateCartSummary.js';
 
 //update offer & coupon & products
-const pricingExpiry = require("../utils/pricingExpiry");
+import pricingExpiry from '../utils/pricingExpiry.js';
 const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
 
 //MESSAGE_CONSTANTS
-const COUPON_MESSAGES = require(`../constants/coupon`)
-const CART_MESSAGES = require(`../constants/cart`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import COUPON_MESSAGES from '../constants/coupon.js';
+import CART_MESSAGES from '../constants/cart.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 

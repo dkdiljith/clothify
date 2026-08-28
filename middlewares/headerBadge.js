@@ -1,5 +1,5 @@
-const Cart = require(`../models/cartSchema`)
-const Wishlist = require(`../models/wishListSchema`)
+import Cart from '../models/cartSchema.js';
+import Wishlist from '../models/wishListSchema.js';
 
 
 

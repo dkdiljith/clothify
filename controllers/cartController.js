@@ -1,10 +1,10 @@
-
-const cartService = require('../services/cartService');
+import cartService from '../services/cartService.js';
 
 
 //MESSAGE_CONSTANTS
-const CART_MESSAGES = require(`../constants/cart`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import CART_MESSAGES from '../constants/cart.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
-const Wishlist = require("../models/wishListSchema");
-const Product = require("../models/productSchema");
-const { verifyProductVariation } = require("../utils/productHelper");
-const WISHLIST_MESSAGES = require("../constants/wishlist");
+import Wishlist from '../models/wishListSchema.js';
+import Product from '../models/productSchema.js';
+import { verifyProductVariation } from '../utils/productHelper.js';
+import WISHLIST_MESSAGES from '../constants/wishlist.js';
 
 async function fetchUserWishlist(userId, page, limit = 12) {
     const wishlist = await Wishlist.findOne({ userId }).lean();

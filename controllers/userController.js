@@ -1,7 +1,7 @@
+import authService from '../services/userService.js';
+import AUTH_MESSAGES from '../constants/auth.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
-const authService = require("../services/userService");
-const AUTH_MESSAGES = require("../constants/auth");
-const STATUS_CODES = require("../constants/status-codes");
 
 exports.homeRender = async (req, res) => {
     try {

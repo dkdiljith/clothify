@@ -1,12 +1,15 @@
-const productService = require("../services/productService");
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+import productService from '../services/productService.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+import Product from "../models/productSchema.js"; // Top of the file
 
 // MESSAGE_CONSTANTS
-const PRODUCT_MESSAGES = require(`../constants/product`)
-const OFFER_MESSAGES = require(`../constants/offer`)
-const STATUS_CODDES = require(`../constants/status-codes`)
+import PRODUCT_MESSAGES from '../constants/product.js';
+import OFFER_MESSAGES from '../constants/offer.js';
+import STATUS_CODDES from '../constants/status-codes.js';
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +41,6 @@ exports.addProductsRender = async (req, res) => {
 
 exports.editProductsRender = async (req, res) => {
     try {
-        const Product = require("../models/productSchema"); // Light query check or service wrapper
         const product = await Product.findById(req.params.id).lean();
         if (!product) return res.status(STATUS_CODDES.NOT_FOUND).redirect('/admin/products');
 

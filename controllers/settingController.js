@@ -1,9 +1,7 @@
 // controllers/settingsController.js
-const settingsService = require("../services/settingsService");
-
-
-const SETTINGS_MESSAGES = require("../constants/settings");
-const STATUS_CODES = require("../constants/status-codes");
+import settingsService from '../services/settingsService.js';
+import SETTINGS_MESSAGES from '../constants/settings.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 exports.initializeSettings = async () => {
     await settingsService.initializeGlobalSettings();

@@ -1,9 +1,7 @@
-const ErrorMessage = require(`../utils/ErrorMessage`);
-const User = require("../models/userSchema");
-const Admin = require(`../models/adminSchema`)
+import ErrorMessage from '../utils/ErrorMessage.js';
+import User from '../models/userSchema.js';
+import Admin from '../models/adminSchema.js';
 
-//MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
 
 //=======================================================================================================//
 

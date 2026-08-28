@@ -1,8 +1,8 @@
-const Admin = require('../models/adminSchema');
-const bcrypt = require('bcryptjs');
+import Admin from '../models/adminSchema.js';
+import bcrypt from 'bcryptjs';
 
 //MESSAGE_CONSTANTS
-const ADMIN_AUTH_MESSAGES = require(`../constants/auth`)
+import ADMIN_AUTH_MESSAGES from '../constants/auth.js';
 
 /////////////////////////////////////////////////////////////////////////////////////////
 

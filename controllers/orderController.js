@@ -1,8 +1,9 @@
-const orderService = require("../services/orderService");
+import orderService from '../services/orderService.js';
 
 // MESSAGE_CONSTANTS
-const ORDER_MESSAGES = require(`../constants/order`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import ORDER_MESSAGES from '../constants/order.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 
 

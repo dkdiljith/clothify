@@ -1,13 +1,13 @@
 // services/referralService.js
-const User = require("../models/userSchema");
-const Wallet = require("../models/walletSchema");
-const Order = require("../models/orderSchema");
-const Referral = require("../models/referralSchema");
-const ReferralHistory = require("../models/referralHistorySchema"); 
-const Setting = require("../models/settingSchema");
+import User from '../models/userSchema.js';
+import Wallet from '../models/walletSchema.js';
+import Order from '../models/orderSchema.js';
+import Referral from '../models/referralSchema.js';
+import ReferralHistory from '../models/referralHistorySchema.js'; 
+import Setting from '../models/settingSchema.js';
 
 //MESSAGE_CONSTANTS
-const REFERRAL_MESSAGES = require(`../constants/referral`)
+import REFERRAL_MESSAGES from '../constants/referral.js';
 
 const DEFAULT_REFERRAL_SETTINGS = {
     coinValue: "0.010",

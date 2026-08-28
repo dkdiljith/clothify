@@ -1,10 +1,8 @@
-const Offer = require("../models/offerSchema");
-const Coupon = require("../models/couponSchema");
-const Product = require("../models/productSchema");
-const Category = require("../models/categorySchema");
+import Offer from '../models/offerSchema.js';
+import Coupon from '../models/couponSchema.js';
+import Product from '../models/productSchema.js';
+import Category from '../models/categorySchema.js';
 
-// //MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

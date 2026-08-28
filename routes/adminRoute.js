@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 router.use((req, res, next) => {
@@ -13,21 +13,21 @@ router.use((req, res, next) => {
 });
 
 //controllers
-const adminController = require('../controllers/adminController')
-const dashboardController = require(`../controllers/dashboardController`)
-const userController = require('../controllers/userController')
-const productController = require(`../controllers/productController`)
-const orderController = require(`../controllers/orderController`)
-const categoryController = require('../controllers/categoryController')
-const couponController = require(`../controllers/couponController`)
-const offerController = require(`../controllers/offerController`)
-const salesController = require(`../controllers/salesController`)
-const settingController = require(`../controllers/settingController`)
+import adminController from '../controllers/adminController.js';
+import dashboardController from '../controllers/dashboardController.js';
+import userController from '../controllers/userController.js';
+import productController from '../controllers/productController.js';
+import orderController from '../controllers/orderController.js';
+import categoryController from '../controllers/categoryController.js';
+import couponController from '../controllers/couponController.js';
+import offerController from '../controllers/offerController.js';
+import salesController from '../controllers/salesController.js';
+import settingController from '../controllers/settingController.js';
 
 //adminAuth (session)
-const adminAuth = require("../middlewares/auth").adminAuth
+import { adminAuth } from '../middlewares/auth.js';
 //invoice generator
-const downloadInvoice = require(`../utils/downloadInvoice`)
+import downloadInvoice from '../utils/downloadInvoice.js';
 
 
 

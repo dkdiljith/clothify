@@ -1,8 +1,9 @@
-const couponService = require("../services/couponService");
+import couponService from '../services/couponService.js';
 
 //MESSAGE_CONSTANTS
-const COUPON_MESSAGES = require(`../constants/coupon`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import COUPON_MESSAGES from '../constants/coupon.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 

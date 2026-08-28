@@ -1,17 +1,17 @@
-const Product = require("../models/productSchema");
-const Category = require("../models/categorySchema");
-const Offer = require("../models/offerSchema");
-const Wishlist = require("../models/wishListSchema");
-const Cart = require("../models/cartSchema");
-const path = require('path'); 
-const fs = require('fs');
+import Product from '../models/productSchema.js';
+import Category from '../models/categorySchema.js';
+import Offer from '../models/offerSchema.js';
+import Wishlist from '../models/wishListSchema.js';
+import Cart from '../models/cartSchema.js';
+import path from 'path'; 
+import fs from 'fs';
 
-const { pricingExpiryUpdate } = require("../utils/pricingExpiry");
+import { pricingExpiryUpdate } from '../utils/pricingExpiry.js';
 
 
 // MESSAGE_CONSTANTS
-const PRODUCT_MESSAGES = require(`../constants/product`)
-const OFFER_MESSAGES = require(`../constants/offer`)
+import PRODUCT_MESSAGES from '../constants/product.js';
+import OFFER_MESSAGES from '../constants/offer.js';
 
 // Helper: Fetch grouped categories
 async function getGroupedCategories() {

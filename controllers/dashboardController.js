@@ -1,9 +1,9 @@
-
-const dashboardService = require('../services/dashboardService');
+import dashboardService from '../services/dashboardService.js';
 
 //MESSAGE_CONSTANTS
-const DASHBOARD_MESSAGES = require(`../constants/dashboard`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import DASHBOARD_MESSAGES from '../constants/dashboard.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

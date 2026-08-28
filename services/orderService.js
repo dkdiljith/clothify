@@ -1,13 +1,13 @@
-const Order = require("../models/orderSchema");
-const Product = require("../models/productSchema");
-const Wallet = require("../models/walletSchema");
-const mongoose = require("mongoose");
+import Order from '../models/orderSchema.js';
+import Product from '../models/productSchema.js';
+import Wallet from '../models/walletSchema.js';
+import mongoose from 'mongoose';
 
 
 // MESSAGE_CONSTANTS
-const ORDER_MESSAGES = require(`../constants/order`)
-const WALLET_MESSAGES = require(`../constants/wallet`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import ORDER_MESSAGES from '../constants/order.js';
+import WALLET_MESSAGES from '../constants/wallet.js';
+import STATUS_CODES from '../constants/status-codes.js';
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 

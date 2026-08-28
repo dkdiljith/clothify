@@ -1,11 +1,9 @@
-const cron = require("node-cron");
-const logger = require('../config/logger');
+import cron from 'node-cron';
+import logger from '../config/logger.js';
 
-const pricingExpiryUpdate = require("../utils/pricingExpiry").pricingExpiryUpdate
-const referralCronService = require(`../controllers/referralController`).processPendingReferralsCron
+import { pricingExpiryUpdate } from '../utils/pricingExpiry.js';
+import { processPendingReferralsCron } from '../controllers/referralController.js';
 
-//MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 

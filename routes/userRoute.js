@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const passportFile = require(`../config/passport`)
-const passport = passportFile.passport
+import passportFile from '../config/passport.js';
+const passport = passportFile.passport;
 
 //passport
 router.use(passport.initialize());
@@ -15,35 +15,35 @@ router.use((req, res, next) => {
 });
 
 //HEADER BADGES
-const headerBadge = require(`../middlewares/headerBadge`)
-router.use(headerBadge)
+import headerBadge from '../middlewares/headerBadge.js';
+router.use(headerBadge);
 
 
 //RAZORPAY integration//
-const razorpay = require(`../utils/razorpay`)
+import razorpay from '../utils/razorpay.js';
 
 //Controllers
-const userController = require('../controllers/userController')
-const userProfileController = require(`../controllers/userProfileController`)
-const productController = require('../controllers/productController')
-const cartController = require(`../controllers/cartController`)
-const wishlistController = require(`../controllers/wishlistController`)
-const orderController = require(`../controllers/orderController`)
-const userOrderController = require(`../controllers/userOrderController`)
-const walletController = require(`../controllers/walletController`)
-const couponController = require(`../controllers/couponController`)
-const searchController = require(`../controllers/searchController`)
-const addressController = require(`../controllers/addressController`)
-const referralController = require(`../controllers/referralController`)
+import userController from '../controllers/userController.js';
+import userProfileController from '../controllers/userProfileController.js';
+import productController from '../controllers/productController.js';
+import cartController from '../controllers/cartController.js';
+import wishlistController from '../controllers/wishlistController.js';
+import orderController from '../controllers/orderController.js';
+import userOrderController from '../controllers/userOrderController.js';
+import walletController from '../controllers/walletController.js';
+import couponController from '../controllers/couponController.js';
+import searchController from '../controllers/searchController.js';
+import addressController from '../controllers/addressController.js';
+import referralController from '../controllers/referralController.js';
 
 //usetAuth (session) 
-const userAuth = require(`../middlewares/auth`).userAuth
+import { userAuth } from '../middlewares/auth.js';
 
 //product validator
-const productValidator = require(`../middlewares/productValidator`)
+import productValidator from '../middlewares/productValidator.js';
 
 //invoice generator
-const downloadInvoice = require(`../utils/downloadInvoice`)
+import downloadInvoice from '../utils/downloadInvoice.js';
 
 // Routes to initiate Google authentication & handle the callback from Google
 router.get('/auth/google', passportFile.googleLogin);

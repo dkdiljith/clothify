@@ -1,7 +1,9 @@
-const app = require('../app');
-const debug = require('debug')('clothify:server');
-const http = require('http');
-const logger = require('../config/logger');
+import app from '../app.js';
+import debugModule from 'debug';
+const debug = debugModule('clothify:server');
+import http from 'http';
+import logger from '../config/logger.js';
+
 
 /**
  * Get port from environment and store in Express.

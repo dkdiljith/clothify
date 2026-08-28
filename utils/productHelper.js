@@ -1,4 +1,4 @@
-const Product = require('../models/productSchema'); 
+import Product from '../models/productSchema.js';
 
 
 

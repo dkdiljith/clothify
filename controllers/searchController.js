@@ -1,6 +1,6 @@
-const searchService = require(`../services/searchService`)
+import searchService from '../services/searchService.js';
+import PRODUCT_MESSAGES from '../constants/product.js';
 
-const PRODUCT_MESSAGES = require(`../constants/product`)
 
 
 exports.collections = async (req, res) => {

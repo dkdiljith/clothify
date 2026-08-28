@@ -1,6 +1,6 @@
-const mongoose = require("mongoose")
+import mongoose from 'mongoose';
 const url = process.env.DB_URL;
-const logger = require('../config/logger');
+import logger from '../config/logger.js';
 
 
 module.exports.connect = function (done){

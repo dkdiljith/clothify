@@ -1,15 +1,13 @@
-const Cart = require(`../models/cartSchema`)
-const Order = require(`../models/orderSchema`)
-const placeOrder = require(`../controllers/userOrderController`).placeOrder
-const retryFailedOrder = require(`../controllers/userOrderController`).retryFailedOrder
-
-//MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+import Cart from '../models/cartSchema.js';
+import Order from '../models/orderSchema.js';
+import { placeOrder, retryFailedOrder } from '../controllers/userOrderController.js';
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const Razorpay = require(`razorpay`)
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID.trim(),
@@ -92,7 +90,6 @@ exports.razorpayReciept = async (req, res) => {
 
 exports.razorpayVerification = async (req, res) => {
   try {
-    const crypto = require('crypto');
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, addressId, orderId } = req.body;
 
     // 1. Generate the signature using your Secret Key

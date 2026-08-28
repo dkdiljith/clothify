@@ -1,11 +1,8 @@
-const nodemailer = require(`nodemailer`);
+import nodemailer from 'nodemailer';
 const user = process.env.MAIL_USER;
 const pass = process.env.MAIL_PASS;
 const host = process.env.MAIL_HOST;
 const port = process.env.MAIL_PORT;
-
-//MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

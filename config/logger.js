@@ -1,5 +1,6 @@
-const { createLogger, format, transports } = require("winston");
-require("winston-daily-rotate-file"); // Imports the rotation module
+import winston from 'winston';
+const { createLogger, format, transports } = winston;
+import 'winston-daily-rotate-file'; // Imports the rotation module
 
 // Base format for files (clean text, no weird color codes)
 const baseFormat = format.combine(

@@ -1,13 +1,13 @@
 // middlewares/passport.js
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userSchema');
-require('dotenv').config();
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import User from '../models/userSchema.js';
+import 'dotenv/config';
 
 
 ///////////////////////////////////////////////
-const createWallet = require(`../services/walletService`).createWallet
-const createReferral = require(`../controllers/referralController`).createReferral
+import { createWallet } from '../services/walletService.js';
+import { createReferral } from '../controllers/referralController.js';
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

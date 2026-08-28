@@ -1,8 +1,5 @@
-const puppeteer = require('puppeteer');
-const Order = require(`../models/orderSchema`)
-
-//MESSAGE_CONSTANTS
-// const MESSAGES = require(`../utils/constants`)
+import puppeteer from 'puppeteer';
+import Order from '../models/orderSchema.js';
 
 
 //////////////////////////////////////////////////////////////////////////////////

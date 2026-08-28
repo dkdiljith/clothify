@@ -1,6 +1,7 @@
-const Order = require("../models/orderSchema");
-const Product = require("../models/productSchema");
-const User = require("../models/userSchema");
+import Order from '../models/orderSchema.js';
+import Product from '../models/productSchema.js';
+import User from '../models/userSchema.js';
+
 const ANALYTICS_STATUSES = [
   "Pending",
   "Shipped",

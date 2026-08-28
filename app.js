@@ -1,28 +1,27 @@
 //load .env files
-require('dotenv').config();
+import 'dotenv/config';
 
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const morgan = require('morgan');
-const logger = require(`./config/logger`) //WINSTON LOGGER
-const exphbs = require('express-handlebars');
-const session = require("express-session")
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+import logger from './config/logger.js'; //WINSTON LOGGER
+import exphbs from 'express-handlebars';
+import session from 'express-session';
 
-
-
-const adminRouter = require(`./routes/adminRoute`)
-const userRouter = require('./routes/userRoute');
-const db = require("./config/connection")
+import adminRouter from './routes/adminRoute.js';
+import userRouter from './routes/userRoute.js';
+import db from './config/connection.js';
 
 const app = express();
 
-const nocache = require(`nocache`)
-app.use(nocache())
+import nocache from 'nocache';
+app.use(nocache());
 
 
 //express-handlebars-section
-const sections = require('express-handlebars-sections');
+import sections from 'express-handlebars-sections';
+
 
 //HBS Connections
 const hbs = exphbs.create({
@@ -34,7 +33,7 @@ const hbs = exphbs.create({
 });
 
 //REGISTERING HBS HELPERS
-const hbsHelpers = require('./utils/hbsHelpers')
+import hbsHelpers from './utils/hbsHelpers.js';
 for (const helperName in hbsHelpers) {
   hbs.handlebars.registerHelper(helperName, hbsHelpers[helperName]);
 }
@@ -85,8 +84,8 @@ db.connect((err) => {
   }
   logger.info("Database connected successfully");
 
-  const { initializeSettings } = require('./controllers/settingController');
-  
+  import { initializeSettings } from './controllers/settingController.js'
+
   initializeSettings()
     .then(() => logger.info("Settings logic finished check"))
     .catch(() => logger.error("Settings logic failed:"));
@@ -94,7 +93,7 @@ db.connect((err) => {
 
 
 //Cron
-require("./jobs/cron");
+import './jobs/cron.js';
 
 // Routes
 app.use(`/admin`, adminRouter);
@@ -104,7 +103,7 @@ app.get('/', (req, res) => {
 });
 
 // Handling Unhandled Requests
-const ErrorMessage = require(`./utils/ErrorMessage`)
+import ErrorMessage from './utils/ErrorMessage.js';
 app.use('*', ErrorMessage.ErrorContent)
 
 module.exports = app;

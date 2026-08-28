@@ -1,7 +1,8 @@
 // controllers/walletController.js
-const walletService = require("../services/walletService");
-const WALLET_MESSAGES = require("../constants/wallet");
-const STATUS_CODES = require("../constants/status-codes");
+import walletService from '../services/walletService.js';
+import WALLET_MESSAGES from '../constants/wallet.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 exports.walletRender = async (req, res) => {
     try {

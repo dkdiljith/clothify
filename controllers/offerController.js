@@ -1,8 +1,9 @@
-const offerService = require("../services/offerService");
+import offerService from '../services/offerService.js';
 
 //MESSAGE_CONSTANTS
-const OFFER_MESAGES = require(`../constants/offer`)
-const STATUS_CODES = require(`../constants/status-codes`)
+import OFFER_MESAGES from '../constants/offer.js';
+import STATUS_CODES from '../constants/status-codes.js';
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 
