@@ -25,7 +25,7 @@ cron.schedule("*/5 * * * *", async () => {
 //Referral Status Validation Checker
 cron.schedule("0 * * * *", async () => {
     try {
-        const result = await referralCronService();
+        const result = await processPendingReferralsCron();
         if (result.success) {
             logger.info(result.message);
         } else {

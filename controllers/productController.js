@@ -3,8 +3,6 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-import Product from "../models/productSchema.js"; // Top of the file
-
 // MESSAGE_CONSTANTS
 import PRODUCT_MESSAGES from '../constants/product.js';
 import OFFER_MESSAGES from '../constants/offer.js';
@@ -41,7 +39,7 @@ export const addProductsRender = async (req, res) => {
 
 export const editProductsRender = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).lean();
+        const product = await productService.getProduct(req.params.id)
         if (!product) return res.status(STATUS_CODDES.NOT_FOUND).redirect('/admin/products');
 
         const categories = await productService.getGroupedCategories();

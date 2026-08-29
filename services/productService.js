@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { pricingExpiryUpdate } from '../utils/pricingExpiry.js';
-
+ 
 
 // MESSAGE_CONSTANTS
 import PRODUCT_MESSAGES from '../constants/product.js';
@@ -387,6 +387,11 @@ async function resetAutoPricing(productId) {
     await pricingExpiryUpdate();
 }
 
+async function getProduct(productId){
+    const product = await Product.findById(productId).lean();
+    return product
+}
+
 export {
     getGroupedCategories,
     fetchProductsForAdmin,
@@ -396,5 +401,6 @@ export {
     toggleBlockProduct,
     fetchOffersForProduct,
     applyOfferToProduct,
-    resetAutoPricing
+    resetAutoPricing,
+    getProduct
 };

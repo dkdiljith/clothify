@@ -1,6 +1,4 @@
 import * as referralService from '../services/referralService.js';
-import Referral from '../models/referralSchema.js';
-
 
 import REFERRAL_MESSAGES from '../constants/referral.js';
 import STATUS_CODES from '../constants/status-codes.js';
@@ -64,7 +62,7 @@ export const cancelReferral = async (req, res) => {
         const { signupBonus, coinValue } = await referralService.getReferralSettings();
         const userId = res.locals.user._id;
         
-        const referral = await Referral.findOne({ userId }).lean();
+        const referral = await referralService.getReferral(userId)
 
         if (req.session?.user) {
             req.session.user.showWelcomeModal = false;

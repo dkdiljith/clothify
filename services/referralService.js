@@ -294,11 +294,17 @@ async function processCronPendingReferrals() {
     return { success: true, message: REFERRAL_MESSAGES.REFERRALS_PROCESSED_SUCCESS };
 }
 
+async function getReferral(userId){
+    const referral = await Referral.findOne({ userId }).lean();
+    return referral
+}
+
 export {
     getReferralSettings,
     getReferralDashboardData,
     applyReferralCode,
     redeemUserCoins,
     createNewReferralRecord,
-    processCronPendingReferrals
+    processCronPendingReferrals,
+    getReferral
 };
