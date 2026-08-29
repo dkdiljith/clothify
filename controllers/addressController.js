@@ -1,4 +1,4 @@
-import addressService from '../services/addressService.js';
+import * as addressService from '../services/addressService.js';
 
 //MESSAGE_CONSTANTS
 import ADDRESS_MESSAGE from '../constants/address.js';
@@ -9,7 +9,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 // THIS ENTIRE CONTROLLER USES  JSON RETURNS
 
 // Add new address
-exports.addAddress = async (req, res) => {
+export const addAddress = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const {
@@ -89,7 +89,7 @@ exports.addAddress = async (req, res) => {
 
 
 
-exports.renderEditForm = async (req, res) => {
+export const renderEditForm = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = res.locals.user._id;
@@ -122,7 +122,7 @@ exports.renderEditForm = async (req, res) => {
 
 
 // Edit existing address
-exports.editAddress = async (req, res) => {
+export const editAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = res.locals.user._id;
@@ -218,7 +218,7 @@ exports.editAddress = async (req, res) => {
 
 
 // Delete address
-exports.deleteAddress = async (req, res) => {
+export const deleteAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = res.locals.user._id;

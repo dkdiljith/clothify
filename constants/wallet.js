@@ -13,4 +13,4 @@ const WALLET_MESSAGES = {
         `Refund for returned item (${productName}) in Order #${orderId}`,
 };
 
-module.exports = WALLET_MESSAGES;
+export default WALLET_MESSAGES;

@@ -16,4 +16,4 @@ const DASHBOARD_MESSAGES = {
 
 
 
-module.exports = DASHBOARD_MESSAGES
+export default DASHBOARD_MESSAGES

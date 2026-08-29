@@ -6,7 +6,7 @@ import Category from '../models/categorySchema.js';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-exports.pricingExpiryUpdate = async () => {
+export const pricingExpiryUpdate = async () => {
 
         const now = new Date();
 

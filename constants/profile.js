@@ -19,4 +19,4 @@ const PROFILE_MESSAGES = {
     MIN_AGE_ERROR: "Minimum age is 13 years."
 };
 
-module.exports = PROFILE_MESSAGES;
+export default PROFILE_MESSAGES;

@@ -1,5 +1,5 @@
 // controllers/userOrderController.js
-import orderService from '../services/userOrderService.js';
+import * as orderService from '../services/userOrderService.js';
 import mongoose from 'mongoose';
 import ORDER_MESSAGES from '../constants/order.js';
 import AUTH_MESSAGES from '../constants/auth.js';
@@ -7,7 +7,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 
 
 // Render Payment Page
-exports.payment = async (req, res) => {
+export const payment = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         if (!userId) {
@@ -22,7 +22,7 @@ exports.payment = async (req, res) => {
 };
 
 // Place Order
-exports.placeOrder = async (req, res) => {
+export const placeOrder = async (req, res) => {
     const session = await mongoose.startSession();
     try {
         const userId = res.locals.user._id;
@@ -56,7 +56,7 @@ exports.placeOrder = async (req, res) => {
 };
 
 // Place Failed Order / Handle Retry Attempt Checks
-exports.placeOrderFailed = async (req, res) => {
+export const placeOrderFailed = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const result = await orderService.placeFailedOrder(userId, req.body);
@@ -84,7 +84,7 @@ exports.placeOrderFailed = async (req, res) => {
 };
 
 // Retry Failed Order
-exports.retryFailedOrder = async (req, res) => {
+export const retryFailedOrder = async (req, res) => {
     const session = await mongoose.startSession();
     try {
         const { orderId } = req.body;
@@ -110,7 +110,7 @@ exports.retryFailedOrder = async (req, res) => {
 };
 
 // Order Success Render
-exports.orderSuccess = async (req, res) => {
+export const orderSuccess = async (req, res) => {
     try {
         const { orderId } = req.query;
         const order = await orderService.fetchOrderForStatusPage(orderId);
@@ -126,7 +126,7 @@ exports.orderSuccess = async (req, res) => {
 };
 
 // Order Failure Render
-exports.orderFailed = async (req, res) => {
+export const orderFailed = async (req, res) => {
     try {
         const { orderId } = req.query;
         const order = await orderService.fetchOrderForStatusPage(orderId);

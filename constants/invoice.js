@@ -21,4 +21,4 @@ const REPORT_MESSAGES = {
 
 
 
-module.exports = REPORT_MESSAGES
+export default REPORT_MESSAGES

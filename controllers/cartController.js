@@ -1,4 +1,4 @@
-import cartService from '../services/cartService.js';
+import * as cartService from '../services/cartService.js';
 
 
 //MESSAGE_CONSTANTS
@@ -9,7 +9,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.cartRender = async (req, res) => {
+export const cartRender = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const flashMessage = res.locals.message || null;
@@ -22,7 +22,7 @@ exports.cartRender = async (req, res) => {
 
 
 
-exports.addToCart = async (req, res) => {
+export const addToCart = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const { productId, variationIndex, quantity: reqQty } = req.params;
@@ -43,7 +43,7 @@ exports.addToCart = async (req, res) => {
 
 
 
-exports.deleteCart = async (req, res) => {
+export const deleteCart = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const productId = req.params.productId;
@@ -60,7 +60,7 @@ exports.deleteCart = async (req, res) => {
 
 
 
-exports.getAddressInCart = async (req, res) => {
+export const getAddressInCart = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const result = await cartService.prepareCheckoutAddresses(userId);
@@ -78,7 +78,7 @@ exports.getAddressInCart = async (req, res) => {
 
 
 
-exports.processPaymentPage = async (req, res) => {
+export const processPaymentPage = async (req, res) => {
   try {
     const { paymentMethod, addressId } = req.body;
     const userId = res.locals.user._id;

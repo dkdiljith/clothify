@@ -9,4 +9,4 @@ const WISHLIST_MESSAGES = {
     ITEM_ALREADY_EXISTS: 'Item is already in your wishlist!'
 };
 
-module.exports = WISHLIST_MESSAGES;
+export default WISHLIST_MESSAGES;

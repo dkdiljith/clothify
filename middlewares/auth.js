@@ -1,4 +1,4 @@
-import ErrorMessage from '../utils/ErrorMessage.js';
+import * as ErrorMessage from '../utils/ErrorMessage.js';
 import User from '../models/userSchema.js';
 import Admin from '../models/adminSchema.js';
 
@@ -6,7 +6,7 @@ import Admin from '../models/adminSchema.js';
 //=======================================================================================================//
 
 // --- USER MIDDLEWARE ---
-exports.userAuth = async (req, res, next) => {
+export const userAuth = async (req, res, next) => {
   try {
     if (!req.session.user) {
       return res.redirect('/user/login');
@@ -37,7 +37,7 @@ exports.userAuth = async (req, res, next) => {
 
 
 // --- ADMIN MIDDLEWARE ---
-exports.adminAuth = async (req, res, next) => {
+export const adminAuth = async (req, res, next) => {
     try {
         if (!req.session.admin) {
             return res.redirect('/admin');

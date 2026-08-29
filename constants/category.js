@@ -56,6 +56,6 @@ const CATEGORY_MESSAGES = {
 
 
 
-module.exports = CATEGORY_MESSAGES
+export default CATEGORY_MESSAGES
 
 

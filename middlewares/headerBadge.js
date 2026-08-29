@@ -27,4 +27,4 @@ async function loadHeaderBadges(req, res, next) {
 
 
 
-module.exports = loadHeaderBadges 
+export default loadHeaderBadges 

@@ -25,4 +25,4 @@ otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 24 * 60 * 60 });
 // Only one active OTP per user & purpose
 otpSchema.index({ userId: 1, purpose: 1 }, { unique: true });
 
-module.exports = mongoose.model("Otp", otpSchema);
+export default mongoose.model("Otp", otpSchema);

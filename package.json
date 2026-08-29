@@ -2,11 +2,12 @@
   "name": "clothify",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  
   "scripts": {
     "start": "nodemon ./bin/www",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "type": "module"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^2.0.3",

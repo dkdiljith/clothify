@@ -5,8 +5,7 @@ import Cart from '../models/cartSchema.js';
 import recalculateCartSummary from '../utils/recalculateCartSummary.js';
 
 //update offer & coupon & products
-import pricingExpiry from '../utils/pricingExpiry.js';
-const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
+import { pricingExpiryUpdate } from '../utils/pricingExpiry.js';
 
 //MESSAGE_CONSTANTS
 import COUPON_MESSAGES from '../constants/coupon.js';
@@ -17,7 +16,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 
 
 
-exports.getCouponsWithPagination = async (
+export const getCouponsWithPagination = async (
   query,
   couponStatus,
   page = 1,
@@ -60,11 +59,11 @@ exports.getCouponsWithPagination = async (
     skip,
   };
 };
-exports.getCouponById = async (couponId) => {
+export const getCouponById = async (couponId) => {
   const coupon = await Coupon.findById(couponId).lean();
   return coupon;
 };
-exports.createNewCoupon = async (couponData) => {
+export const createNewCoupon = async (couponData) => {
   const {
     couponCode,
     discountType,
@@ -167,7 +166,7 @@ exports.createNewCoupon = async (couponData) => {
 
 
 
-exports.updateCoupon = async (couponId, couponData) => {
+export const updateCoupon = async (couponId, couponData) => {
   const {
     couponCode,
     discountType,
@@ -282,7 +281,7 @@ exports.updateCoupon = async (couponId, couponData) => {
 
 
 
-exports.deleteCoupon = async (couponId) => {
+export const deleteCoupon = async (couponId) => {
   const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
   await pricingExpiryUpdate();
   if (!deletedCoupon) {
@@ -294,7 +293,7 @@ exports.deleteCoupon = async (couponId) => {
 
 
 
-exports.applyCouponToCart = async (userId, couponId) => {
+export const applyCouponToCart = async (userId, couponId) => {
   const coupon = await Coupon.findById(couponId).lean();
   if (!coupon || !coupon.isActive || new Date(coupon.endDate) < new Date()) {
     return { success: false, status: STATUS_CODES.BAD_REQUEST, message: COUPON_MESSAGES.INVALID };
@@ -333,7 +332,7 @@ exports.applyCouponToCart = async (userId, couponId) => {
 
 
 
-exports.removeCouponFromCart = async (userId) => {
+export const removeCouponFromCart = async (userId) => {
   const cart = await Cart.findOne({ userId });
   if (!cart) {
     return { success: false, status: STATUS_CODES.NOT_FOUND, message: CART_MESSAGES.CART_NOT_FOUND };

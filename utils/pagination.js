@@ -87,4 +87,4 @@ const adminPaginationFactory = async ({
 
 
 
-module.exports = adminPaginationFactory;
+export default adminPaginationFactory;

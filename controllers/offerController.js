@@ -1,4 +1,4 @@
-import offerService from '../services/offerService.js';
+import * as offerService from '../services/offerService.js';
 
 //MESSAGE_CONSTANTS
 import OFFER_MESAGES from '../constants/offer.js';
@@ -7,7 +7,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-exports.offerRender = async (req, res) => {
+export const offerRender = async (req, res) => {
   try {
     const result = await offerService.getFilteredOffers(req.query);
     return res.render("admin/offer", {
@@ -39,7 +39,7 @@ exports.offerRender = async (req, res) => {
 
 
 
-exports.createOffer = async (req, res) => {
+export const createOffer = async (req, res) => {
   try {
     const savedOffer = await offerService.createOffer(req.body);
     return res.status(STATUS_CODES.CREATED).json({
@@ -62,7 +62,7 @@ exports.createOffer = async (req, res) => {
 
 
 
-exports.offerEditJson = async (req, res) => {
+export const offerEditJson = async (req, res) => {
   try {
     const offer = await offerService.getOfferById(req.params.offerId);
     return res.json(offer);
@@ -74,7 +74,7 @@ exports.offerEditJson = async (req, res) => {
 
 
 
-exports.totalListOfCategories = async (req, res) => {
+export const totalListOfCategories = async (req, res) => {
   try {
     const result = await offerService.getPaginatedSubcategories(req.query);
     return res.json(result);
@@ -86,7 +86,7 @@ exports.totalListOfCategories = async (req, res) => {
 
 
 
-exports.totalListOfProducts = async (req, res) => {
+export const totalListOfProducts = async (req, res) => {
   try {
     const result = await offerService.getPaginatedProducts(req.query);
     return res.json(result);
@@ -98,7 +98,7 @@ exports.totalListOfProducts = async (req, res) => {
 
 
 
-exports.editOffer = async (req, res) => {
+export const editOffer = async (req, res) => {
   try {
     const updatedOffer = await offerService.updateOffer(
       req.params.offerId,
@@ -124,7 +124,7 @@ exports.editOffer = async (req, res) => {
 
 
 
-exports.offerDelete = async (req, res) => {
+export const offerDelete = async (req, res) => {
   try {
     await offerService.deleteOffer(req.params.offerId);
     return res.status(STATUS_CODES.OK).json({

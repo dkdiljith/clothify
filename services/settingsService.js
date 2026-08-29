@@ -169,8 +169,7 @@ async function updateReferralSettings(body) {
     await settings.save();
     return settings.referralSettings;
 }
-
-module.exports = {
+export {
     initializeGlobalSettings,
     getReferralSettings,
     updateReferralSettings

@@ -387,7 +387,7 @@ async function resetAutoPricing(productId) {
     await pricingExpiryUpdate();
 }
 
-module.exports = {
+export {
     getGroupedCategories,
     fetchProductsForAdmin,
     fetchSingleProductDetails,

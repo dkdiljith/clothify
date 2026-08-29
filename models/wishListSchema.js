@@ -29,4 +29,4 @@ wishListSchema.pre('save', function (next) {
 
 
 const Cart = mongoose.model('WishList', wishListSchema);
-module.exports = Cart;
+export default Cart;

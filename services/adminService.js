@@ -16,7 +16,7 @@ const securePassword = async (password) => {
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.authenticateAdmin = async (email, password) => {
+export const authenticateAdmin = async (email, password) => {
     const admin = await Admin.findOne({ email }).lean();
 
     if (!admin) {
@@ -41,7 +41,7 @@ exports.authenticateAdmin = async (email, password) => {
 
 
 
-exports.registerAdmin = async (adminData) => {
+export const registerAdmin = async (adminData) => {
     const { name, email, password } = adminData;
 
     // Check if email already exists

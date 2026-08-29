@@ -22,5 +22,5 @@ const referralHistorySchema = new mongoose.Schema({
 
 referralHistorySchema.index({ user: 1, createdAt: -1 });
 
-module.exports = mongoose.model('referralHistory', referralHistorySchema);
+export default mongoose.model('referralHistory', referralHistorySchema);
 

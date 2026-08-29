@@ -1,13 +1,13 @@
 import js from "@eslint/js";
 import globals from "globals";
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "commonjs",
+      sourceType: "module", // Changed from "commonjs" to support ES Modules
       globals: {
         ...globals.node,
         ...globals.browser,

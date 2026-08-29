@@ -1,4 +1,4 @@
-import couponService from '../services/couponService.js';
+import * as couponService from '../services/couponService.js'
 
 //MESSAGE_CONSTANTS
 import COUPON_MESSAGES from '../constants/coupon.js';
@@ -8,7 +8,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.couponRender = async (req, res) => {
+export const couponRender = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
@@ -58,7 +58,7 @@ exports.couponRender = async (req, res) => {
 
 
 
-exports.couponEditJson = async (req, res) => {
+export const couponEditJson = async (req, res) => {
     try {
         const coupon = await couponService.getCouponById(req.params.couponId);
         return res.json(coupon);
@@ -69,7 +69,7 @@ exports.couponEditJson = async (req, res) => {
 
 
 
-exports.createCoupon = async (req, res) => {
+export const createCoupon = async (req, res) => {
     try {
         const result = await couponService.createNewCoupon(req.body);
         return res.status(result.status).json({
@@ -89,7 +89,7 @@ exports.createCoupon = async (req, res) => {
 
 
 
-exports.couponEdit = async (req, res) => {
+export const couponEdit = async (req, res) => {
     try {
         const couponId = req.params.couponId;
         const result = await couponService.updateCoupon(couponId, req.body);
@@ -110,7 +110,7 @@ exports.couponEdit = async (req, res) => {
 
 
 
-exports.couponDelete = async (req, res) => {
+export const couponDelete = async (req, res) => {
     try {
         const { couponId } = req.params;
         const result = await couponService.deleteCoupon(couponId);
@@ -128,7 +128,7 @@ exports.couponDelete = async (req, res) => {
 
 
 
-exports.applyCoupon = async (req, res) => {
+export const applyCoupon = async (req, res) => {
     try {
         const { couponId } = req.body;
         const userId = res.locals.user._id;
@@ -146,7 +146,7 @@ exports.applyCoupon = async (req, res) => {
 
 
 
-exports.removeCoupon = async (req, res) => {
+export const removeCoupon = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const result = await couponService.removeCouponFromCart(userId);

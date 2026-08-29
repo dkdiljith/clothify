@@ -446,7 +446,7 @@ const resetEmailProcess = async (userId, email, otp) => {
     );
 };
 
-module.exports = {
+export {
     getHomeData,
     loginUser,
     registerUserProcess,

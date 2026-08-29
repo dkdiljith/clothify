@@ -6,7 +6,7 @@ import ADDRESS_MESSAGE from '../constants/address.js';
 /////////////////////////////////////////////////////////////////////////////////
 
 
-exports.createAddress = async (addressData) => {
+export const createAddress = async (addressData) => {
   const { userId, isDefault } = addressData;
   if (isDefault) {
     await Address.updateMany({ userId }, { $set: { isDefault: false } });
@@ -26,7 +26,7 @@ exports.createAddress = async (addressData) => {
 
 
 
-exports.getAddressForEdit = async (addressId, userId) => {
+export const getAddressForEdit = async (addressId, userId) => {
   const address = await Address.findOne({ _id: addressId, userId }).lean();
   return address;
 };
@@ -34,7 +34,7 @@ exports.getAddressForEdit = async (addressId, userId) => {
 
 
 
-exports.updateAddress = async (addressId, userId, updateData) => {
+export const updateAddress = async (addressId, userId, updateData) => {
   const { isDefault } = updateData;
   // Verify address belongs to user
   const existingAddress = await Address.findOne({ _id: addressId, userId });
@@ -64,7 +64,7 @@ exports.updateAddress = async (addressId, userId, updateData) => {
 
 
 
-exports.deleteAddress = async (addressId, userId) => {
+export const deleteAddress = async (addressId, userId) => {
   // Verify address belongs to user
   const address = await Address.findOne({ _id: addressId, userId });
   if (!address) {

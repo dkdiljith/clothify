@@ -1,4 +1,4 @@
-import dashboardService from '../services/dashboardService.js';
+import * as dashboardService from '../services/dashboardService.js'; 
 
 //MESSAGE_CONSTANTS
 import DASHBOARD_MESSAGES from '../constants/dashboard.js';
@@ -8,7 +8,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.dashboardRender = async (req, res) => {
+export const dashboardRender = async (req, res) => {
     try {
         return res.render("admin/dashboard");
     } catch  {
@@ -18,7 +18,7 @@ exports.dashboardRender = async (req, res) => {
     }
 };
 
-exports.getDashboardData = async (req, res) => {
+export const getDashboardData = async (req, res) => {
     try {
         const allowedFilters = ["today", "week", "month", "year"];
         const filter = allowedFilters.includes(req.query.filter) ? req.query.filter : "month";

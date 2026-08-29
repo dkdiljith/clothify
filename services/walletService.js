@@ -168,7 +168,7 @@ async function processWalletPayment(userId, amount) {
     return result;
 }
 
-module.exports = {
+export {
     createWallet,
     getWalletDetails,
     createRazorpayDepositOrder,

@@ -1,11 +1,11 @@
 // controllers/userProfileController.js
-import userService from '../services/userProfileService.js';
+import * as userService from '../services/userProfileService.js';
 import PROFILE_MESSAGES from '../constants/profile.js';
 import STATUS_CODES from '../constants/status-codes.js';
 
 
 // Profile Renders
-exports.profileRender = async (req, res) => {
+export const profileRender = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const { userData, address } = await userService.fetchUserProfile(userId);
@@ -15,7 +15,7 @@ exports.profileRender = async (req, res) => {
     }
 };
 
-exports.securityRender = async (req, res) => {
+export const securityRender = async (req, res) => {
     try {
         const hasPassword = await userService.checkUserHasPassword(res.locals.user._id);
         return res.status(STATUS_CODES.OK).render("user/security", {
@@ -27,7 +27,7 @@ exports.securityRender = async (req, res) => {
     }
 };
 
-exports.profileEdit = async (req, res) => {
+export const profileEdit = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         await userService.updateUserData(userId, req.body);
@@ -43,11 +43,11 @@ exports.profileEdit = async (req, res) => {
     }
 };
 
-exports.deleteUserRender = async (req, res) => {
+export const deleteUserRender = async (req, res) => {
     return res.status(STATUS_CODES.OK).render(`user/deleteAccount`, { user_sidebar: true });
 };
 
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         await userService.deactivateUserAccount(userId);
@@ -73,7 +73,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // Address Renders & Actions
-exports.addressRender = async (req, res) => {
+export const addressRender = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const addresses = await userService.fetchUserAddresses(userId);
@@ -83,11 +83,11 @@ exports.addressRender = async (req, res) => {
     }
 };
 
-exports.addAddressRender = async (req, res) => {
+export const addAddressRender = async (req, res) => {
     return res.status(STATUS_CODES.OK).render(`user/addAddress`, { user_sidebar: true });
 };
 
-exports.editAddressRender = async (req, res) => {
+export const editAddressRender = async (req, res) => {
     try {
         const address = await userService.fetchSingleAddress(req.params.id);
         return res.status(STATUS_CODES.OK).render(`user/editAddress`, { address, user_sidebar: true });
@@ -96,7 +96,7 @@ exports.editAddressRender = async (req, res) => {
     }
 };
 
-exports.addAddress = async (req, res) => {
+export const addAddress = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const addresses = await userService.createNewAddress(userId, req.body);
@@ -106,7 +106,7 @@ exports.addAddress = async (req, res) => {
     }
 };
 
-exports.editAddress = async (req, res) => {
+export const editAddress = async (req, res) => {
     try {
         await userService.updateExistingAddress(req.params.id, req.body);
         return res.redirect('back');
@@ -115,7 +115,7 @@ exports.editAddress = async (req, res) => {
     }
 };
 
-exports.setDefaultAddress = async (req, res) => {
+export const setDefaultAddress = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         await userService.setDefaultAddress(userId, req.params.id);
@@ -125,7 +125,7 @@ exports.setDefaultAddress = async (req, res) => {
     }
 };
 
-exports.deleteAddress = async (req, res) => {
+export const deleteAddress = async (req, res) => {
     try {
         await userService.removeAddress(req.params.id);
         return res.redirect(`/user/address`);
@@ -135,7 +135,7 @@ exports.deleteAddress = async (req, res) => {
 };
 
 // Order Renders
-exports.userOrders = async (req, res) => {
+export const userOrders = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const { orders, isRetryPendingOrder, pagination } = await userService.fetchUserOrders(userId, req.query);
@@ -157,7 +157,7 @@ exports.userOrders = async (req, res) => {
     }
 };
 
-exports.userOrderDetails = async (req, res) => {
+export const userOrderDetails = async (req, res) => {
     try {
         const order = await userService.fetchOrderDetails(req.params.orderId);
         return res.status(STATUS_CODES.OK).render(`user/orderDetails`, { order, user_sidebar: true });

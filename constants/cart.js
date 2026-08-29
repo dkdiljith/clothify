@@ -44,4 +44,4 @@ const CART_MESSAGES = {
 
 
 
-module.exports = CART_MESSAGES
+export default CART_MESSAGES

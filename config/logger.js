@@ -42,4 +42,4 @@ logger.exceptions.handle(
   })
 );
 
-module.exports = logger;
+export default logger;

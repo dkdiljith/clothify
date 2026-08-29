@@ -53,4 +53,4 @@ const AUTH_MESSAGES = {
     EMAIL_UPDATED_SUCCESS: "Email updated successfully!"
 };
 
-module.exports = AUTH_MESSAGES;
+export default AUTH_MESSAGES;

@@ -4,9 +4,7 @@ import Product from '../models/productSchema.js';
 
 
 //update offer & coupon & products
-import pricingExpiry from '../utils/pricingExpiry.js';
-const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
-
+import { pricingExpiryUpdate } from '../utils/pricingExpiry.js';
 
 //MESSAGE_CONSTANTS
 import CATEGORY_MESSAGE from '../constants/category.js';
@@ -16,14 +14,14 @@ import STATUS_CODES from '../constants/status-codes.js';
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.getAllCategories = async () => {
+export const getAllCategories = async () => {
     const categories = await Category.find().lean();
     return categories;
 };
 
 
 
-exports.getCategoryEditData = async (parentId) => {
+export const getCategoryEditData = async (parentId) => {
     const parentCategory = await Category.findById(parentId).lean();
     if (!parentCategory) {
         return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.PARENT_NOT_FOUND };
@@ -74,7 +72,7 @@ exports.getCategoryEditData = async (parentId) => {
 
 
 
-exports.createCategory = async (name, parentCategory) => {
+export const createCategory = async (name, parentCategory) => {
     const formattedName = name
         .trim()
         .replace(/\s+/g, ' ')
@@ -94,7 +92,7 @@ exports.createCategory = async (name, parentCategory) => {
 
 
 
-exports.removeCategory = async (categoryId) => {
+export const removeCategory = async (categoryId) => {
     const category = await Category.findById(categoryId).lean();
     if (!category) {
         return { success: false, status: STATUS_CODES.NOT_FOUND, message: CATEGORY_MESSAGE.CATEGORY_NOT_FOUND };
@@ -116,7 +114,7 @@ exports.removeCategory = async (categoryId) => {
 
 
 
-exports.updateCategory = async (categoryId, name, newSubcategory) => {
+export const updateCategory = async (categoryId, name, newSubcategory) => {
     // 1. Update name if provided
     if (name) {
         await Category.findByIdAndUpdate(categoryId, {
@@ -142,7 +140,7 @@ exports.updateCategory = async (categoryId, name, newSubcategory) => {
 
 
 
-exports.getOfferRenderData = async (categoryId) => {
+export const getOfferRenderData = async (categoryId) => {
     const now = new Date();
     const category = await Category.findById(categoryId).lean();
     if (!category) {
@@ -168,7 +166,7 @@ exports.getOfferRenderData = async (categoryId) => {
 
 
 
-exports.applyCategoryOffer = async (categoryId, offerId) => {
+export const applyCategoryOffer = async (categoryId, offerId) => {
     const now = new Date();
     const category = await Category.findById(categoryId);
     const offer = await Offer.findById(offerId).lean();
@@ -224,7 +222,7 @@ exports.applyCategoryOffer = async (categoryId, offerId) => {
 
 
 
-exports.resetCategoryPricing = async (categoryId) => {
+export const resetCategoryPricing = async (categoryId) => {
     const category = await Category.findById(categoryId);
     const products = await Product.find({ categoryId });
     if (!category) {

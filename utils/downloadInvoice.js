@@ -465,4 +465,4 @@ const downloadInvoice = async (req, res) => {
 
 
 
-module.exports = downloadInvoice;
+export default downloadInvoice;

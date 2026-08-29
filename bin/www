@@ -1,9 +1,19 @@
+process.on('uncaughtException', (err) => {
+  console.error('💥 CRITICAL UNCAUGHT EXCEPTION:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 UNHANDLED PROMISE REJECTION AT:', promise, 'REASON:', reason);
+  process.exit(1);
+});
+
 import app from '../app.js';
 import debugModule from 'debug';
 const debug = debugModule('clothify:server');
 import http from 'http';
 import logger from '../config/logger.js';
-
+// ... rest of your bin/www code
 
 /**
  * Get port from environment and store in Express.

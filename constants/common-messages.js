@@ -31,7 +31,6 @@ const COMMON_MESSAGES = {
 }
 
 
-
-module.exports = COMMON_MESSAGES
+export default COMMON_MESSAGES
 
 

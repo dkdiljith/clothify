@@ -1,9 +1,10 @@
-import adminService from '../services/adminService.js';
+import * as adminService from '../services/adminService.js'; 
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.loginRender = async (req, res) => {
+export const loginRender = async (req, res) => {
   if (req.session.admin) {
     return res.redirect(`admin/dashboard`);
   }
@@ -12,19 +13,19 @@ exports.loginRender = async (req, res) => {
 
 
 
-exports.registerRender = async (req, res) => {
+export const registerRender = async (req, res) => {
   return res.render(`admin/register`, { plain_body: true });
 };
 
 
 
-exports.activityLogRender = async (req, res) => {
+export const activityLogRender = async (req, res) => {
   return res.render(`admin/activity-log`);
 };
 
 
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     // Input Validation
@@ -49,7 +50,7 @@ exports.login = async (req, res) => {
 
 
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
     // MISSING FIELDS
@@ -103,7 +104,7 @@ exports.register = async (req, res) => {
 
 
 
-exports.logout = (req, res) => {
+export const logout = (req, res) => {
   delete req.session.admin;
   req.session.save((err) => {
     if (err) {

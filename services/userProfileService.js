@@ -185,7 +185,7 @@ async function fetchOrderDetails(orderId) {
     return await Order.findById(orderId).lean();
 }
 
-module.exports = {
+export {
     fetchUserProfile,
     updateUserData,
     checkUserHasPassword,

@@ -78,7 +78,7 @@ const getAnalyticsMatchStage = (startDate, endDate) => ({
 
 
 
-exports.getStatisticsData = async (filter) => {
+export const getStatisticsData = async (filter) => {
   const { startDate, endDate } = getDateFilter(filter);
   const orders = await Order.find({
     createdAt: { $gte: startDate, $lte: endDate },
@@ -125,7 +125,7 @@ exports.getStatisticsData = async (filter) => {
 
 
 
-exports.getRevenueChartData = async (filter) => {
+export const getRevenueChartData = async (filter) => {
   const { startDate } = getDateFilter(filter);
   let groupId;
   let labels = [];
@@ -247,7 +247,7 @@ exports.getRevenueChartData = async (filter) => {
 
 
 
-exports.getTopProductsData = async (filter) => {
+export const getTopProductsData = async (filter) => {
   const { startDate, endDate } = getDateFilter(filter);
   return await Order.aggregate([
     { $match: getAnalyticsMatchStage(startDate, endDate) },
@@ -285,7 +285,7 @@ exports.getTopProductsData = async (filter) => {
 
 
 
-exports.getTopCategoriesData = async (filter) => {
+export const getTopCategoriesData = async (filter) => {
   const { startDate, endDate } = getDateFilter(filter);
   return await Order.aggregate([
     { $match: getAnalyticsMatchStage(startDate, endDate) },
@@ -336,7 +336,7 @@ exports.getTopCategoriesData = async (filter) => {
     { $limit: 10 },
   ]);
 };
-exports.getPaymentMethodsData = async (filter) => {
+export const getPaymentMethodsData = async (filter) => {
   const { startDate, endDate } = getDateFilter(filter);
   return await Order.aggregate([
     { $match: getAnalyticsMatchStage(startDate, endDate) },

@@ -3,7 +3,7 @@ const url = process.env.DB_URL;
 import logger from '../config/logger.js';
 
 
-module.exports.connect = function (done){
+export const connect = function (done){
     mongoose.connect(url)
     .then(()=>{
         // console.log("Database Connected Successfully")
@@ -13,8 +13,8 @@ module.exports.connect = function (done){
         logger.error(err)
         done(err)
     })
-}
+};
 
-module.exports.get = function (){
+export const get = function (){
    return mongoose.connection;
-}
+};

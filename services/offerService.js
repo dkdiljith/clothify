@@ -1,8 +1,7 @@
 import Offer from '../models/offerSchema.js';
 import Product from '../models/productSchema.js';
 import Category from '../models/categorySchema.js';
-import pricingExpiry from '../utils/pricingExpiry.js';
-const pricingExpiryUpdate = pricingExpiry.pricingExpiryUpdate;
+import { pricingExpiryUpdate } from '../utils/pricingExpiry.js'; 
 
 
 //MESSAGE_CONSTANTS
@@ -11,7 +10,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 
 //////////////////////////////////////////////////////////////////////////////
 
-exports.getFilteredOffers = async (queryData) => {
+export const getFilteredOffers = async (queryData) => {
     const page = parseInt(queryData.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
@@ -63,7 +62,7 @@ exports.getFilteredOffers = async (queryData) => {
     };
 };
 
-exports.validateAndFormatOfferPayload = async (body, excludeId = null) => {
+export const validateAndFormatOfferPayload = async (body, excludeId = null) => {
     const { offerCode, offerType, discountType, discountValue, startDate, endDate, targetIds } = body;
 
     if (!offerCode || !offerType || !discountType || discountValue === undefined || !startDate || !endDate) {
@@ -126,8 +125,8 @@ exports.validateAndFormatOfferPayload = async (body, excludeId = null) => {
     };
 };
 
-exports.createOffer = async (body) => {
-    const payload = await exports.validateAndFormatOfferPayload(body);
+export const createOffer = async (body) => {
+    const payload = await validateAndFormatOfferPayload(body);
 
     const offer = new Offer({
         offerCode: payload.cleanCode,
@@ -145,11 +144,11 @@ exports.createOffer = async (body) => {
     return savedOffer;
 };
 
-exports.getOfferById = async (offerId) => {
+export const getOfferById = async (offerId) => {
     return await Offer.findById(offerId);
 };
 
-exports.getPaginatedSubcategories = async (queryData) => {
+export const getPaginatedSubcategories = async (queryData) => {
     const page = parseInt(queryData.page) || 1;
     const limit = 20;
     const search = queryData.search?.trim() || "";
@@ -183,7 +182,7 @@ exports.getPaginatedSubcategories = async (queryData) => {
     };
 };
 
-exports.getPaginatedProducts = async (queryData) => {
+export const getPaginatedProducts = async (queryData) => {
     const page = parseInt(queryData.page) || 1;
     const limit = 4;
     const search = queryData.search?.trim() || "";
@@ -217,13 +216,13 @@ exports.getPaginatedProducts = async (queryData) => {
     };
 };
 
-exports.updateOffer = async (offerId, body) => {
+export const updateOffer = async (offerId, body) => {
     const existingOffer = await Offer.findById(offerId);
     if (!existingOffer) {
         throw { status: STATUS_CODES.NOT_FOUND, message: OFFER_MESAGES.NOT_FOUND};
     }
 
-    const payload = await exports.validateAndFormatOfferPayload(body, offerId);
+    const payload = await validateAndFormatOfferPayload(body, offerId);
 
     existingOffer.offerCode = payload.cleanCode;
     existingOffer.offerType = payload.offerType;
@@ -239,7 +238,7 @@ exports.updateOffer = async (offerId, body) => {
     return existingOffer;
 };
 
-exports.deleteOffer = async (offerId) => {
+export const deleteOffer = async (offerId) => {
     const deletedOffer = await Offer.findByIdAndDelete(offerId);
     if (!deletedOffer) {
         throw { status: STATUS_CODES.NOT_FOUND, message: OFFER_MESAGES.NOT_FOUND };

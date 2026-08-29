@@ -92,4 +92,4 @@ async function fetchCollectionsData(queryParams, userId) {
 
 
 
-module.exports = {fetchCollectionsData}
+export {fetchCollectionsData}

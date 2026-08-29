@@ -62,7 +62,7 @@ async function calculateRefund(order, itemId) {
 
 
 
-exports.getFilteredOrders = async (queryData) => {
+export const getFilteredOrders = async (queryData) => {
     const page = parseInt(queryData.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
@@ -117,16 +117,16 @@ exports.getFilteredOrders = async (queryData) => {
 
 
 
-exports.getOrderById = async (orderId) => {
+export const getOrderById = async (orderId) => {
     return await Order.findById(orderId).lean();
 };
 
 
 
 
-exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
+export const updateOrderStatus = async (orderId, itemId, newStatus) => {
     if (newStatus === "Cancelled") {
-        return await exports.processItemCancellation(orderId, itemId, "item is out of stock");
+        return await processItemCancellation(orderId, itemId, "item is out of stock");
     }
 
     if (newStatus !== "Returned") {
@@ -242,7 +242,7 @@ exports.updateOrderStatus = async (orderId, itemId, newStatus) => {
 
 
 
-exports.cancelOrder = async (orderId, itemId, reason) => {
+export const cancelOrder = async (orderId, itemId, reason) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -339,7 +339,7 @@ exports.cancelOrder = async (orderId, itemId, reason) => {
 
 
 
-exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
+export const returnOrder = async (orderId, itemId, reason, returnAll) => {
     const order = await Order.findById(orderId);
     if (!order) {
         throw { status: STATUS_CODES.NOT_FOUND, message: ORDER_MESSAGES.ORDER_NOT_FOUND };
@@ -408,7 +408,7 @@ exports.returnOrder = async (orderId, itemId, reason, returnAll) => {
 
 
 
-exports.processItemCancellation = async (orderId, itemId, reason) => {
+export const processItemCancellation = async (orderId, itemId, reason) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();

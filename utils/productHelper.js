@@ -47,4 +47,4 @@ async function verifyProductVariation(productId, variationIndex) {
 
 }
 
-module.exports = { verifyProductVariation };
+export { verifyProductVariation };

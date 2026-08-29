@@ -1,9 +1,9 @@
-import authService from '../services/userService.js';
+import * as authService from '../services/userService.js';
 import AUTH_MESSAGES from '../constants/auth.js';
 import STATUS_CODES from '../constants/status-codes.js';
 
 
-exports.homeRender = async (req, res) => {
+export const homeRender = async (req, res) => {
     try {
         const userId = res.locals.user?._id || null;
         const { products, referralSettings } = await authService.getHomeData(userId);
@@ -20,17 +20,17 @@ exports.homeRender = async (req, res) => {
     }
 };
 
-exports.registerRender = async (req, res) => {
+export const registerRender = async (req, res) => {
     if (req.session.user) return res.redirect(`/user/home`);
     return res.render("user/register", { plain_body: true });
 };
 
-exports.loginRender = async (req, res) => {
+export const loginRender = async (req, res) => {
     if (req.session.user) return res.redirect(`/user/home`);
     return res.render("user/login", { plain_body: true });
 };
 
-exports.forgetPasswordRender = async (req, res) => {
+export const forgetPasswordRender = async (req, res) => {
     if (req.session.user) {
         if (req.query.priority) {
             return res.render("user/forgetPassword", {
@@ -48,7 +48,7 @@ exports.forgetPasswordRender = async (req, res) => {
     });
 };
 
-exports.userLogout = (req, res) => {
+export const userLogout = (req, res) => {
     delete req.session.user;
     req.session.save((err) => {
         if (err) return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(AUTH_MESSAGES.INTERNAL_SERVER_ERROR);
@@ -56,7 +56,7 @@ exports.userLogout = (req, res) => {
     });
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const userSessionData = await authService.loginUser(email, password);
@@ -72,7 +72,7 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password, confirmPassword } = req.body;
         if (!name || !email || !password || !confirmPassword) {
@@ -91,7 +91,7 @@ exports.register = async (req, res) => {
     }
 };
 
-exports.emailVerificationRender = (req, res) => {
+export const emailVerificationRender = (req, res) => {
     const sessionUser = req.session.unknown_user;
     if (!sessionUser) return res.redirect("/user/register");
 
@@ -102,7 +102,7 @@ exports.emailVerificationRender = (req, res) => {
     });
 };
 
-exports.resendEmailVerification = async (req, res) => {
+export const resendEmailVerification = async (req, res) => {
     try {
         const sessionUser = req.session.unknown_user;
         if (!sessionUser?._id) {
@@ -127,7 +127,7 @@ exports.resendEmailVerification = async (req, res) => {
     }
 };
 
-exports.emailVerification = async (req, res) => {
+export const emailVerification = async (req, res) => {
     try {
         const { verificationCode } = req.body;
         const sessionUser = req.session.unknown_user;
@@ -162,7 +162,7 @@ exports.emailVerification = async (req, res) => {
     }
 };
 
-exports.forgetPassword = async (req, res) => {
+export const forgetPassword = async (req, res) => {
     try {
         const { email } = req.body;
         const sessionData = await authService.forgetPasswordProcess(email);
@@ -183,7 +183,7 @@ exports.forgetPassword = async (req, res) => {
     }
 };
 
-exports.resetPasswordRender = async (req, res) => {
+export const resetPasswordRender = async (req, res) => {
     try {
         const otp = req.params.token;
         if (!otp) return res.redirect("/user/forgetPassword?priority=true&&error=invalidLink");
@@ -200,7 +200,7 @@ exports.resetPasswordRender = async (req, res) => {
     }
 };
 
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
     try {
         const { newPassword, confirmPassword } = req.body;
         const forgotPasswordSession = req.session.forgot_password;
@@ -219,7 +219,7 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
-exports.showUsers = async (req, res) => {
+export const showUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const query = req.query.query || "";
@@ -246,7 +246,7 @@ exports.showUsers = async (req, res) => {
     }
 };
 
-exports.blockUser = async (req, res) => {
+export const blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
         if (!userId) return res.status(STATUS_CODES.NOT_FOUND).json({ message: AUTH_MESSAGES.USER_NOT_FOUND });
@@ -260,7 +260,7 @@ exports.blockUser = async (req, res) => {
     }
 };
 
-exports.verifyPassword = async (req, res) => {
+export const verifyPassword = async (req, res) => {
     try {
         const { password } = req.body;
         if (!password) return res.status(STATUS_CODES.UNAUTHORIZED).json({ message: AUTH_MESSAGES.INVALID_PASSWORD });
@@ -275,7 +275,7 @@ exports.verifyPassword = async (req, res) => {
     }
 };
 
-exports.verifyEmail = async (req, res) => {
+export const verifyEmail = async (req, res) => {
     try {
         const { email } = req.body;
         const userId = res.locals.user._id;
@@ -294,7 +294,7 @@ exports.verifyEmail = async (req, res) => {
     }
 };
 
-exports.resetEmail = async (req, res) => {
+export const resetEmail = async (req, res) => {
     try {
         const { otp, email } = req.body;
         const userId = res.locals.user._id;

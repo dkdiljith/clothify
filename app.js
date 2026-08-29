@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url'; // Required for __dirname replacement
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import logger from './config/logger.js'; //WINSTON LOGGER
@@ -11,7 +12,11 @@ import session from 'express-session';
 
 import adminRouter from './routes/adminRoute.js';
 import userRouter from './routes/userRoute.js';
-import db from './config/connection.js';
+import * as db from './config/connection.js';
+
+// --- ESM __dirname and __filename workaround ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -77,14 +82,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database connection
+import { initializeSettings } from './controllers/settingController.js'; // Moved to the top level scope
+
 db.connect((err) => {
   if (err) {
     console.log("Connection Failed");
     process.exit(1);
   }
   logger.info("Database connected successfully");
-
-  import { initializeSettings } from './controllers/settingController.js'
 
   initializeSettings()
     .then(() => logger.info("Settings logic finished check"))
@@ -103,7 +108,7 @@ app.get('/', (req, res) => {
 });
 
 // Handling Unhandled Requests
-import ErrorMessage from './utils/ErrorMessage.js';
+import * as ErrorMessage from './utils/ErrorMessage.js';
 app.use('*', ErrorMessage.ErrorContent)
 
-module.exports = app;
+export default app;

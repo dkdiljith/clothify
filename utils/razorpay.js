@@ -16,7 +16,7 @@ const razorpay = new Razorpay({
 
 
 
-exports.razorpayReciept = async (req, res) => {
+export const razorpayReciept = async (req, res) => {
   try {
     const userId = res.locals.user._id;
     const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -88,7 +88,7 @@ exports.razorpayReciept = async (req, res) => {
 
 
 
-exports.razorpayVerification = async (req, res) => {
+export const razorpayVerification = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, addressId, orderId } = req.body;
 

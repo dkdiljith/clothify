@@ -1,11 +1,11 @@
 // controllers/wishlistController.js
-import wishlistService from '../services/wishlistService.js';
+import * as wishlistService from '../services/wishlistService.js';
 import { addToCart } from '../controllers/cartController.js';
 import STATUS_CODES from '../constants/status-codes.js';
 import WISHLIST_MESSAGES from '../constants/wishlist.js';
 
 
-exports.wishlistRender = async (req, res) => {
+export const wishlistRender = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const page = parseInt(req.query.page) || 1;
@@ -25,7 +25,7 @@ exports.wishlistRender = async (req, res) => {
     }
 };
 
-exports.addToWishlist = async (req, res) => {
+export const addToWishlist = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const productId = req.params.id;
@@ -52,7 +52,7 @@ exports.addToWishlist = async (req, res) => {
     }
 };
 
-exports.removeFromWishlist = async (req, res) => {
+export const removeFromWishlist = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const productId = req.params.id;
@@ -72,7 +72,7 @@ exports.removeFromWishlist = async (req, res) => {
     }
 };
 
-exports.addToCartFromWishlist = async (req, res) => {
+export const addToCartFromWishlist = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const { productId } = req.params;

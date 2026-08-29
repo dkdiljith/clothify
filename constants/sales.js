@@ -7,4 +7,4 @@ const SALES_MESSAGES = {
 };
 
 
-module.exports = SALES_MESSAGES;
+export default SALES_MESSAGES;

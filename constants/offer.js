@@ -83,6 +83,6 @@ const OFFER_MESSAGES = {
 
 
 
-module.exports = OFFER_MESSAGES
+export default OFFER_MESSAGES
 
    

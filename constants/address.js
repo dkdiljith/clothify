@@ -40,6 +40,7 @@ const ADDRESS_MESSAGES = {
 
 
 
-module.exports = ADDRESS_MESSAGES
+export default ADDRESS_MESSAGES;
+
 
 

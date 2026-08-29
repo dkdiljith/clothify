@@ -87,4 +87,4 @@ async function validateCartCheckout(req, res, next) {
   }
 }
 
-module.exports = validateCartCheckout;
+export default validateCartCheckout;

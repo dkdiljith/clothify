@@ -1,4 +1,4 @@
-import orderService from '../services/orderService.js';
+import * as orderService from '../services/orderService.js';
 
 // MESSAGE_CONSTANTS
 import ORDER_MESSAGES from '../constants/order.js';
@@ -11,7 +11,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 ////////////////////////////////////////////////////////////////////////////////
 
 
-exports.ordersRender = async (req, res) => {
+export const ordersRender = async (req, res) => {
     try {
         const result = await orderService.getFilteredOrders(req.query);
         return res.render("admin/orders", {
@@ -41,7 +41,7 @@ exports.ordersRender = async (req, res) => {
 };
 
 
-exports.orderDetails = async (req, res) => {
+export const orderDetails = async (req, res) => {
     try {
         const order = await orderService.getOrderById(req.params.orderId);
         return res.render(`admin/orderDetails`, { order, admin: true });
@@ -50,7 +50,7 @@ exports.orderDetails = async (req, res) => {
     }
 };
 
-exports.orderStatusChange = async (req, res) => {
+export const orderStatusChange = async (req, res) => {
     try {
         const { orderId, itemId } = req.params;
         const { status: newStatus } = req.body;
@@ -65,7 +65,7 @@ exports.orderStatusChange = async (req, res) => {
     }
 };
 
-exports.orderCancel = async (req, res) => {
+export const orderCancel = async (req, res) => {
     try {
         const { orderId, itemId, reason } = req.body;
         const result = await orderService.cancelOrder(orderId, itemId, reason);
@@ -79,7 +79,7 @@ exports.orderCancel = async (req, res) => {
     }
 };
 
-exports.orderReturn = async (req, res) => {
+export const orderReturn = async (req, res) => {
     try {
         const { orderId, itemId, reason, returnAll } = req.body;
         const result = await orderService.returnOrder(orderId, itemId, reason, returnAll);

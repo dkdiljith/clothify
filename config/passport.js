@@ -116,4 +116,5 @@ const googleCallback = (req, res, next) => {
 
 
 
-module.exports = { passport, googleLogin, googleCallback }
+export { passport, googleLogin, googleCallback };
+

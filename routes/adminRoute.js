@@ -13,21 +13,22 @@ router.use((req, res, next) => {
 });
 
 //controllers
-import adminController from '../controllers/adminController.js';
-import dashboardController from '../controllers/dashboardController.js';
-import userController from '../controllers/userController.js';
-import productController from '../controllers/productController.js';
-import orderController from '../controllers/orderController.js';
-import categoryController from '../controllers/categoryController.js';
-import couponController from '../controllers/couponController.js';
-import offerController from '../controllers/offerController.js';
-import salesController from '../controllers/salesController.js';
-import settingController from '../controllers/settingController.js';
+import * as adminController from '../controllers/adminController.js';
+import * as dashboardController from '../controllers/dashboardController.js';
+import * as userController from '../controllers/userController.js';
+import * as productController from '../controllers/productController.js';
+import * as orderController from '../controllers/orderController.js';
+import * as categoryController from '../controllers/categoryController.js';
+import * as couponController from '../controllers/couponController.js';
+import * as offerController from '../controllers/offerController.js';
+import * as salesController from '../controllers/salesController.js';
+import * as settingController from '../controllers/settingController.js';
 
 //adminAuth (session)
 import { adminAuth } from '../middlewares/auth.js';
 //invoice generator
 import downloadInvoice from '../utils/downloadInvoice.js';
+
 
 
 
@@ -127,7 +128,7 @@ router.route(`/settings/referral`)
     .post(adminAuth, settingController.referralSettings)
 
 
-module.exports = router
+export default router
 
 
 

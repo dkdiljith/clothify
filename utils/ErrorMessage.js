@@ -1,4 +1,4 @@
-exports.ErrorContent = async (req, res) => {
+export const ErrorContent = async (req, res) => {
     const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -127,7 +127,7 @@ exports.ErrorContent = async (req, res) => {
 
 
 
-exports.userUnavailableError = async (req, res) => {
+export const userUnavailableError = async (req, res) => {
  const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">

@@ -21,4 +21,4 @@ referralSchema.index({ referrer: 1, status: 1 });
 
 
 const Referral = mongoose.model('referral', referralSchema);
-module.exports = Referral;
+export default Referral;

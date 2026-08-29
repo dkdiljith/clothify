@@ -1,10 +1,10 @@
 // controllers/walletController.js
-import walletService from '../services/walletService.js';
+import * as walletService from '../services/walletService.js';
 import WALLET_MESSAGES from '../constants/wallet.js';
 import STATUS_CODES from '../constants/status-codes.js';
 
 
-exports.walletRender = async (req, res) => {
+export const walletRender = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const { wallet, credit, debit, page, limit, totalPages } = await walletService.getWalletDetails(userId, req.query.page);
@@ -29,7 +29,7 @@ exports.walletRender = async (req, res) => {
     }
 };
  
-exports.amountDeposit = async (req, res) => {
+export const amountDeposit = async (req, res) => {
     try {
         const { amount } = req.body;
         const order = await walletService.createRazorpayDepositOrder(amount);
@@ -39,7 +39,7 @@ exports.amountDeposit = async (req, res) => {
     }
 };
 
-exports.walletPaymentVerification = async (req, res) => {
+export const walletPaymentVerification = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const paymentId = await walletService.verifyAndCreditWalletPayment(userId, req.body);
@@ -55,7 +55,7 @@ exports.walletPaymentVerification = async (req, res) => {
     }
 };
 
-exports.walletPayment = async (req, res) => {
+export const walletPayment = async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = res.locals.user._id;

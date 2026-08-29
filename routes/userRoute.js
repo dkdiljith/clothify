@@ -1,8 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import passportFile from '../config/passport.js';
-const passport = passportFile.passport;
+import { passport, googleLogin, googleCallback } from '../config/passport.js';
 
 //passport
 router.use(passport.initialize());
@@ -20,21 +19,21 @@ router.use(headerBadge);
 
 
 //RAZORPAY integration//
-import razorpay from '../utils/razorpay.js';
+import * as razorpay from '../utils/razorpay.js';
 
 //Controllers
-import userController from '../controllers/userController.js';
-import userProfileController from '../controllers/userProfileController.js';
-import productController from '../controllers/productController.js';
-import cartController from '../controllers/cartController.js';
-import wishlistController from '../controllers/wishlistController.js';
-import orderController from '../controllers/orderController.js';
-import userOrderController from '../controllers/userOrderController.js';
-import walletController from '../controllers/walletController.js';
-import couponController from '../controllers/couponController.js';
-import searchController from '../controllers/searchController.js';
-import addressController from '../controllers/addressController.js';
-import referralController from '../controllers/referralController.js';
+import * as userController from '../controllers/userController.js';
+import * as userProfileController from '../controllers/userProfileController.js';
+import * as productController from '../controllers/productController.js';
+import * as cartController from '../controllers/cartController.js';
+import * as wishlistController from '../controllers/wishlistController.js';
+import * as orderController from '../controllers/orderController.js';
+import * as userOrderController from '../controllers/userOrderController.js';
+import * as walletController from '../controllers/walletController.js';
+import * as couponController from '../controllers/couponController.js';
+import * as searchController from '../controllers/searchController.js';
+import * as addressController from '../controllers/addressController.js';
+import * as referralController from '../controllers/referralController.js';
 
 //usetAuth (session) 
 import { userAuth } from '../middlewares/auth.js';
@@ -45,9 +44,10 @@ import productValidator from '../middlewares/productValidator.js';
 //invoice generator
 import downloadInvoice from '../utils/downloadInvoice.js';
 
+
 // Routes to initiate Google authentication & handle the callback from Google
-router.get('/auth/google', passportFile.googleLogin);
-router.get('/auth/google/callback', passportFile.googleCallback);
+router.get('/auth/google', googleLogin);
+router.get('/auth/google/callback', googleCallback);
 
 
 // USER AUTHENTICATIONS
@@ -149,4 +149,4 @@ router.post('/wallet/create-razorpay-order', userAuth, walletController.amountDe
 router.post('/wallet/verify-payment', userAuth, walletController.walletPaymentVerification)
 
 
-module.exports = router;
+export default router;

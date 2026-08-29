@@ -1,10 +1,10 @@
 // controllers/salesController.js
-import salesReportService from '../services/salesService.js';
+import * as salesReportService from '../services/salesService.js';
 import SALES_MESSAGES from '../constants/sales.js';
 import STATUS_CODES from '../constants/status-codes.js';
 
 
-exports.salesReportRender = async (req, res) => {
+export const salesReportRender = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const page = parseInt(req.query.page) || 1;
@@ -44,7 +44,7 @@ exports.salesReportRender = async (req, res) => {
     }
 };
 
-exports.downloadSalesReportPdf = async (req, res) => {
+export const downloadSalesReportPdf = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const pdfBuffer = await salesReportService.generatePdfBuffer(startDate, endDate);
@@ -60,7 +60,7 @@ exports.downloadSalesReportPdf = async (req, res) => {
     }
 };
 
-exports.downloadSalesReportExcel = async (req, res) => {
+export const downloadSalesReportExcel = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const workbook = await salesReportService.generateExcelWorkbook(startDate, endDate);
@@ -81,7 +81,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
     }
 };
 
-exports.downloadSalesReportCsv = async (req, res) => {
+export const downloadSalesReportCsv = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const workbook = await salesReportService.generateCsvWorkbook(startDate, endDate);

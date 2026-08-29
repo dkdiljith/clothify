@@ -395,7 +395,7 @@ async function generateCsvWorkbook(startDate, endDate) {
     return workbook;
 }
 
-module.exports = {
+export {
     buildOrderQuery,
     getSalesReportData,
     generatePdfBuffer,

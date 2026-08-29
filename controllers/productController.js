@@ -1,4 +1,4 @@
-import productService from '../services/productService.js';
+import * as productService from '../services/productService.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -30,7 +30,7 @@ const upload = multer({ storage: storage }).array('images', 5);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Render Views Controllers
-exports.addProductsRender = async (req, res) => {
+export const addProductsRender = async (req, res) => {
     try {
         const categories = await productService.getGroupedCategories();
         return res.render('admin/addProducts', { admin: true, categories });
@@ -39,7 +39,7 @@ exports.addProductsRender = async (req, res) => {
     }
 };
 
-exports.editProductsRender = async (req, res) => {
+export const editProductsRender = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id).lean();
         if (!product) return res.status(STATUS_CODDES.NOT_FOUND).redirect('/admin/products');
@@ -51,7 +51,7 @@ exports.editProductsRender = async (req, res) => {
     }
 };
 
-exports.showProducts = async (req, res) => {
+export const showProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const query = req.query.query || "";
@@ -80,7 +80,7 @@ exports.showProducts = async (req, res) => {
     }
 };
 
-exports.singleProductPage = async (req, res) => {
+export const singleProductPage = async (req, res) => {
     try {
         const userId = res.locals.user?._id || null;
         const data = await productService.fetchSingleProductDetails(req.params.id, userId);
@@ -94,7 +94,7 @@ exports.singleProductPage = async (req, res) => {
 };
 
 // API Controllers with Multer Execution
-exports.addProducts = async (req, res) => {
+export const addProducts = async (req, res) => {
     upload(req, res, async (err) => {
         if (err) return res.status(STATUS_CODDES.INTERNAL_SERVER_ERROR).json({ success: false, error: err.message });
         try {
@@ -107,7 +107,7 @@ exports.addProducts = async (req, res) => {
     });
 };
 
-exports.updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
     upload(req, res, async (err) => {
         if (err) return res.status(STATUS_CODDES.INTERNAL_SERVER_ERROR).json({ success: false, error: err.message });
         try {
@@ -120,7 +120,7 @@ exports.updateProduct = async (req, res) => {
     });
 };
 
-exports.blockProduct = async (req, res) => {
+export const blockProduct = async (req, res) => {
     try {
         await productService.toggleBlockProduct(req.params.productId);
         return res.status(STATUS_CODDES.OK).json({ success: true, message: 'success' });
@@ -129,7 +129,7 @@ exports.blockProduct = async (req, res) => {
     }
 };
 
-exports.applyOfferJson = async (req, res) => {
+export const applyOfferJson = async (req, res) => {
     try {
         const { product, offers } = await productService.fetchOffersForProduct(req.params.productId);
         return res.status(STATUS_CODDES.OK).json({ success: true, offers, product });
@@ -138,7 +138,7 @@ exports.applyOfferJson = async (req, res) => {
     }
 };
 
-exports.applyOffer = async (req, res) => {
+export const applyOffer = async (req, res) => {
     try {
         await productService.applyOfferToProduct(req.params.productId, req.body.offerId);
         return res.status(STATUS_CODDES.OK).json({ success: true, message: OFFER_MESSAGES.MANUAL_OVERRIDE_APPLIED });
@@ -147,7 +147,7 @@ exports.applyOffer = async (req, res) => {
     }
 };
 
-exports.autoPricing = async (req, res) => {
+export const autoPricing = async (req, res) => {
     try {
         await productService.resetAutoPricing(req.params.productId);
         return res.status(STATUS_CODDES.OK).json({ success: true, message: OFFER_MESSAGES.AUTO_PRICING_ENABLED });

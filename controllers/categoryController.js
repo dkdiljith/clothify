@@ -1,4 +1,4 @@
-import categoryService from '../services/categoryService.js';
+import * as categoryService from '../services/categoryService.js';
 
 //MESSAGE_CONSTANTS
 import CATEGORY_MESSAGE from '../constants/category.js';
@@ -9,7 +9,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 
 
 
-exports.showCategories = async (req, res) => {
+export const showCategories = async (req, res) => {
   try {
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
@@ -66,7 +66,7 @@ exports.showCategories = async (req, res) => {
 
 
 //show edit category
-exports.editCategoryRender = async (req, res) => {
+export const editCategoryRender = async (req, res) => {
   try {
     const parentId = req.params.id;
     const result = await categoryService.getCategoryEditData(parentId);
@@ -87,7 +87,7 @@ exports.editCategoryRender = async (req, res) => {
 
 
 // create new Category
-exports.addCategory = async (req, res) => {
+export const addCategory = async (req, res) => {
   try {
     const { name, parentCategory } = req.body;
     if (!name || name.trim() === "") {
@@ -104,7 +104,7 @@ exports.addCategory = async (req, res) => {
 
 
 
-exports.deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res) => {
   try {
     const result = await categoryService.removeCategory(req.params.id);
     if (!result.success) {
@@ -120,7 +120,7 @@ exports.deleteCategory = async (req, res) => {
 
 
 // edit category
-exports.editCategory = async (req, res) => {
+export const editCategory = async (req, res) => {
   try {
     const { name, newSubcategory } = req.body;
     const categoryId = req.params.id;
@@ -141,7 +141,7 @@ exports.editCategory = async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////APPLY OFFER FUNCTIONS//////////////////////
 // Apply Offer Render Function
-exports.applyOfferJson = async (req, res) => {
+export const applyOfferJson = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await categoryService.getOfferRenderData(id);
@@ -167,7 +167,7 @@ exports.applyOfferJson = async (req, res) => {
 
 
 // Apply Category Manual
-exports.applyOffer = async (req, res) => {
+export const applyOffer = async (req, res) => {
   try {
     const { id } = req.params;
     const { offerId } = req.body;
@@ -193,7 +193,7 @@ exports.applyOffer = async (req, res) => {
 
 
 
-exports.autoPricing = async (req, res) => {
+export const autoPricing = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await categoryService.resetCategoryPricing(id);

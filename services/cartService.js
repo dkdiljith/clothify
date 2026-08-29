@@ -17,7 +17,7 @@ import STATUS_CODES from '../constants/status-codes.js';
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-exports.getCartForRendering = async (userId, flashMessage) => {
+export const getCartForRendering = async (userId, flashMessage) => {
     // Initial check
     const cartExists = await Cart.findOne({ userId }).lean();
     if (!cartExists || cartExists.items.length === 0) {
@@ -102,7 +102,7 @@ exports.getCartForRendering = async (userId, flashMessage) => {
 
 
 
-exports.modifyCartItem = async (
+export const modifyCartItem = async (
     userId,
     productId,
     variationIndex,
@@ -229,7 +229,7 @@ exports.modifyCartItem = async (
 
 
 
-exports.deleteCartItem = async (userId, productId, variationIndex) => {
+export const deleteCartItem = async (userId, productId, variationIndex) => {
     const vIndex = parseInt(variationIndex);
     const cart = await Cart.findOne({ userId });
     if (!cart) {
@@ -272,7 +272,7 @@ exports.deleteCartItem = async (userId, productId, variationIndex) => {
 
 
 
-exports.prepareCheckoutAddresses = async (userId) => {
+export const prepareCheckoutAddresses = async (userId) => {
     if (!userId) {
         return { success: false, status: STATUS_CODES.NOT_FOUND, message: USER_MESSAGE.USER_NOT_FOUND };
     }
@@ -340,7 +340,7 @@ exports.prepareCheckoutAddresses = async (userId) => {
 
 
 
-exports.getCartForPaymentValidation = async (userId) => {
+export const getCartForPaymentValidation = async (userId) => {
   const cart = await Cart.findOne({ userId }).lean();
   return cart;
 };

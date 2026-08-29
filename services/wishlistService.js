@@ -108,7 +108,7 @@ async function getFirstAvailableVariationForWishlist(userId, productId) {
     return variationIndex;
 }
 
-module.exports = {
+export {
     fetchUserWishlist,
     addItemToWishlist,
     removeItemFromWishlist,

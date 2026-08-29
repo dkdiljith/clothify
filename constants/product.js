@@ -95,5 +95,5 @@ const PRODUCT_MESSAGES = {
 
 
   
-module.exports =PRODUCT_MESSAGES
+export default PRODUCT_MESSAGES
 

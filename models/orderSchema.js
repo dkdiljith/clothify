@@ -122,5 +122,5 @@ orderSchema.pre("save", function (next) {
 });
 
 
-module.exports = mongoose.model('Order', orderSchema);
+export default mongoose.model('Order', orderSchema);
 

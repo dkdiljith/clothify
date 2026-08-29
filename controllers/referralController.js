@@ -1,4 +1,4 @@
-import referralService from '../services/referralService.js';
+import * as referralService from '../services/referralService.js';
 import Referral from '../models/referralSchema.js';
 
 
@@ -8,7 +8,7 @@ import COMMON_MESSAGES from '../constants/common-messages.js';
 
 
 
-exports.referral = async (req, res) => {
+export const referral = async (req, res) => {
     try {
         const userId = res.locals.user?._id;
         if (!userId) {
@@ -29,7 +29,7 @@ exports.referral = async (req, res) => {
     }
 };
 
-exports.applyReferral = async (req, res) => {
+export const applyReferral = async (req, res) => {
     try {
         const { referralCode } = req.body;
         const userId = res.locals.user._id;
@@ -59,7 +59,7 @@ exports.applyReferral = async (req, res) => {
     }
 };
 
-exports.cancelReferral = async (req, res) => {
+export const cancelReferral = async (req, res) => {
     try {
         const { signupBonus, coinValue } = await referralService.getReferralSettings();
         const userId = res.locals.user._id;
@@ -86,7 +86,7 @@ exports.cancelReferral = async (req, res) => {
     }
 };
 
-exports.redeemCoin = async (req, res) => {
+export const redeemCoin = async (req, res) => {
     try {
         const userId = res.locals.user._id;
         const result = await referralService.redeemUserCoins(userId, req.body.reedeemCoinInput);
@@ -107,7 +107,7 @@ exports.redeemCoin = async (req, res) => {
 };
 
 // Exported standalone utility methods utilized elsewhere (e.g., auth service or cron job)
-exports.createReferral = async (userId, session = null) => {
+export const createReferral = async (userId, session = null) => {
     try {
         return await referralService.createNewReferralRecord(userId, session);
     } catch {
@@ -115,6 +115,6 @@ exports.createReferral = async (userId, session = null) => {
     }
 };
 
-exports.processPendingReferralsCron = async () => {
+export const processPendingReferralsCron = async () => {
     return await referralService.processCronPendingReferrals();
 };

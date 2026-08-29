@@ -1,17 +1,17 @@
 // controllers/settingsController.js
-import settingsService from '../services/settingsService.js';
+import * as settingsService from '../services/settingsService.js';
 import SETTINGS_MESSAGES from '../constants/settings.js';
 import STATUS_CODES from '../constants/status-codes.js';
 
-exports.initializeSettings = async () => {
+export const initializeSettings = async () => {
     await settingsService.initializeGlobalSettings();
 };
 
-exports.landingPage = async (req, res) => {
+export const landingPage = async (req, res) => {
     return res.render(`admin/settings/landingPage`, { isSettings: true });
 };
 
-exports.referralSettingsRender = async (req, res) => {
+export const referralSettingsRender = async (req, res) => {
     try {
         const settings = await settingsService.getReferralSettings();
         return res.render("admin/settings/referralSettings", {
@@ -27,7 +27,7 @@ exports.referralSettingsRender = async (req, res) => {
     }
 };
 
-exports.referralSettings = async (req, res) => {
+export const referralSettings = async (req, res) => {
     try {
         const updatedSettings = await settingsService.updateReferralSettings(req.body);
         return res.status(STATUS_CODES.OK).json({

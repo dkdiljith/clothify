@@ -20,4 +20,4 @@ const REFERRAL_MESSAGES = {
     REFERRALS_PROCESSED_SUCCESS: "Referrals processed successfully."
 };
 
-module.exports = REFERRAL_MESSAGES;
+export default REFERRAL_MESSAGES;

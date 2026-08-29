@@ -6,7 +6,7 @@ const port = process.env.MAIL_PORT;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-exports.verificationEmailSend = async (email, verificationToken) => {
+export const verificationEmailSend = async (email, verificationToken) => {
   try {
     const transporter = nodemailer.createTransport({
       host,
@@ -99,7 +99,7 @@ exports.verificationEmailSend = async (email, verificationToken) => {
   }
 };
 
-exports.passwordResetEmailSend = async (email, resetToken) => {
+export const passwordResetEmailSend = async (email, resetToken) => {
   try {
     const transporter = nodemailer.createTransport({
       host,
@@ -169,7 +169,7 @@ exports.passwordResetEmailSend = async (email, resetToken) => {
 };
 
 // utils/emailSender.js
-exports.sendPasswordChangedEmail = async (email) => {
+export const sendPasswordChangedEmail = async (email) => {
   const transporter = nodemailer.createTransport({
     host,
     port,

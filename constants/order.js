@@ -49,4 +49,4 @@ const ORDER_MESSAGES = {
     MAX_RETRY_EXCEEDED: "You have reached the maximum limit of 5 payment retries for this order."
 };
 
-module.exports = ORDER_MESSAGES;
+export default ORDER_MESSAGES;

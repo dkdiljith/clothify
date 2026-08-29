@@ -32,5 +32,5 @@ const PAYMENT_MESSAGES = {
 
 
 
-module.exports = PAYMENT_MESSAGES
+export default PAYMENT_MESSAGES
    

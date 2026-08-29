@@ -1,9 +1,9 @@
-import searchService from '../services/searchService.js';
+import * as searchService from '../services/searchService.js';
 import PRODUCT_MESSAGES from '../constants/product.js';
 
 
 
-exports.collections = async (req, res) => {
+export const collections = async (req, res) => {
     try {
         const userId = res.locals.user?._id || null;
         const data = await searchService.fetchCollectionsData(req.query, userId);

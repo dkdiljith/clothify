@@ -422,7 +422,7 @@ async function fetchOrderForStatusPage(orderId) {
     return await Order.findOne({ orderId }).lean();
 }
 
-module.exports = {
+export {
     getPaymentPageDetails,
     placeNewOrder,
     placeFailedOrder,

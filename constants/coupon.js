@@ -60,4 +60,4 @@ const COUPON_MESSAGES = {
 
 
 
-module.exports =  COUPON_MESSAGES
+export default  COUPON_MESSAGES

@@ -35,4 +35,4 @@ const SETTINGS_MESSAGES = {
     HOLDING_PERIOD_MAX: "Clothify allows a maximum holding period of 30 days.",
 };
 
-module.exports = SETTINGS_MESSAGES;
+export default SETTINGS_MESSAGES;

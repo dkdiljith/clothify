@@ -294,7 +294,7 @@ async function processCronPendingReferrals() {
     return { success: true, message: REFERRAL_MESSAGES.REFERRALS_PROCESSED_SUCCESS };
 }
 
-module.exports = {
+export {
     getReferralSettings,
     getReferralDashboardData,
     applyReferralCode,
