@@ -1,0 +1,46 @@
+name: Clothify CD
+
+on:
+  workflow_run:
+    workflows:
+      - "Clothify CI"
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: >
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Clothify to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "$EC2_SSH_KEY" > ~/.ssh/clothify.pem
+          chmod 600 ~/.ssh/clothify.pem
+
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/clothify.pem \
+              "$EC2_USER@$EC2_HOST" \
+              "cd ~/clothify && \
+               git pull --ff-only origin main && \
+               sudo docker build -t clothify-app:latest . && \
+               sudo docker rm -f clothify-monolith && \
+               sudo docker run -d \
+                 --name clothify-monolith \
+                 --restart unless-stopped \
+                 --network clothify-network \
+                 --env-file /home/ubuntu/clothify/.env \
+                 -p 127.0.0.1:3000:3000 \
+                 clothify-app:latest && \
+               sudo docker logs --tail 50 clothify-monolith"

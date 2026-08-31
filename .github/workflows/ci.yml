@@ -33,32 +33,4 @@ jobs:
       - name: Build Docker image
         run: docker build -t clothify-app:ci .
 
-  ssh-test:
-    needs: lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Test network access to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          echo "Testing connection to $EC2_HOST on port 22..."
-          nc -vz -w 10 "$EC2_HOST" 22
-
-      - name: Test SSH connection to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-
-          echo "$EC2_SSH_KEY" > ~/.ssh/clothify.pem
-          chmod 600 ~/.ssh/clothify.pem
-
-          ssh-keyscan -T 10 -H "$EC2_HOST" >> ~/.ssh/known_hosts
-
-          ssh -o ConnectTimeout=10 \
-              -i ~/.ssh/clothify.pem \
-              "$EC2_USER@$EC2_HOST" \
-              "echo 'SSH connection successful'; hostname; whoami"
+        
